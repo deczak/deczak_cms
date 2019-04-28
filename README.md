@@ -3,17 +3,15 @@
 
 Development of a CMS like the other thousends in the world.
 
-The development will start a bit later. I'm at the moment busy with other stuff. I will do sometimes some tests because i have not much experience with git.
+More information coming later, i'm just doing some tests at the moment.
 
-## License
+# Requirements
 
-This Software uses the Expat License - Copyright 2018 DECZAK (www.deczak.de)
+PHP 7+, htaccess support, propper config for calling mail function
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+# Install information
 
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+copy-pasta, htacces, rights, configs
 
 ## Todo
 
