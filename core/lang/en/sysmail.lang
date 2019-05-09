@@ -1,0 +1,18 @@
+
+##	Messages for SysMailer
+
+
+##	CSQLConnect.php
+
+	SYSMAIL_DB_FAILED_SUBJ	=	Database connection error
+	SYSMAIL_DB_FAILED_TEXT	=	Error while attempting to connect to the database on [TIMESTAMP]
+	
+
+##	CLogin.php	
+	
+	
+
+	SYSMAIL_ACCLOCKED_SUBJ	=	User account locked due to failed login
+	SYSMAIL_ACCLOCKED_TEXT	= 	A user account got locked due to failed login on [TIMESTAMP]\r\n\r\nDatabase   : [DATABASE]\r\nAccount-ID : [DATAID]\r\nRemote-IP  : [REMOTE]
+
+	

@@ -44,8 +44,7 @@ class	CURLVariables extends CBasic
 
 				$_bValidationSuccess = $this -> _retrieve($_POST[ $_requestedSet["input"] ], $_requestedSet, [], $_bValidationSuccess);
             }
-            else
-            if( $_fromGET && isset($_GET[ $_requestedSet["input"] ])) // check if GET and request exists in GET
+            elseif( $_fromGET && isset($_GET[ $_requestedSet["input"] ])) // check if GET and request exists in GET
             {
 				$_requestedSet["validate"] = explode('|', $_requestedSet["validate"]);		
 				$_requestedSet["validate"] = array_filter($_requestedSet["validate"],'strlen');
@@ -168,7 +167,7 @@ class	CURLVariables extends CBasic
                     
                 case    '!empty':    
                         if( !empty($_temporaryOutput) OR is_string($_temporaryOutput) AND strlen($_temporaryOutput) > 0 )
-                        { $_bValidateResult = true; } else { $_bValidateResult = false; $_bBreakForeach = true; echo 'is empty<br>'; }
+                        { $_bValidateResult = true; } else { $_bValidateResult = false; $_bBreakForeach = true; }
                         break;
             }
 
@@ -196,11 +195,11 @@ class	CURLVariables extends CBasic
 	public function
 	getValue(string $_key, $_defaultValue = false)
 	{
-        if( !isset($this ->  mv_aStorage[$_key]) )
+        if( !isset($this ->  m_aStorage[$_key]) )
         {
             return $_defaultValue;        
         }
-        return $this ->  mv_aStorage[ $_key ];   
+        return $this ->  m_aStorage[ $_key ];   
 	}
 
 	public function
@@ -278,7 +277,7 @@ class	CURLVariables extends CBasic
 	public function
 	printHiddenInputs(array $_ignoreKeys = [])
 	{
-		$this -> _printHiddenInputs($this -> mv_aStorage, $_ignoreKeys, [] );
+		$this -> _printHiddenInputs($this -> m_aStorage, $_ignoreKeys, [] );
 	}
 
 	/**

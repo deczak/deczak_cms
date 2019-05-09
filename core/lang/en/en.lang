@@ -1,0 +1,13 @@
+
+
+
+	$import(error)
+	$import(sysmail)
+	
+	
+
+	
+
+##	a comment
+
+	TESTSTRING	=	I'am a Test

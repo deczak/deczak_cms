@@ -1,9 +1,9 @@
 
-# The Thing
+# The project
 
 Development of a CMS like the other thousends in the world.
 
-More information coming later, i'm just doing some tests at the moment.
+More information coming later, i'm just doing some tests at the moment. It is at an early stage.
 
 # Requirements
 

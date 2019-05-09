@@ -10,7 +10,7 @@ class CSingleton
 		return $instance;
 	}
 
-	private function __construct() 	{}
+	private function __construct()	{}
 	private function __clone() 		{}
 	private function __sleep() 		{}
 	private function __wakeup() 	{}

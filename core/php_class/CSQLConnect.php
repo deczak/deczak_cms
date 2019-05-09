@@ -1,13 +1,17 @@
 <?php
 
-class	CSQLConnect
+require_once 'CSingleton.php';
+
+class	CSQLConnect extends CSingleton
 {
-	public	$m_hSQLConnection;
+	private	$m_aSQLConnections;
+	private $m_bFalse;
 
 	public function
-	__construct()
+	initialize()
 	{
-		$this -> m_hSQLConnection	= false;
+		$this -> m_aSQLConnections	= false;
+		$this -> m_bFalse	= false;
 	}
 
 	/**
@@ -16,22 +20,34 @@ class	CSQLConnect
 	 * 	@return boolean		Returns boolean true if it was successful, otherwise false
 	 */
 	public function
-	createConnection(array $_accessData)
+	createConnection(array $_dbDataStructure)
 	{
-		if(		!isset($_accessData['server'])
-			||	!isset($_accessData['database'])
-			||	!isset($_accessData['user'])
-			||	!isset($_accessData['password'])
-		  ) return false;
-
-		@ $this -> m_hSQLConnection = new mysqli( $_accessData["server"] , $_accessData["user"] , $_accessData["password"] , $_accessData["database"] );
-
-		if( $this -> m_hSQLConnection -> connect_errno )
+		foreach($_dbDataStructure as $_accessData)
 		{
-			return false;
+			if(		!is_array($_accessData)
+				||	!isset($_accessData['server'])
+				||	!isset($_accessData['database'])
+				||	!isset($_accessData['user'])
+				||	!isset($_accessData['password'])
+				||	!isset($_accessData['name'])
+			  )
+			{
+				CMessages::instance() -> addMessage(CLanguage::instance() -> getStringExt( ERR_CR_DBPARAMS ), MSG_LOG, '', true);				  
+				return false;
+			}
+
+			@$this -> m_aSQLConnections[$_accessData['name']] = new mysqli( $_accessData["server"] , $_accessData["user"] , $_accessData["password"] , $_accessData["database"] );
+
+			if( $this -> m_aSQLConnections[$_accessData['name']] -> connect_errno )
+			{
+				CMessages::instance() 	-> addMessage(CLanguage::instance() -> getStringExt( ERR_CR_DBFAILED , ['[DBERROR]' => $this -> m_aSQLConnections[$_accessData['name']] -> connect_error] ), MSG_LOG, '', true);
+				CSysMailer::instance() 	-> sendMail(CLanguage::instance() -> getString('SYSMAIL_DB_FAILED_SUBJ'), CLanguage::instance() -> getStringExt('SYSMAIL_DB_FAILED_SUBJ',['[TIMESTAMP]' => date(TIME_FORMAT_SYSMAIL,time())]), true, 'sql-connection');
+				return false;
+			}
+			
+			$this -> m_aSQLConnections[$_accessData['name']] -> query("SET NAMES 'utf8mb4'");
 		}
-		
-		$this -> m_hSQLConnection -> query("SET NAMES 'utf8mb4'");
+
 		return true;
 	}
 
@@ -41,24 +57,46 @@ class	CSQLConnect
 	 * 	@return object/boolean		Returns the valid connection, otherwise false
 	 */
 	public function
-	&getConnection()
+	&getConnection(string $_connectionName = '')
 	{
-		return $this -> m_hSQLConnection;
+		if($this -> m_aSQLConnections === NULL) return $this -> m_bFalse;
+		if(strlen($_connectionName) === 0)
+		{
+			$_SQLKeys 		= array_keys($this -> m_aSQLConnections);
+			$_SQLConnection = &$this -> m_aSQLConnections[$_SQLKeys[0]];
+			if($_SQLConnection === NULL) return $this -> m_bFalse;
+			if($_SQLConnection !== false) return $_SQLConnection;	
+		}
+		else if(isset($this -> m_aSQLConnections[$_connectionName]))
+		{
+			return $this -> m_aSQLConnections[$_connectionName];
+		}
+		return $this -> m_bFalse;
 	}
 
 	/**
 	 *	Returns the error message if exists
 	 *	
 	 * 	@return string		MySQL error message, otherwise OK
-	 */
+	
 	public function
-	getErrorMsg()
+	getErrorString(string $_connectionName = '')
 	{
-		if( $this -> m_hSQLConnection !== false && $this -> m_hSQLConnection -> connect_errno )
+		// Umbenennen in getConnectError, umbauen
+
+		if($this -> m_aSQLConnections === NULL) return 'Not initialized';
+		if(strlen($_connectionName) === 0)
 		{
-			return $this -> m_hSQLConnection -> connect_error;
+			$_SQLKeys 		= array_keys($this -> m_aSQLConnections);
+			$_SQLConnection = &$this -> m_aSQLConnections[$_SQLKeys[0]];
+			if($_SQLConnection === NULL) return 'Not initialized';
+			if($_SQLConnection !== false && $_SQLConnection -> connect_errno) return $_SQLConnection -> connect_error;
+		}
+		else if(isset($this -> m_aSQLConnections[$_connectionName]) && $this -> m_aSQLConnections[$_connectionName] !== false && $this -> m_aSQLConnections[$_connectionName] -> connect_errno ) 
+		{
+			return $this -> m_aSQLConnections[$_connectionName] -> connect_error;
 		}
 		return 'OK';
-	}
+	} */
 }
 ?>

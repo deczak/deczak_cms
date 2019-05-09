@@ -1,0 +1,6 @@
+
+	The language files in those directories contains only base strings for the basic CMS (system messages)
+	
+	Its the wrong place for module oder customized strings 
+	
+	adding additional languages is ok

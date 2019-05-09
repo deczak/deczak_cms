@@ -5,22 +5,25 @@ define('MSG_WARNING',2);
 define('MSG_OK',3);
 define('MSG_NOTIFY',4);
 define('MSG_LOG',9);
+define('MSG_DEBUG',10);
 
 require_once 'CSingleton.php';
 
 class	CMessages extends CSingleton
 {
-	private	$m_bLogMode;
+	private	$m_bProtocolReporting;
+	private	$m_bDebugReporting;
 	private	$m_LogDestination;
 	private	$m_aStorage;
 
 	public function
-	initialize(bool $_logMode = false)
+	initialize(bool $_protocolReporting = false, bool $_debugReporting = false)
 	{
-		$this -> m_bLogMode 	= $_logMode;
-		$this -> m_aStorage		= [];
+		$this -> m_bProtocolReporting 	= $_protocolReporting;
+		$this -> m_bDebugReporting 		= $_debugReporting;
+		$this -> m_aStorage				= [];
 
-		if($_logMode) $this -> initMessagesLog();
+		if($_protocolReporting) $this -> initMessagesLog();
 		return true;
 	}
 
@@ -28,16 +31,17 @@ class	CMessages extends CSingleton
 	addMessage(string $_msgContent, int $_msgType = MSG_OK, string $_msgTarget = '', bool $_toLogFile = false)
 	{
 		if(strlen($_msgContent) == 0) return false;
-		if(!$this -> m_bLogMode && $_msgType === MSG_LOG && !$_toLogFile) return false;
+		if(!$this -> m_bProtocolReporting && $_msgType === MSG_LOG && !$_toLogFile) return false;
+		if(!$this -> m_bDebugReporting && $_msgType === MSG_DEBUG) return false;
 		switch($_msgType)
 		{
 			case MSG_ERROR:
 			case MSG_WARNING:
 			case MSG_OK:
-			case MSG_NOTIFY:	$this -> m_aStorage[$_msgType][] = new CMessages_Item($_msgType, $_msgTarget, $_msgContent);
+			case MSG_NOTIFY:	$this -> m_aStorage[$_msgType][] = new CMessagesItem($_msgType, $_msgTarget, $_msgContent);
 								if(!$_toLogFile) break;
 
-			case MSG_LOG:		if(!$this -> m_bLogMode) break;
+			case MSG_LOG:		if(!$this -> m_bProtocolReporting) break;
 								$_hFile = fopen($this -> m_LogDestination, "a");
 								while(true)
 								{
@@ -100,7 +104,7 @@ class	CMessages extends CSingleton
 	}
 }
 
-class	CMessages_Item
+class	CMessagesItem
 {
 	public	$m_iMessageType;
 	public	$m_MessageTarget;

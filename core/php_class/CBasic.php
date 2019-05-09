@@ -27,7 +27,7 @@ class	CBasic
 	public function
 	dbug(bool $_returnAsString = false)
 	{
-		tk::dbug($this -> m_aStorage, $_returnAsString);
+		TK::dbug($this -> m_aStorage, $_returnAsString);
 	}
 
 }
