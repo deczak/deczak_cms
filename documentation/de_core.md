@@ -1,37 +1,37 @@
 
 Dieses Dokument ist konzeptionell
 
-# Konzept des Kerns
+## Konzept des Kerns
 
 
-# CSingleton
+## CSingleton
 
-# CCookie
+## CCookie
 
-  ** Diese Klasse ist eine Singleton Klasse **
+  **Diese Klasse ist eine Singleton Klasse**
 
-# CLanguage
+## CLanguage
 
-  ** Diese Klasse ist eine Singleton Klasse **
+  **Diese Klasse ist eine Singleton Klasse**
 
-# CMessage
+## CMessage
 
-  ** Diese Klasse ist eine Singleton Klasse **
+  **Diese Klasse ist eine Singleton Klasse**
 
-# CSession
+## CSession
 
-  ** Diese Klasse ist eine Singleton Klasse **
+  **Diese Klasse ist eine Singleton Klasse**
 
-# CSQLConnect
+## CSQLConnect
 
-  ** Diese Klasse ist eine Singleton Klasse **
+  **Diese Klasse ist eine Singleton Klasse**
 
-# CSysMailer
+## CSysMailer
 
-  ** Diese Klasse ist eine Singleton Klasse **
+  **Diese Klasse ist eine Singleton Klasse**
 
-# CBasic
+## CBasic
 
-# CURLVariables
+## CURLVariables
     
-# CLogin
+## CLogin

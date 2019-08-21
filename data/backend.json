@@ -1,0 +1,84 @@
+[
+	{
+		"page_name"	:"Start",
+		"page_title":"Start",
+		"page_description":"",
+		"page_path"	:"",
+		"node_id"	:"2",
+		"objects"	:[
+						{						
+							"module_id"	:"M1",
+							"object_id"	:"1459",
+							"body"		:"backend/dashboard/",
+							"params"	:"ABKND"
+						}
+					 ],
+		"menu_group":"0",
+		"menu_order":"0"
+	},		
+	{
+		"page_name"	:"Dashboard",
+		"page_title":"Dashboard",
+		"page_description":"",
+		"page_path"	:"dashboard",
+		"node_id"	:"3",
+		"page_auth"	:"ABKND",
+		"objects"	:[],
+		"menu_group":"0",
+		"menu_order":"0"
+	},
+	{
+		"page_name"	:"Backend Users",
+		"page_title":"Backend Users",
+		"page_description":"",
+		"page_path"	:"backend-users",
+		"node_id"	:"4",
+		"page_auth"	:"ABKND",
+		"objects"	:[
+						{
+							"module_id"	:"M2",
+							"object_id"	:"1255",
+							"body"		:"",
+							"params"	:""
+						}		
+					 ],
+		"menu_group":"1",
+		"menu_order":"0"
+	},
+	{
+		"page_name"	:"Sites",
+		"page_title":"Sites",
+		"page_description":"",
+		"page_path"	:"sites",
+		"node_id"	:"5",
+		"page_auth"	:"ABKND",
+		"objects"	:[
+						{
+							"module_id"	:"M3",
+							"object_id"	:"1981",
+							"body"		:"",
+							"params"	:""
+						}		
+					 ],
+		"menu_group":"1",
+		"menu_order":"0"
+	}	,
+	{
+		"page_name"	:"Right Groups",
+		"page_title":"Right Groups",
+		"page_description":"",
+		"page_path"	:"right-groups",
+		"node_id"	:"6",
+		"page_auth"	:"ABKND",
+		"objects"	:[
+						{
+							"module_id"	:"M6",
+							"object_id"	:"1472",
+							"body"		:"",
+							"params"	:""
+						}		
+					 ],
+		"menu_group":"1",
+		"menu_order":"0"
+	}		
+]

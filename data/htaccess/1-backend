@@ -1,0 +1,16 @@
+RewriteRule ^backend/sites/create/([a-zA-Z]+)/(.*)/? backend/index.php?cms-node=5&cms-ctrl-action[1981]=create&cms-edit-page-lang=$1&cms-edit-page-node=$2&%{QUERY_STRING} [NC,L]
+RewriteRule ^backend/sites/edit/([a-zA-Z]+)/(.*)/? backend/index.php?cms-node=5&cms-ctrl-action[1981]=edit&cms-edit-page-lang=$1&cms-edit-page-node=$2&%{QUERY_STRING} [NC,L]
+RewriteRule ^backend/sites/delete/([a-zA-Z]+)/(.*)/? backend/index.php?cms-node=5&cms-ctrl-action[1981]=delete&cms-edit-page-lang=$1&cms-edit-page-node=$2&%{QUERY_STRING} [NC,L]
+RewriteRule ^backend/sites/deletetree/([a-zA-Z]+)/(.*)/? backend/index.php?cms-node=5&cms-ctrl-action[1981]=deletetree&cms-edit-page-lang=$1&cms-edit-page-node=$2&%{QUERY_STRING} [NC,L]
+RewriteRule ^backend/sites/?$ backend/index.php?cms-node=5&%{QUERY_STRING} [NC,L]
+
+RewriteRule ^backend/backend-users/delete/(.*)?$ backend/index.php?cms-node=4&cms-ctrl-action[1255]=delete&cms-system-id=$1 [NC,L]
+RewriteRule ^backend/backend-users/user/(.*)?$ backend/index.php?cms-node=4&cms-ctrl-action[1255]=edit&cms-system-id=$1 [NC,L]
+RewriteRule ^backend/backend-users/create(.*)/?$ backend/index.php?cms-node=4&cms-ctrl-action[1255]=create$1 [NC,L]
+RewriteRule ^backend/backend-users/(.*)/?$ backend/index.php?cms-node=4$1 [NC,L]
+
+RewriteRule ^backend/dashboard/(.*)/?$ backend/index.php?cms-node=3$1 [NC,L]
+RewriteRule ^backend/(.*)/?$ backend/$1 [NC,L]
+
+RewriteRule ^((backend/).*)$ backend/$1 [L,NC]
+

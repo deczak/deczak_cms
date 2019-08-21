@@ -1,0 +1,42 @@
+{
+	"rights"	:[
+					{"name":"create",	"desc":"Create new right group"},
+					{"name":"edit",		"desc":"Edit right group"},
+					{"name":"delete",	"desc":"Delete right group"},
+					{"name":"view",		"desc":"View existing right groups"}
+				 ],
+	"sub"		:[
+					{
+						"url_name"	:"",
+						"ctl_target":"",
+						"menu_name"	:"MOD_RGROUP_SUB_VIEW_NAME",
+						"menu_order":"0"
+					},
+					{
+						"url_name"	:"create",
+						"ctl_target":"create",
+						"menu_name"	:"MOD_RGROUP_SUB_CREATE_NAME",
+						"menu_order":"0"
+					},
+					{
+						"url_name"	:"group",
+						"ctl_target":"edit",
+						"menu_name"	:"",
+						"menu_order":"0"
+					},
+					{
+						"url_name"	:"delete",
+						"ctl_target":"delete",
+						"menu_name"	:"",
+						"menu_order":"0"
+					}
+				 ],
+	"htaccess"	:{
+					"variables"		:[
+										{
+											"key" 		: "cms-system-id",
+											"wildcard"	:"(.*)"
+										}
+									 ]
+				 }
+}

@@ -1,0 +1,27 @@
+{
+	"rights"	:[
+					{"name":"create",	"desc":"Create"},
+					{"name":"edit",		"desc":"Edit"},
+					{"name":"delete",	"desc":"Delete"}
+				 ],
+	"sub"		:[		
+					{
+						"url_name"	:"create",
+						"ctl_target":"create",
+						"menu_name"	:"",
+						"menu_order":"0"
+					},
+					{
+						"url_name"	:"edit",
+						"ctl_target":"edit",
+						"menu_name"	:"",
+						"menu_order":"0"
+					},
+					{
+						"url_name"	:"delete",
+						"ctl_target":"delete",
+						"menu_name"	:"",
+						"menu_order":"0"
+					}
+				 ]
+}

@@ -1,0 +1,45 @@
+
+##	
+	
+	MOD_SITES_SEC_INDEX_NAME			=	Overview
+	MOD_SITES_SEC_CREATE_NAME			=	Create site
+
+	MOD_SITES_ERR_USERID_UK				=	This site does not exists
+	
+	
+	MOD_SITES_MENU						=	Menu
+
+
+##	Overview
+
+	MOD_SITES_OV_TABLE_NODEID			= Node-ID
+	MOD_SITES_OV_TABLE_PAGETITLE		= Title
+	MOD_SITES_OV_TABLE_PAGEURL			= URL
+	MOD_SITES_OV_TABLE_CREATEDAT		= Created at
+	MOD_SITES_OV_TABLE_UPDATEDAT		= Updated at
+
+	MOD_SITES_OV_TABLE_PAGEEDIT			= Edit page
+	MOD_SITES_OV_TABLE_PAGECREATE		= Create sub page
+	MOD_SITES_OV_TABLE_PAGEDELETE		= Delete page
+	MOD_SITES_OV_TABLE_PAGEDELETETREE	= Delete page tree
+
+	MOD_SITES_OV_TABLE_SELECTALL		= Select all
+	
+
+##	Create
+
+	MOD_SITES_ERR_NOTCREATED			= Could not create a new site
+	MOD_SITES_PAGECREATED				= Created new site
+	
+	MOD_SITES_NEWPAGE_NAME				= Unnamed page
+	
+##	Delete
+
+	MOD_SITES_ERR_NOTDELETED			= Could not delete page
+	MOD_SITES_PAGEDELETED				= Deleted page
+	MOD_SITES_PAGEDELETEDTREE			= Deleted page and all sub pages
+	
+##	Edit
+
+	
+	

@@ -1,0 +1,12 @@
+{
+	"template_name"		: "default",
+	"hide_on_selection"	: false,
+	"include_head"		: [
+							"head.php"
+						  ],
+	"include_content"	: [
+							"header.php", 
+							"content.php", 
+							"footer.php"
+						  ]
+}

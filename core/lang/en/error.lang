@@ -21,3 +21,10 @@
 	ERR_CR_LOGIN_7		= Login failed on unclear account state
 	ERR_CR_LOGIN_8		= Login failed on locked account by adminitrator
 	ERR_CR_LOGIN_9		= Missing parameters on initializing
+	
+
+##	Controllers
+
+	ERR_PERMISSON		= You do not have sufficient permissions
+	ERR_SQL_ERROR		= Unknown error on sql query
+	ERR_VALIDATIONFAIL	= Data validation failed

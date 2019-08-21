@@ -1,0 +1,12 @@
+{
+	"template_name"		: "backend",
+	"hide_on_selection"	: true,
+	"include_head"		: [
+							"head.php"
+						  ],
+	"include_content"	: [
+							"header.php", 
+							"content.php", 
+							"footer.php"
+						  ]
+}

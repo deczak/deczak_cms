@@ -1,0 +1,90 @@
+		
+/**	Fonts
+**/
+
+	@font-face {
+	  font-family: 'Open Sans';
+	  font-style: normal;
+	  font-weight: 300;
+	  src: local('Open Sans Light'), local('OpenSans-Light'),
+		   url('../fonts/open-sans-v15-latin-300.woff2') format('woff2'),
+		   url('../fonts/open-sans-v15-latin-300.woff') format('woff'); 
+	}
+
+	@font-face {
+	  font-family: 'Open Sans';
+	  font-style: normal;
+	  font-weight: 400;
+	  src: local('Open Sans Regular'), local('OpenSans-Regular'),
+		   url('../fonts/open-sans-v15-latin-regular.woff2') format('woff2'),
+		   url('../fonts/open-sans-v15-latin-regular.woff') format('woff'); 
+	}
+
+	@font-face {
+	  font-family: 'Open Sans';
+	  font-style: normal;
+	  font-weight: 600;
+	  src: local('Open Sans SemiBold'), local('OpenSans-SemiBold'),
+		   url('../fonts/open-sans-v15-latin-600.woff2') format('woff2'),
+		   url('../fonts/open-sans-v15-latin-600.woff') format('woff');
+	}
+
+	@font-face {
+	  font-family: 'Open Sans';
+	  font-style: normal;
+	  font-weight: 700;
+	  src: local('Open Sans Bold'), local('OpenSans-Bold'),
+		   url('../fonts/open-sans-v15-latin-700.woff2') format('woff2'),
+		   url('../fonts/open-sans-v15-latin-700.woff') format('woff'); 
+	}	
+
+		
+/** Default Stuff
+**/
+
+
+	* { box-sizing:border-box; padding:0px; margin:0px; }
+		
+	body { font-size:16px; font-family:'Open Sans',sans-serif; font-weight:300; color:rgb(65,65,65); -moz-text-size-adjust:none; -webkit-text-size-adjust:none; -ms-text-size-adjust:none; text-size-adjust:none; overflow-y:scroll; scroll-behavior:smooth; position: relative; }	
+		
+	.wrapper-inside { max-width:1400px; margin:0 auto; padding:0px 15px; }
+
+
+/** Hyperlink Styles
+**/
+
+
+	a { text-decoration:none; cursor:pointer; outline:none; }
+
+	a.yellow,
+	a.yellow:visited   { color:#ffd633; }
+	a.yellow:hover,
+	a.yellow:focus     { text-shadow:0 0 1px #ffffff; color:#ffd633; }
+
+	a.darkblue,
+	a.darkblue:visited { color: #2d5986; }
+	a.darkblue:hover,
+	a.darkblue:focus   { text-shadow:0 0 1px #b3b3b3; color:#204060; }		
+
+
+/** Header
+**/
+
+
+	header > div.main-nav-container { background: linear-gradient(to top, rgb(102, 102, 102), rgb(64, 64, 64)); border-bottom: 1px solid rgb(0,0,0); box-shadow: 0px 4px 10px 0px rgba(0,0,0,0.1); color:white; } 
+	header > div.main-nav-container > div.wrapper-inside { display:flex; justify-content:space-between;  padding-top:15px; padding-bottom:15px; } 
+	header > div.main-nav-container > div.wrapper-inside > div.left > a { font-size:1.4em; text-shadow:0px 0px 5px rgba(255,255,255,0.5); color:white; } 
+	header > div.main-nav-container > div.wrapper-inside > div.right {  } 
+
+	header > div.sub-nav-container { background:linear-gradient(to bottom,rgb(233,223,37),rgb(214,187,35)); border-bottom:1px solid rgb(0,0,0); box-shadow:0px 4px 10px 0px rgba(0,0,0,0.1); }
+	header > div.sub-nav-container > div.wrapper-inside { display:flex; justify-content:space-between; align-items:center; height:30px; }
+	header > div.sub-nav-container > div.wrapper-inside > div.crumbs { font-size:0.8em; text-transform:uppercase; letter-spacing: 2px; }
+	header > div.sub-nav-container > div.wrapper-inside > div.crumbs .crumb-delimeter { font-weight:700; display:inline-block; padding:0px 5px; }
+	header > div.sub-nav-container > div.wrapper-inside > div.sub-nav-items { text-transform:uppercase; font-size:0.9em; letter-spacing:0.06em; }
+
+
+/**	Icon rotation
+**/
+
+	.loading { animation: rotate 1s linear infinite; }
+	@keyframes rotate { to { transform: rotate(360deg); } }

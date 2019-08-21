@@ -1,13 +1,23 @@
 
 
-
 	$import(error)
 	$import(sysmail)
 	
+		
 	
+##	Base Strings
 
+
+	MENU				=	Menu
+	SELECT_ALL			=	Select all
+	TIME_CREATE_AT		=	Created at
+	TIME_UPDATE_AT		=	Updated at
 	
+	BUTTON_SAVE			=	Save
+	BUTTON_DELETE		=	Delete
+	
+	
+##	Messages
 
-##	a comment
-
-	TESTSTRING	=	I'am a Test
+	WAIT_FOR_REDIRECT	=	please wait for redirect
+	

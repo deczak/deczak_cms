@@ -1,0 +1,29 @@
+
+##	Sub Sections
+
+	MOD_RGROUP_SUB_VIEW_NAME			=	Overview
+	MOD_RGROUP_SUB_CREATE_NAME			=	Create group
+
+##	Error
+
+	MOD_RGROUP_ERR_RGROUP_ID_UK			=	Group does not exists
+	MOD_RGROUP_ERR_NOTUPDATED			=	Group not updated
+	MOD_RGROUP_ERR_NOTCREATED			=	Group not created
+
+##	Positive returns
+		
+	MOD_RGROUP_OK_UPDATED				=	Group updated
+	MOD_RGROUP_OK_DELETED				=	Group deleted
+	MOD_RGROUP_OK_CREATED				=	Group created
+	
+##		
+
+	MOD_RGROUPS_GROUP_ID				=	Group-ID
+	MOD_RGROUPS_GROUP_NAME				=	Group Name
+	MOD_RGROUPS_GROUP_ASSIGNMENT		=	Group assignments
+		
+	MOD_RGROUPS_EDIT_GROUP				=	Edit Group
+	
+	
+	MOD_RGROUPS_GROUP_INFO				=	Group Information			
+	MOD_RGROUPS_GROUP_RIGHTS			=	Group Rights

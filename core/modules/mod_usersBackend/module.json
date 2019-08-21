@@ -1,0 +1,42 @@
+{
+	"rights"	:[
+					{"name":"create",	"desc":"Creating new user accounts"},
+					{"name":"edit",		"desc":"Editing user accounts"},
+					{"name":"delete",	"desc":"Deleting user accounts"},
+					{"name":"view",		"desc":"Viewing existing user accounts"}
+				 ],
+	"sub"		:[
+					{
+						"url_name"	:"",
+						"ctl_target":"",
+						"menu_name"	:"MOD_BEUSER_SEC_INDEX_NAME",
+						"menu_order":"0"
+					},
+					{
+						"url_name"	:"create",
+						"ctl_target":"create",
+						"menu_name"	:"MOD_BEUSER_SEC_CREATE_NAME",
+						"menu_order":"0"
+					},
+					{
+						"url_name"	:"user",
+						"ctl_target":"edit",
+						"menu_name"	:"",
+						"menu_order":"0"
+					},
+					{
+						"url_name"	:"delete",
+						"ctl_target":"delete",
+						"menu_name"	:"",
+						"menu_order":"0"
+					}
+				 ],
+	"htaccess"	:{
+					"variables"		:[
+										{
+											"key" 		: "cms-system-id",
+											"wildcard"	:"(.*)"
+										}
+									 ]
+				 }
+}

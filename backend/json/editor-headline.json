@@ -1,0 +1,59 @@
+{
+	"menus": [
+		{
+			"command": "formatblock",
+			"header": "not in use atm",
+			"values": {
+				"h1": "H1",
+				"h2": "H2",
+				"h3": "H3",
+				"h4": "H4",
+				"h5": "H5",
+				"h6": "H6"
+			}
+		}
+	],
+	"buttons" : [
+		{
+			"text": "Undo",
+			"command": "undo",
+			"image": "fa-reply"
+		}, {
+			"text": "Redo",
+			"command": "redo",
+			"image": "fa-share"
+		}, {
+			"text": "Remove formatting",
+			"command": "removeFormat",
+			"image": "fa-remove-format"
+		}, {
+			"text": "Bold",
+			"command": "bold",
+			"image": "fa-bold"
+		}, {
+			"text": "Italic",
+			"command": "italic",
+			"image": "fa-italic"
+		}, {
+			"text": "Underline",
+			"command": "underline",
+			"image": "fa-underline"
+		}, {
+			"text": "Left align",
+			"command": "justifyleft",
+			"image": "fa-align-left"
+		}, {
+			"text": "Center align",
+			"command": "justifycenter",
+			"image": "fa-align-center"
+		}, {
+			"text": "Right align",
+			"command": "justifyright",
+			"image": "fa-align-right"
+		},{
+			"text": "Justify align",
+			"command": "justifyFull",
+			"image": "fa-align-justify"
+		}
+	]
+}

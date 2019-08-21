@@ -1,39 +1,39 @@
 
 This document is conceptual
 	
-todo
+todo ... dont worry, not all is a singleton class
 	
-# Konzept des Kerns
+## Konzept des Kerns
 
 
-# CSingleton
+## CSingleton
 
-# CCookie
+## CCookie
 
-  ** This class is a singleton class **
+  **This class is a singleton class**
 
-# CLanguage
+## CLanguage
 
-  ** This class is a singleton class **
+  **This class is a singleton class**
 
-# CMessage
+## CMessage
 
-  ** This class is a singleton class **
+  **This class is a singleton class**
 
-# CSession
+## CSession
 
-  ** This class is a singleton class **
+  **This class is a singleton class**
 
-# CSQLConnect
+## CSQLConnect
 
-  ** This class is a singleton class **
+  **This class is a singleton class**
 
-# CSysMailer
+## CSysMailer
 
-  ** This class is a singleton class **
+  **This class is a singleton class**
 
-# CBasic
+## CBasic
 
-# CURLVariables
+## CURLVariables
     
-# CLogin
+## CLogin

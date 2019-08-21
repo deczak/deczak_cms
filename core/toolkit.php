@@ -16,6 +16,43 @@ class	TK
 		print_r($_data);
 		echo '</pre>';
 	}
+
+	public static function
+	xhrResult(int $_state, string $_msg, array $_data = [])
+	{
+		$_array		=	[
+						"state"	=>	$_state,
+						"msg"	=>	$_msg,
+						"data"	=>	$_data
+						];
+						
+		echo json_encode($_array, JSON_HEX_APOS | JSON_UNESCAPED_SLASHES | JSON_FORCE_OBJECT | JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK);
+		exit;
+	}
+
+	public static function
+	normalizeFilename(string $_filename, bool $_replaceSlashes = false)
+	{
+		$search 	= array(" ", "Ä", "Ö", "Ü", "ä", "ö", "ü", "ß");
+		$replace 	= array("-", "Ae", "Oe", "Ue", "ae", "oe", "ue", "ss");
+
+ 		$_filename 	= str_replace($search, $replace, strtolower($_filename));
+
+		if($_replaceSlashes)
+			$_filename = preg_replace( '/[^a-z0-9_\-]+/', '', $_filename);
+		else
+			$_filename = preg_replace( '/[^a-z0-9_-\/]+/', '', $_filename);
+	
+		return $_filename;
+	}
+	
+	public static function
+	getActiveServerProtocol()
+	{
+		if(isset($_SERVER['HTTPS']) && ($_SERVER['HTTPS'] == 'on' || $_SERVER['HTTPS'] == 1) || isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] == 'https')
+			return 'https://';
+		return 'http://';			 
+	}
 }
 
 class	CRYPT
@@ -98,6 +135,18 @@ class	CRYPT
 	HASH(string $_algo, string $_string, $_salt, $_pepper)
 	{
 		return hash($_algo, $_string . (!empty($_salt) ? $_salt : '') . (!empty($_pepper) ? $_pepper : ''));
+	}
+	
+	public static function
+	LOGIN_HASH(string $_string)
+	{
+		return CRYPT::ENCRYPT($_string, CRYPT::CHECKSUM($_string), true);
+	}
+	
+	public static function
+	LOGIN_CRYPT(string $_string, string $_key)
+	{
+		return CRYPT::HASH512($_string, CRYPT::CHECKSUM(CRYPT::HASH256($_string)), $_key ) . CRYPT::CHECKSUM(CRYPT::HASH256($_string));
 	}
 }
 
