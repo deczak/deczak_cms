@@ -10,7 +10,7 @@ The version number is the release date. A letter as suffix indicates fixes on sa
 
 
 # Version history	    
-
+```
 master  20200112  Release version (alpha)
   
             - early version
@@ -20,3 +20,4 @@ master  20200112  Release version (alpha)
 master  20190922  Release version (alpha)
   
             - early version
+```
