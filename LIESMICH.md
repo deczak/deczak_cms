@@ -43,5 +43,3 @@ Im Verzeichnis install gibt es eine index.php die alles übernimmt. Zur erfolgre
 
 Eine Manuelle Installation ist nicht möglich, Sie könnten diese zwar soweit durchführen das Sie auf den öffentlichen Bereich zugreifen können, aber für das Backend (die Administration) brauchen Sie einen Benutzer dessen Zugangsdaten gesondert gehasht werden. Das zu erklären ist zu kompliziert als das man es sinnvoll in eine Anleitung packen könnte. Und wenn ich dafür ein Helfer Script erstellen würden.
 
-test
-
