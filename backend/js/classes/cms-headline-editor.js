@@ -8,7 +8,7 @@ class	cmsHeadlineEditor
 
 		this.sModeLabel 	= "Source";
 		this.rId 			= /\d+$/;
-
+		
 		this.customCommands = {
 			"createLink": function (oDoc, that) {
 				var sLnk = prompt("Write the URL here", "http:\/\/");
@@ -46,15 +46,25 @@ class	cmsHeadlineEditor
 		for(var nItem = 0; nItem < targetElements.length; nItem++)
 		{
 			if(this.editorExists(targetElements[nItem])) continue;
+
 			this.replace(targetElements[nItem]);
 		}
 		
 		document.execCommand("defaultParagraphSeparator", false, "br");
 	}
 
+	createOnDestNode(node)
+	{
+		var	targetElement = node.querySelector('.'+ this.className);
+		if(targetElement != null)		
+			this.replace(targetElement);
+	}
+
 	editorExists(targetElement)
 	{
-		var childNodes = targetElement.childNodes
+
+		var childNodes = targetElement.childNodes;
+
 		if(childNodes.length == 3 && childNodes[0].classList !== undefined && childNodes[0].classList.contains('rte-editbox'))
 			return true;
 		return false;

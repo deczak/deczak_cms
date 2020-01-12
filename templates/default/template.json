@@ -5,8 +5,28 @@
 							"head.php"
 						  ],
 	"include_content"	: [
+							"header.php",
+							"content.php",
+							"footer.php"
+						  ],
+	"include_error"		: [
 							"header.php", 
-							"content.php", 
+							"error.php", 
+							"footer.php"
+						  ],
+	"include_error_404"	: [
+							"404_header.php", 
+							"404_error.php", 
+							"footer.php"
+						  ],
+	"include_error_403"	: [
+							"403_header.php", 
+							"403_error.php", 
+							"footer.php"
+						  ],
+	"include_error_920"	: [
+							"920_header.php", 
+							"920_error.php", 
 							"footer.php"
 						  ]
 }

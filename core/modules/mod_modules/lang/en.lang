@@ -1,0 +1,25 @@
+	
+##	Messages
+
+	M_BEMOULE_MSG_INSTALLED			=	Module has been installed
+	M_BEMOULE_MSG_REMOVED			=	Module has been removed
+
+	M_BEMOULE_MSG_WARNINGNOTICE		=	When uninstalling a module, all data in the database belonging to this module are deleted.
+
+##	
+
+	M_BEMOULE_NAME					=	Module name
+	M_BEMOULE_SECTION				=	Section
+	M_BEMOULE_STATE					=	Module state
+
+	M_BEMOULE_MODULEINFO			=	Module information
+	M_BEMOULE_MODULELOC				=	Module location
+	M_BEMOULE_MODULEID				=	Module-ID
+	M_BEMOULE_MODULETYPE			=	Module type
+	M_BEMOULE_MODULEACTIVATED		=	Module is activated
+
+
+	
+	
+	
+	

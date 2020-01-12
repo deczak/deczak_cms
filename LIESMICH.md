@@ -1,7 +1,7 @@
 
-# Das Projekt
+# Das Projekt - cosCMS
 
-Dabei handelt es sich um ein Content Management System wie es diese mittlerweile dutzendfach gibt.
+Dieses Content Management System erstelle ich primär für mich und meinen Anforderungen, stelle es aber der allgemeinheit zur Verfügung. Das Kürzel cos steht dabei für cooking own soup, in Anlehnung dessen das jemand seine eigene Suppe kocht anstatt die von anderen zu verwenden. Gegen eine Mitarbeit am Projekt habe ich nichts einzuwenden. Hinweise zu Fehlern und der gleichen sind erwünscht.
 
 ##	Aktueller Stand
 
@@ -12,9 +12,9 @@ Diese Version ist eine frühe, wenn man das so nennen möchte, Alpha Version. Da
 + Benutzer für Backend anlegen, bearbeiten, löschen
 + Rechtegruppen für Backend benutzer anlegen, bearbeiten, löschen
 
-Aufgrund dessen das ich noch einiges umbauen muss, verzichte ich noch auf eine entsprechende Dokumentation der internen Abläufe. Keiner wäscht sein Auto wenn er weiß das es zwei Stunden später anfängt zu regnen.
+Aufgrund dessen das ich noch einiges umbauen muss, verzichte ich noch auf eine entsprechende Dokumentation der internen Abläufe.
 
-Ich schreibe es, obwohl dies sicher klar sein sollte, doch lieber. Das ist eine frühe Version und es fehlt noch eine Menge. Nutzen Sie diese Version nicht im Live Einsatz.
+Ich schreibe es, obwohl dies sicher klar sein sollte, doch lieber: Das ist eine frühe Version und es fehlt noch eine Menge. Nutzen Sie diese Version nicht im Live Einsatz.
 
 ##	Geplante Funktionen und Eigenschaften (Vorläufig)
 
@@ -28,25 +28,18 @@ Ich schreibe es, obwohl dies sicher klar sein sollte, doch lieber. Das ist eine 
 
 ## Nicht geplante Eigenschaften
 
-+ Sich zu weit aus dem Fenster zu lehnen
 + Nach Hause telefonieren
 + Automatische Updates
++ Bild und Video Bearbeitungsfunktionen
 
 # Voraussetzungen für dieses CMS
 
-+ Ein Webserver mit PHP7+, HTAccess Support (Apache Style) inklusive URL Rewrite sowie funktionierende sendmail Konfiguration in PHP.
++ Ein Webserver mit PHP7+, HTAccess Support inklusive URL Rewrite sowie funktionierende sendmail Konfiguration in PHP.
 + Ein MySQL kompatible Datenbank Server
 
 # Installation
 
-Im Verzeichnis install gibt es eine install.php die alles übernimmt. Zur erfolgreichen installation werden grundsätzlich die Datenbank Informationen benötigt, eine eMail Adresse an der System Nachrichten gesendet werden sowie weitere Angabe die dort erklärt werden.
+Im Verzeichnis install gibt es eine index.php die alles übernimmt. Zur erfolgreichen installation werden grundsätzlich die Datenbank Informationen benötigt, eine eMail Adresse an der System Nachrichten gesendet werden sowie weitere Angabe die dort erklärt werden.
 
-Eine Manuelle Installation ist nicht möglich, Sie könnten diese zwar soweit durchführen das Sie auf den öffentlichen Bereich zugreifen können, aber für das Backend (die Administration) brauchen Sie einen benutzer dessen Zugangsdaten gesondert gehasht werden. Das zu erklären ist zu kompliziert als das man es sinnvoll in eine Anleitung packen könnte. Und wenn ich dafür ein Helfer Script erstellen würden .. Gott verdammt wofür hab ich dann die install.php erstellt ...
+Eine Manuelle Installation ist nicht möglich, Sie könnten diese zwar soweit durchführen das Sie auf den öffentlichen Bereich zugreifen können, aber für das Backend (die Administration) brauchen Sie einen Benutzer dessen Zugangsdaten gesondert gehasht werden. Das zu erklären ist zu kompliziert als das man es sinnvoll in eine Anleitung packen könnte. Und wenn ich dafür ein Helfer Script erstellen würden.
 
-# Todo
-
-+ verdammt viel
-+ des weiteren einen namen für das CMS ausdenken
-+ vielleicht ein wenig sport machen
-
-Einen Zeitplan kann ich nicht geben, aber die nächste Vorabversion wird noch in diesem Jahr kommen. 

@@ -1,18 +1,12 @@
 <?php
 
-/*
- 
-	This file contains different toolkit functions, as example using those with tk::<function> 
-
- */
-
 class	TK
 {
 	public static function
 	dbug($_data, bool $_returnAsString = false)
 	{
 		if($_returnAsString) return print_r($_data, true);
-		echo '<pre style="border:1px dotted red; padding:10px; margin:10px;">';
+		echo '<pre style="border:1px dotted red; padding:10px; margin:10px; tab-size:4; -moz-tab-size:4;">';
 		print_r($_data);
 		echo '</pre>';
 	}
@@ -53,6 +47,33 @@ class	TK
 			return 'https://';
 		return 'http://';			 
 	}
+
+	public static function
+	strip_breaks_n_tags(string $string)
+	{
+		$string = str_replace(array("\r", "\n"), '', $string);
+		return strip_tags($string);
+	}
+
+	public static function
+	getBackendUserName(&$_sqlConnection, int $_userId)
+	{
+		require_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelUsersBackend.php';
+		$pModel = new modelUsersBackend();
+		if(!$pModel -> load($_sqlConnection, [ 'user_id' => $_userId ]))
+			return '';
+		$user = $pModel -> getDataInstance()[0];
+		return $user -> user_name_first .' '. $user -> user_name_last;
+	}
+
+	public static function
+	getValueFromArrayByValueI(array $_srcArray, $_searchKey, $_searchValue, $_returnKey, $_returnDefault)
+	{
+		foreach($_srcArray as $dataset)
+			if(isset($dataset -> $_searchKey) && isset($dataset -> $_returnKey) && stripos($_searchValue, $dataset -> $_searchKey) !== false)
+				return $dataset -> $_returnKey;
+		return $_returnDefault;
+	}
 }
 
 class	CRYPT
@@ -60,7 +81,7 @@ class	CRYPT
 	private static function
 	CRYPTKEY(string $_key, bool $_appendKey )
 	{
-		$_CryptKey	=	ENCRYPTION_BASEKEY;
+		$_CryptKey	=	CONFIG::GET() -> ENCRYPTION -> BASEKEY;
 		if( !empty($_key) AND !$_appendKey)
 		{
 			$_CryptKey	=	$_key;
@@ -76,7 +97,7 @@ class	CRYPT
 	private static function
 	CRYPTVECTOR(string $_key, bool $_appendKey )
 	{
-		$_CryptKey		=	ENCRYPTION_BASEKEY;
+		$_CryptKey		=	CONFIG::GET() -> ENCRYPTION -> BASEKEY;
 		if( !empty($_key) AND !$_appendKey)
 		{
 			$_CryptKey	=	$_key;
@@ -91,13 +112,13 @@ class	CRYPT
 	public static function
 	ENCRYPT(string $_string, string $_key = '', bool $_appendKey = false )
 	{	
-		return	base64_encode( openssl_encrypt( $_string, ENCRYPTION_METHOD, CRYPT::CRYPTKEY($_key,$_appendKey), 0, CRYPT::CRYPTVECTOR($_key,$_appendKey) ) );	
+		return	base64_encode( openssl_encrypt( $_string, CONFIG::GET() -> ENCRYPTION -> METHOD, CRYPT::CRYPTKEY($_key,$_appendKey), 0, CRYPT::CRYPTVECTOR($_key,$_appendKey) ) );	
 	}
 
 	public static function
 	DECRYPT(string $_string, string $_key = '', bool $_appendKey = false )
 	{
-		return	openssl_decrypt( base64_decode( $_string ), ENCRYPTION_METHOD, CRYPT::CRYPTKEY($_key,$_appendKey), 0, CRYPT::CRYPTVECTOR($_key,$_appendKey) );		
+		return	openssl_decrypt( base64_decode( $_string ), CONFIG::GET() -> ENCRYPTION -> METHOD, CRYPT::CRYPTKEY($_key,$_appendKey), 0, CRYPT::CRYPTVECTOR($_key,$_appendKey) );		
 	}	
 
 	public static function

@@ -1,15 +1,17 @@
 {
+	"module_controller" : "controllerRightGroups",
 	"rights"	:[
-					{"name":"create",	"desc":"Create new right group"},
-					{"name":"edit",		"desc":"Edit right group"},
-					{"name":"delete",	"desc":"Delete right group"},
-					{"name":"view",		"desc":"View existing right groups"}
+					{"name":"index",	"desc":"OVERVIEW"},
+					{"name":"view",		"desc":"VIEW"},
+					{"name":"create",	"desc":"CREATE"},
+					{"name":"edit",		"desc":"EDIT"},
+					{"name":"delete",	"desc":"DELETE"}
 				 ],
 	"sub"		:[
 					{
 						"url_name"	:"",
 						"ctl_target":"",
-						"menu_name"	:"MOD_RGROUP_SUB_VIEW_NAME",
+						"menu_name"	:"OVERVIEW",
 						"menu_order":"0"
 					},
 					{
@@ -20,6 +22,12 @@
 					},
 					{
 						"url_name"	:"group",
+						"ctl_target":"view",
+						"menu_name"	:"",
+						"menu_order":"0"
+					},
+					{
+						"url_name"	:"edit",
 						"ctl_target":"edit",
 						"menu_name"	:"",
 						"menu_order":"0"

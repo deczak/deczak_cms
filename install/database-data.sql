@@ -1,7 +1,26 @@
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET time_zone = "+00:00";
 
-INSERT INTO `tb_page` (`data_id`, `page_id`, `node_id`, `page_version`, `page_template`, `time_create`, `time_update`, `create_by`, `update_by`, `update_reason`) VALUES
+INSERT INTO `tb_modules` (`module_id`, `module_location`, `module_controller`, `module_type`, `module_group`, `is_frontend`, `is_active`, `module_icon`, `module_name`, `create_time`, `create_by`, `update_time`, `update_by`) VALUES
+(1, 'mod_loginForm', 'controllerLoginForm', 'core', 'Simple Modules', 1, 1, '&#xf2f6;', 'Login', 0, 1, 0, 0),
+(2, 'mod_usersBackend', 'controllerUsersBackend', 'core', 'backend', 0, 1, '', 'Backend Users', 0, 1, 0, 0),
+(3, 'mod_pages', 'controllerPages', 'core', 'backend', 0, 1, '', 'Page Editing', 0, 1, 0, 0),
+(4, 'mod_SimpleText', 'controllerSimpleText', 'core', 'Simple Modules', 1, 1, '&#xf15c;', 'Text', 0, 1, 0, 0),
+(5, 'mod_SimpleHeadline', 'controllerSimpleHeadline', 'core', 'Simple Modules', 1, 1, '&#xf1dc;', 'Headline', 0, 1, 0, 0),
+(6, 'mod_RightGroups', 'controllerRightGroups', 'core', 'backend', 0, 1, '', 'Right Groups', 0, 1, 0, 0),
+(7, 'mod_simpleSource', 'controllerSimpleSource', 'core', 'Simple Modules', 1, 1, '&#xf121;', 'Code', 0, 1, 0, 0),
+(8, 'mod_LoginObjects', 'controllerLoginObjects', 'core', 'backend', 0, 1, '', 'Login Objects', 0, 1, 0, 0),
+(9, 'mod_deniedRemote', 'controllerDeniedRemote', 'core', 'backend', 0, 1, '', 'Denied Remote Address', 0, 1, 0, 0),
+(10, 'mod_userAgent', 'controllerUserAgent', 'core', 'backend', 0, 1, '', 'User Agents', 0, 1, 0, 0),
+(11, 'mod_sessions', 'controllerSessions', 'core', 'backend', 0, 1, '', 'Sessions', 0, 22, 0, 0),
+(12, 'mod_modules', 'controllerModules', 'core', 'backend', 0, 1, '', 'MODULE_MODULES', 0, 22, 0, 0);
+
+
+INSERT INTO `tb_login_objects` (`data_id`, `object_id`, `object_databases`, `object_table`, `object_fields`, `object_session_ext`, `object_description`, `is_disabled`, `is_protected`, `create_time`, `create_by`, `update_time`, `update_by`) VALUES
+(12, 'ABKND', '["1"]', 'tb_users_backend', '[{"name":"login_name","data_prc":"crypt","type":"text","is_username":"0"},{"name":"login_pass","data_prc":"hash","type":"password","is_username":"1"}]', '{"1":{"name":"user_name_last","data_prc":"crypt"},"2":{"name":"language","data_prc":"text"}}', 'Backend Access', 0, 1, 1569299590, 22, 1569903496, 0);
+
+
+INSERT INTO `tb_page` (`data_id`, `page_id`, `node_id`, `page_version`, `page_template`, `create_time`, `update_time`, `create_by`, `update_by`, `update_reason`) VALUES
 (1, 1, 2, 1, 'default', 0, 0, 0, 0, ''),
 (2, 2, 3, 1, 'default', 0, 0, 0, 0, ''),
 (3, 3, 4, 1, 'default', 0, 0, 0, 0, ''),
@@ -15,15 +34,15 @@ INSERT INTO `tb_page_header` (`data_id`, `page_id`, `node_id`, `page_language`, 
 (4, 4, 5, 'en', 'Page B', 'Page B', '', 1),
 (5, 5, 6, 'en', 'Sub page of B', 'Sub page of B', '', 1);
 
-INSERT INTO `tb_page_object` (`node_id`, `page_version`, `module_id`, `object_id`, `object_order_by`, `time_create`, `time_update`, `create_by`, `update_by`, `update_reason`) VALUES
-(4, 1, 'M5', 1, 1, 0, 0, 0, 0, ''),
-(2, 1, 'M4', 3, 2, 0, 0, 0, 0, ''),
-(2, 1, 'M5', 4, 1, 0, 0, 0, 0, ''),
-(3, 1, 'M5', 6, 1, 0, 0, 0, 0, ''),
-(2, 1, 'M4', 8, 4, 0, 0, 0, 0, ''),
-(2, 1, 'M5', 9, 3, 0, 0, 0, 0, ''),
-(2, 1, 'M5', 10, 5, 0, 0, 0, 0, ''),
-(2, 1, 'M4', 11, 6, 0, 0, 0, 0, '');
+INSERT INTO `tb_page_object` (`node_id`, `page_version`, `module_id`, `object_id`, `object_order_by`, `create_time`, `update_time`, `create_by`, `update_by`, `update_reason`) VALUES
+(4, 1, '5', 1, 1, 0, 0, 0, 0, ''),
+(2, 1, '4', 3, 2, 0, 0, 0, 0, ''),
+(2, 1, '5', 4, 1, 0, 0, 0, 0, ''),
+(3, 1, '5', 6, 1, 0, 0, 0, 0, ''),
+(2, 1, '4', 8, 4, 0, 0, 0, 0, ''),
+(2, 1, '5', 9, 3, 0, 0, 0, 0, ''),
+(2, 1, '5', 10, 5, 0, 0, 0, 0, ''),
+(2, 1, '4', 11, 6, 0, 0, 0, 0, '');
 
 INSERT INTO `tb_page_object_simple` (`data_id`, `object_id`, `body`, `params`) VALUES
 (1, 1, '<h1>This is a headline<br></h1>', ''),
@@ -43,11 +62,11 @@ INSERT INTO `tb_page_path` (`page_id`, `page_language`, `page_path`, `node_id`, 
 (4, 'en', 'page-b/', 5, 7, 10),
 (5, 'en', 'sub-page-of-b/', 6, 8, 9);
 
-INSERT INTO `tb_right_groups` (`group_id`, `group_name`, `group_rights`) VALUES
-(1, 'administrator', '{"M1":["create","edit","delete"],"M2":["create","edit","delete","view"],"M3":["create","edit","delete","deletetree","view"],"M4":["create","edit","delete"],"M5":["create","edit","delete"],"M6":["create","edit","delete","view"]}');
+INSERT INTO `tb_right_groups` (`group_id`, `group_name`, `group_rights`, `create_time`, `create_by`, `update_time`, `update_by`) VALUES
+(1, 'administrator', '{"1":["view","create","edit","delete"],"2":["index","view","create","edit","delete"],"3":["index","view","create","edit","delete"],"4":["view","create","edit","delete"],"5":["view","create","edit","delete"],"6":["index","view","create","edit","delete"],"7":["view","create","edit","delete"],"8":["index","view","create","edit","delete"],"9":["index","view","create","edit","delete"],"10":["index","view","create","edit","delete"],"11":["index","view","edit","delete"],"12":["index","view","create","edit","delete"],"35":["index","view","create","edit","delete"]}', 0, 22, 0, 0);
 
-INSERT INTO `tb_users_backend` (`data_id`, `login_name`, `login_pass`, `login_count`, `user_id`, `user_name_first`, `user_name_last`, `user_mail`, `time_login`, `time_create`, `time_update`, `cookie_id`, `recover_key`, `recover_timeout`, `is_locked`) VALUES
-(1, 'b2p3amNlc3lIOEE5cHliNDdLbHVodz09', '5685477bbe00722fd06506b4f0803cd649644a29711815557e54007ec39cf5fc3293add371ab7609c96c731a999aa886c5520e5d31bc4b5e79b4c325da19e88f2394', 0, '1', 'WExNMk5DTUNjczVYa0pERlFWMUZrdz09', 'WExNMk5DTUNjczVYa0pERlFWMUZrdz09', 'WExNMk5DTUNjczVYa0pERlFWMUZrdz09', 0, 0, 0, '{}', NULL, 0, 0);
+INSERT INTO `tb_users_backend` (`data_id`, `login_name`, `login_pass`, `login_count`, `user_id`, `user_name_first`, `user_name_last`, `user_mail`, `time_login`, `create_time`, `update_time`, `cookie_id`, `recover_key`, `recover_timeout`, `is_locked`,`language`) VALUES
+(1, '%USER_NAME%', '%USER_PASSWORD%', 0, '1', '%USER_FIRST_NAME%', '%USER_LAST_NAME%', '%USER_MAIL%', 0, 0, 0, '{}', 0, 0, 0,'en');
 
 INSERT INTO `tb_users_groups` (`data_id`, `user_id`, `group_id`) VALUES
 (1, '1', 1);

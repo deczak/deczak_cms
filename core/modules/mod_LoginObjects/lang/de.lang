@@ -1,0 +1,36 @@
+
+##	Sub Sections
+
+	MOD_LOGINO_SUB_CREATE_NAME			=	Objekt erstellen
+
+
+	M_BERMADDR_MSG_OBJEXIST		=	Objekt existiert bereits
+
+##	Error
+
+	MOD_LOGINO_ERR_OBJECT_ID_UK			=	Objekt existiert nicht
+	MOD_LOGINO_ERR_NOTUPDATED			=	Objekt wurde nicht aktualisiert
+	MOD_LOGINO_ERR_NOTCREATED			=	Objekt wurde nicht erstellt
+
+##	Positive returns
+		
+	MOD_LOGINO_OK_UPDATED				=	Objekt wurde aktualsiert
+	MOD_LOGINO_OK_DELETED				=	Objekt wurde gelöscht
+	MOD_LOGINO_OK_CREATED				=	Objekt wurde erstellt
+	
+##		
+
+	MOD_LOGINO_OBJECT_NAME				=	Objekt Name (ID)
+	MOD_LOGINO_OBJECT_DESC				=	Objekt Beschreibung
+	MOD_LOGINO_OBJECT_TABLE				=	Authentifiziererungs Tabelle
+	MOD_LOGINO_OBJECT_DATABASE_SELECT	=	Datenbank auswählen
+		
+	MOD_LOGINO_EDIT_OBJECT				=	Objekt bearbeiten
+	
+	
+	MOD_LOGINO_OBJECT					=	Login Objekt			
+	MOD_LOGINO_OBJECT_INFO				=	Objekt Information			
+	MOD_LOGINO_OBJECT_FIELDS			=	Authentifiziererungs Felder
+	MOD_LOGINO_OBJECT_DATABASE			=	Authentifiziererungs Datenbank
+	MOD_LOGINO_OBJECT_SESS_EXTENT		=	Erweiterte Session Daten
+	MOD_LOGINO_OBJECT_DISABLED			=	Objekt Disabled

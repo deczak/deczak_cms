@@ -72,7 +72,8 @@
 
 
 	header > div.main-nav-container { background: linear-gradient(to top, rgb(102, 102, 102), rgb(64, 64, 64)); border-bottom: 1px solid rgb(0,0,0); box-shadow: 0px 4px 10px 0px rgba(0,0,0,0.1); color:white; } 
-	header > div.main-nav-container > div.wrapper-inside { display:flex; justify-content:space-between;  padding-top:15px; padding-bottom:15px; } 
+	header > div.main-nav-container > div.wrapper-inside { display:flex; justify-content:space-between;   } 
+	header > div.main-nav-container > div.wrapper-inside > div.left { padding-top:10px; padding-bottom:10px; } 
 	header > div.main-nav-container > div.wrapper-inside > div.left > a { font-size:1.4em; text-shadow:0px 0px 5px rgba(255,255,255,0.5); color:white; } 
 	header > div.main-nav-container > div.wrapper-inside > div.right {  } 
 
@@ -80,7 +81,7 @@
 	header > div.sub-nav-container > div.wrapper-inside { display:flex; justify-content:space-between; align-items:center; height:30px; }
 	header > div.sub-nav-container > div.wrapper-inside > div.crumbs { font-size:0.8em; text-transform:uppercase; letter-spacing: 2px; }
 	header > div.sub-nav-container > div.wrapper-inside > div.crumbs .crumb-delimeter { font-weight:700; display:inline-block; padding:0px 5px; }
-	header > div.sub-nav-container > div.wrapper-inside > div.sub-nav-items { text-transform:uppercase; font-size:0.9em; letter-spacing:0.06em; }
+	header > div.sub-nav-container > div.wrapper-inside > div.sub-nav-items { text-transform:uppercase; font-size:0.8em; letter-spacing:0.06em; }
 
 
 /**	Icon rotation
@@ -88,3 +89,21 @@
 
 	.loading { animation: rotate 1s linear infinite; }
 	@keyframes rotate { to { transform: rotate(360deg); } }
+
+
+/**	Color indicator
+**/
+
+	div.color-indicator { display:block; height:16px; width:16px; margin:0 auto; }
+
+	div.color-indicator.positive[data-state="0"] { background-color:red; }
+	div.color-indicator.positive[data-state="1"] { background-color:green; }
+
+	div.color-indicator.negative[data-state="0"] { background-color:green; }
+	div.color-indicator.negative[data-state="1"] { background-color:red; }
+
+/**	Backend Login
+**/
+
+	body[data-node-id="2"] > div.login-form-container { position:fixed; top:52%; left:50%; transform:translate(-50%,-50%); }
+	body[data-node-id="2"] > div.login-form-container fieldset { background:none; }

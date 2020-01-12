@@ -15,22 +15,20 @@
 
 	$configFile = file_get_contents('template-config.php');
 
-	$configFile = str_replace('%%SERVER_ROOT%%',$_POST['server-root'], $configFile);
-	$configFile = str_replace('%%SERVER_URL%%', $_POST['server-url'], $configFile);
+	$configFile = str_replace('%SERVER_ROOT%',$_POST['server-root'], $configFile);
+	$configFile = str_replace('%SERVER_URL%', $_POST['server-url'], $configFile);
 
-	$configFile = str_replace('%%DATABASE_SERVER%%',$_POST['database-server'], $configFile);
-	$configFile = str_replace('%%DATABASE_USER%%',$_POST['database-user'], $configFile);
-	$configFile = str_replace('%%DATABASE_PASSWORD%%',$_POST['database-pass'], $configFile);
-	$configFile = str_replace('%%DATABASE_DATABASE%%',$_POST['database-database'], $configFile);
+	$configFile = str_replace('%DATABASE_SERVER%',$_POST['database-server'], $configFile);
+	$configFile = str_replace('%DATABASE_USER%',$_POST['database-user'], $configFile);
+	$configFile = str_replace('%DATABASE_PASSWORD%',$_POST['database-pass'], $configFile);
+	$configFile = str_replace('%DATABASE_DATABASE%',$_POST['database-database'], $configFile);
 
-	$configFile = str_replace('%%SYSMAIL_NAME%%',$_POST['mail-name'], $configFile);
-	$configFile = str_replace('%%SYSMAIL_MAIL%%',$_POST['mail-mail'], $configFile);
+	$configFile = str_replace('%SYSMAIL_NAME%',$_POST['mail-name'], $configFile);
+	$configFile = str_replace('%SYSMAIL_MAIL%',$_POST['mail-mail'], $configFile);
+
+	$configFile = str_replace('%BASEKEY%',$_POST['crypt-basekey'], $configFile);
 
 
-
-
-//	
-// 	%%SYSMAIL_MAIL%%
 	file_put_contents('../config/standard.php', $configFile);
 
 	tk::xhrResult(0, 'OK');

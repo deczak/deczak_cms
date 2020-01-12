@@ -7,19 +7,24 @@
 	MOD_BEUSER_ERR_USERID_UK		=	This user does not exists
 	
 	
-	MOD_BEUSER_MENU					=	Menu
+
+
+	M_BEUSER_MSG_ISCREATED		=	User account was created
+	M_BEUSER_MSG_ISUPDATED		=	User account was updated
+	M_BEUSER_MSG_ISDELETED		=	User account was deleted
+
+	M_BEUSER_MSG_USERNAMEEXIST	=	Username exist already
+
+
+
+	M_BEUSER_MSG_PASSNOTEQUAL			=	The login password fields are not equal
 
 ##	Overview
 
 	MOD_BEUSER_OV_TABLE_USERID		=	User-ID
-	MOD_BEUSER_OV_TABLE_USER		=	Username
-	MOD_BEUSER_OV_TABLE_CREATETIME	=	Created at
 	MOD_BEUSER_OV_TABLE_LASTLOGIN	=	Last login
 	MOD_BEUSER_OV_TABLE_NUMLOGIN	=	Num of login
 
-	MOD_BEUSER_OV_TABLE_SELECTALL	=	Select all
-	
-	MOD_BEUSER_OV_TABLE_EDITUSER	=	Edit user
 	
 	
 ##	Edit / Create
@@ -43,13 +48,14 @@
 	MOD_BEUSER_FM_RIGTHGROUPS		=	Right groups
 	MOD_BEUSER_FM_LOCKEDSTATE		=	Account locked state
 	
-	
+	MOD_BEUSER_FM_BACKENDSTTNGS		= 	Backend settings
+
+
 	MOD_BEUSER_FM_LOCKED_0_NOTLOCKED	=	not locked
 	MOD_BEUSER_FM_LOCKED_1_NOTVERIFIED	=	locked by not verified
 	MOD_BEUSER_FM_LOCKED_2_FAILEDLOGIN	=	locked by failed login limit
+
+
 	
-	
-	MOD_BEUSER_FM_BTN_SAVE			=	Save
-	MOD_BEUSER_FM_BTN_DELETE		=	Delete User
 	
 	

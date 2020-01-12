@@ -44,7 +44,7 @@ class 	modelBackend extends CModel
 
 			if(!empty($_pageData['page_auth']) && $_targetSite != 0)
 			{
-				if(CSession::instance() -> getSessionValue('IS_AUTH_OBJECT', $_pageData['page_auth']) === false)
+				if(CSession::instance() -> isAuthed($_pageData['page_auth']) === false)
 				{
 					header("Location: ". CMS_SERVER_URL_BACKEND ); 			
 					exit;		
@@ -54,6 +54,7 @@ class 	modelBackend extends CModel
 			##	Create Page object
 
 			$this -> m_storage = new $_className($_pageData, $this -> m_shemeBackend -> getColumns());
+
 
 			##	Create object object
 

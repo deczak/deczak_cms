@@ -11,6 +11,8 @@ class CShemeColumn
 	public	$defaultValue;
 	public	$isNull;
 	public	$length;
+	public	$keyType;
+	public	$indexType;
 
 	public function
 	__construct(string $name, string $type)
@@ -23,7 +25,7 @@ class CShemeColumn
 		$this -> attribute 		 = false;
 		$this -> defaultValue 	 = NULL;
 		$this -> isNull		 	 = false;
-		$this -> length			 = 1;
+		$this -> length			 = 0;
 	}
 
 	public function
@@ -41,9 +43,9 @@ class CShemeColumn
 	}
 
 	public function
-	isNull()
+	setIndex($_type)
 	{
-		$this -> isNull = 'NULL';
+		$this -> indexType = $_type;
 		return $this;
 	}
 
@@ -68,6 +70,14 @@ class CShemeColumn
 	}
 
 	public function
+	setKey($_type)
+	{
+		$this -> keyType = strtoupper($_type);
+
+		return $this;
+	}
+
+	public function
 	setAttribute(string $attribute)
 	{
 		if(empty($attribute))
@@ -87,19 +97,29 @@ class CSheme
 	__construct()
 	{
 		$this -> m_tableName		= '';
-		$this -> m_collate = '';
-		$this -> m_charset = '';
+		$this -> m_collate 			= '';
+		$this -> m_charset 			= '';
 		$this -> m_sheme['columns'] = [];
+		$this -> m_tableEngine 		= '';
+
+		$this -> m_duplications		= [];
 	}
 
 	protected function
 	setTable(string $_tableName, bool $_isVirtual = false)
 	{
 		$this -> m_tableName 		= $_tableName;
-		$this -> m_collate 			= SQL::TABLE_COLLATE;
-		$this -> m_charset 			= SQL::TABLE_CHARSET;
-		$this -> m_sheme['virtual']		= $_isVirtual;
+		$this -> m_collate 			= CONFIG::GET() -> MYSQL -> TABLE_COLLATE;
+		$this -> m_charset 			= CONFIG::GET() -> MYSQL -> TABLE_CHARSET;
+		$this -> m_tableEngine 		= CONFIG::GET() -> MYSQL -> TABLE_ENGINE;
+		$this -> m_sheme['virtual']	= $_isVirtual;
 		return $this;
+	}
+
+	protected function
+	setEngine(string $_tableEngine)
+	{
+		$this -> m_tableName 		= $_tableEngine;
 	}
 	
 	protected function
@@ -142,40 +162,139 @@ class CSheme
 	}
 
 	public function
-	createTable(&$_sqlConnection)
+	createTable(&$_sqlConnection, &$_errorMsg)
 	{
+		if($this -> m_sheme['virtual'] === true)
+			return true;
+
 		if(empty($_sqlConnection) || !property_exists($_sqlConnection, 'errno') || $_sqlConnection -> errno != 0)
-			trigger_error("CImperator::__construct -- Invalid SQL connection", E_USER_ERROR);
+			trigger_error("CSheme::__construct -- Invalid SQL connection", E_USER_ERROR);
 
+		if($_sqlConnection -> query("DESCRIBE `". $this -> m_tableName ."`"))
+		{
+			return false;
+		}
+
+		$primaryKey		= '';
+
+		$sqlString 		= [];
+		$sqlString[] 	= "CREATE TABLE `". $this -> m_tableName ."` (";
+
+		$isFirstColumn = true;
+		foreach($this -> m_sheme['columns'] as $columnName => $columnData)
+		{
+			if($columnData -> isVirtual)
+				continue;
+
+			$columnData -> type = ($columnData -> type === 'string' ? 'VARCHAR' : $columnData -> type);
+
+			if($isFirstColumn)
+				$isFirstColumn = false;
+			else
+				$sqlString[] 	= ",";
+
+			$sqlString[] 	= "`". $columnData -> name ."`";
+			$sqlString[] 	= $columnData -> type . ($columnData -> length !== 0 ? "(". $columnData -> length .")" : "");
+
+			if($columnData -> attribute !== false)
+				$sqlString[] 	= $columnData -> attribute;
+
+			if(!$columnData -> isNull && $columnData -> defaultValue === NULL)
+
+				$sqlString[] 	= "NOT NULL";
+
+			elseif($columnData -> isNull && $columnData -> defaultValue === NULL)
+				$sqlString[] 	= "DEFAULT NULL";
+			else
+				$sqlString[] 	= "DEFAULT '". $columnData -> defaultValue ."'";
+
+			if($columnData -> isAutoIncrement)
+				$sqlString[] 	= "AUTO_INCREMENT";
+	
+		
+
+		}
+
+		$primaryKeySet = false;
+
+		foreach($this -> m_sheme['columns'] as $columnName => $columnData)
+		{
+
+			if($columnData -> keyType !== NULL)
+			{
+				if($columnData -> keyType === 'PRIMARY' && !$primaryKeySet)
+				{
+					$primaryKeySet = true;
+				}
+				elseif($columnData -> keyType === 'PRIMARY' && $primaryKeySet)
+				{
+
+					$_errorMsg = 'Setting multiple primary keys on table '. $this -> m_tableName .' is not allowed.';
+					return false;
+
+				}
+
+				$primaryKey	= [ "type" => $columnData -> keyType, "column" => $columnData -> name];
+
+				$sqlString[] 	= ", ". $columnData -> keyType ." KEY (". $columnData -> name .")";
+
+			}	
+		}
+
+
+		$sqlString[] 	= ") ENGINE=". $this -> m_tableEngine ." DEFAULT CHARSET=". $this -> m_charset ." COLLATE=". $this -> m_collate;
+
+		if($_sqlConnection -> query(implode(' ', $sqlString)) === false)
+		{
+
+			$_errorMsg = 'Query return error: '. $_sqlConnection -> error .' | '. print_r(implode(' ', $sqlString),true);
+			return false;			
+		}
+
+		## Keys
 /*
+		$sqlString 		= [];
+		$sqlString[] 	= "ALTER TABLE `". $this -> m_tableName ."`";
+		$isFirstColumn 	= true;
+		foreach($this -> m_sheme['columns'] as $columnName => $columnData)
+		{		
+
+			if($columnData -> keyType === NULL || $columnData -> keyType === 'PRIMARY')
+				continue;
+
+			if($isFirstColumn)
+				$isFirstColumn = false;
+			else
+				$sqlString[] 	= ",";
 
 
 
-CREATE TABLE `tb_page_object` (
-  `node_id` int(10) UNSIGNED NOT NULL,
-  `page_version` mediumint(9) UNSIGNED NOT NULL DEFAULT '1',
-  `module_id` mediumint(9) UNSIGNED NOT NULL,
-  `object_id` int(11) UNSIGNED NOT NULL,
-  `object_order_by` mediumint(9) UNSIGNED NOT NULL,
-  `time_create` bigint(20) UNSIGNED DEFAULT NULL,
-  `time_update` bigint(20) UNSIGNED DEFAULT NULL,
-  `create_by` mediumint(8) UNSIGNED DEFAULT NULL,
-  `update_by` mediumint(8) UNSIGNED DEFAULT NULL,
-  `update_reason` varchar(250) COLLATE utf8mb4_unicode_ci DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+			$sqlString[] 	= "ADD ". $columnData -> keyType." KEY (`". $columnData -> name ."`)";
+		}
 
-
-ALTER TABLE `tb_page_object`
-  ADD PRIMARY KEY (`object_id`),
-  ADD KEY `node_id` (`node_id`);
-
-
-
---
-ALTER TABLE `tb_page_object`
-  MODIFY `object_id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT;
-
+		$_sqlConnection -> query(implode(' ', $sqlString));
 */
+		##	Index
+
+		$sqlString 		= [];
+		$sqlString[] 	= "ALTER TABLE `". $this -> m_tableName ."`";
+		$isFirstColumn 	= true;
+		foreach($this -> m_sheme['columns'] as $columnName => $columnData)
+		{		
+			if($columnData -> indexType === NULL)
+				continue;
+
+			if($isFirstColumn)
+				$isFirstColumn = false;
+			else
+				$sqlString[] 	= ",";
+
+			$sqlString[] 	= "ADD ". $columnData -> indexType." `". $columnData -> name ."` (`". $columnData -> name ."`)";
+		}
+
+		$_sqlConnection -> query(implode(' ', $sqlString));
+
+		return true;
 
 	}
 
@@ -184,6 +303,14 @@ ALTER TABLE `tb_page_object`
 	{		
 		if(empty($_sqlConnection) || !property_exists($_sqlConnection, 'errno') || $_sqlConnection -> errno != 0)
 			trigger_error("CImperator::__construct -- Invalid SQL connection", E_USER_ERROR);
+
+		$_sqlConnection -> query("TRUNCATE TABLE `". $this -> m_tableName ."`");	
+	}
+
+	public function
+	duplicateTable(string $_tableName)
+	{
+		$this -> m_duplications[]	= $_tableName;
 	}
 
 }

@@ -12,10 +12,16 @@ createMenu(&$sitemap, $_pos = 1, $_level = 2 )
 		if($_level !== intval($sitemap[$i] -> level)) 
 			break;
 
+// TODO hidden_state checks 
+
+		if($sitemap[$i] -> hidden_state != 0 && !CMS_BACKEND)
+			continue;
+
+			
 		if(CMS_BACKEND)
-			echo '<li><a href="'. CMS_SERVER_URL_BACKEND .'sites/edit/'. $sitemap[$i] -> page_language .'/'. $sitemap[$i] -> node_id .'" title="'. $sitemap[$i] -> page_title .'">'. $sitemap[$i] -> page_name  .'</a>';
+			echo '<li><a href="'. CMS_SERVER_URL_BACKEND .'pages/view/'. $sitemap[$i] -> page_language .'/'. $sitemap[$i] -> node_id .'" title="'. $sitemap[$i] -> page_title .'">'. $sitemap[$i] -> page_name  .'</a>';
 		else
-			echo '<li><a href="'. CMS_SERVER_URL . URL_LANG_PRREFIX . substr($sitemap[$i] -> page_path, 1) .'" title="'. $sitemap[$i] -> page_title .'">'. $sitemap[$i] -> page_name  .'</a>';
+			echo '<li><a href="'. CMS_SERVER_URL . URL_LANG_PRREFIX . substr($sitemap[$i] -> page_path, 1) .'" title="'. $sitemap[$i] -> page_title .'" '. ($sitemap[$i] -> menu_follow == 0 ? 'rel="nofollow"' : '') .'>'. $sitemap[$i] -> page_name  .'</a>';
 
 		if($sitemap[$i] -> offspring != 0)
 			$i = createMenu($sitemap, ($i + 1), ($_level + 1));
@@ -37,7 +43,7 @@ createMenu(&$sitemap, $_pos = 1, $_level = 2 )
 
 		<div id="page-headline">
 
-			Project Name
+			<!--Project Name-->
 			
 		</div>
 
@@ -47,24 +53,24 @@ createMenu(&$sitemap, $_pos = 1, $_level = 2 )
 
 		<div id="language-selection">
 			<?php
-			foreach(CFG::LANG_SUPPORTED as $_lang)
+			foreach(CONFIG::GET() -> LANGUAGE -> SUPPORTED as $_lang)
 			{
 				$_url= '';
 
 				if(CMS_BACKEND)
 				{
-					if(isset($page -> alternate_path[ $_lang['key'] ]))
+					if(isset($pageRequest -> alternate_path[ $_lang['key'] ]))
 					{
-						$_url = CMS_SERVER_URL_BACKEND .'sites/edit/'. $_lang['key'] .'/'. $page -> alternate_path[ $_lang['key'] ]['node_id'];
+						$_url = CMS_SERVER_URL_BACKEND .'pages/view/'. $_lang['key'] .'/'. $pageRequest -> alternate_path[ $_lang['key'] ]['node_id'];
 						echo '<a href="'. $_url .'" title="'. $_lang['name'] .'">'. $_lang['key'] .'</a>';
 					}
 				}
 				else
 				{		
-					if(isset($page -> alternate_path[ $_lang['key'] ]))
-						$_url = substr($page -> alternate_path[ $_lang['key'] ]['path'],1);
+					if(isset($pageRequest -> alternate_path[ $_lang['key'] ]))
+						$_url = substr($pageRequest -> alternate_path[ $_lang['key'] ]['path'],1);
 
-					$_url = CMS_SERVER_URL . ((CFG::LANG_DEFAULT_SUFFIX || $_lang['key'] !== CFG::LANG_DEFAULT) ? $_lang['key'] .'/' : '') . ($_url === '/' ? '' : $_url);
+					$_url = CMS_SERVER_URL . ((CONFIG::GET() -> LANGUAGE -> DEFAULT_IN_URL || $_lang['key'] !== CONFIG::GET() -> LANGUAGE -> DEFAULT) ? $_lang['key'] .'/' : '') . ($_url === '/' ? '' : $_url);
 
 					echo '<a href="'. $_url .'" title="'. $_lang['name'] .'">'. $_lang['key'] .'</a>';
 				}
@@ -73,25 +79,25 @@ createMenu(&$sitemap, $_pos = 1, $_level = 2 )
 		</div>
 
 	</div>
-	
+
 	<div class="inner-wrapper">
 		<div id="crumb-path">
 			<?php
-			foreach($page -> crumb_path as $_crumb)
+			foreach($pageRequest -> crumbsList as $crumb)
 			{
-				if($_crumb -> level !== 1)
+				if($crumb -> level !== 1)
 					echo '<span class="crumb-delimeter">&rang;</span>';
 
-				if($_crumb -> node_id !== $page -> node_id)
+				if($crumb -> nodeId != $pageRequest -> node_id)
 				{
 					if(CMS_BACKEND)
-						echo '<a href="'. CMS_SERVER_URL_BACKEND .'sites/edit/'. $_crumb -> page_language .'/'. $_crumb -> node_id .'" title="'. $_crumb -> page_title .'">'. $_crumb -> page_name  .'</a>';
+						echo '<a href="'. CMS_SERVER_URL_BACKEND .'pages/view/'. $crumb -> language .'/'. $crumb -> nodeId .'" title="'. $crumb -> title .'">'. $crumb -> name  .'</a>';
 					else
-						echo '<a href="'. CMS_SERVER_URL . URL_LANG_PRREFIX . substr($_crumb -> page_path, 1) .'" title="'. $_crumb -> page_title .'">'. $_crumb -> page_name .'</a>';
+						echo '<a href="'. CMS_SERVER_URL . URL_LANG_PRREFIX . substr($crumb -> urlPart, 1) .'" title="'. $crumb -> page_title .'">'. $crumb -> name .'</a>';
 				}
 
-				if($_crumb -> node_id === $page -> node_id)
-					echo '<span>'. $_crumb -> page_name .'</span>';
+				if($crumb -> nodeId === $pageRequest -> node_id)
+					echo '<span>'. $crumb -> name .'</span>';
 			}
 			?>
 		</div>

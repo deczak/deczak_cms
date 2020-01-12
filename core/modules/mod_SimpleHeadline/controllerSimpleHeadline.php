@@ -8,7 +8,7 @@ class	controllerSimpleHeadline extends CController
 	private	$m_modelSimple;
 		
 	public function
-	__construct(array $_module, &$_object)
+	__construct($_module, &$_object)
 	{
 		parent::__construct($_module, $_object);
 
@@ -46,12 +46,16 @@ class	controllerSimpleHeadline extends CController
 
 		##	Call sub-logic function by target, if there results are false, we make a fall back to default view
 
+		$enableEdit 	= $this -> hasRights($_userRights, 'edit');
+		$enableDelete	= $this -> hasRights($_userRights, 'delete');
+
 		$_logicResults = false;
 		switch($_controllerAction)
 		{
-			case 'create': 		/*    */	$_logicResults = $this -> logicCreate($_sqlConnection, $_isXHRequest, $_logicResult);		break;
-			case 'delete': 		/*   */		$_logicResults = $this -> logicDelete($_sqlConnection, $_isXHRequest, $_logicResult);		break;
-			case 'edit': 		/* 		 */	$_logicResults = $this -> logicEdit($_sqlConnection, $_isXHRequest, $_logicResult);			break;	
+			case 'view'		: $_logicResults = $this -> logicView(	$_sqlConnection, $_isXHRequest, $_logicResult);	break;
+			case 'edit'		: $_logicResults = $this -> logicEdit(	$_sqlConnection, $_isXHRequest, $_logicResult);	break;	
+			case 'create'	: $_logicResults = $this -> logicCreate($_sqlConnection, $_isXHRequest, $_logicResult);	break;
+			case 'delete'	: $_logicResults = $this -> logicDelete($_sqlConnection, $_isXHRequest, $_logicResult);	break;	
 		}
 
 		if(!$_logicResults)
@@ -67,7 +71,10 @@ class	controllerSimpleHeadline extends CController
 	private function
 	logicView(&$_sqlConnection, $_isXHRequest, &$_logicResult)
 	{
-		$this -> m_modelSimple -> load($_sqlConnection,['object_id' => $this -> m_aObject -> object_id]);
+		$modelCondition = new CModelCondition();
+		$modelCondition -> where('object_id', $this -> m_aObject -> object_id);
+
+		$this -> m_modelSimple -> load($_sqlConnection, $modelCondition);
 
 		$this -> setView(	
 						'view',	
@@ -84,7 +91,6 @@ class	controllerSimpleHeadline extends CController
 	private function
 	logicEdit(&$_sqlConnection, $_isXHRequest, &$_logicResult)
 	{
-		$this -> m_modelSimple -> load($_sqlConnection,['object_id' => $this -> m_aObject -> object_id]);
 
 		##	XHR Function call
 
@@ -112,14 +118,19 @@ class	controllerSimpleHeadline extends CController
 
 								if(!$_bValidationErr)
 								{
+									$modelCondition = new CModelCondition();
+									$modelCondition -> where('object_id', $_aFormData['object_id']);
+									
+									$objectId = $_aFormData['object_id'];
+									unset($_aFormData['object_id']);
 
-									if($this -> m_modelSimple -> update($_sqlConnection, $_aFormData))
+									if($this -> m_modelSimple -> update($_sqlConnection,$_aFormData, $modelCondition))
 									{
 										$_bValidationMsg = 'Object updated';
 
 										$this -> m_modelPageObject = new modelPageObject();
 
-										$_objectUpdate['object_id']		=	$_aFormData['object_id'];
+										$_objectUpdate['object_id']			=	$objectId;
 										$_objectUpdate['time_update']		=	time();
 										$_objectUpdate['update_by']			=	0;
 										$_objectUpdate['update_reason']		=	'';
@@ -146,6 +157,11 @@ class	controllerSimpleHeadline extends CController
 
 		}	
 
+		$modelCondition = new CModelCondition();
+		$modelCondition -> where('object_id', $this -> m_aObject -> object_id);
+
+		$this -> m_modelSimple -> load($_sqlConnection, $modelCondition);
+		
 		$this -> setView(	
 						'edit',	
 						'',
@@ -160,7 +176,6 @@ class	controllerSimpleHeadline extends CController
 	private function
 	logicCreate(&$_sqlConnection, $_isXHRequest, &$_logicResult)
 	{
-
 		##	XHR Function call
 
 		if($_isXHRequest !== false && $_isXHRequest === 'cms-insert-module')
@@ -192,16 +207,12 @@ class	controllerSimpleHeadline extends CController
 			}
 
 			tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $_bValidationDta);	// contains exit call
-
 		}	
-
 	}
 	
 	private function
 	logicDelete(&$_sqlConnection, $_isXHRequest, &$_logicResult)
 	{
-		$this -> m_modelSimple -> load($_sqlConnection,['object_id' => $this -> m_aObject -> object_id]);
-
 		##	XHR Function call
 
 		if($_isXHRequest !== false)
@@ -224,8 +235,10 @@ class	controllerSimpleHeadline extends CController
 
 									if(!$_bValidationErr)
 									{
+										$modelCondition = new CModelCondition();
+										$modelCondition -> where('object_id', $_aFormData['object_id']);
 
-										if($this -> m_modelSimple -> delete($_sqlConnection, $_aFormData))
+										if($this -> m_modelSimple -> delete($_sqlConnection, $modelCondition))
 										{
 											$_objectModel  	 = new modelPageObject();
 											$_objectModel	-> delete($_sqlConnection, $_aFormData);
@@ -249,19 +262,10 @@ class	controllerSimpleHeadline extends CController
 			}
 			
 			tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $_bValidationDta);	// contains exit call
-
 		}	
 
 		return false;
-		
 	}
-
-	private function
-	setView(string $_view, string $_moduleTarget,  array $_dataInstances = [])
-	{
-		$this -> m_pView = new CView( CMS_SERVER_ROOT . DIR_CORE . DIR_MODULES . $this -> m_aModule['module_location'].'/view/'. $_view, $_moduleTarget , $_dataInstances );	
-	}
-
 
 }
 

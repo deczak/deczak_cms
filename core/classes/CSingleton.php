@@ -10,6 +10,11 @@ class CSingleton
 		return $instance;
 	}
 
+	public static function GET()
+	{
+		return static::instance();
+	}
+
 	private function __construct()	{}
 	private function __clone() 		{}
 	private function __sleep() 		{}

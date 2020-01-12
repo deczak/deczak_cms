@@ -1,0 +1,59 @@
+
+##	
+
+	MOD_BEUSER_SEC_INDEX_NAME		=	Übersicht
+	MOD_BEUSER_SEC_CREATE_NAME		=	Benutzer erstellen
+
+	MOD_BEUSER_ERR_USERID_UK		=	Dieser Benutzer existiert nicht
+	
+	
+
+
+	M_BEUSER_MSG_ISCREATED		=	Benutzer wurde erstellt
+	M_BEUSER_MSG_ISUPDATED		=	Benutzer wurde aktualisiert
+	M_BEUSER_MSG_ISDELETED		=	Benutzer wurde gelöscht
+
+	M_BEUSER_MSG_USERNAMEEXIST	=	Benutzername existiert bereits
+
+
+
+	M_BEUSER_MSG_PASSNOTEQUAL		=	Die Passwort Felder sind nicht identisch
+
+##	Overview
+
+	MOD_BEUSER_OV_TABLE_USERID		=	User-ID
+	MOD_BEUSER_OV_TABLE_LASTLOGIN	=	Letzte Anmeldung
+	MOD_BEUSER_OV_TABLE_NUMLOGIN	=	Anmeldungen
+
+	
+	
+##	Edit / Create
+
+	MOD_BEUSER_FM_CREATEUSER		=	Benutzer erstellen
+	MOD_BEUSER_FM_USERINFO			=	Benutzer Information
+	MOD_BEUSER_FM_FIRSTNAME			=	Vorname
+	MOD_BEUSER_FM_LASTNAME			=	Nachname
+	MOD_BEUSER_FM_MAILADDRESS		=	eMail Adresse
+	MOD_BEUSER_FM_LOGININFO			=	Anmelde Information
+	MOD_BEUSER_FM_LOGINUSERNAME		=	Benutzername
+	MOD_BEUSER_FM_LOGINPASSWORD		=	Password
+	MOD_BEUSER_FM_LOGINPASSWORD2	=	Password (Wiederholung)
+	MOD_BEUSER_FM_ACCOUNTINFO		=	Konto Information
+	MOD_BEUSER_FM_USERID			=	User-ID
+	MOD_BEUSER_FM_CREATEDAT			=	Erstellt am
+	MOD_BEUSER_FM_LASTLOGIN			=	Letzte Anmeldung
+	MOD_BEUSER_FM_LOGINCOUNT		=	Anmeldungen
+	MOD_BEUSER_FM_USERAUTH			=	Benutzer Authentifizierung
+	MOD_BEUSER_FM_USERRIGHTS		=	Benutzerrechte
+	MOD_BEUSER_FM_RIGTHGROUPS		=	Rechtegruppen
+	MOD_BEUSER_FM_LOCKEDSTATE		=	Konto gesperrt 
+	
+	MOD_BEUSER_FM_BACKENDSTTNGS		= 	Backend Einstellungen
+	
+	MOD_BEUSER_FM_LOCKED_0_NOTLOCKED	=	nicht gesperrt
+	MOD_BEUSER_FM_LOCKED_1_NOTVERIFIED	=	gesperrt (nicht verifiziert)
+	MOD_BEUSER_FM_LOCKED_2_FAILEDLOGIN	=	gesperrt (fehlgeschlagene Anmeldungen)
+	
+	
+	
+	

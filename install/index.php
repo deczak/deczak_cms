@@ -146,7 +146,7 @@
 								TK.callXHR('<?php echo $protocol. $_SERVER['SERVER_NAME'] .''. $sub_path; ?>install/xhr-insert-database-data.php', formData, onXHRInstallDatabaseData, TK.onXHRError, than);
 								break;
 
-					case 5:		// insert datebase initial data
+					case 5:		// create htaccess
 								var	formData = new FormData();
 									formData.append("server-subpath", document.querySelector('input[name="server-sub"]').value);
 									formData.append("database-server", document.querySelector('input[name="database-server"]').value);

@@ -20,9 +20,9 @@ class	CSQLConnect extends CSingleton
 	 * 	@return boolean		Returns boolean true if it was successful, otherwise false
 	 */
 	public function
-	createConnection(array $_dbDataStructure)
+	createConnection()
 	{
-		foreach($_dbDataStructure as $_accessData)
+		foreach(CONFIG::GET() -> MYSQL -> DATABASE as $_accessData)
 		{
 			if(		!is_array($_accessData)
 				||	!isset($_accessData['server'])
@@ -32,7 +32,7 @@ class	CSQLConnect extends CSingleton
 				||	!isset($_accessData['name'])
 			  )
 			{
-				CMessages::instance() -> addMessage(CLanguage::instance() -> getStringExt( ERR_CR_DBPARAMS ), MSG_LOG, '', true);				  
+				CMessages::instance() -> addMessage(CLanguage::instance() -> getStringExt( 'ERR_CR_DBPARAMS' ), MSG_LOG, '', true);				  
 				return false;
 			}
 
@@ -40,8 +40,10 @@ class	CSQLConnect extends CSingleton
 
 			if( $this -> m_aSQLConnections[$_accessData['name']] -> connect_errno )
 			{
-				CMessages::instance() 	-> addMessage(CLanguage::instance() -> getStringExt( ERR_CR_DBFAILED , ['[DBERROR]' => $this -> m_aSQLConnections[$_accessData['name']] -> connect_error] ), MSG_LOG, '', true);
+				CMessages::instance() 	-> addMessage(CLanguage::instance() -> getStringExt( 'ERR_CR_DBFAILED' , ['[DBERROR]' => $this -> m_aSQLConnections[$_accessData['name']] -> connect_error] ), MSG_LOG, '', true);
 				CSysMailer::instance() 	-> sendMail(CLanguage::instance() -> getString('SYSMAIL_DB_FAILED_SUBJ'), CLanguage::instance() -> getStringExt('SYSMAIL_DB_FAILED_SUBJ',['[TIMESTAMP]' => date(TIME_FORMAT_SYSMAIL,time())]), true, 'sql-connection');
+
+				$this -> m_aSQLConnections[$_accessData['name']] = false;
 				return false;
 			}
 			

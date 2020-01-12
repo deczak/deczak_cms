@@ -1,0 +1,61 @@
+
+
+	$import(error)
+	$import(sysmail)
+	$import(page-edit)
+	
+			
+##	Base Strings
+
+
+	MENU				=	Menü
+	SELECT_ALL			=	Alle auswählen
+	TIME_CREATE_AT		=	Erstellt am
+	TIME_UPDATE_AT		=	Bearbeitet am
+	CREATE_BY			=	Erstellt von
+	UPDATE_By			=	Bearbeitet von
+	
+	BUTTON_SAVE			=	Speichern
+	BUTTON_DELETE		=	Löschen
+	BUTTON_EDIT			=	Bearbeiten
+	BUTTON_CREATE		=	Erstellen
+	
+	YES					=	Ja
+	NO					=	Nein
+	
+	INFORMATION			=	Information
+	DESCRIPTION			=	Beschreibung
+	USER				=	Benutzer
+	ADDRESS				= 	Adresse
+	NAME				= 	Name
+	OVERVIEW			= 	Übersicht
+	DELETE				=	Löschen
+	EDIT				=	Bearbeiten
+	VIEW				=	Betrachten
+	SESSION				= 	Session
+	DATE				= 	Datum
+	VISITOR				=	Besucher
+	TIMESTAMP			=	Zeitpunkt
+	PAGE				= 	Seite
+	LANGUAGE			=	Sprache
+	
+	DENIED				= 	Verboten					# eg: Denied / Forbidden IP addresses
+	DENIED2				= 	Verbotene					# eg: Forbidden IP address (single address)
+	CREATE				=	Erstellen
+	ALLOWED				=	Erlaubt
+	ACTIVE				=	Aktiv
+	DEACTIVATED			=	Deaktiviert
+	WARNING				=	Warnung
+
+	USERNAME			=	Benutzername
+	
+##	Messages
+
+	WAIT_FOR_REDIRECT	=	bitte warten für Weiterleitung
+	
+	WAS_DELETED			=	wurde gelöscht
+	WAS_UPDATED			=	wurde aktualisiert
+	
+	IS_UNKNOWN			=	ist unbekannt
+	
+	

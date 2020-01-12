@@ -1,8 +1,9 @@
 
-
-/*
-**	Selector
-*/
+:root
+{
+  --ui-input-padding	: 7px 10px;
+  --ui-input-color-hover: #0066cc;
+}
 
 
 	button { cursor:pointer; background:rgb(242, 242, 242); background:linear-gradient(to bottom, rgb(242, 242, 242), rgb(204, 204, 204)); border:1px solid grey; text-shadow: 0 0 4px rgba(255,255,255,0.8); }
@@ -23,14 +24,14 @@
 	input,
 	textarea,
 	select,
-	button	{ font-size:0.85rem; padding: 7px 10px;}
+	button	{ font-size:0.85em; padding: var(--ui-input-padding); }
 
 
 	input:required,
 	textarea:required,
 	select:required
 	{
-		border-left: 			4px solid #0066cc;
+		border-left: 			4px solid var(--ui-input-color-hover);
 		background-color:		#ffffff;
 	}
 
@@ -40,7 +41,7 @@
 	submit:required:focus
 	{
 		border: 				1px solid #0066cc;
-		border-left: 			4px solid #0066cc;
+		border-left: 			4px solid var(--ui-input-color-hover);
 		background-color:		#ffffff;
 	}
 
@@ -123,12 +124,12 @@
 		position: 				relative;
 		padding-left: 			1.95em;
 		cursor: 				pointer;
-		-webkit-touch-callout:  none; /* iOS Safari */
-		  -webkit-user-select:  none; /* Safari */
-		   -khtml-user-select:  none; /* Konqueror HTML */
-			 -moz-user-select:  none; /* Firefox */
-			  -ms-user-select:  none; /* Internet Explorer/Edge */
-				  user-select:  none; /* Non-prefixed version, currently supported by Chrome and Opera */
+		-webkit-touch-callout:  none;
+		  -webkit-user-select:  none;
+		   -khtml-user-select:  none;
+			 -moz-user-select:  none;
+			  -ms-user-select:  none;
+				  user-select:  none;
 	}
 
 	[type="checkbox"]:not(:checked) + label:before
@@ -277,24 +278,11 @@
 		background-color: 		#ddd;
 	}
 
-	[type="radio"]:disabled:checked + label:after 
-	{
-		color: 					#999;
-	}
+	[type="radio"]:disabled:checked + label:after { color:#999; }
+	[type="radio"]:disabled 		+ label { color:#aaa; }
 
-	[type="radio"]:disabled + label 
-	{
-		color:					#aaa;
-	}
+	[type="radio"]:checked:focus 	+ label:before,
+	[type="radio"]:not(:checked):focus + label:before { border:1px solid #0066cc; }
 
-	[type="radio"]:checked:focus + label:before,
-	[type="radio"]:not(:checked):focus + label:before 
-	{
-		border: 				1px solid #0066cc;
-	}
-
-	label:hover:before
-	{
-		border: 				1px solid #0066cc !important;
-	}
+	label:hover:before { border:1px solid #0066cc !important; }
 

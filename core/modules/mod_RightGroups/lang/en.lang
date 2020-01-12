@@ -22,8 +22,6 @@
 	MOD_RGROUPS_GROUP_NAME				=	Group Name
 	MOD_RGROUPS_GROUP_ASSIGNMENT		=	Group assignments
 		
-	MOD_RGROUPS_EDIT_GROUP				=	Edit Group
-	
 	
 	MOD_RGROUPS_GROUP_INFO				=	Group Information			
 	MOD_RGROUPS_GROUP_RIGHTS			=	Group Rights

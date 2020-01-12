@@ -1,0 +1,45 @@
+
+##	
+	
+	MOD_SITES_SEC_INDEX_NAME			=	Übersicht
+	MOD_SITES_SEC_CREATE_NAME			=	Seite erstellen
+
+	MOD_SITES_ERR_USERID_UK				=	Diese Seite existiert nicht
+	
+	
+	MOD_SITES_MENU						=	Menü
+
+
+##	Overview
+
+	MOD_SITES_OV_TABLE_NODEID			= Node-ID
+	MOD_SITES_OV_TABLE_PAGETITLE		= Title
+	MOD_SITES_OV_TABLE_PAGEURL			= URL
+	MOD_SITES_OV_TABLE_CREATEDAT		= Erstellt am
+	MOD_SITES_OV_TABLE_UPDATEDAT		= Geändert am
+
+	MOD_SITES_OV_TABLE_PAGEEDIT			= Bearbeiten
+	MOD_SITES_OV_TABLE_PAGECREATE		= Unterseite erstellen
+	MOD_SITES_OV_TABLE_PAGEDELETE		= Löschen
+	MOD_SITES_OV_TABLE_PAGEDELETETREE	= Seitenbaum löschen
+
+	MOD_SITES_OV_TABLE_SELECTALL		= Alle auswählen
+	
+
+##	Create
+
+	MOD_SITES_ERR_NOTCREATED			= Neue Seite konnte nicht erstellt werden
+	MOD_SITES_PAGECREATED				= Neue Seite erstellen
+	
+	MOD_SITES_NEWPAGE_NAME				= Unbenannte Seite
+	
+##	Delete
+
+	MOD_SITES_ERR_NOTDELETED			= Seite konnte nicht gelöscht werden
+	MOD_SITES_PAGEDELETED				= Seite gelöscht
+	MOD_SITES_PAGEDELETEDTREE			= Seite und Unterseiten gelöscht
+	
+##	Edit
+
+	
+	

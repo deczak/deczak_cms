@@ -8,24 +8,28 @@ class	CLanguage extends CSingleton
 	private		$m_bInitialized;
 	private		$m_activeLanguage;
 	private		$m_defaultLanguage;
-	private		$m_aSupportedLanguages;
 
 	public function
-	initialize(array $_parameters, string $_activeLanguage)
+	initialize(string $_activeLanguage)
 	{
-		$this -> m_defaultLanguage		= $_parameters['default'];
+		$this -> m_defaultLanguage		= CONFIG::GET() -> LANGUAGE -> DEFAULT;
+
 		$this -> m_activeLanguage		= $_activeLanguage;
-		$this -> m_aSupportedLanguages	= $_parameters['supported'];
-		if(!isset($_parameters['supported'][$_activeLanguage]))
-			$this -> m_activeLanguage = $_parameters['default'];
+		
+		if(!isset(CONFIG::GET() -> LANGUAGE -> SUPPORTED[$_activeLanguage]))
+			$this -> m_activeLanguage = CONFIG::GET() -> LANGUAGE -> DEFAULT;
+
 		$this -> m_bInitialized			= true;
 	}
 
 	public function
 	loadLanguageFile(string $_Filelocation , string $_LanguageKey, array $_compareData = [] )
 	{ 
+
+
 		if( !file_exists( $_Filelocation . $_LanguageKey .'.lang' ) )
 		{
+			
 			if( !file_exists( $_Filelocation . $this -> m_defaultLanguage .'.lang' ) )
 			{
 				return;
@@ -34,6 +38,7 @@ class	CLanguage extends CSingleton
 		}
 		
 		$_aFilepaths[] = $_Filelocation . $_LanguageKey .'.lang';
+
 		
 		for( $i = 0; $i < count($_aFilepaths); $i++)
 		{
@@ -52,6 +57,7 @@ class	CLanguage extends CSingleton
 				$_FileLine = fgets($_pFileHandler);
 
 				
+		
 
 
 				if ($_FileLine === false) 
@@ -109,6 +115,8 @@ class	CLanguage extends CSingleton
 					continue;
 				}
 
+				$fi_aStringData[1] = explode('#', $fi_aStringData[1])[0];
+
 				if(!$_bIgnoreString)
 				$this -> m_aStorage[$_LanguageKey][ trim($fi_aStringData[0]) ] = trim($fi_aStringData[1]);
 			}		
@@ -120,14 +128,68 @@ class	CLanguage extends CSingleton
 	public function
 	getString(string $_StringID, string $_DefaultString = '???')
 	{
+
 		if(empty($this -> m_bInitialized)) return 'not_initialized';
-		if( isset( $this -> m_aStorage[$this -> m_activeLanguage][$_StringID] ) )
+
+		$_StringID = explode(' ', $_StringID);
+
+		$returnValue = '';
+
+		foreach($_StringID as $key => $stringId)
 		{
-			return $this -> m_aStorage[$this -> m_activeLanguage][$_StringID];
+			$stringId = trim($stringId);
+
+			if($key !== 0)
+				$returnValue .= ' ';
+
+			if( isset( $this -> m_aStorage[$this -> m_activeLanguage][$stringId] ) )
+			{
+				
+
+				$returnValue .= $this -> m_aStorage[$this -> m_activeLanguage][$stringId];
+			}
+			else
+			{
+
+				$returnValue .= $_DefaultString;
+			}
 		}
-		  
-		return $_DefaultString;
+		return $returnValue;
 	}	
+
+	public function
+	string(string $_StringID, string $_format = 'regular')
+	{
+		if(empty($this -> m_bInitialized)) return 'not_initialized';
+
+		$_StringID 		= explode(' ', $_StringID);
+		$returnValue 	= '';
+
+		foreach($_StringID as $key => $stringId)
+		{
+			$stringId = trim($stringId);
+
+			if($key !== 0)
+				$returnValue .= ' ';
+
+			if( isset( $this -> m_aStorage[$this -> m_activeLanguage][$stringId] ) )
+			{
+				$returnValue .= $this -> m_aStorage[$this -> m_activeLanguage][$stringId];
+			}
+			else
+			{
+				$returnValue .= '???';
+			}
+		}
+
+		switch($_format)
+		{
+			case 'all_lower': $returnValue = strtolower($returnValue); break;
+			case 'all_upper': $returnValue = strtoupper($returnValue); break;
+		}
+
+		return $returnValue;
+	}
 
 	public function
 	getStringExt(string $_StringID , array $_Replacement = array() )
@@ -145,6 +207,12 @@ class	CLanguage extends CSingleton
 			}	
 		}
 		return '???';
+	}
+
+	public function
+	stringExt(string $_StringID , array $_Replacement = array())
+	{
+		return $this -> getStringExt($_StringID, $_Replacement);
 	}
 
 	public function
@@ -170,11 +238,30 @@ class	CLanguage extends CSingleton
 	public function
 	setActiveLanguage(string $_activeLanguage)
 	{
-		if(empty($this -> m_bInitialized)) return false;
-		if(!isset($this -> m_aSupportedLanguages[$_activeLanguage]))
-			$this -> m_activeLanguage = $this -> m_defaultLanguage;	
+		if(empty($this -> m_bInitialized))
+			return false;
+
+		if(!CMS_BACKEND)
+		{
+			if(!isset(CONFIG::GET() -> LANGUAGE -> SUPPORTED[$_activeLanguage]))
+
+				$this -> m_activeLanguage = $this -> m_defaultLanguage;	
+
+			else
+
+				$this -> m_activeLanguage = $_activeLanguage;
+		}
 		else
-			$this -> m_activeLanguage = $_activeLanguage;
+		{
+			if(!isset(CONFIG::GET() -> LANGUAGE -> BACKEND[$_activeLanguage]))
+
+				$this -> m_activeLanguage = 'en';	
+
+			else
+
+				$this -> m_activeLanguage = $_activeLanguage;
+		}
+
 		return $this -> m_activeLanguage;
 	}	
 }

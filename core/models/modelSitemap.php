@@ -15,17 +15,17 @@ class 	modelSitemap extends CModel
 	}	
 				
 	public function
-	load(&$_sqlConnection, string $_language)
+	load(&$_sqlConnection, CModelCondition $_condition = NULL)
 	{
 		$_mainpageNodeID = 1;
+
+		$_condition -> where('page_path', $_sqlConnection -> real_escape_string('/'));
 
 		##	Get node_id for language defined start page
 
 		$_sqlString =	"	SELECT 		tb_page_path.node_id
 							FROM 		tb_page_path
-							WHERE 		tb_page_path.page_path 		= '". $_sqlConnection -> real_escape_string('/') ."'
-							AND 		tb_page_path.page_language 	= '". $_sqlConnection -> real_escape_string($_language) ."'
-						";
+						".	($_condition != NULL ? $_condition -> getConditions($_sqlConnection, $_condition) : '');
 
 		$_sqlNodeRes = $_sqlConnection -> query($_sqlString);
 
@@ -34,7 +34,6 @@ class 	modelSitemap extends CModel
 			$_sqlNode 			= $_sqlNodeRes -> fetch_assoc();
 			$_mainpageNodeID 	= $_sqlNode['node_id'];
 		}
-
 
 		##	Get node and children
 
@@ -46,8 +45,10 @@ class 	modelSitemap extends CModel
 										tb_page_header.page_title,
 										tb_page_header.page_name,
 										tb_page_header.page_version,
-										tb_page.time_create,
-										tb_page.time_update
+										tb_page.create_time,
+										tb_page.update_time,
+										tb_page.hidden_state,
+										tb_page.menu_follow
 							FROM 		tb_page_path AS n,
 										tb_page_path AS p,
 										tb_page_path AS o
@@ -61,7 +62,7 @@ class 	modelSitemap extends CModel
 							GROUP BY	o.node_lft
 							ORDER BY 	o.node_lft
 						";
-
+			
 		$_sqlNodeRes = $_sqlConnection -> query($_sqlString) or die($_sqlConnection -> error);
 
 		if($_sqlNodeRes === false || !$_sqlNodeRes -> num_rows)
@@ -88,6 +89,8 @@ class 	modelSitemap extends CModel
 			$_page['alternate_path'] = $this -> getAlternatePaths($_sqlConnection, $_page['page_id']);
 			$this -> m_storage[] = new $_className($_page, $this -> m_shemeSitemap -> getColumns());
 		}	
+
+		return true;
 	}
 
 	private function

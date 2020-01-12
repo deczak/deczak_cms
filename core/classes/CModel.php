@@ -3,18 +3,25 @@
 class	CModel
 {
 	protected	$m_storage;
-	protected	$m_additionalProperties;
-	protected	$m_tableRelations;
+	protected	$m_additionalProperties;		// deprecated
+	protected	$m_tableRelations;				// deprecated
+
+	protected	$m_className;
+	protected	$m_sheme;
 
 	public function
-	__construct()
+	__construct(string $_className = '')
 	{
-		$this -> m_storage 				= NULL;
-		$this -> m_additionalProperties = [];
-		$this -> m_tableRelations		= [];
+		$this -> m_storage 				= [];
+
+		$this -> m_additionalProperties = [];			// deprecated
+		$this -> m_tableRelations		= [];			// deprecated
+
+		$this -> m_className			= $_className;
 	}
 		
-	protected function
+	#protected function ( temporär wegen backend handling)
+	public function
 	createClass(&$_targetSheme, string $_nameAppendix = '', string $_parentClass = '', array $_additionalProperties = [])
 	{
 		$_className = __CLASS__.'_data'.(!empty($_nameAppendix) ? '_'.$_nameAppendix : '');
@@ -166,25 +173,51 @@ class	CModel
 										];
 	}
 
-/*
-	protected function
-	_includeDataByComparsion(&$_dataInstance, $_includeDataInstance = NULL, string $_includeOn = '', array $_includeValues = [])
+	public function
+	searchValue($_needle, string $_searchColumn, string $_returnColumn)
 	{
-		if($_includeDataInstance != NULL && !empty($_includeOn))
+		foreach($this -> m_storage as $_model)
 		{
-			foreach($_includeDataInstance as $_includeData)
-			{								
-				if($_dataInstance -> $_includeOn === $_includeData -> $_includeOn)
-				{
-					foreach($_includeValues as $_value)
-					{
-						$_dataInstance -> $_value = $_includeData -> $_value;
-					}
-				}
-			}
+			if($_model -> $_searchColumn === $_needle) return $_model -> $_returnColumn;
 		}
-	}
-*/
+		return NULL;
+	}	
+
+	public function
+	isUnique(&$_sqlConnection, array $_where, array $_whereNot = [])
+	{
+		$tableName	=	$this -> m_sheme -> getTableName();
+
+		if(count($_where) === 0)
+			return false;
+
+		$_sqlWhere = [];
+		foreach($_where as $_whereKey => $_whereColumn)
+			$_sqlWhere[] = " `$_whereKey` = '". $_sqlConnection -> real_escape_string($_whereColumn) . "' ";
+		
+		$_sqlWhereNot = [];
+		foreach($_whereNot as $_whereKey => $_whereColumn)
+			$_sqlWhereNot[] = " `$_whereKey` != '". $_sqlConnection -> real_escape_string($_whereColumn) . "' ";
+		
+		$sqlString	=	"	SELECT		`data_id` 
+							FROM		`$tableName`
+						";
+
+		if(count($_sqlWhere) !== 0)
+			$sqlString	.=	" WHERE ". implode(' AND ', $_sqlWhere);
+
+		if(count($_sqlWhereNot) !== 0)
+			$sqlString	.=	" AND ". implode(' AND ', $_sqlWhereNot);
+
+		$sqlResult	=	$_sqlConnection -> query($sqlString);
+
+		if($sqlResult -> num_rows === 0)
+			return true;
+		
+		return false;
+	}	
+
+
 }
 
 ?>

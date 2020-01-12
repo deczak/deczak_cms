@@ -51,6 +51,13 @@ class	cmsTextEditor
 		document.execCommand("defaultParagraphSeparator", false, "p");
 	}
 
+	createOnDestNode(node)
+	{
+		var	targetElement = node.querySelector('.'+ this.className);
+		if(targetElement != null)		
+			this.replace(targetElement);
+	}
+
 	editorExists(targetElement)
 	{
 		var childNodes = targetElement.childNodes

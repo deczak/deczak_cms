@@ -1,0 +1,30 @@
+
+##	Error Messages for Core Functions
+
+##	instance.php
+
+	ERR_CR_LOGINDTAMM	= The login information are not complete
+
+##	CSQLConnect.php
+
+	ERR_CR_DBPARAMS		= Required parameters for connection establishment not valid
+	ERR_CR_DBFAILED		= Database connection error: [DBERROR]
+
+##	CLogin.php
+
+	ERR_CR_LOGIN_1		= No valid login objects on initializing
+	ERR_CR_LOGIN_2		= Login object does not exists
+	ERR_CR_LOGIN_3		= Requested field name does not exists on transmitted form data
+	ERR_CR_LOGIN_4		= Class not initialized
+	ERR_CR_LOGIN_5		= Login failed on locked account due to login fail limit reached
+	ERR_CR_LOGIN_6		= Login failed on not verified mail address
+	ERR_CR_LOGIN_7		= Login failed on unclear account state
+	ERR_CR_LOGIN_8		= Login failed on locked account by adminitrator
+	ERR_CR_LOGIN_9		= Missing parameters on initializing
+	
+
+##	Controllers
+
+	ERR_PERMISSON		= You do not have sufficient permissions
+	ERR_SQL_ERROR		= Unknown error on sql query
+	ERR_VALIDATIONFAIL	= Data validation failed

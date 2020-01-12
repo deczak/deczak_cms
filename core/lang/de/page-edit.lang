@@ -1,0 +1,55 @@
+
+	
+
+
+	BEPE_PANEL_MSG_PAGENAME			=	Sie müssen einen gültigen Seitennamen angeben.
+	BEPE_PANEL_MSG_PAGETITLE		=	Sie müssen einen gültigen Title angeben.
+	BEPE_PANEL_MSG_PAGETEMPLATE		=	Sie müssen einen gültiges Template angeben.
+	BEPE_PANEL_MSG_ALTLANGEVEN		=	Eine Seite gleicher Sprache kann nicht als Alternative Seite angegeben werden.
+	
+	BEPE_PANEL_BACKLINK				=	Zurück zur Übersicht
+
+	BEPE_PANEL_GROUP_INFORMATION	=	&nbsp;
+	BEPE_PANEL_GROUP_NAME			=	Name & Beschreibung
+	BEPE_PANEL_GROUP_TEMPLATE		=	Template
+	BEPE_PANEL_GROUP_VISIBILTY		=	Sichbarkeit & Zugriff
+	BEPE_PANEL_GROUP_EXTSETTINGS	= 	Extended Settings
+	BEPE_PANEL_GROUP_SEARCHMACHINE	= 	Suchmaschinen Einstellungen
+	BEPE_PANEL_GROUP_ALTLANG		= 	Alternative Sprachen
+
+	BEPE_PANEL_NODEID				=	Node-ID
+	BEPE_PANEL_PAGEID				=	Page-ID
+	BEPE_PANEL_LANGUAGE				=	Sprache
+
+	BEPE_PANEL_PAGENAME				=	Seitenname
+	BEPE_PANEL_PAGETITLE			=	Seitentitle
+	BEPE_PANEL_PAGEDESCRIPTION		=	Seitenbeschreibung
+	BEPE_PANEL_BROWSERCACHING		=	Browser Caching
+
+	BEPE_PANEL_HIDDEN_0_VISIBLE		=	Sichtbar
+	BEPE_PANEL_HIDDEN_1_LOCKED		=	Gesperrt für alle (Hinweis)
+	BEPE_PANEL_HIDDEN_4_LOCKED		=	Gesperrt für alle (404)
+	BEPE_PANEL_HIDDEN_2_HIDDEN		=	In Menüs ausblenden
+	BEPE_PANEL_HIDDEN_3_REGISTERED	=	Sichtbar für angemeldete
+
+	BEPE_PANEL_CACHING_0_ENABLED	=	Aktiviert
+	BEPE_PANEL_CACHING_1_DISABLED	=	Deaktiviert
+
+	BEPE_PANEL_CRAWLER_1_INDEX		=	Indexieren
+	BEPE_PANEL_CRAWLER_0_NOINDEX	=	Nicht indexieren
+
+	BEPE_PANEL_CRAWLER_1_FOLLOW		=	Links folgen
+	BEPE_PANEL_CRAWLER_0_NOFOLLOW	=	Links nicht folgen
+
+	BEPE_PANEL_CRAWLER_1_MENUFOLLOW		=	Folge link zu dieser Seite
+	BEPE_PANEL_CRAWLER_0_MENUNOFOLLOW	=	Folge nicht link zu dieser Seite
+
+	BEPE_PANEL_NOALTLANGEXIST		=	Keine alternativen Sprachen vorhanden
+
+	BEPE_PANEL_ALTLANGNODEID		=	Seite verknüpfen mit Ziel Seiten-ID
+
+
+
+
+
+

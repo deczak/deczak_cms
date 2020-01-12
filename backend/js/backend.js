@@ -1,5 +1,12 @@
 (function() {
 	
+
+	var	pUiSelect = new cmsUiSelect();
+		pUiSelect.init();
+		pUiSelect.create();
+
+
+
 /**
  *	Functions for edit and create forms
  */
@@ -77,7 +84,11 @@
 		for(var i = 0; i < fieldset.elements.length; i++)
 		{
 			var field = fieldset.elements[i];
-			if(!field.name || field.disabled || field.type === 'file' || field.type === 'reset' || field.type === 'submit' || field.type === 'button' || (field.type === 'checkbox' && !field.checked)) continue;
+			if(!field.name || field.disabled || field.type === 'file' || field.type === 'reset' || field.type === 'submit' || field.type === 'button' || (field.type === 'checkbox' && !field.checked) || (field.type === 'radio' && !field.checked)) continue;
+
+			//	console.log(field.type);
+			//	console.log(field.name +' = '+ field.value);
+
 			formData.append(field.name, field.value);
 		}
 		return formData;
@@ -128,62 +139,3 @@
 
 }());
 
-/*
-               function
-
-                callXHR(requestURL, formData, callbackSuccess, callbackError)
-
-                {
-
-                    var xhRequest = new XMLHttpRequest();
-
-                    xhRequest.open('POST', requestURL);
-
-                    xhRequest.responseType = 'json';
-
-                    xhRequest.onerror   = function ()
-
-                    {
-
-                        // Event wird nicht bei Server Rückmeldungen gefeuert (z.B. 404 und 500)
-
-                    };
-
-                    xhRequest.onloadend = function()
-
-                    {
-
-                        if(this.status === 200)
-
-                        {
-
-                            callbackSuccess(xhRequest.response);
-
-                        }
-
-                        else
-
-                        {
-
-                            callbackError(this);
-
-                        }
-
-                    }
-
-                    xhRequest.send(formData);
-
-                }
-
- 
-
-                function
-
-                onXHRError(instance)
-
-                {
-
-                    console.log('XHR Fehler '+ instance.status +' bei Zugriff auf '+ instance.responseURL);
-
-                }
-*/

@@ -12,10 +12,13 @@
 		pObjectTools.init(CMS.SERVER_URL_BACKEND + CMS.PAGE_PATH + CMS.MODULE_TARGET);
 		pObjectTools.create();
 
-	var	pModuleManager = new cmsModuleManager();
-		pModuleManager.init('cms-edit-content-container', MODULES, {pEditorText, pEditorHeadline, pObjectTools});
-		pModuleManager.create();
+	var	pEditorCode = new cmsCodeEditor();	
+		pEditorCode.init('editor-simple-code', 'simple-text');
+		pEditorCode.create();
 
+	var	pModuleManager = new cmsModuleManager();
+		pModuleManager.init('cms-edit-content-container', MODULES, {pEditorText, pEditorHeadline, pEditorCode, pObjectTools});
+		pModuleManager.create();
 
 
 
@@ -63,7 +66,7 @@
 		var	formData 		= collectAllFields(panelContainer);
 			formData.append('cms-xhrequest',panelContainer.getAttribute('data-xhr-target'));
 
-		var	requestTarget	= CMS.SERVER_URL_BACKEND + CMS.PAGE_PATH + CMS.MODULE_TARGET;
+		var	requestTarget	= CMS.SERVER_URL_BACKEND + 'pages/' + panelContainer.getAttribute('data-xhr-overwrite-target');
 
 		xhr = new XMLHttpRequest();
 		xhr.open('POST', requestTarget, true);
@@ -79,12 +82,57 @@
 								setTimeout(function(){ window.location.replace(jsonObject.data.redirect); }, 2000);
 							}		
 												
-							if(typeof resultBox != 'undefined')
-							{
-								resultBox.innerHTML = jsonObject.msg;
-								resultBox.setAttribute('data-error',jsonObject.state);
-							}	
+						//	if(typeof resultBox != 'undefined')
+						//	{
+						//		resultBox.innerHTML = jsonObject.msg;
+						//		resultBox.setAttribute('data-error', 1);
+						//	}	
+
+
+
+/*
+						let numFields 	= Object.keys(response.data).length;
+
+						for(let i = 0; i < numObjects; i++)
+						{
+
+
+						}
+*/
+
+
+panelContainer.querySelectorAll('.result-box').forEach( function(element, key, nodeList) { 
+
+	element.innerHTML = '';
+	element.setAttribute('data-error', '');
+
+  });
+
+$pageIdError = false;
+for(var key in jsonObject.data) {
+    
+
+	
+		var resultBox 		= panelContainer.querySelector('.result-box[data-field="'+ key +'"]');
+
+								resultBox.innerHTML = jsonObject.data[key];
+								resultBox.setAttribute('data-error', 1);
+
+	if(key == 'page_id')
+	$pageIdError = true;
+
+}
+
+if(!$pageIdError)
+{
+							let altPageId = document.getElementById('alt_page_id').value;
+
+							if(altPageId != '')
+								window.updateAlternateList(altPageId);
+}
 				
+
+							document.getElementById('alt_page_id').value = "";
 					
 					 		break;
 					

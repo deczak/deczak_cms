@@ -52,10 +52,15 @@ class TK
 		return 'rgba('+ cssRGBA.join(', ') +')';
 	}
 
+	static
+	ucfirst(string)
+	{
+		return string.charAt(0).toUpperCase() + string.slice(1)
+	}
 
 	static
 	callXHR(requestURL, formData, callbackSuccess, callbackError, xhrCallInstance)
-	{
+	{		
 		var xhRequest = new XMLHttpRequest();
 
 		xhRequest.open('POST', requestURL);
@@ -83,5 +88,35 @@ class TK
 	{
 		console.log('XHR error '+ xhrInstance.status +' when accessing '+ xhrInstance.responseURL);
 	}
+
+	static
+	formatDate(unixTimestamp, format)
+	{
+		let date 	= new Date(unixTimestamp * 1000);
+
+		var result	= format;
+
+		// Day
+
+		result	= result.replace(/d/g, date.getDate().toString().padStart(2, '0'));
+
+		//	Month
+
+		let	month 	= date.getMonth() + 1;
+		result	= result.replace(/m/g, month.toString().padStart(2, '0'));
+
+		// Year
+
+		result	= result.replace(/Y/g, date.getFullYear().toString());
+
+		// Time
+
+		result	= result.replace(/H/g, date.getHours().toString().padStart(2, '0'));
+		result	= result.replace(/i/g, date.getMinutes().toString().padStart(2, '0'));
+		result	= result.replace(/s/g, date.getSeconds().toString().padStart(2, '0'));
+
+		return result;
+	}
+
 
 }

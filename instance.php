@@ -4,8 +4,8 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 
 ##  I N C L U D E   C O F I G U R A T I O N   F I L E S
 
-	require_once    'config/standard.php';
 	require_once    'config/directories.php';
+	require_once    'config/standard.php';
 
 ##	B E N C H M A R K
 
@@ -24,6 +24,8 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 	
 	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CView.php';
 	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CModel.php';
+	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CModelCondition.php';
+	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CModelComplementary.php';
 	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CController.php';
 	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CSheme.php';
 
@@ -31,6 +33,8 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CURLVariables.php';
 	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CMessages.php';
 	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CSysMailer.php';
+	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CHTAccess.php';
+	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CXMLSitemap.php';
 	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CSession.php';
 	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CCookie.php';
 	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CLogin.php';
@@ -40,6 +44,7 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CModules.php';
 	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CHTML.php';
 	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CTemplate.php';
+	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CPageRequest.php';
 
 	CBenchmark::instance() -> measurementPoint('initialize and execute system classes');	
 
@@ -57,7 +62,7 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 	//	Sends a mail message to a defined address for important messages
 
 	$_pSysMailer	 =	CSysMailer::instance();
-	$_pSysMailer	->	initialize(CFG::SYSMAIL,'System Message - ');
+	$_pSysMailer	->	initialize();
 
 ##	L A N G U A G E   S Y S T E M   /   I N I T I A L   F I L E S
 
@@ -65,8 +70,8 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 	// 	Loads and manage language files
 
 	$_pLanguage		 = 	CLanguage::instance();		
-	$_pLanguage		-> 	initialize(CFG::LANGUAGE, CFG::LANGUAGE['default']);		
-	$_pLanguage		->	loadLanguageFile(CMS_SERVER_ROOT.DIR_CORE.DIR_LANGUAGES.CFG::LANGUAGE['default'] .'/', CFG::LANGUAGE['default'] );
+	$_pLanguage		-> 	initialize(CONFIG::GET() -> LANGUAGE -> DEFAULT);		
+	$_pLanguage		->	loadLanguageFile(CMS_SERVER_ROOT.DIR_CORE.DIR_LANGUAGES.CONFIG::GET() -> LANGUAGE -> DEFAULT .'/', CONFIG::GET() -> LANGUAGE -> DEFAULT );
 
 ##  S Q L   C O N N E C T I O N
 
@@ -74,10 +79,9 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 
 	$_pSQLObject 	 =	CSQLConnect::instance();
 	$_pSQLObject 	->	initialize();
-	if(!$_pSQLObject-> 	createConnection(CFG::MYSQL))
-	{
-		// nothing atm
-		echo 'db connect error';
+	if(!$_pSQLObject-> 	createConnection())
+	{	##	create connection failed
+		CPageRequest::instance() -> setResponseCode(920);
 	}	
 
 ##	C O O K I E   M A N A G E R
@@ -86,22 +90,14 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 	// 	Set and get Cookie Data
 
 	$_pCookies		 =	CCookie::instance();
-	$_pCookies 		->	initialize(CFG::COOKIES);
-
-##	S E S S I O N   S Y S T E M
-
-	//	CSession is a singleton class
-	// 	Session System without session cookies at the beginning
-
-	$_pSession		 = 	CSession::instance();		
-	$_pSession		->	updateSession();			
-
+	$_pCookies 		->	initialize();
+		
 ##	U R L   V A R I A B L E S   /   I N I T I A L   R E Q U E S T
 
 	$_pURLVariables	 =	new CURLVariables();
 
-	$_request[] 	 = 	[	"input" => "lang", 		  	 	"validate" => "strip_tags|strip_whitespaces|lowercase|!empty",          "use_default" => true, "default_value" => CFG::LANGUAGE['default'] ]; // language key
-	$_request[] 	 = 	[	"input" => "cms-node",  		"validate" => "strip_tags|strip_whitespaces|lowercase|is_digit|!empty", "use_default" => true, "default_value" => 2     ]; // node_id
+	$_request[] 	 = 	[	"input" => "cms-lang", 		  	 	"validate" => "strip_tags|strip_whitespaces|lowercase|!empty",          "use_default" => true, "default_value" => CONFIG::GET() -> LANGUAGE -> DEFAULT ]; // language key
+	$_request[] 	 = 	[	"input" => "cms-node",  		"validate" => "strip_tags|strip_whitespaces|lowercase|is_digit|!empty", "use_default" => true, "default_value" => false     ]; // node_id
 	$_request[] 	 = 	[	"input" => "cms-ctrl-action",	"validate" => "strip_tags|strip_whitespaces|lowercase|!empty", 			"use_default" => true, "default_value" => []	]; // requested controller action
 	$_pURLVariables -> retrieve($_request, true, false); // GET
 
@@ -116,59 +112,79 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 
 	$_rcaTarget		 =	$_pURLVariables -> getValue("cms-ctrl-action");
 
+##	S E S S I O N   S Y S T E M
+
+	//	CSession is a singleton class
+	// 	Session System without session cookies at the beginning
+
+	$_pSession		 = 	CSession::instance();		
+	$_pSession		->	updateSession(intval($_pURLVariables -> getValue("cms-node")), $_pURLVariables -> getValue("cms-lang"));	
+
+##	Requested initial script action
+
 	switch($_pURLVariables -> getValue("cms-risa"))
 	{
 		case 'login':	## User login #################################################################################################################
 
-						$_pLoginVariables	 =	new CURLVariables();
-						$_aLoginReqStruct[]  = 	[	"input" => "username", "validate" => "strip_tags|!empty" ];
-						$_aLoginReqStruct[]  = 	[	"input" => "password", "validate" => "strip_tags|!empty" ];
-						if($_pLoginVariables -> retrieve($_aLoginReqStruct, false, true, true))
-						{	##	Login process
-							$_pLogin		 =	new CLogin(CFG::LOGIN);
-							if( $_pLogin ->	login($_pURLVariables -> getValue("cms-tlon"), $_pLoginVariables -> getArray()) )
-							{
-								$_rcaTarget[$_pURLVariables -> getValue("cms-oid")] = 'loginSuccess';				
-							}
+						$_pLogin		 =	new CLogin();
+						if( $_pLogin ->	login($_pSQLObject -> getConnection(CONFIG::GET() -> MYSQL -> PRIMARY_DATABASE), $_pURLVariables -> getValue("cms-tlon")) )
+						{
+							$_rcaTarget[$_pURLVariables -> getValue("cms-oid")] = 'loginSuccess';				
 						}
 						else
 						{	##	Missing data for login
+					
 							$_pMessages -> 	addMessage( $_pLanguage -> getString('ERR_CR_LOGINDTAMM') , MSG_WARNING, '', true);							
 						}
 						break;
 
 		case 'logout':	## User logout ################################################################################################################
 
-						$_pLogin	 =	new CLogin(CFG::LOGIN);
-						$_pLogin 	->	logout($_pURLVariables -> getValue("cms-tlon"));
+						$_pLogin	 =	new CLogin();
+						$_pLogin 	->	logout($_pSQLObject -> getConnection(CONFIG::GET() -> MYSQL -> PRIMARY_DATABASE), $_pURLVariables -> getValue("cms-tlon"));
 						break;
 	}
 
 ##	L A N G U A G E   S Y S T E M   /   S E T   R E Q   L A N G
 
-	$_pLanguage		-> 	setActiveLanguage($_pURLVariables -> getValue("lang"));		
+	$activeLanguage = $_pURLVariables -> getValue("cms-lang");
+
+	if(CMS_BACKEND && CSession::instance() -> getValue('language') !== NULL)
+		$activeLanguage  = CSession::instance() -> getValue('language');
+
+	if(CMS_BACKEND && $activeLanguage !== NULL && CONFIG::GET() -> LANGUAGE -> DEFAULT !== $activeLanguage)
+		$_pLanguage		-> loadLanguageFile(CMS_SERVER_ROOT.DIR_CORE.DIR_LANGUAGES.$activeLanguage .'/', $activeLanguage );
+
+	$_pLanguage		-> 	setActiveLanguage($activeLanguage);		
 
 ##	M O D U L E S   L O A D E R	
 
 	CBenchmark::instance() -> measurementPoint('module loader');	
 
 	$_pModules		 =	CModules::instance();
-	$_pModules		->	loadModules();
+	$_pModules		->	init($_pSQLObject -> getConnection(CONFIG::GET() -> MYSQL -> PRIMARY_DATABASE));
 
 ##	I M P E R A T O R
 
 	CBenchmark::instance() -> measurementPoint('call imperator');	
 
-	$_pageRequest	 =	[
-							"node_id"			=>	$_pURLVariables -> getValue("cms-node"),
-							"page_language"		=>	$_pLanguage		-> getActiveLanguage(),
-							"page_language_def"	=>	CFG::LANG_DEFAULT,
-							"page_version"		=>	$_pURLVariables -> getValue("version"),
-							"xhrequest"			=>	$_pURLVariables -> getValue("cms-xhrequest")
-						];		
-						
-	$_pImperator	 =	new CImperator( $_pSQLObject -> getConnection(CFG::MYSQL_PRMY) );
-	$_pImperator	->	logic( $_pageRequest , $_pModules, $_rcaTarget, CMS_BACKEND);
+	$_pPageRequest 	 = 	CPageRequest::instance();
+	$_pPageRequest 	-> 	init(
+							$_pSQLObject 		-> getConnection(CONFIG::GET() -> MYSQL -> PRIMARY_DATABASE),
+							$_pURLVariables 	-> getValue("cms-node"),
+							$_pLanguage			-> getActiveLanguage(),
+							$_pURLVariables 	-> getValue("version"),
+							$_pURLVariables 	-> getValue("cms-xhrequest")
+							);
+
+
+
+#	$_pPageRequest 	-> 	pageLanguage		= $_pLanguage		-> getActiveLanguage();
+	#$_pPageRequest 	-> 	pageLanguageDefault	= CONFIG::GET() -> LANGUAGE -> DEFAULT;
+#	$_pPageRequest 	-> 	pageVersion			= $_pURLVariables -> getValue("version");
+					
+	$_pImperator	 =	new CImperator( $_pSQLObject -> getConnection(CONFIG::GET() -> MYSQL -> PRIMARY_DATABASE) );
+	$_pImperator	->	logic($_pSQLObject -> getConnection(CONFIG::GET() -> MYSQL -> PRIMARY_DATABASE), $_pPageRequest , $_pModules, $_rcaTarget, CMS_BACKEND);
 
 ##	H T M L   D O C U M E N T
 
@@ -178,12 +194,18 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 
 ##	V I E W 
 
-	$_pHTML -> openDocument($_pImperator -> m_page, $_pImperator, $_pageRequest);
+	$_pHTML -> openDocument($_pImperator -> m_page, $_pImperator, $_pPageRequest);
 
 
 #	$_pHTAccess  = new CHTAccess();
 #	$_pHTAccess -> generatePart4Backend();
-#	$_pHTAccess -> generatePart4Frontend($_pSQLObject -> getConnection(CFG::MYSQL_PRMY));
+#	$_pHTAccess -> generatePart4Frontend($_pSQLObject -> getConnection(CONFIG::GET() -> MYSQL -> PRIMARY_DATABASE));
+#	$_pHTAccess -> generatePart4DeniedAddress($_pSQLObject -> getConnection(CONFIG::GET() -> MYSQL -> PRIMARY_DATABASE));
 #	$_pHTAccess -> writeHTAccess();
+
+
+	#$sitemap  	 = new CXMLSitemap();
+	#$sitemap  	-> generate($_pSQLObject -> getConnection(CONFIG::GET() -> MYSQL -> PRIMARY_DATABASE));
+
 
 ?>

@@ -1,0 +1,7 @@
+ 
+	M_BESESSION_USERAGENT			=	User Agent
+	M_BESESSION_SESSIONID			=	Session-ID
+	M_BESESSION_VISITEDPAGES		=	Besuchte Seiten
+	M_BESESSION_ACTIVEPAGE			= 	Aktive Seite
+	M_BESESSION_REFERRER			= 	Referrer
+	M_BESESSION_HISTORY				= 	Zugriffs Verlauf

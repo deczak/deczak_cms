@@ -2,128 +2,126 @@
 
 require_once 'CBasic.php';
 
+require_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelLoginObjects.php';
+
 class	CLogin extends CBasic
 {
-	private	$m_bInitialized;
-	private	$m_iFailLimit;
-	private $m_iFailTime;
 
 	public 	function
-	__construct(array $_parameters)
+	__construct()
 	{
-		$this -> m_bInitialized = false;
-		$this -> m_aStorage		= [];
-
-		if(empty($_parameters['fail_limit']))
-		{
-			$this -> setError('ERR_9');
-			return;
-		}
-
-		$this -> m_iFailLimit		= $_parameters['fail_limit'];
-
-		foreach($_parameters['objects'] as $_loginKey => $_loginObject)
-		{
-			if(		!is_array($_loginObject)
-				||	empty($_loginObject['ob_name'])
-				||	empty($_loginObject['table'])
-				||	!is_array($_loginObject['db_name'])
-				||	count($_loginObject['db_name']) == 0
-				||	!is_array($_loginObject['columns'])
-				||	count($_loginObject['columns']) == 0
-				||	!is_array($_loginObject['columns'])
-				||	count($_loginObject['columns']) == 0
-			  )
-			{
-			}
-			$this -> m_aStorage[ $_loginObject['ob_name'] ] = $_loginObject;
-		}
-
-		if(count($this -> m_aStorage) != 0)
-		{
-			$this -> m_bInitialized = true;
-			$this -> setError('ERR_0');
-		}
-		else
-		{
-			$this -> setError('ERR_1');
-		}
 	}
 
 	public	function
-	login(string $_loginObjectName, array $_formData)
+	login(&$_sqlConnection, string $_loginObjectName)
 	{
-	
-		if(!$this -> m_bInitialized)
-		{	##	Class not initialized
-			$this -> setError('ERR_4');
+
+
+			$modelCondition = new CModelCondition();
+			$modelCondition -> where('object_id', $_loginObjectName);
+			
+
+		## get login objects
+		$_pModelLoginObjects	 =	new modelLoginObjects();
+		$_pModelLoginObjects	->	load($_sqlConnection, $modelCondition);	
+
+		$_loginObjects			 = 	$_pModelLoginObjects -> getDataInstance();
+
+		## check if requested login object exists 
+
+		// TODO :: just count it and if 1 then = *[0]
+
+		$_foundObject = false;
+		foreach($_loginObjects as $_objectIndex => $_object)
+		{
+			if($_object -> object_id === $_loginObjectName)
+			{
+				$_loginObject = &$_loginObjects[$_objectIndex];
+				$_foundObject = true;
+				break;
+			}
+		}	
+
+		if(!$_foundObject)
+		{
+			$this -> setError('ERR_CR_LOGIN_2');
 			return false;
 		}
 
-
-		if(!isset($this -> m_aStorage[$_loginObjectName]))
-		{	##	Login object unknown
-			$this -> setError('ERR_2');
-			return false;
-		}
+		## get Session instance and check login fails count
+		$_pSession		 	= CSession::instance();
+		$_loginFailCount	= $_pSession -> getValue('login_fail_count');
 
 
-		$_pSession		 = 	CSession::instance();
-		$_loginFailCount	= $_pSession -> getSessionValue('LOGIN_FAIL_COUNT');
-
-
-		if($_loginFailCount > $this -> m_iFailLimit)
+		if($_loginFailCount > CONFIG::GET() -> LOGIN -> FAIL_LIMIT)
 		{	##	Login limit reached
-			$this -> setError('ERR_5');
+			$this -> setError('ERR_CR_LOGIN_5');
 			return false;
 		}
 
-		$_loginObject 	= &$this -> m_aStorage[$_loginObjectName];
 		$_bLoginResult	= false;
 		$_columnsValue	= [];
 		$_cryptUsername	= [];
+		
+		$_loginObject -> object_fields = json_decode($_loginObject -> object_fields);
 
+		## retrieve form data
+		$_pLoginVariables	 =	new CURLVariables();
 
-		foreach($_loginObject['columns'] as $_column)
+		foreach($_loginObject -> object_fields as $_field)
 		{
+			$_aLoginReqStruct[]  = 	[	"input" => $_field -> name, "validate" => "strip_tags|!empty" ];
+		}
 
-			if(empty($_formData[ $_column['field'] ]))
+		if(!$_pLoginVariables -> retrieve($_aLoginReqStruct, false, true, true))
+		{	## one or more fields failed on validation
+			return false;
+		}
+
+		$_formData		 = $_pLoginVariables ->getArray();
+
+		## data proc for field data
+		foreach($_loginObject -> object_fields as $_field)
+		{
+			if(empty($_formData[ $_field -> name ]))
 			{
-				$this -> setError('ERR_3');
+				$this -> setError('ERR_CR_LOGIN_3');
 				return $_bLoginResult;
 			}
 
-			switch($_column['data_prc'])
+			switch($_field -> data_prc)
 			{
 				case 'plain':	##	No kind of processing
-								$_generatedValue = $_formData[ $_column['field'] ];						
+								$_generatedValue = $_formData[ $_field -> name ];						
 								break;
 
 				case 'crypt':	##	Encrypt form data for validation
-								$_generatedValue = CRYPT::LOGIN_HASH($_formData[ $_column['field'] ]);						
+								$_generatedValue = CRYPT::LOGIN_HASH($_formData[ $_field -> name ]);						
 								break;
 
 				case 'hash':	##	Hash form data for validation
 				default:
-								$_generatedValue = CRYPT::LOGIN_CRYPT($_formData[ $_column['field'] ], ENCRYPTION_BASEKEY);					
+								$_generatedValue = CRYPT::LOGIN_CRYPT($_formData[ $_field -> name ], CONFIG::GET() -> ENCRYPTION -> BASEKEY);					
 				
 			}
 
-			$_columnsValue[] = $_loginObject['table'] .'.'. $_column['name'] ." = '". $_generatedValue."'";
-			if(isset($_column['is_username']) && $_column['is_username'] === true) $_cryptUsername[] = $_loginObject['table'] .'.'. $_column['name'] ." = '". $_generatedValue."'";	
+			$_columnsValue[] = $_loginObject -> object_table .'.'. $_field -> name ." = '". $_generatedValue."'";
+			if(isset($_field -> is_username) && $_field -> is_username === '1') $_cryptUsername[] = $_loginObject -> object_table .'.'. $_field -> name ." = '". $_generatedValue."'";	
 		}		
-			
+	
 		##	Looping through the databases
 
-		foreach($_loginObject['db_name'] as $_dbName)
+		$_loginObject -> object_databases = json_decode($_loginObject -> object_databases);
+
+		foreach($_loginObject -> object_databases as $_dbName)
 		{
 			$_db 	= CSQLConnect::instance() -> getConnection($_dbName);
 
-			$_sqlString			=	"	SELECT		". $_loginObject['table'] .".is_locked,
-													". $_loginObject['table'] .".login_count,
-													". $_loginObject['table'] .".data_id,
-													". $_loginObject['table'] .".cookie_id
-										FROM		". $_loginObject['table'] ."
+			$_sqlString			=	"	SELECT		". $_loginObject -> object_table .".is_locked,
+													". $_loginObject -> object_table .".login_count,
+													". $_loginObject -> object_table .".data_id,
+													". $_loginObject -> object_table .".cookie_id
+										FROM		". $_loginObject -> object_table ."
 										WHERE		". implode(' AND ',$_columnsValue) ."
 										LIMIT		1
 									";
@@ -140,62 +138,62 @@ class	CLogin extends CBasic
 					case '0':	## OK
 
 								$_timeStamp 	=	time();
-								$_cookieID		=	CCookie::instance() -> createCookieIdinator( $_loginObjectName , $_timeStamp , $_pSession -> getSessionValue('SESSION_ID') );
+								$_cookieID		=	CCookie::instance() -> createCookieIdinator( $_loginObjectName , $_timeStamp , $_pSession -> getValue('session_id') );
 								$_existsCookies =	json_decode($_sqlLoginChk['cookie_id'],true);
 								$_existsCookies[$_loginObjectName]['id'] = $_cookieID;
 								$_existsCookies	=	json_encode($_existsCookies, JSON_FORCE_OBJECT);
 
-								$_sqlString		=	"	UPDATE		". $_loginObject['table'] ."
-														SET			". $_loginObject['table'] .".login_count	= '". ($_sqlLoginChk['login_count'] + 1) ."',
-																	". $_loginObject['table'] .".time_login		= '". $_timeStamp ."',
-																	". $_loginObject['table'] .".cookie_id		= '". $_db -> real_escape_string($_existsCookies) ."'
-														WHERE		". $_loginObject['table'] .".data_id		= '". $_sqlLoginChk['data_id'] ."'
+								$_sqlString		=	"	UPDATE		". $_loginObject -> object_table ."
+														SET			". $_loginObject -> object_table .".login_count	= '". ($_sqlLoginChk['login_count'] + 1) ."',
+																	". $_loginObject -> object_table .".time_login	= '". $_timeStamp ."',
+																	". $_loginObject -> object_table .".cookie_id	= '". $_db -> real_escape_string($_existsCookies) ."'
+														WHERE		". $_loginObject -> object_table .".data_id		= '". $_sqlLoginChk['data_id'] ."'
 													";
 
 								$_db -> query($_sqlString);	
-								$_pSession -> setSessionValue('LOGIN_FAIL_COUNT', 0, true);
+								$_pSession -> setValue('login_fail_count', 0, true);
 
 								return true;
 
 					case '1':	## Account mail not verified
 
-								$this -> setError('ERR_6');
+								$this -> setError('ERR_CR_LOGIN_6');
 								return false;
 
 					case '2':	## Account locked (fail login limit reached)
 
-								$this -> setError('ERR_5');
+								$this -> setError('ERR_CR_LOGIN_5');
 								return false;
 
 					case '3':	## Account locked by administrator
 
-								$this -> setError('ERR_8');
+								$this -> setError('ERR_CR_LOGIN_8');
 								return false;
 
 					default:	## Unclear account state
 
-								$this -> setError('ERR_7');
+								$this -> setError('ERR_CR_LOGIN_7');
 								return false;
 				}
 			}
 
 		}
 
-		##	If the login of the user account is valid, the function returns a result before we reach that part of the code
+		##	If the login of the user account is valid, the function returns a result before we reach that part of the code.
 		##	Because we are here now, that means the login failed
 
 		$_loginFailCount++;
 
-		foreach($_loginObject['db_name'] as $_dbName)
+		foreach($_loginObject -> object_databases as $_dbName)
 		{
 			$_db 	= CSQLConnect::instance() -> getConnection($_dbName);
 
-			if($_loginFailCount > $this -> m_iFailLimit)
+			if($_loginFailCount > CONFIG::GET() -> LOGIN -> FAIL_LIMIT)
 			{	##	Login limit reached -> lock account, update session for login kill
 				
-				$_sqlString			=	"	SELECT		". $_loginObject['table'] .".user_mail,
-														". $_loginObject['table'] .".data_id
-											FROM		". $_loginObject['table'] ."
+				$_sqlString			=	"	SELECT		". $_loginObject -> object_table .".user_mail,
+														". $_loginObject -> object_table .".data_id
+											FROM		". $_loginObject -> object_table ."
 											WHERE		". implode(' AND ',$_cryptUsername) ."
 										";
 
@@ -210,9 +208,9 @@ class	CLogin extends CBasic
 
 					while($_sqlLoginFail = $_sqlLoginFailRes -> fetch_assoc())
 					{
-						$_sqlString			=	"	UPDATE		". $_loginObject['table'] ."
-													SET			". $_loginObject['table'] .".is_locked	= '2'
-													WHERE		". $_loginObject['table'] .".data_id	= ". $_sqlLoginFail['data_id'] ."
+						$_sqlString			=	"	UPDATE		". $_loginObject -> object_table ."
+													SET			". $_loginObject -> object_table .".is_locked	= '2'
+													WHERE		". $_loginObject -> object_table .".data_id	= ". $_sqlLoginFail['data_id'] ."
 												";
 
 						$_db -> query($_sqlString);	
@@ -221,32 +219,35 @@ class	CLogin extends CBasic
 					}
 				}
 
-				$_pSession -> setSessionValue('LOGIN_FAIL_COUNT', $_loginFailCount, true);
+				$_pSession -> setValue('login_fail_count', $_loginFailCount, true);
 			}
 			else
 			{	##	Login limit not reached -> update session
-				$_pSession -> setSessionValue('LOGIN_FAIL_COUNT', $_loginFailCount, true);
+				$_pSession -> setValue('login_fail_count', $_loginFailCount, true);
 			}
 		}
 	}
 
 	public	function
-	logout(string $_loginObjectName)
+	logout(&$_sqlConnection, string $_loginObjectName)
 	{
-		if(!$this -> m_bInitialized)
-		{	##	Class not initialized
-			$this -> setError('ERR_4');
-			return false;
-		}
 
-		if(!isset($this -> m_aStorage[$_loginObjectName]))
+			$modelCondition = new CModelCondition();
+			$modelCondition -> where('object_id', $_loginObjectName);
+			
+		## get login objects
+		$_pModelLoginObjects	 =	new modelLoginObjects();
+		$_pModelLoginObjects	->	load($_sqlConnection, $modelCondition);	
+
+		$_loginObjects			 = 	$_pModelLoginObjects -> getDataInstance();
+
+		if(count($_loginObjects) == 0)
 		{	##	Login object unknown
-			$this -> setError('ERR_2');
+			$this -> setError('ERR_CR_LOGIN_2');
 			return false;
 		}
-
-		$_loginObject 	= &$this -> m_aStorage[$_loginObjectName]['ob_name'];
-		$_authObject	= CSession::instance() -> getSessionValue('IS_AUTH_OBJECT', $_loginObject);
+		
+		$_authObject	= CSession::instance() -> isAuthed($_loginObjectName);
 
 		if($_authObject !== false)
 		{	
@@ -263,7 +264,7 @@ class	CLogin extends CBasic
 				$_sqlLogout 	=	$_sqlLogoutRes -> fetch_assoc();
 
 				$_existsCookies =	json_decode($_sqlLogout['cookie_id'],true);
-				unset($_existsCookies[$_loginObject]);
+				unset($_existsCookies[$_loginObjectName]);
 				$_existsCookies	=	json_encode($_existsCookies, JSON_FORCE_OBJECT);
 
 				$_sqlString		=	"	UPDATE		". $_authObject['table'] ."
@@ -281,47 +282,9 @@ class	CLogin extends CBasic
 	public	function
 	setError($_errorCode)
 	{	
-		$_pMessages = CMessages::instance();
-		$_pLanguage	= CLanguage::instance();
-
-		switch($_errorCode)
-		{
-			case 'ERR_1':	##	No valid login objects
-							$_pMessages -> addMessage( $_pLanguage -> getString('ERR_CR_LOGIN_1') , MSG_LOG , '' , true );
-							return;
-
-			case 'ERR_2':	##	Login object does not exists
-							$_pMessages -> addMessage( $_pLanguage -> getString('ERR_CR_LOGIN_2') , MSG_LOG , '' , true );
-							return;
-
-			case 'ERR_3':	##	Requested field name does not exists on transmitted form data
-							$_pMessages -> addMessage( $_pLanguage -> getString('ERR_CR_LOGIN_3') , MSG_LOG , '' , true );
-							return;
-
-			case 'ERR_4':	##	Class not initialized
-							$_pMessages -> addMessage( $_pLanguage -> getString('ERR_CR_LOGIN_4') , MSG_LOG , '' , true );
-							return;
-
-			case 'ERR_5':	##	Login failed on locked account due to login fail limit reached
-							$_pMessages -> addMessage( $_pLanguage -> getString('ERR_CR_LOGIN_5') , MSG_LOG , '' , true );
-							return;
-
-			case 'ERR_6':	##	Login failed on not verified mail address
-							$_pMessages -> addMessage( $_pLanguage -> getString('ERR_CR_LOGIN_6') , MSG_LOG , '' , true );
-							return;
-
-			case 'ERR_7':	##	Login failed on unclear account state
-							$_pMessages -> addMessage( $_pLanguage -> getString('ERR_CR_LOGIN_7') , MSG_LOG , '' , true );
-							return;
-
-			case 'ERR_8':	##	Login failed on locked account by adminitrator
-							$_pMessages -> addMessage( $_pLanguage -> getString('ERR_CR_LOGIN_8') , MSG_LOG , '' , true );
-							return;
-
-			case 'ERR_9':	##	Missing parameters on initializing
-							$_pMessages -> addMessage( $_pLanguage -> getString('ERR_CR_LOGIN_9') , MSG_LOG , '' , true );
-							return;
-		}
+		$_pLanguage	 = CLanguage::instance();
+		$_pMessages  = CMessages::instance();
+		$_pMessages -> addMessage( $_pLanguage -> getString($_errorCode) , MSG_LOG , '' , true );
 	}
 
 }

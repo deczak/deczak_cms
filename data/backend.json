@@ -7,10 +7,13 @@
 		"node_id"	:"2",
 		"objects"	:[
 						{						
-							"module_id"	:"M1",
+							"module_id"	:"1",
 							"object_id"	:"1459",
 							"body"		:"backend/dashboard/",
-							"params"	:"ABKND"
+							"params"	:{
+											"object_id" : "ABKND",
+											"labels"	: ["Username","Password"]
+										 }
 						}
 					 ],
 		"menu_group":"0",
@@ -36,7 +39,7 @@
 		"page_auth"	:"ABKND",
 		"objects"	:[
 						{
-							"module_id"	:"M2",
+							"module_id"	:"2",
 							"object_id"	:"1255",
 							"body"		:"",
 							"params"	:""
@@ -46,15 +49,15 @@
 		"menu_order":"0"
 	},
 	{
-		"page_name"	:"Sites",
-		"page_title":"Sites",
+		"page_name"	:"Pages",
+		"page_title":"Pages",
 		"page_description":"",
-		"page_path"	:"sites",
+		"page_path"	:"pages",
 		"node_id"	:"5",
 		"page_auth"	:"ABKND",
 		"objects"	:[
 						{
-							"module_id"	:"M3",
+							"module_id"	:"3",
 							"object_id"	:"1981",
 							"body"		:"",
 							"params"	:""
@@ -72,8 +75,98 @@
 		"page_auth"	:"ABKND",
 		"objects"	:[
 						{
-							"module_id"	:"M6",
+							"module_id"	:"6",
 							"object_id"	:"1472",
+							"body"		:"",
+							"params"	:""
+						}		
+					 ],
+		"menu_group":"1",
+		"menu_order":"0"
+	},
+	{
+		"page_name"	:"Login Object",
+		"page_title":"Login Object",
+		"page_description":"",
+		"page_path"	:"login-objects",
+		"node_id"	:"7",
+		"page_auth"	:"ABKND",
+		"objects"	:[
+						{
+							"module_id"	:"8",
+							"object_id"	:"1674",
+							"body"		:"",
+							"params"	:""
+						}		
+					 ],
+		"menu_group":"1",
+		"menu_order":"0"
+	},
+	{
+		"page_name"	:"Denied Remote Addresses",
+		"page_title":"Denied Remote Addresses",
+		"page_description":"",
+		"page_path"	:"denied-remote",
+		"node_id"	:"8",
+		"page_auth"	:"ABKND",
+		"objects"	:[
+						{
+							"module_id"	:"9",
+							"object_id"	:"1675",
+							"body"		:"",
+							"params"	:""
+						}		
+					 ],
+		"menu_group":"2,
+		"menu_order":"0"
+	},
+	{
+		"page_name"	:"User Agents",
+		"page_title":"User Agents",
+		"page_description":"",
+		"page_path"	:"useragents",
+		"node_id"	:"9",
+		"page_auth"	:"ABKND",
+		"objects"	:[
+						{
+							"module_id"	:"10",
+							"object_id"	:"1676",
+							"body"		:"",
+							"params"	:""
+						}		
+					 ],
+		"menu_group":"2",
+		"menu_order":"0"
+	},
+	{
+		"page_name"	:"Sessions",
+		"page_title":"Sessions",
+		"page_description":"",
+		"page_path"	:"sessions",
+		"node_id"	:"10",
+		"page_auth"	:"ABKND",
+		"objects"	:[
+						{
+							"module_id"	:"11",
+							"object_id"	:"1677",
+							"body"		:"",
+							"params"	:""
+						}		
+					 ],
+		"menu_group":"1",
+		"menu_order":"0"
+	},
+	{
+		"page_name"	:"Modules",
+		"page_title":"Modules",
+		"page_description":"",
+		"page_path"	:"modules",
+		"node_id"	:"11",
+		"page_auth"	:"ABKND",
+		"objects"	:[
+						{
+							"module_id"	:"12",
+							"object_id"	:"1678",
 							"body"		:"",
 							"params"	:""
 						}		

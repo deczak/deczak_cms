@@ -1,0 +1,25 @@
+
+##	
+
+	MOD_BEUSERAG_SEC_CREATE_NAME	=	User Agent erstellen
+
+	
+##	Messages
+
+	M_BEUSERAG_MSG_DENIEDUK			=	User Agent existiert nicht
+	M_BEUSERAG_MSG_DENIEDEXIST		=	User Agent existiert bereits
+	
+	M_BEUSERAG_MSG_ISCREATED		=	User Agent wurde erstellt
+	M_BEUSERAG_MSG_ISUPDATED		=	User Agent wurde aktualisiert
+	M_BEUSERAG_MSG_ISDELETED		=	User Agent wurde gelöscht
+
+##	
+
+	M_BEUSERAG_AGENTNAME			=	Agent Name
+	M_BEUSERAG_AGENTSUFFIX			=	Agent Suffix
+	M_BEUSERAG_USERAGENT			=	User Agent
+
+	
+	
+	
+	

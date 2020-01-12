@@ -9,6 +9,7 @@ class	cmsModuleManager
 		this.className 			= contentContainerClassName;
 		this.activeModules		= activeModules;
 		this.parentInstances	= parentInstances;
+		this.parentInstances	= parentInstances;
 	}
 	
 	create()
@@ -17,6 +18,8 @@ class	cmsModuleManager
 
 		for(var nItem = 0; nItem < targetElements.length; nItem++)
 		{
+
+			
 			this.insert(targetElements[nItem], 0);
 			this.insert(targetElements[nItem], null);
 		}		
@@ -66,7 +69,7 @@ class	cmsModuleManager
 			var	oModulesList = document.createElement("ul");
 			
 			for (var module = 0; module < Object.keys(this.activeModules).length; module++)
-			{			
+			{	
 				if(this.activeModules[module].module_group !== moduleGroups[group])
 					continue;
 
@@ -169,8 +172,9 @@ class	cmsModuleManager
 										contentContainer.insertBefore(newObject, contentContainer.childNodes[1]);
 								}
 
-								parentInstances.pEditorText.create();
-								parentInstances.pEditorHeadline.create();
+								parentInstances.pEditorText.createOnDestNode(newObject);
+								parentInstances.pEditorHeadline.createOnDestNode(newObject);
+								parentInstances.pEditorCode.createOnDestNode(newObject);
 								parentInstances.pObjectTools.create();
 								parentInstances.pObjectTools.submitObjectsOrder(contentContainer);
 
@@ -225,7 +229,7 @@ class	cmsModuleManager
 		var	moduleGroups = [];
 		for (var i = 0; i < Object.keys(this.activeModules).length; i++)
 		{
-			if(!this.activeModules[i].module_is_frontend)
+			if(!this.activeModules[i].is_frontend)
 				continue;
 			if(moduleGroups.indexOf(this.activeModules[i].module_group) != -1)
 				continue;

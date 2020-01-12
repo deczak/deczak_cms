@@ -14,6 +14,8 @@
 	define('DIR_LANGUAGES' 	, 'lang/');
 	define('DIR_DATA' 		, 'data/');
 	define('DIR_PUBLIC' 	, 'public/');
+	define('DIR_CERT' 		, 'cert/');
+	define('DIR_CRON' 		, 'cron/');
 
 
 ?>

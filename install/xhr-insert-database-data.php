@@ -1,6 +1,6 @@
 <?php
-
 	include '../core/toolkit.php';
+	include '../config/directories.php';
 	include '../config/standard.php';
 
 	if(empty($_POST['database-server'])) 	tk::xhrResult(1, 'Database server address not set');	else $_POST['database-server'] 	 = trim(strip_tags($_POST['database-server']));
@@ -17,7 +17,7 @@
 
 
 	$_POST['user-user']			= CRYPT::LOGIN_HASH($_POST['user-user']);
-	$_POST['user-pass']			= CRYPT::LOGIN_CRYPT($_POST['user-pass'], ENCRYPTION_BASEKEY);
+	$_POST['user-pass']			= CRYPT::LOGIN_CRYPT($_POST['user-pass'], CONFIG::GET() -> ENCRYPTION -> BASEKEY);
 	$_POST['user-first-name']	= CRYPT::ENCRYPT($_POST['user-first-name'], '1', true);
 	$_POST['user-last-name']	= CRYPT::ENCRYPT($_POST['user-last-name'], '1', true);
 	$_POST['user-mail']			= CRYPT::ENCRYPT($_POST['user-mail'], '1', true);
@@ -27,13 +27,14 @@
 	if (mysqli_connect_errno())
 		tk::xhrResult(1, 'SQL error on connection - '. mysqli_connect_error());
 
+
 	$sqlDump = file_get_contents('database-data.sql');
 
-	$sqlDump = str_replace('%%USER_NAME%%',$_POST['user-user'], $sqlDump);
-	$sqlDump = str_replace('%%USER_PASSWORD%%',$_POST['user-pass'], $sqlDump);
-	$sqlDump = str_replace('%%USER_FIRST_NAME%%',$_POST['user-first-name'], $sqlDump);
-	$sqlDump = str_replace('%%USER_LAST_NAME%%',$_POST['user-last-name'], $sqlDump);
-	$sqlDump = str_replace('%%USER_MAIL%%',$_POST['user-mail'], $sqlDump);
+	$sqlDump = str_replace('%USER_NAME%',$_POST['user-user'], $sqlDump);
+	$sqlDump = str_replace('%USER_PASSWORD%',$_POST['user-pass'], $sqlDump);
+	$sqlDump = str_replace('%USER_FIRST_NAME%',$_POST['user-first-name'], $sqlDump);
+	$sqlDump = str_replace('%USER_LAST_NAME%',$_POST['user-last-name'], $sqlDump);
+	$sqlDump = str_replace('%USER_MAIL%',$_POST['user-mail'], $sqlDump);
 
 	if( $db -> multi_query($sqlDump) === FALSE)
 		tk::xhrResult(1, 'SQL error on query - '. $db -> error);

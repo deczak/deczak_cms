@@ -1,8 +1,10 @@
 {
+	"module_controller" : "controllerSimpleHeadline",
 	"rights"	:[
-					{"name":"create",	"desc":"Create"},
-					{"name":"edit",		"desc":"Edit"},
-					{"name":"delete",	"desc":"Delete"}
+					{"name":"view",		"desc":"VIEW"},
+					{"name":"create",	"desc":"CREATE"},
+					{"name":"edit",		"desc":"EDIT"},
+					{"name":"delete",	"desc":"DELETE"}
 				 ],
 	"sub"		:[		
 					{

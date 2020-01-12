@@ -3,7 +3,7 @@
 
 	<div class="inner-wrapper">
 
-		
+	
 
 	</div>
 
@@ -16,7 +16,7 @@
 	
 var	CMS = 	{
 				"SERVER_URL" 	: "<?php echo CMS_SERVER_URL; ?>",
-				"PAGE_PATH" 	: "<?php echo REQUESTED_PAGE_PATH; ?>",
+				"PAGE_PATH" 	: "<?php echo $pageRequest -> urlPath; ?>",
 				"MODULE_TARGET"	: (typeof MODULE != "undefined" ? MODULE.TARGET : '')
 			};	
 	

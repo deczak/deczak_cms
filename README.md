@@ -1,7 +1,7 @@
 
 # The project
 
-This is a content management system as you can find them dozen times. 
+I create this content management system primarily for myself and my requirements, but make it available to the general public. The abbreviation cos stands for cooking own soup, based on the fact that someone cooks their own soup instead of using others. I have no objection to participating in the project. Notes on errors and the like are welcome.
 
 ## Current status
 
@@ -12,9 +12,9 @@ This version is an early, if you like to call it that, alpha version. You can do
 + Create, edit, delete user for backend
 + Create, edit, delete rights groups for backend users
 
-Due to the fact that I still have to rebuild a lot, I do without a corresponding documentation of the internal processes. No one washes his car when he knows it starts raining two hours later.
+Due to the fact that I still have to rebuild a lot, I do without a corresponding documentation of the internal processes.
 
-I write it, although it should be clear, but better. This is an early version and a lot is missing. Do not use this version in live stage.
+I write it, although it should be clear, but better: This is an early version and a lot is missing. Do not use this version in live stage.
 
 ## Planned functions and properties (provisional)
 
@@ -28,9 +28,9 @@ I write it, although it should be clear, but better. This is an early version an
 
 ## Properties that will not happens
 
-+ To lean too far out of the window
 + Call home
 + Automatic updates
++ Image and video editing
 
 # Requirements
 
@@ -39,14 +39,6 @@ I write it, although it should be clear, but better. This is an early version an
 
 # Install information
 
-In the directory install there is an install.php which takes over everything. For successful installation, the database information is generally required, an eMail address to which system messages are sent as well as further details which are explained there.
+In the install directory there is an index.php that does everything. For successful installation, the database information is generally required, an email address to which system messages are sent and other information that is explained there.
 
-A manual installation is not possible, you could access the public area, but for the backend (the administration) you need a user whose access data has to be hashed separately. To explain that is too complicated as that it could be useful to pack in a guide. And if I would create a helper script for it .. God damn for what did I create then the install.php  ...
-
-## Todo
-
-+ damn much
-+ finding a name for the CMS
-+ maybe do some sports
-
-I can not give a timetable, but the next pre-release will come later this year.
+A manual installation is not possible, you could do this to the extent that you can access the public area, but for the backend (administration) you need a user whose access data is hashed separately. To explain that is too complicated to be put in a manual. And if I would create a helper script for it.

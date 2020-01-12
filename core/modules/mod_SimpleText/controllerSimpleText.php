@@ -8,7 +8,7 @@ class	controllerSimpleText extends CController
 	private	$m_modelSimple;
 		
 	public function
-	__construct(array $_module, &$_object)
+	__construct($_module, &$_object)
 	{
 		parent::__construct($_module, $_object);
 
@@ -46,12 +46,16 @@ class	controllerSimpleText extends CController
 
 		##	Call sub-logic function by target, if there results are false, we make a fall back to default view
 
+		$enableEdit 	= $this -> hasRights($_userRights, 'edit');
+		$enableDelete	= $this -> hasRights($_userRights, 'delete');
+
 		$_logicResults = false;
 		switch($_controllerAction)
 		{
-			case 'create': 		/*    */	$_logicResults = $this -> logicCreate($_sqlConnection, $_isXHRequest, $_logicResult);		break;
-			case 'delete': 		/*   */		$_logicResults = $this -> logicDelete($_sqlConnection, $_isXHRequest, $_logicResult);		break;
-			case 'edit': 		/* 		 */	$_logicResults = $this -> logicEdit($_sqlConnection, $_isXHRequest, $_logicResult);			break;	
+			case 'view'		: $_logicResults = $this -> logicView(	$_sqlConnection, $_isXHRequest, $_logicResult);	break;
+			case 'edit'		: $_logicResults = $this -> logicEdit(	$_sqlConnection, $_isXHRequest, $_logicResult);	break;	
+			case 'create'	: $_logicResults = $this -> logicCreate($_sqlConnection, $_isXHRequest, $_logicResult);	break;
+			case 'delete'	: $_logicResults = $this -> logicDelete($_sqlConnection, $_isXHRequest, $_logicResult);	break;	
 		}
 
 		if(!$_logicResults)
@@ -59,15 +63,15 @@ class	controllerSimpleText extends CController
 			##	Default View
 			$_logicResults = $this -> logicView($_sqlConnection, $_isXHRequest, $_logicResult);	
 		}
-
-
-
 	}
 
 	private function
 	logicView(&$_sqlConnection, $_isXHRequest, &$_logicResult)
 	{
-		$this -> m_modelSimple -> load($_sqlConnection,['object_id' => $this -> m_aObject -> object_id]);
+		$modelCondition = new CModelCondition();
+		$modelCondition -> where('object_id', $this -> m_aObject -> object_id);
+
+		$this -> m_modelSimple -> load($_sqlConnection, $modelCondition);
 
 		$this -> setView(	
 						'view',	
@@ -78,14 +82,11 @@ class	controllerSimpleText extends CController
 						);
 
 		return true;
-
 	}
 
 	private function
 	logicEdit(&$_sqlConnection, $_isXHRequest, &$_logicResult)
 	{
-		$this -> m_modelSimple -> load($_sqlConnection,['object_id' => $this -> m_aObject -> object_id]);
-
 		##	XHR Function call
 
 		if($_isXHRequest !== false)
@@ -99,7 +100,6 @@ class	controllerSimpleText extends CController
 			{
 				case 'edit'  :	// Update object
 
-
 								$_pFormVariables =	new CURLVariables();
 								$_request		 =	[];
 								$_request[] 	 = 	[	"input" => "cms-object-id",  "output" => "object_id", 	"validate" => "strip_tags|!empty" ]; 
@@ -107,19 +107,23 @@ class	controllerSimpleText extends CController
 								$_pFormVariables-> retrieve($_request, false, true); // POST 
 								$_aFormData		 = $_pFormVariables ->getArray();
 
-
 								if(empty($_aFormData['object_id'])) 		{ 	$_bValidationErr = true; 	$_bValidationDta[] = 'cms-object-id'; 			}
 
 								if(!$_bValidationErr)
 								{
+									$modelCondition = new CModelCondition();
+									$modelCondition -> where('object_id', $_aFormData['object_id']);
 
-									if($this -> m_modelSimple -> update($_sqlConnection, $_aFormData))
+									$objectId = $_aFormData['object_id'];
+									unset($_aFormData['object_id']);
+
+									if($this -> m_modelSimple -> update($_sqlConnection, $_aFormData, $modelCondition))
 									{
 										$_bValidationMsg = 'Object updated';
 
 										$this -> m_modelPageObject = new modelPageObject();
 
-										$_objectUpdate['object_id']		=	$_aFormData['object_id'];
+										$_objectUpdate['object_id']		=	$objectId;
 										$_objectUpdate['time_update']		=	time();
 										$_objectUpdate['update_by']			=	0;
 										$_objectUpdate['update_reason']		=	'';
@@ -143,8 +147,12 @@ class	controllerSimpleText extends CController
 			}
 			
 			tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $_bValidationDta);	// contains exit call
-
 		}	
+
+		$modelCondition = new CModelCondition();
+		$modelCondition -> where('object_id', $this -> m_aObject -> object_id);
+
+		$this -> m_modelSimple -> load($_sqlConnection, $modelCondition);
 
 		$this -> setView(	
 						'edit',	
@@ -200,8 +208,6 @@ class	controllerSimpleText extends CController
 	private function
 	logicDelete(&$_sqlConnection, $_isXHRequest, &$_logicResult)
 	{
-		$this -> m_modelSimple -> load($_sqlConnection,['object_id' => $this -> m_aObject -> object_id]);
-
 		##	XHR Function call
 
 		if($_isXHRequest !== false)
@@ -225,7 +231,10 @@ class	controllerSimpleText extends CController
 									if(!$_bValidationErr)
 									{
 
-										if($this -> m_modelSimple -> delete($_sqlConnection, $_aFormData))
+										$modelCondition = new CModelCondition();
+										$modelCondition -> where('object_id', $_aFormData['object_id']);
+
+										if($this -> m_modelSimple -> delete($_sqlConnection, $modelCondition))
 										{
 											$_objectModel  	 = new modelPageObject();
 											$_objectModel	-> delete($_sqlConnection, $_aFormData);
@@ -254,12 +263,6 @@ class	controllerSimpleText extends CController
 
 		return false;
 		
-	}
-
-	private function
-	setView(string $_view, string $_moduleTarget,  array $_dataInstances = [])
-	{
-		$this -> m_pView = new CView( CMS_SERVER_ROOT . DIR_CORE . DIR_MODULES . $this -> m_aModule['module_location'].'/view/'. $_view, $_moduleTarget , $_dataInstances );	
 	}
 
 

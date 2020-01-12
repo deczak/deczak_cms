@@ -4,8 +4,6 @@ include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SHEME.'shemeRightGroups.php';
 
 class 	modelRightGroups extends CModel
 {
-	public	$m_sheme;
-
 	public function
 	__construct()
 	{		
@@ -15,44 +13,31 @@ class 	modelRightGroups extends CModel
 	}	
 
 	public function
-	load(&$_sqlConnection, array $_where = [])
+	load(&$_sqlConnection, CModelCondition $_condition = NULL)
 	{
-		$_className	=	$this -> createClass($this -> m_sheme,'rightGroup');
+		$className	=	$this -> createClass($this -> m_sheme,'rightGroup');
+		$tableName	=	$this -> m_sheme -> getTableName();
 
-		$_tableName	=	$this -> m_sheme -> getTableName();
+		$sqlSelect	=	"	SELECT		$tableName.*
+							FROM		$tableName
+						".	($_condition != NULL ? $_condition -> getConditions($_sqlConnection, $_condition) : '');
 
-		$_sqlWhere = [];
-
-		foreach($_where as $_whereKey => $_whereColumn)
-		{
-			$_sqlWhere[] = " `$_whereKey` = '". $_sqlConnection -> real_escape_string($_whereColumn) . "' ";
-		}
-
-		$_sqlSelect	=	"	SELECT		$_tableName.group_id,
-										$_tableName.group_name,
-										$_tableName.group_rights
-							FROM		$_tableName
-						";
-
-		if(count($_sqlWhere) !== 0)
-			$_sqlSelect	.=	" WHERE ". implode(' AND ', $_sqlWhere);
-
-		$_sqlResult	=	 $_sqlConnection -> query($_sqlSelect);
+		$_sqlResult	=	 $_sqlConnection -> query($sqlSelect);
 
 		if($_sqlResult -> num_rows === 0) return false;
 
 		while($_sqlResult !== false && $_sqlRow = $_sqlResult -> fetch_assoc())
 		{
 			$_instanceKey = count($this -> m_storage);
-			$this -> m_storage[] = new $_className($_sqlRow, $this -> m_sheme -> getColumns());
+
+			$this -> m_storage[] = new $className($_sqlRow, $this -> m_sheme -> getColumns());
 			$this -> m_storage[$_instanceKey] -> group_rights = json_decode($this -> m_storage[$_instanceKey] -> group_rights );
 		}	
 			
 		return true;
 	}
 	
-	
-	public function
+		public function
 	insert( &$_sqlConnection, $_dataset, &$_insertID)
 	{
 		$_tableRight	=	$this -> m_sheme -> getTableName();
@@ -85,17 +70,14 @@ class 	modelRightGroups extends CModel
 	}
 	
 	public function
-	update( &$_sqlConnection, $_dataset)
+	update( &$_sqlConnection, $_dataset, CModelCondition $_condition = NULL)
 	{
-
+		if($_condition === NULL || !$_condition -> isSet()) return false;
 
 		$_tableRight	=	$this -> m_sheme -> getTableName();
-
 		
 		if(isset($_dataset['group_rights'])) $_dataset['group_rights'] = json_encode($_dataset['group_rights']);
 	
-
-
 		$_sqlString		 =	"UPDATE $_tableRight SET ";
 		$_loopCounter 	= 0;
 		foreach($_dataset as $_column => $_value)
@@ -106,44 +88,27 @@ class 	modelRightGroups extends CModel
 			$_sqlString  .= "`". $_sqlConnection -> real_escape_string($_column) ."` = '". $_sqlConnection -> real_escape_string($_value) ."'";
 			$_loopCounter++;
 		}
-		$_sqlString 	 .= " WHERE group_id = '". $_dataset['group_id'] ."'";
+
+		$_sqlString	.=	$_condition -> getConditions($_sqlConnection, $_condition);
 
 		if($_sqlConnection -> query($_sqlString) !== false) return true;
 		return false;
 	}
 	
 	public function
-	delete( &$_sqlConnection, $_where)
+	delete(&$_sqlConnection, CModelCondition $_condition = NULL)
 	{
-		$_tableRight	=	$this -> m_sheme -> getTableName();
-		if(empty($_where)) return false;
 
-		$_sqlString		 =	"DELETE FROM $_tableRight WHERE ";
-		$_loopCounter 	 = 0;
-		foreach($_where as $_column => $_value)
-		{
-			$_sqlString .= ($_loopCounter != 0 ? ', ':'');
-			$_sqlString .= "`".$_column ."` = '". $_value ."'";
-			$_loopCounter++;
-		}
+		if($_condition === NULL || !$_condition -> isSet()) return false;
 
-		if($_sqlConnection -> query($_sqlString) !== false) return true;
+		$tableName	=	$this -> m_sheme -> getTableName();
+
+		$sqlString	 =	"DELETE FROM $tableName
+						". $_condition -> getConditions($_sqlConnection, $_condition);
+
+		if($_sqlConnection -> query($sqlString) !== false) return true;
 		return false;
 	}
-	
-
-	public function
-	searchValue($_needle, string $_searchColumn, string $_returnColumn)
-	{
-		foreach($this -> m_storage as $_model)
-		{
-			if($_model -> $_searchColumn === $_needle) return $_model -> $_returnColumn;
-		}
-		return NULL;
-	}	
-	
-	
-	
 }
 
 

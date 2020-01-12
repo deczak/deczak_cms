@@ -17,6 +17,11 @@ class	CView
 	public function
 	view()
 	{
+
+		$sqlConnection 	= CSQLConnect::instance() -> getConnection(CONFIG::GET() -> MYSQL -> PRIMARY_DATABASE);
+		$pageRequest 	= CPageRequest::instance();
+		$language		= CLanguage::instance();
+
 		##	Required for XHR Functions
 
 		if(!empty($this -> m_object['object_target'])) echo ' <script> var MODULE = { "TARGET" : "'. $this -> m_object['object_target'] .'" };</script>';

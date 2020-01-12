@@ -4,7 +4,6 @@ include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SHEME.'shemeSimple.php';
 
 class 	modelSimple extends CModel
 {
-	private		$m_sheme;
 
 	public function
 	__construct()
@@ -15,25 +14,16 @@ class 	modelSimple extends CModel
 	}
 
 	public function
-	load(&$_sqlConnection, array $_dataset)	// dataset must contains object_id
+	load(&$_sqlConnection, CModelCondition $_condition = NULL)
 	{
-		$_className		=	$this -> createClass($this -> m_sheme, 'simple'. $_dataset['object_id'] );
-
+		$_className		=	$this -> createClass($this -> m_sheme, 'simple');
 		$_tableName		=	$this -> m_sheme -> getTableName();
 		
 		$_sqlString		=	"	SELECT		*
 								FROM 		$_tableName
-								WHERE
-							";	
+							".	($_condition != NULL ? $_condition -> getConditions($_sqlConnection, $_condition) : '');
 
-		$_loopCounter = 0;
-		foreach($_dataset as $_colKey => $_colValue)
-		{
-			$_sqlString		.=	($_loopCounter !== 0 ? ' AND ' : '') ." $_colKey = '$_colValue'";
-			$_loopCounter++;
-		}	
-
-		$_sqlResult		=	 $_sqlConnection -> query($_sqlString) or die($_sqlConnection -> error);
+		$_sqlResult		=	 $_sqlConnection -> query($_sqlString);
 
 		if($_sqlResult !== false && $_sqlResult -> num_rows !== 0)
 		{
@@ -43,11 +33,11 @@ class 	modelSimple extends CModel
 	}
 
 	public function
-	update(&$_sqlConnection, array $_dataset) // dataset must contains object_id
+	update(&$_sqlConnection, $_dataset, CModelCondition $_condition = NULL)
 	{
 		##	
 
-		$_className			=	$this -> createClass($this -> m_sheme, 'simple'. $_dataset['object_id'] );
+		$_className			=	$this -> createClass($this -> m_sheme, 'simple');
 		$this -> m_storage 	= 	new $_className($_dataset, $this -> m_sheme -> getColumns());
 
 		$_tableName			=	$this -> m_sheme -> getTableName();
@@ -64,8 +54,8 @@ class 	modelSimple extends CModel
 			$_sqlString  .= ($_loopCounter != 0 ? ', ':'') . "`". $_sqlConnection -> real_escape_string($_column) ."` = '". $_sqlConnection -> real_escape_string($_value) ."'";
 			$_loopCounter++;
 		}
-		$_sqlString 	 .= 	"	WHERE 		object_id 		= '". $_sqlConnection -> real_escape_string($_dataset['object_id']) ."'	
-								";
+
+		$_sqlString	.=	$_condition -> getConditions($_sqlConnection, $_condition);
 
 		if($_sqlConnection -> query($_sqlString) === false)
 			return false;
@@ -79,11 +69,11 @@ class 	modelSimple extends CModel
 	}
 
 	public function
-	create(&$_sqlConnection, array $_dataset) // dataset must contains object_id
+	create(&$_sqlConnection, array $_dataset)
 	{
 		##	
 
-		$_className			=	$this -> createClass($this -> m_sheme, 'simple'. $_dataset['object_id'] );
+		$_className			=	$this -> createClass($this -> m_sheme, 'simple');
 		$this -> m_storage 	= 	new $_className($_dataset, $this -> m_sheme -> getColumns());
 
 		$_insertColumns = 	[];
@@ -110,14 +100,17 @@ class 	modelSimple extends CModel
 	}
 
 	public function
-	delete(&$_sqlConnection, array $_deleteWhere)	
+	delete(&$_sqlConnection, CModelCondition $_condition = NULL)
 	{
-		$_tableName			=	$this -> m_sheme -> getTableName();
-		
-		if($_sqlConnection -> query("DELETE FROM $_tableName WHERE object_id = '". $_sqlConnection -> real_escape_string($_deleteWhere['object_id']) ."'") === false)
-			return false;
+		if($_condition === NULL || !$_condition -> isSet()) return false;
 
-		return true;
+		$_tableName		 =	$this -> m_sheme -> getTableName();
+
+		$_sqlString	 	 =	"DELETE FROM $_tableName ";
+		$_sqlString		.=	$_condition -> getConditions($_sqlConnection, $_condition);
+
+		if($_sqlConnection -> query($_sqlString) !== false) return true;
+		return false;
 	}		
 
 }

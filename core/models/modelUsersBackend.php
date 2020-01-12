@@ -35,22 +35,23 @@ class 	modelUsersBackend extends CModel
 										$_tableUsers.user_mail,
 										$_tableUsers.login_count,
 										$_tableUsers.time_login,
-										$_tableUsers.time_create,
+										$_tableUsers.create_time,
+										$_tableUsers.update_time,
+										$_tableUsers.create_by,
+										$_tableUsers.update_by,
 										$_tableUsers.is_locked
 							FROM		$_tableUsers	
 						";
 
 		if(count($_sqlWhere) !== 0)
 			$_sqlSelect	.=	" WHERE ". implode(' AND ', $_sqlWhere);
-
+			
 		$_sqlResult	=	 $_sqlConnection -> query($_sqlSelect);
-
+		
 		if($_sqlResult -> num_rows === 0) return false;
 
 		while($_sqlResult !== false && $_sqlRow = $_sqlResult -> fetch_assoc())
 		{
-			$_modelIndex = count($this -> m_storage);
-			
 			$this -> decryptRawSQLDataset($_sqlRow, $_sqlRow['user_id'], ['user_name_first', 'user_name_last', 'user_mail']);
 
 			$this -> m_storage[] = new $_className($_sqlRow, $this -> m_shemeUsersBackend -> getColumns());
@@ -71,8 +72,6 @@ class 	modelUsersBackend extends CModel
 		$_tableUsers	=	$this -> m_shemeUsersBackend -> getTableName();
 
 		$this -> encryptRawSQLDataset($_dataset, $_dataset['user_id'], ['user_name_first', 'user_name_last', 'user_mail']);
-
-		$_dataset['time_create'] = time();
 
 		$_className		=	$this -> createClass($this -> m_shemeUsersBackend,'userBackend');
 		$_model 		= 	new $_className($_dataset, $this -> m_shemeUsersBackend -> getColumns());
@@ -147,13 +146,22 @@ class 	modelUsersBackend extends CModel
 		}
 		return NULL;
 	}
-
+/*
 	public function
 	isDatasetExists(&$_sqlConnection, string $_tableName, array $_where)
 	{
 		$_tableName	=	$this -> m_shemeUsersBackend -> getTableName();
 		return parent::isDatasetExists($_sqlConnection, $_tableName, $_where);
 	}
+*/
+	public function
+	isUnique(&$_sqlConnection, array $_where, array $_whereNot = [])
+	{
+		$tableName	=	$this -> m_shemeUsersBackend -> getTableName();
+		return $this -> _isUnique($_sqlConnection, $tableName, $_where, $_whereNot);
+	}
+
+
 
 }
 

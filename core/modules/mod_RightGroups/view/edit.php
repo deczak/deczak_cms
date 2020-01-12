@@ -16,40 +16,42 @@
 <div class="be-module-container forms-view">
 	<div>
 		<div class="inter-menu">
-			<h2><?php echo CLanguage::instance() -> getString('MENU'); ?></h2>
+			<h2><?php echo CLanguage::get() -> string('MENU'); ?></h2>
 			<hr>
 			<ul>
-			<li><a class="darkblue" href="#group-data"><?php echo CLanguage::instance() -> getString('MOD_RGROUPS_GROUP_INFO'); ?></a></li>
-			<li><a class="darkblue" href="#group-rights"><?php echo CLanguage::instance() -> getString('MOD_RGROUPS_GROUP_RIGHTS'); ?></a></li>
+			<li><a class="darkblue" href="#group-data"><?php echo CLanguage::get() -> string('MOD_RGROUPS_GROUP_INFO'); ?></a></li>
+			<li><a class="darkblue" href="#group-rights"><?php echo CLanguage::get() -> string('MOD_RGROUPS_GROUP_RIGHTS'); ?></a></li>
 			</ul>
 			<hr>
 			<div class="delete-box">	
-				<fieldset class="ui fieldset" data-xhr-target="group-delete" data-xhr-overwrite-target="delete/<?php echo $right_group -> group_id; ?>">	
-					<div class="submit-container">
-						<div class="protector"><input type="checkbox" class="trigger-submit-protector" id="protector-user-delete"><label for="protector-user-delete"></label></div>
-						<button class="trigger-submit-fieldset" type="button" disabled><?php echo CLanguage::instance() -> getString('BUTTON_DELETE'); ?></button>
-					</div>
-					<div class="result-box" data-error=""></div>
-				</fieldset>
+				<?php if($enableDelete) { ?>
+					<fieldset class="ui fieldset" data-xhr-target="group-delete" data-xhr-overwrite-target="delete/<?php echo $right_group -> group_id; ?>">	
+						<div class="submit-container button-only">
+							<button class="ui button icon labeled trigger-submit-fieldset" type="button" disabled><i class="fas fa-trash-alt"></i><?php echo CLanguage::get() -> string('BUTTON_DELETE'); ?></button>
+							<div class="protector"><input type="checkbox" class="trigger-submit-protector" id="protector-user-delete"><label for="protector-user-delete"></label></div>
+						</div>
+						<div class="result-box" data-error=""></div>
+					</fieldset>
+				<?php } ?>
 			</div>
 		</div>
 	</div>
 	<div>
 
 		
-		<fieldset class="ui fieldset submit-able" id="group-data" data-xhr-target="group-data">
-			<legend><?php echo CLanguage::instance() -> getString('MOD_RGROUPS_GROUP_INFO'); ?></legend>
+		<fieldset class="ui fieldset submit-able" id="group-data" data-xhr-target="group-data" data-xhr-overwrite-target="edit/<?php echo $right_group -> group_id; ?>">
+			<legend><?php echo CLanguage::get() -> string('MOD_RGROUPS_GROUP_INFO'); ?></legend>
 			<div>
 				<!-- group -->
 				<div class="group width-100">
 					<div class="input width-25">
-						<label><?php echo CLanguage::instance() -> getString('MOD_RGROUPS_GROUP_ID'); ?></label>
+						<label><?php echo CLanguage::get() -> string('MOD_RGROUPS_GROUP_ID'); ?></label>
 						<input type="text" disabled value="<?php echo $right_group -> group_id; ?>">
 						<i class="fas fa-lock"></i>
 					</div>
 
 					<div class="input width-25">
-						<label><?php echo CLanguage::instance() -> getString('MOD_RGROUPS_GROUP_NAME'); ?></label>
+						<label><?php echo CLanguage::get() -> string('MOD_RGROUPS_GROUP_NAME'); ?></label>
 						<input type="text" name="group_name" value="<?php echo $right_group -> group_name; ?>">
 					</div>
 
@@ -62,21 +64,25 @@
 
 			</div>
 
-			<div class="result-box" data-error=""></div>
+			<?php if($enableEdit) { ?>
 
-			<!-- Submit button - beware of fieldset name -->
+				<div class="result-box" data-error=""></div>
 
-			<div class="submit-container">
-				<div class="protector"><input type="checkbox" class="trigger-submit-protector" id="protector-group-data"><label for="protector-group-data"></label></div>
-				<button class="trigger-submit-fieldset" type="button" disabled><?php echo CLanguage::instance() -> getString('BUTTON_SAVE'); ?></button>
-			</div>
+				<!-- Submit button - beware of fieldset name -->
+
+				<div class="submit-container">
+					<button class="ui button icon labeled trigger-submit-fieldset" type="button" disabled><i class="fas fa-save"></i><?php echo CLanguage::get() -> string('BUTTON_SAVE'); ?></button>
+					<div class="protector"><input type="checkbox" class="trigger-submit-protector" id="protector-group-data"><label for="protector-group-data"></label></div>
+				</div>
+				
+			<?php } ?>
 
 		</fieldset>
 
 
 
-		<fieldset class="ui fieldset submit-able" id="group-rights" data-xhr-target="group-rights">
-			<legend><?php echo CLanguage::instance() -> getString('MOD_RGROUPS_GROUP_RIGHTS'); ?></legend>
+		<fieldset class="ui fieldset submit-able" id="group-rights" data-xhr-target="group-rights" data-xhr-overwrite-target="edit/<?php echo $right_group -> group_id; ?>">
+			<legend><?php echo CLanguage::get() -> string('MOD_RGROUPS_GROUP_RIGHTS'); ?></legend>
 			<div>
 
 				<!-- group -->
@@ -95,12 +101,12 @@
 								<?php
 								foreach($_aActiveModules as $_module)
 								{
-									switch($_module['module_type'])
+									switch($_module -> module_type)
 									{
-										case 'core'  :	$_modLocation	= CMS_SERVER_ROOT . DIR_CORE . DIR_MODULES . $_module['module_location'] .'/';									
+										case 'core'  :	$_modLocation	= CMS_SERVER_ROOT . DIR_CORE . DIR_MODULES . $_module -> module_location .'/';									
 														break;
 
-										case 'mantle':	$_modLocation	= CMS_SERVER_ROOT . DIR_MANTLE . DIR_MODULES . $_module['module_location'] .'/';
+										case 'mantle':	$_modLocation	= CMS_SERVER_ROOT . DIR_MANTLE . DIR_MODULES . $_module -> module_location .'/';
 														break;
 									}
 
@@ -108,26 +114,26 @@
 									$_moduleData = json_decode($_moduleData);
 
 									?>
-									<tr>
-										<td><?php echo $_module['module_name']; ?></td>
+									<tr style="">
+										<td><?php echo $_module -> module_name; ?></td>
 										<td>
 											<div style="display:flex;">
 											<?php
 											foreach($_moduleData -> rights as $_right)
 											{
 												$_isActiveRight = '';
-												$_tempBullShit = $_module['module_id'];
+												$_tempBullShit = $_module -> module_id;
 
-												if(property_exists($right_group -> group_rights, $_module['module_id']) && in_array($_right -> name, $right_group -> group_rights -> $_tempBullShit))
+												if(property_exists($right_group -> group_rights, $_module -> module_id) && in_array($_right -> name, $right_group -> group_rights -> $_tempBullShit))
 												{
 													$_isActiveRight = 'checked';
 												}
 
 												?>
-												<div style="margin:2px 8px; display:flex; align-items:center; position:relative; padding:4px; font-size:0.9em;">
-													<input type="checkbox" id="<?php echo $_module['module_id'] .'-'. $_right -> name; ?>" name="group_rights[<?php echo $_module['module_id']; ?>][]" value="<?php echo $_right -> name; ?>" <?php echo $_isActiveRight; ?>>
-													<label for="<?php echo $_module['module_id'] .'-'. $_right -> name; ?>" title="<?php echo $_right -> desc; ?>">
-														<?php echo $_right -> name; ?>
+												<div class="ui pick-item">
+													<input type="checkbox" id="<?php echo $_module -> module_id .'-'. $_right -> name; ?>" name="group_rights[<?php echo $_module -> module_id; ?>][]" value="<?php echo $_right -> name; ?>" <?php echo $_isActiveRight; ?>>
+													<label for="<?php echo $_module -> module_id .'-'. $_right -> name; ?>" title="<?php echo CLanguage::get() -> string($_right -> desc); ?>">
+														<?php echo CLanguage::get() -> string($_right -> desc); ?>
 													</label>
 												</div>
 												<?php
@@ -144,26 +150,32 @@
 						</table>
 
 						<style>
+							#table-mod-group-rights	{ width:100%; border: 2px solid white; margin-top: 14px; }
 							#table-mod-group-rights	> thead td { font-size:0.9em; font-weight:700; }
-							#table-mod-group-rights	> thead td:first-child { width:150px; }
-							#table-mod-group-rights td { padding: 2px; }
+							#table-mod-group-rights	> thead td:first-child { width:225px; }
+							#table-mod-group-rights td { padding: 2px 6px; }
+							#table-mod-group-rights tbody > tr { background:white; }
+
 						</style>
 
 
 					</div>
 				</div>	
 		
-
 			</div>
 
-			<div class="result-box" data-error=""></div>
+			<?php if($enableEdit) { ?>
 
-			<!-- Submit button - beware of fieldset name -->
+				<div class="result-box" data-error=""></div>
 
-			<div class="submit-container">
-				<div class="protector"><input type="checkbox" class="trigger-submit-protector" id="protector-group-rights"><label for="protector-group-rights"></label></div>
-				<button class="trigger-submit-fieldset " type="button" disabled><?php echo CLanguage::instance() -> getString('BUTTON_SAVE'); ?></button>
-			</div>
+				<!-- Submit button - beware of fieldset name -->
+
+				<div class="submit-container">
+					<button class="ui button icon labeled trigger-submit-fieldset " type="button" disabled><i class="fas fa-save"></i><?php echo CLanguage::get() -> string('BUTTON_SAVE'); ?></button>
+					<div class="protector"><input type="checkbox" class="trigger-submit-protector" id="protector-group-rights"><label for="protector-group-rights"></label></div>
+				</div>
+
+			<?php } ?>
 
 		</fieldset>
 

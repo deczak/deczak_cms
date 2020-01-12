@@ -1,6 +1,7 @@
 <?php
 
 include_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelSitemap.php';	
+include_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelDeniedRemote.php';	
 
 class	CHTAccess
 {
@@ -18,18 +19,17 @@ class	CHTAccess
 		$this -> m_rootLocation 	= CMS_SERVER_ROOT;
 
 		$this -> m_backendFilepath	= CMS_SERVER_ROOT.DIR_DATA.'backend.json';
-		$this -> m_modulesFilepath	= CMS_SERVER_ROOT.DIR_DATA.'active-modules.json';
 
 		$this -> m_publicFolder  	= 'public';
-		$this -> m_backendFolder 	= 'backend';
+		$this -> m_backendFolder 	= CMS_BACKEND_PUBLIC;
 	}
 
 	public function
 	generatePart4Backend()
 	{
-		$_targetFile = '1-backend';
+		$_targetFile = '2-backend';
 
-		$_hFile 	 = fopen($this -> m_dataLocation . $_targetFile, "r+");
+		$_hFile 	 = fopen($this -> m_dataLocation . $_targetFile, "w");
 
 		if (flock($_hFile, LOCK_EX))
 		{
@@ -40,8 +40,7 @@ class	CHTAccess
 			$_backend	= file_get_contents($this -> m_backendFilepath);
 			$_backend	= json_decode($_backend);
 
-			$_activeModules	= file_get_contents($this -> m_modulesFilepath);
-			$_activeModules	= json_decode($_activeModules);
+			$_activeModules	= CModules::instance() -> getModules();
 
 			##	looping pages
 
@@ -57,21 +56,25 @@ class	CHTAccess
 				foreach($_page -> objects as $_object)
 				{	
 					$_moduleData = $this -> _findActiveModuleData($_activeModules, $_object -> module_id);
+
 					if($_moduleData === false)
 						continue;
-
+						
 					$_moduleJSON = CMS_SERVER_ROOT.$_moduleData -> module_type.'/'.DIR_MODULES.$_moduleData -> module_location.'/module.json';
 
 					if(!file_exists($_moduleJSON))
 						continue;
+
 		
 					$_moduleParams	= file_get_contents($_moduleJSON);
 					$_moduleParams	= json_decode($_moduleParams);	
+	
 
 					##	looping sub section of module thats used by object		
 
 					foreach($_moduleParams -> sub as $_moduleSub)
-					{
+					{	
+
 						if(empty($_moduleSub -> url_name))
 						{
 							$_createEndNullSub = true;
@@ -124,7 +127,15 @@ class	CHTAccess
 			$_string = "RewriteRule ^((". $this -> m_backendFolder ."/).*)$ ". $this -> m_backendFolder ."/$1 [L,NC]" . "\r\n";
 			fwrite($_hFile, $_string);				
 			
-			fwrite($_hFile, "\r\n");		
+			fwrite($_hFile, "\r\n");	
+
+
+			if(CONFIG::GET() -> CRONJOB -> CRON_DIRECTORY_PUBLIC)
+			{	
+				$_string = "RewriteRule ^cron/(.*)/?$ cron/$1 [NC,L]" . "\r\n";
+				fwrite($_hFile, $_string);	
+				fwrite($_hFile, "\r\n");	
+			}
 
 			##	Release lock
 
@@ -154,9 +165,9 @@ class	CHTAccess
 	public function
 	generatePart4Frontend(&$_sqlConnection)
 	{
-		$_targetFile = '2-frontend';
+		$_targetFile = '3-frontend';
 
-		$_hFile 	 = fopen($this -> m_dataLocation . $_targetFile, "r+");
+		$_hFile 	 = fopen($this -> m_dataLocation . $_targetFile, "w");
 
 		if (flock($_hFile, LOCK_EX))
 		{
@@ -164,18 +175,21 @@ class	CHTAccess
 
 			##	Read pages from sql and write it to file
 
-			$_numLanguages = count(CFG::LANG_SUPPORTED);
+			$_numLanguages = count(CONFIG::GET() -> LANGUAGE -> SUPPORTED);
 			$_procLanguage = 0;
 
-			foreach(CFG::LANG_SUPPORTED as $_lang)
+			foreach(CONFIG::GET() -> LANGUAGE -> SUPPORTED as $_lang)
 			{
 				$_procLanguage++;
 
 				$_langSuffix = $_lang['key'] .'/';
-				$_langSuffix = (!CFG::LANG_DEFAULT_SUFFIX && CFG::LANG_DEFAULT === $_lang['key'] ? '' : $_langSuffix);
+				$_langSuffix = (!CONFIG::GET() -> LANGUAGE -> DEFAULT_IN_URL && CONFIG::GET() -> LANGUAGE -> DEFAULT === $_lang['key'] ? '' : $_langSuffix);
+
+				$modelCondition = new CModelCondition();
+				$modelCondition -> where('language', $_lang['key']);	
 
 				$_pSitemap 	 = new modelSitemap();
-				$_pSitemap	-> load($_sqlConnection, $_lang['key']);
+				$_pSitemap	-> load($_sqlConnection, $modelCondition);
 
 				$_sitemap	= $_pSitemap	-> getDataInstance();
 
@@ -194,7 +208,7 @@ class	CHTAccess
 						if(!empty($_langSuffix))
 						{
 
-							$_string =  "RewriteRule ^". $_langSuffix ."?$ ". $this -> m_publicFolder ."/index.php?cms-node=". $_sitemap[$i] -> node_id ."&lang=". $_sitemap[$i] -> page_language ."&%{QUERY_STRING} [NC,L]" . "\r\n";	
+							$_string =  "RewriteRule ^". $_langSuffix ."?$ ". $this -> m_publicFolder ."/index.php?cms-node=". $_sitemap[$i] -> node_id ."&cms-lang=". $_sitemap[$i] -> page_language ."&%{QUERY_STRING} [NC,L]" . "\r\n";	
 							fwrite($_hFile, $_string);
 						}
 
@@ -208,7 +222,7 @@ class	CHTAccess
 
 					##	redirect for the site
 
-					$_string =  "RewriteRule ^". $_langSuffix . $_sitemap[$i] -> page_path ."?$ ". $this -> m_publicFolder ."/index.php?cms-node=". $_sitemap[$i] -> node_id ."&lang=". $_sitemap[$i] -> page_language ."&%{QUERY_STRING} [NC,L]" . "\r\n";	
+					$_string =  "RewriteRule ^". $_langSuffix . $_sitemap[$i] -> page_path ."?$ ". $this -> m_publicFolder ."/index.php?cms-node=". $_sitemap[$i] -> node_id ."&cms-lang=". $_sitemap[$i] -> page_language ."&%{QUERY_STRING} [NC,L]" . "\r\n";	
 					fwrite($_hFile, $_string);
 				}
 
@@ -226,6 +240,50 @@ class	CHTAccess
 		}
 
 		fclose($_hFile);
+	}
+
+	public function
+	generatePart4DeniedAddress(&$_sqlConnection)
+	{
+		$_targetFile = '0-denied';
+
+		$_hFile 	 = fopen($this -> m_dataLocation . $_targetFile, "w");
+
+		if (flock($_hFile, LOCK_EX))
+		{
+			#ftruncate($_hFile, 0);
+
+			fwrite($_hFile, "\r\n");
+			fwrite($_hFile, 'Order Allow,Deny');
+			fwrite($_hFile, "\r\n");
+
+			$modelDeniedRemote 	 = new modelDeniedRemote();
+			$modelDeniedRemote	-> load($_sqlConnection);
+
+			$deniedList			 = $modelDeniedRemote -> getDataInstance();
+
+			if(is_array($deniedList)) // workaround weil kein array wenn leer (?)
+			{
+				foreach($deniedList as $denied)
+				{
+					fwrite($_hFile, 'Deny from '. $denied -> denied_ip);
+					fwrite($_hFile, "\r\n");
+				}
+			}
+
+			fwrite($_hFile, "Allow from all");
+			fwrite($_hFile, "\r\n");
+	
+			fflush($_hFile); 
+
+			flock($_hFile, LOCK_UN); 
+		}
+		else
+		{
+			# Flock returned false
+		}
+
+		fclose($_hFile);	
 	}
 
 	public function

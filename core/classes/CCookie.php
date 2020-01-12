@@ -7,9 +7,9 @@ class	CCookie extends CSingleton
 	private		$m_bRequestHTTPSCookie;
 
 	public function
-	initialize(array $_parameters)
+	initialize()
 	{
-		$this -> m_bRequestHTTPSCookie = boolval($_parameters['request_https']);
+		$this -> m_bRequestHTTPSCookie = CONFIG::GET() -> SESSION -> COOKIE_HTTPS;
 	}
 
 	public function

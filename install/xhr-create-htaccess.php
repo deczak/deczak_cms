@@ -1,10 +1,15 @@
 <?php
 
+ error_reporting(E_ALL);
+	ini_set('display_errors', 1);
+
 	include '../core/toolkit.php';
-	include '../config/standard.php';
 	include '../config/directories.php';
+	include '../config/standard.php';
 	include '../core/classes/CSheme.php';
 	include '../core/classes/CModel.php';
+	include '../core/classes/CModules.php';
+	include '../core/classes/CModelCondition.php';
 	include '../core/shemes/shemeSitemap.php';
 	include '../core/classes/CHTAccess.php';
 
@@ -21,10 +26,12 @@
 	if (mysqli_connect_errno())
 		tk::xhrResult(1, 'SQL error on connection - '. mysqli_connect_error());
 
+	CModules::instance() -> init($db);
+
 
 	$configFile = file_get_contents('0-base');
 
-	$configFile = str_replace('%%SUB_PATH%%',$_POST['server-subpath'], $configFile);
+	$configFile = str_replace('%SUB_PATH%',$_POST['server-subpath'], $configFile);
 
 	file_put_contents('../data/htaccess/0-base', $configFile);
 
