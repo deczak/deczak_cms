@@ -11,12 +11,13 @@ The version number is the release date. A letter as suffix indicates fixes on sa
 
 # Version history	    
 ```
-		20200115  Dev version
+        20200115  Dev version
 
         Changes:
 		
           - Switched error message box styles
           - Added error message if module install fails
+          - Added missing encryption base key replacement on install
           - Fixed wrong column name when calling moduleSitemap, which led to wrong URLs in 
             sitemap.xml and .htaccess
 		
