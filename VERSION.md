@@ -17,7 +17,8 @@ The version number is the release date. A letter as suffix indicates fixes on sa
 		
           - Switched error message box styles
           - Added error message if module install fails
-		  - Fixed wrong column name when calling moduleSitemap, which led to wrong URLs in sitemap.xml and .htaccess
+          - Fixed wrong column name when calling moduleSitemap, which led to wrong URLs in 
+            sitemap.xml and .htaccess
 		
 master  20200112  Release version (alpha)
   
