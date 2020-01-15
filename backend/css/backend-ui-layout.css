@@ -26,7 +26,7 @@
 	div.be-module-container .inter-menu  ul { margin:7px 0px 7px 24px; }
 	div.be-module-container .inter-menu  h2 { font-size:1.2em; font-weight:300; }
 	div.be-module-container .delete-box { padding-top:10px; }
-	div.be-module-container .delete-box .ui.fieldset { padding:0px; border:none; }
+	div.be-module-container .delete-box .ui.fieldset { padding:0px; border:none; background:unset; }
 	div.be-module-container .delete-box .ui.fieldset .submit-container { left:0px; flex-wrap:nowrap; width:100%; position:initial; }
 	div.be-module-container .delete-box .ui.fieldset .submit-container button { width:100%; min-width:initial; text-align:left; }
 	div.be-module-container .delete-box .ui.fieldset .result-box { margin:10px 0px; }
@@ -107,11 +107,10 @@ button.ui,
 .ui .input > i.far,
 .ui .input > i.fas { position:absolute; bottom:10px; right:15px; opacity:0.5; }
 
-
-.ui.fieldset .result-box { padding:10px; margin:10px 8px; font-size:0.9em; }
-.ui.fieldset .result-box:empty { display:none; }
-.ui.fieldset .result-box[data-error="0"] { background-color:rgba(0,153,51,0.2); border:1px solid rgb(0,153,51,1); }
-.ui.fieldset .result-box[data-error="1"] { background-color:rgba(255,0,0,0.2); border:1px solid rgba(255,0,0,1); }
+.ui .result-box { padding:10px 20px; font-size:0.9em; margin:15px 8px; border-radius:3px; color:white; font-weight:500; }
+.ui .result-box[data-error="0"] { background:rgba(0,153,51,0.6); }
+.ui .result-box[data-error="1"] { background:rgba(255,0,0,0.6); }
+.ui .result-box:empty { display:none; }
 
 .ui div.input > div.select-wrapper { position:relative; width:100%; }
 .ui div.input > div.select-wrapper > select { -webkit-appearance:none; -moz-appearance:none; appearance:none; width:100%; cursor:pointer; height:34px; }

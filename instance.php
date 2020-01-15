@@ -176,13 +176,7 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 							$_pURLVariables 	-> getValue("version"),
 							$_pURLVariables 	-> getValue("cms-xhrequest")
 							);
-
-
-
-#	$_pPageRequest 	-> 	pageLanguage		= $_pLanguage		-> getActiveLanguage();
-	#$_pPageRequest 	-> 	pageLanguageDefault	= CONFIG::GET() -> LANGUAGE -> DEFAULT;
-#	$_pPageRequest 	-> 	pageVersion			= $_pURLVariables -> getValue("version");
-					
+			
 	$_pImperator	 =	new CImperator( $_pSQLObject -> getConnection(CONFIG::GET() -> MYSQL -> PRIMARY_DATABASE) );
 	$_pImperator	->	logic($_pSQLObject -> getConnection(CONFIG::GET() -> MYSQL -> PRIMARY_DATABASE), $_pPageRequest , $_pModules, $_rcaTarget, CMS_BACKEND);
 
@@ -204,8 +198,8 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 #	$_pHTAccess -> writeHTAccess();
 
 
-	#$sitemap  	 = new CXMLSitemap();
-	#$sitemap  	-> generate($_pSQLObject -> getConnection(CONFIG::GET() -> MYSQL -> PRIMARY_DATABASE));
+#	$sitemap  	 = new CXMLSitemap();
+#	$sitemap  	-> generate($_pSQLObject -> getConnection(CONFIG::GET() -> MYSQL -> PRIMARY_DATABASE));
 
 
 ?>

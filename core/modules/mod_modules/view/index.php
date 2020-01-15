@@ -24,33 +24,7 @@
 				<td class="bach-item-menu"></td>
 			</tr>
 		</thead>
-		<tbody id="table-body-overview">
-		<?php
-		/*
-		foreach($modulesList as $_dataKey => $_dataSet)
-		{
-			$_dataSet -> create_time 	= ($_dataSet -> create_time == 0 ? '-' : date(TIME_FORMAT_BACKENDVIEW, $_dataSet -> create_time) );
-			$_dataSet -> update_time 	= ($_dataSet -> update_time == 0 ? '-' : date(TIME_FORMAT_BACKENDVIEW, $_dataSet -> update_time) );
-
-			$_dataSet -> is_frontend	= ($_dataSet -> is_frontend === 1 ? 'Frontend' : 'Backend');
-
-			?>
-
-			<tr class="trigger-batch-item">
-				<td class="batch-selection-item"><input type="checkbox" class="trigger-batch-item-checkbox" name="group-id[]" value="<?php echo $_dataSet -> data_id; ?>" id="item-<?php echo $_dataKey; ?>"><label for="item-<?php echo $_dataKey; ?>"></label></td>
-				<td class=""><span style="font-family:icons-solid;"><?= $_dataSet -> module_icon; ?></span></td>
-				<td class=""><?= $_dataSet -> module_name; ?></td>
-				<td class=""><?= $_dataSet -> is_frontend; ?></td>
-				<td><div class="color-indicator positive" data-state="<?= $_dataSet -> is_active; ?>"></div></td>
-				<td class=""></td>
-				<td class="bach-item-menu"><span>&equiv;</span><div class="dropdown-content"><div></div><a href="<?php echo CMS_SERVER_URL_BACKEND . $pageRequest -> urlPath; ?>module/<?php echo $_dataSet -> module_id; ?>"><?php echo $language -> string('BUTTON_EDIT'); ?></a></div></td>
-			</tr>
-
-			<?php
-		}
-		*/
-		?>
-		</tbody>
+		<tbody id="table-body-overview"></tbody>
 		<tfoot>
 			<tr>
 				<td></td>
@@ -68,6 +42,10 @@
 			</tr>			
 		</tfoot>
 	</table>
+
+	<div class="ui">
+		<div id="result-box-install" class="ui result-box"></div>
+	</div>
 
 </div>
 

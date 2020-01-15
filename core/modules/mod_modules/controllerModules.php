@@ -114,7 +114,13 @@ class	controllerModules extends CController
 									$_request[] 	 = 	[	"input" => "type", "validate" => "strip_tags|!empty", "use_default" => true, "default_value" => false ]; 		
 									$_pURLVariables -> 	retrieve($_request, false, true); // POST 
 
-									CModules::instance() -> install($_sqlConnection, $_pURLVariables -> getValue("module"), $_pURLVariables -> getValue("type"));
+									$errorMsg = '';
+
+									if(!CModules::instance() -> install($_sqlConnection, $_pURLVariables -> getValue("module"), $_pURLVariables -> getValue("type"), $errorMsg))
+									{
+										$_bValidationErr =	true;
+										$_bValidationMsg =	$errorMsg;
+									}
 
 									$data = [];
 

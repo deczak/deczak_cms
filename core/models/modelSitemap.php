@@ -23,7 +23,8 @@ class 	modelSitemap extends CModel
 
 		##	Get node_id for language defined start page
 
-		$_sqlString =	"	SELECT 		tb_page_path.node_id
+#		$_sqlString =	"	SELECT 		tb_page_path.node_id
+		$_sqlString =	"	SELECT 		*
 							FROM 		tb_page_path
 						".	($_condition != NULL ? $_condition -> getConditions($_sqlConnection, $_condition) : '');
 

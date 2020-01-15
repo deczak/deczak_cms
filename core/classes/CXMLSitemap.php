@@ -25,7 +25,7 @@ class CXMLSitemap
 
 
 				$modelCondition = new CModelCondition();
-				$modelCondition -> where('language', $_lang['key']);	
+				$modelCondition -> where('page_language', $_lang['key']);	
 
 				$_pSitemap 	 = new modelSitemap();
 				$_pSitemap	-> load($_sqlConnection, $modelCondition);
@@ -33,7 +33,7 @@ class CXMLSitemap
 				$sitemap	= $_pSitemap	-> getDataInstance();
 
 				for($i = count($sitemap) - 1; $i >= 0; $i--)
-				{
+				{			
 					fwrite($_hFile, "\t<url>\r\n");
 					fwrite($_hFile, "\t\t<loc>". CMS_SERVER_URL . $_langSuffix . substr($sitemap[$i] -> page_path,1) ."</loc>\r\n");
 					fwrite($_hFile, "\t\t<changefreq>monthly</changefreq>\r\n");
