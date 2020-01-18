@@ -123,8 +123,8 @@ class	CImperator extends CBasic
 										'module_id'			=>	$_pURLVariables -> getValue("cms-insert-module"),
 										'object_order_by'	=>	$_pURLVariables -> getValue("cms-insert-after"),
 										'node_id'			=>	$_pURLVariables -> getValue("cms-insert-node-id"),
-										'time_create'		=>	time(),
-										'create_by'			=>	0
+										'create_time'		=>	time(),
+										'create_by'			=>	CSession::instance() -> getValue('user_id')
 									];
 
 					$_objectModel  = new modelPageObject();

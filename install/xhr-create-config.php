@@ -4,6 +4,7 @@
 
 	if(empty($_POST['server-root'])) 		tk::xhrResult(1, 'Document root not set');				else $_POST['server-root'] 		 = trim(strip_tags($_POST['server-root']));
 	if(empty($_POST['server-url'])) 		tk::xhrResult(1, 'Web URL address not set');			else $_POST['server-url'] 		 = trim(strip_tags($_POST['server-url']));
+	if(empty($_POST['crypt-basekey'])) 		tk::xhrResult(1, 'Base encryption key not set');		else $_POST['crypt-basekey'] 	 = trim(strip_tags($_POST['crypt-basekey']));
 
 	if(empty($_POST['database-server'])) 	tk::xhrResult(1, 'Database server address not set');	else $_POST['database-server'] 	 = trim(strip_tags($_POST['database-server']));
 	if(empty($_POST['database-user'])) 		tk::xhrResult(1, 'Database user name not set');			else $_POST['database-user'] 	 = trim(strip_tags($_POST['database-user']));

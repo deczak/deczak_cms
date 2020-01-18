@@ -2,7 +2,7 @@
 ##	Messages for SysMailer
 
 
-##	CSQLConnect.php
+##	CSQLConnect.php -- not in use atm
 
 	SYSMAIL_DB_FAILED_SUBJ	=	Database connection error
 	SYSMAIL_DB_FAILED_TEXT	=	Error while attempting to connect to the database on [TIMESTAMP]

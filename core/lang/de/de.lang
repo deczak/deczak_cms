@@ -46,6 +46,10 @@
 	ACTIVE				=	Aktiv
 	DEACTIVATED			=	Deaktiviert
 	WARNING				=	Warnung
+	HIDDEN				= 	Versteckt
+	LOCKED				=	Gesperrt
+	DEFAULT				=	Standard
+	NOTE				=	Hinweis
 
 	USERNAME			=	Benutzername
 	

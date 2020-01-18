@@ -117,7 +117,7 @@
 							"params"	:""
 						}		
 					 ],
-		"menu_group":"2,
+		"menu_group":"2",
 		"menu_order":"0"
 	},
 	{
@@ -173,5 +173,23 @@
 					 ],
 		"menu_group":"1",
 		"menu_order":"0"
-	}		
+	},
+	{
+		"page_name"	:"Languages",
+		"page_title":"Languages",
+		"page_description":"",
+		"page_path"	:"languages",
+		"node_id"	:"12",
+		"page_auth"	:"ABKND",
+		"objects"	:[
+						{
+							"module_id"	:"13",
+							"object_id"	:"1679",
+							"body"		:"",
+							"params"	:""
+						}		
+					 ],
+		"menu_group":"3",
+		"menu_order":"0"
+	}
 ]

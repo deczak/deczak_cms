@@ -412,16 +412,35 @@
 					
 					<div class="content-page" data-page-id="6">
 									
+						<h1>Encyption Base Key</h1>
+
+						<p>Certain data are stored in encrypted form in the database. A base key is required for encryption and can be set here.<br><br><b>This key cannot be changed afterwards.</b></p>
+								
+						<table class="form">
+							<tbody>
+								<tr>
+									<td>Basekey</td>
+									<td><input type="text" name="crypt-basekey" value="<?= hash('md5', time() . rand(999,9999999)); ?>"></td>
+								</tr>
+							</tbody>
+						</table>
+												
+						<div class="button-box">
+							<button type="button" data-action="previous">Back</button> 
+							<button type="button" data-action="next">Next</button>
+						</div>
+											
+					</div>	
+
+					<!-- page 7 --> 
+					
+					<div class="content-page" data-page-id="7">
+									
 						<h1>Execute installation</h1>
 
 						<p></p>
-			
-						
-
-						
+								
 						<pre id="install-process"></pre>
-
-						
 					
 						<button type="button" data-action="previous">Back</button> 
 						<button type="button" data-action="install">Run install</button> 
@@ -433,22 +452,22 @@
 							<a href="" id="install-done-url"></a><br>
 							<a href="" id="install-done-url-backend"></a>
 
-
 							<br><br>
 							You can't reach this install address again until you removed the .htaccess file.
 						</div>
-					
-						
+											
 					</div>					
 					
+
+
+
+
+
 					
 
 				</div>
 				
 			</div>
-					
-			
-			
 			
 		</div>
 		

@@ -53,26 +53,29 @@ createMenu(&$sitemap, $_pos = 1, $_level = 2 )
 
 		<div id="language-selection">
 			<?php
-			foreach(CONFIG::GET() -> LANGUAGE -> SUPPORTED as $_lang)
+			foreach(CLanguage::instance() -> getLanguages() as $_lang)
 			{
 				$_url= '';
 
 				if(CMS_BACKEND)
 				{
-					if(isset($pageRequest -> alternate_path[ $_lang['key'] ]))
+					if(isset($pageRequest -> alternate_path[ $_lang -> lang_key ]))
 					{
-						$_url = CMS_SERVER_URL_BACKEND .'pages/view/'. $_lang['key'] .'/'. $pageRequest -> alternate_path[ $_lang['key'] ]['node_id'];
-						echo '<a href="'. $_url .'" title="'. $_lang['name'] .'">'. $_lang['key'] .'</a>';
+						$_url = CMS_SERVER_URL_BACKEND .'pages/view/'. $_lang -> lang_key .'/'. $pageRequest -> alternate_path[ $_lang -> lang_key ]['node_id'];
+						echo '<a href="'. $_url .'" title="'. $_lang -> lang_name .'">'. $_lang -> lang_key .'</a>';
 					}
 				}
 				else
 				{		
-					if(isset($pageRequest -> alternate_path[ $_lang['key'] ]))
-						$_url = substr($pageRequest -> alternate_path[ $_lang['key'] ]['path'],1);
+					if($_lang -> lang_hidden)	continue;
+					if($_lang -> lang_locked)	continue;	
 
-					$_url = CMS_SERVER_URL . ((CONFIG::GET() -> LANGUAGE -> DEFAULT_IN_URL || $_lang['key'] !== CONFIG::GET() -> LANGUAGE -> DEFAULT) ? $_lang['key'] .'/' : '') . ($_url === '/' ? '' : $_url);
+					if(isset($pageRequest -> alternate_path[ $_lang -> lang_key ]))
+						$_url = substr($pageRequest -> alternate_path[ $_lang -> lang_key ]['path'],1);
 
-					echo '<a href="'. $_url .'" title="'. $_lang['name'] .'">'. $_lang['key'] .'</a>';
+					$_url = CMS_SERVER_URL . ((CONFIG::GET() -> LANGUAGE -> DEFAULT_IN_URL || $_lang -> lang_key !== CLanguage::instance() -> getDefault()) ? $_lang -> lang_key .'/' : '') . ($_url === '/' ? '' : $_url);
+
+					echo '<a href="'. $_url .'" title="'. $_lang -> lang_name .'">'. $_lang -> lang_key .'</a>';
 				}
 			}
 			?>

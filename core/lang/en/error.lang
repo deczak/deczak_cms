@@ -5,7 +5,7 @@
 
 	ERR_CR_LOGINDTAMM	= The login information are not complete
 
-##	CSQLConnect.php
+##	CSQLConnect.php -- not in use atm
 
 	ERR_CR_DBPARAMS		= Required parameters for connection establishment not valid
 	ERR_CR_DBFAILED		= Database connection error: [DBERROR]

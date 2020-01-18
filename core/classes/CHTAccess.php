@@ -175,18 +175,20 @@ class	CHTAccess
 
 			##	Read pages from sql and write it to file
 
-			$_numLanguages = count(CONFIG::GET() -> LANGUAGE -> SUPPORTED);
+			$supportedLanguages = CLanguage::instance() -> getLanguages();
+
+			$_numLanguages = count($supportedLanguages);
 			$_procLanguage = 0;
 
-			foreach(CONFIG::GET() -> LANGUAGE -> SUPPORTED as $_lang)
-			{
+			foreach($supportedLanguages as $_lang)
+			{	
 				$_procLanguage++;
 
-				$_langSuffix = $_lang['key'] .'/';
-				$_langSuffix = (!CONFIG::GET() -> LANGUAGE -> DEFAULT_IN_URL && CONFIG::GET() -> LANGUAGE -> DEFAULT === $_lang['key'] ? '' : $_langSuffix);
+				$_langSuffix = $_lang -> lang_key .'/';
+				$_langSuffix = (!CONFIG::GET() -> LANGUAGE -> DEFAULT_IN_URL && CLanguage::instance() -> getDefault() === $_lang -> lang_key ? '' : $_langSuffix);
 
 				$modelCondition = new CModelCondition();
-				$modelCondition -> where('language', $_lang['key']);	
+				$modelCondition -> where('page_language', $_lang -> lang_key);	
 
 				$_pSitemap 	 = new modelSitemap();
 				$_pSitemap	-> load($_sqlConnection, $modelCondition);
@@ -204,11 +206,11 @@ class	CHTAccess
 					if(empty($_sitemap[$i] -> page_path) && $i == 0)
 					{
 
-
 						if(!empty($_langSuffix))
 						{
 
 							$_string =  "RewriteRule ^". $_langSuffix ."?$ ". $this -> m_publicFolder ."/index.php?cms-node=". $_sitemap[$i] -> node_id ."&cms-lang=". $_sitemap[$i] -> page_language ."&%{QUERY_STRING} [NC,L]" . "\r\n";	
+
 							fwrite($_hFile, $_string);
 						}
 

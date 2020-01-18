@@ -1,15 +1,18 @@
 <?php
 
-include_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelModules.php';	
+include_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelLanguages.php';	
+include_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelPage.php';	
 
-class	controllerModules extends CController
+include_once CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CHTAccess.php';	
+include_once CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CXMLSitemap.php';	
+
+class	controllerLanguages extends CController
 {
-	private		$m_modelRightGroups;
 
 	public function
 	__construct($_module, &$_object)
 	{		
-		$this -> m_pModel	= new modelModules();
+		$this -> m_pModel	= new modelLanguages();
 		parent::__construct($_module, $_object);
 
 		CPageRequest::instance() -> subs = $this -> getSubSection();
@@ -65,8 +68,6 @@ class	controllerModules extends CController
 	{
 		##	XHR request
 
-		
-
 		if($_isXHRequest !== false)
 		{	
 			$_bValidationErr =	false;
@@ -86,13 +87,8 @@ class	controllerModules extends CController
 
 									if($_pURLVariables -> getValue("cms-system-id") !== false)
 									{	
-										$modelCondition -> where('module_id', $_pURLVariables -> getValue("cms-system-id"));
+										$modelCondition -> where('lang_key', $_pURLVariables -> getValue("cms-system-id"));
 									}
-
-
-
-									$modelCondition -> orderBy('is_frontend');
-									$modelCondition -> orderBy('module_name');
 
 									if(!$this -> m_pModel -> load($_sqlConnection, $modelCondition))
 									{
@@ -100,31 +96,11 @@ class	controllerModules extends CController
 										$_bValidationErr = true;
 									}											
 						
-										$data['installed'] = $this -> m_pModel -> getDataInstance();
-										$data['available'] = CModules::instance() -> getAvailableModules();
+										$data = $this -> m_pModel -> getDataInstance();
 
 
 									break;
 
-				case 'install'  :	// Install
-
-									$_pURLVariables	 =	new CURLVariables();
-									$_request		 =	[];
-									$_request[] 	 = 	[	"input" => "module", "validate" => "strip_tags|!empty", "use_default" => true, "default_value" => false ]; 		
-									$_request[] 	 = 	[	"input" => "type", "validate" => "strip_tags|!empty", "use_default" => true, "default_value" => false ]; 		
-									$_pURLVariables -> 	retrieve($_request, false, true); // POST 
-
-									$errorMsg = '';
-
-									if(!CModules::instance() -> install($_sqlConnection, $_pURLVariables -> getValue("module"), $_pURLVariables -> getValue("type"), $errorMsg))
-									{
-										$_bValidationErr =	true;
-										$_bValidationMsg =	$errorMsg;
-									}
-
-									$data = [];
-
-									break;
 			}
 
 			tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $data);	// contains exit call
@@ -139,7 +115,6 @@ class	controllerModules extends CController
 						'index',	
 						'',
 						[
-							'modulesList' 	=> $this -> m_pModel -> getDataInstance(),
 							'enableEdit'	=> $_enableEdit,
 							'enableDelete'	=> $_enableDelete
 						]
@@ -150,7 +125,6 @@ class	controllerModules extends CController
 	private function
 	logicCreate(&$_sqlConnection, $_isXHRequest)
 	{
-		/*
 		if($_isXHRequest !== false)
 		{
 			$_bValidationErr =	false;
@@ -159,19 +133,32 @@ class	controllerModules extends CController
 
 			$_pURLVariables	 =	new CURLVariables();
 			$_request		 =	[];
-			$_request[] 	 = 	[	"input" => "denied_ip",  	"validate" => "strip_tags|strip_whitespaces|!empty" ]; 	
-			$_request[] 	 = 	[	"input" => "denied_desc",  	"validate" => "strip_tags|!empty" ]; 	
+			$_request[] 	 = 	[	"input" => "lang_key",  		"validate" => "strip_tags|strip_whitespaces|!empty" ]; 	
+			$_request[] 	 = 	[	"input" => "lang_name",  		"validate" => "strip_tags|strip_whitespaces|!empty" ]; 	
+			$_request[] 	 = 	[	"input" => "lang_name_native", 	"validate" => "strip_tags|strip_whitespaces|!empty" ]; 	
+			$_request[] 	 = 	[	"input" => "lang_default",  	"validate" => "strip_tags|strip_whitespaces|!empty", "use_default" => true, "default_value" => 0  ]; 	
+			$_request[] 	 = 	[	"input" => "lang_hidden",  		"validate" => "strip_tags|strip_whitespaces|!empty", "use_default" => true, "default_value" => 0 ]; 	
+			$_request[] 	 = 	[	"input" => "lang_locked",  		"validate" => "strip_tags|strip_whitespaces|!empty", "use_default" => true, "default_value" => 0  ]; 	
 			$_pURLVariables -> retrieve($_request, false, true); // POST 
 			$_aFormData		 = $_pURLVariables ->getArray();
 
-			if(empty($_aFormData['denied_ip'])) { 	$_bValidationErr = true; 	$_bValidationDta[] = 'denied_ip'; 	}
+			if(empty($_aFormData['lang_key'])) { 			$_bValidationErr = true; 	$_bValidationDta[] = 'lang_key'; 			}
+			if(empty($_aFormData['lang_name'])) { 			$_bValidationErr = true; 	$_bValidationDta[] = 'lang_name'; 			}
+			if(empty($_aFormData['lang_name_native'])) { 	$_bValidationErr = true; 	$_bValidationDta[] = 'lang_name_native'; 	}
 
 			if(!$_bValidationErr)	// Validation OK (by pre check)
 			{		
-				if(!$this -> m_pModel -> isUnique($_sqlConnection, ['denied_ip' => $_aFormData['denied_ip']]))
+
+				if(!$this -> m_pModel -> isUnique($_sqlConnection, ['lang_key' => $_aFormData['lang_key']]))
 				{
 					$_bValidationMsg .= CLanguage::get() -> string('M_BERMADDR_MSG_DENIEDEXIST');
 					$_bValidationErr = true;
+				}
+	
+				if(intval($_aFormData['lang_default']) === 1)
+				{
+					$_aFormData['lang_hidden'] = 0;
+					$_aFormData['lang_locked'] = 0;
 				}
 			}
 			else	// Validation Failed 
@@ -189,19 +176,52 @@ class	controllerModules extends CController
 
 				if($this -> m_pModel -> insert($_sqlConnection, $_aFormData, $dataId))
 				{
-					$_bValidationMsg = CLanguage::get() -> string('M_BERMADDR_MSG_ISCREATED') .' - '. CLanguage::get() -> string('WAIT_FOR_REDIRECT');
-					$_bValidationDta['redirect'] = CMS_SERVER_URL_BACKEND . CPageRequest::instance() -> urlPath .'address/'.$dataId;
+					$_bValidationMsg = CLanguage::get() -> string('M_BELANG_BEENCREATED') .' - '. CLanguage::get() -> string('WAIT_FOR_REDIRECT');
+					$_bValidationDta['redirect'] = CMS_SERVER_URL_BACKEND . CPageRequest::instance() -> urlPath .'language/'.$_aFormData['lang_key'];
+
+					##	If this Language is the new default, changes to other to non-default
+
+					if(intval($_aFormData['lang_default']) === 1)
+					{
+						$modelCondition = new CModelCondition();
+						$modelCondition -> whereNot('lang_key', $_pURLVariables -> getValue("cms-system-id"));
+
+						$_aFormData = [];
+						$_aFormData['lang_default'] = 0;
+
+						$this -> m_pModel -> update($_sqlConnection, $_aFormData, $modelCondition);
+					}
+
+					$rootPage = [];
+					$rootPage['cms-edit-page-lang'] = $_aFormData['lang_key'];
+					$rootPage['cms-edit-page-node'] = '1';
+
+					$rootPage['page_id'] = '1';
+					$rootPage['page_name'] = 'Start '. strtoupper($_aFormData['lang_key']);
+					$rootPage['page_template'] = 'default';
+
+					$rootPage['create_time']	=	time();
+					$rootPage['create_by']		= CSession::instance() -> getValue('user_id');
+
+					$nodeId = 0;
+
+					$modelPage  = new modelPage();
+					$modelPage -> insert($_sqlConnection, $rootPage, $nodeId);
+
+					## Update .htacces and sitemap.xml
 
 					$_pHTAccess  = new CHTAccess();
-					$_pHTAccess -> generatePart4DeniedAddress($_sqlConnection);
+					$_pHTAccess -> generatePart4Frontend($_sqlConnection);
 					$_pHTAccess -> writeHTAccess();
+
+					$sitemap  	 = new CXMLSitemap();
+					$sitemap 	-> generate($_sqlConnection);
 				}
 				else
 				{
 					$_bValidationMsg .= CLanguage::get() -> string('ERR_SQL_ERROR');
 				}
 			}
-
 
 			tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $_bValidationDta);	// contains exit call
 		}
@@ -211,7 +231,7 @@ class	controllerModules extends CController
 						'create',
 						'create/'
 						);
-		*/
+
 		return true;
 	}
 
@@ -226,20 +246,20 @@ class	controllerModules extends CController
 		if($_pURLVariables -> getValue("cms-system-id") !== false)
 		{	
 			$modelCondition = new CModelCondition();
-			$modelCondition -> where('module_id', $_pURLVariables -> getValue("cms-system-id"));
+			$modelCondition -> where('lang_key', $_pURLVariables -> getValue("cms-system-id"));
 
 			if($this -> m_pModel -> load($_sqlConnection, $modelCondition))
-			{
+			{ 
 				##	Gathering additional data
 
-				$_crumbName	 = $this -> m_pModel -> searchValue(intval($_pURLVariables -> getValue("cms-system-id")),'module_id','module_name');
+				$_crumbName	 = $this -> m_pModel -> searchValue($_pURLVariables -> getValue("cms-system-id"),'lang_key','lang_name');
 
 				$this -> setCrumbData('edit', $_crumbName, true);
 				$this -> setView(
 								'edit',
-								'module/'. $_pURLVariables -> getValue("cms-system-id"),								
+								'language/'. $_pURLVariables -> getValue("cms-system-id"),								
 								[
-									'modulesList' 	=> $this -> m_pModel -> getDataInstance(),
+									'languagesList' 	=> $this -> m_pModel -> getDataInstance(),
 									'enableEdit'	=> $_enableEdit,
 									'enableDelete'	=> $_enableDelete
 								]								
@@ -255,7 +275,6 @@ class	controllerModules extends CController
 	private function
 	logicEdit(&$_sqlConnection, $_isXHRequest = false)
 	{	
-		
 		$_pURLVariables	 =	new CURLVariables();
 		$_request		 =	[];
 		$_request[] 	 = 	[	"input" => "cms-system-id",  	"validate" => "strip_tags|!empty" ,	"use_default" => true, "default_value" => false ]; 		
@@ -263,25 +282,34 @@ class	controllerModules extends CController
 
 		if($_pURLVariables -> getValue("cms-system-id") !== false && $_isXHRequest !== false)
 		{	
-			
 			$_bValidationErr =	false;
 			$_bValidationMsg =	'';
 			$_bValidationDta = 	[];
 
 			switch($_isXHRequest)
 			{
-				case 'module-data'  :		// Update user data
+				case 'language'  :		// Update user data
 
 											$_pFormVariables =	new CURLVariables();
 											$_request		 =	[];
-											$_request[] 	 = 	[	"input" => "is_active",  	"validate" => "strip_tags|strip_whitespaces|!empty" ]; 	
+											$_request[] 	 = 	[	"input" => "lang_name",  		"validate" => "strip_tags|strip_whitespaces|!empty" ]; 	
+											$_request[] 	 = 	[	"input" => "lang_name_native", 	"validate" => "strip_tags|strip_whitespaces|!empty" ]; 	
+											$_request[] 	 = 	[	"input" => "lang_default",  	"validate" => "strip_tags|strip_whitespaces|!empty"  ]; 	
+											$_request[] 	 = 	[	"input" => "lang_hidden",  		"validate" => "strip_tags|strip_whitespaces|!empty", "use_default" => true, "default_value" => 0 ]; 	
+											$_request[] 	 = 	[	"input" => "lang_locked",  		"validate" => "strip_tags|strip_whitespaces|!empty", "use_default" => true, "default_value" => 0  ]; 	
 											$_pFormVariables-> retrieve($_request, false, true); // POST 
 											$_aFormData		 = $_pFormVariables ->getArray();
 
-											if(empty($_aFormData['is_active'])) { 	$_bValidationErr = true; 	$_bValidationDta[] = 'is_active'; 	}
+											if(empty($_aFormData['lang_name'])) { 			$_bValidationErr = true; 	$_bValidationDta[] = 'lang_name'; 			}
+											if(empty($_aFormData['lang_name_native'])) { 	$_bValidationErr = true; 	$_bValidationDta[] = 'lang_name_native'; 	}
 
 											if(!$_bValidationErr)	// Validation OK (by pre check)
 											{		
+												if(isset($_aFormData['lang_default']) && intval($_aFormData['lang_default']) === 1)
+												{
+													$_aFormData['lang_hidden'] = 0;
+													$_aFormData['lang_locked'] = 0;
+												}
 											}
 											else	// Validation Failed 
 											{
@@ -294,11 +322,33 @@ class	controllerModules extends CController
 												$_aFormData['update_time'] 	= time();
 
 												$modelCondition = new CModelCondition();
-												$modelCondition -> where('module_id', $_pURLVariables -> getValue("cms-system-id"));
+												$modelCondition -> where('lang_key', $_pURLVariables -> getValue("cms-system-id"));
 												
 												if($this -> m_pModel -> update($_sqlConnection, $_aFormData, $modelCondition))
 												{
-													$_bValidationMsg = CLanguage::get() -> string('M_BERMADDR_MSG_ISUPDATED');
+													$_bValidationMsg = CLanguage::get() -> string('LANGUAGE') .' '. CLanguage::get() -> string('WAS_UPDATED');
+
+													##	If this Language is the new default, changes to other to non-default
+
+													if(isset($_aFormData['lang_default']) && intval($_aFormData['lang_default']) === 1)
+													{
+														$modelCondition = new CModelCondition();
+														$modelCondition -> whereNot('lang_key', $_pURLVariables -> getValue("cms-system-id"));
+
+														$_aFormData = [];
+														$_aFormData['lang_default'] = 0;
+
+														$this -> m_pModel -> update($_sqlConnection, $_aFormData, $modelCondition);
+													}
+
+													## Update .htacces and sitemap.xml
+
+													$_pHTAccess  = new CHTAccess();
+													$_pHTAccess -> generatePart4Frontend($_sqlConnection);
+													$_pHTAccess -> writeHTAccess();
+
+													$sitemap  	 = new CXMLSitemap();
+													$sitemap 	-> generate($_sqlConnection);
 												}
 												else
 												{
@@ -337,13 +387,42 @@ class	controllerModules extends CController
 
 			switch($_isXHRequest)
 			{
-				case 'uninstall':	//	Uninstall
-							
-									CModules::instance() -> uninstall($_sqlConnection, $_pURLVariables -> getValue("cms-system-id"));
+				case 'delete':	//	Delete
 
-									$_bValidationMsg = CLanguage::get() -> string('M_BEMOULE_MSG_REMOVED') .' - '. CLanguage::get() -> string('WAIT_FOR_REDIRECT');
-									$_bValidationDta['redirect'] = CMS_SERVER_URL_BACKEND . CPageRequest::instance() -> urlPath;
-														
+									$modelCondition = new CModelCondition();
+									$modelCondition -> where('lang_key', $_pURLVariables -> getValue("cms-system-id"));
+
+									if($this -> m_pModel -> delete($_sqlConnection, $modelCondition))
+									{
+										$_bValidationMsg = CLanguage::get() -> string('M_BELANG_BEENDELETED') .' - '. CLanguage::get() -> string('WAIT_FOR_REDIRECT');
+										$_bValidationDta['redirect'] = CMS_SERVER_URL_BACKEND . CPageRequest::instance() -> urlPath;
+
+										##	Delete Pages
+
+										$sqlRootNodeRes	= $_sqlConnection -> query("SELECT node_id FROM tb_page_header WHERE page_language = '". $_pURLVariables -> getValue("cms-system-id") ."'");
+										$sqlRootNodeItm = $sqlRootNodeRes -> fetch_assoc();
+
+										$modelCondition = new CModelCondition();
+										$modelCondition -> where('node_id', $sqlRootNodeItm['node_id']);
+
+										$modelPage  = new modelPage();
+										$modelPage -> deleteTree($_sqlConnection, $modelCondition);
+
+										## Update .htacces and sitemap.xml
+
+										$_pHTAccess  = new CHTAccess();
+										$_pHTAccess -> generatePart4Frontend($_sqlConnection);
+										$_pHTAccess -> writeHTAccess();
+
+										$sitemap  	 = new CXMLSitemap();
+										$sitemap 	-> generate($_sqlConnection);
+
+									}
+									else
+									{
+										$_bValidationMsg .= CLanguage::get() -> string('ERR_SQL_ERROR');
+									}
+
 									break;
 			}
 

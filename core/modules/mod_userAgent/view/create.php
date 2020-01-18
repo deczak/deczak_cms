@@ -55,7 +55,7 @@
 
 			</div>
 
-			<div class="result-box" data-error=""></div>
+			<div class="ui result-box" data-error=""></div>
 
 			<!-- Submit button - beware of fieldset name -->
 

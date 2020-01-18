@@ -194,14 +194,13 @@ class	CModules extends CSingleton
 	}
 
 	public function
-	install(&$_sqlConnection, $moduleLocation, $moduleType)
+	install(&$_sqlConnection, $moduleLocation, $moduleType, &$errorMsg)
 	{
 		// Read module.json
 
 		$moduleFilepath 	= CMS_SERVER_ROOT . $moduleType .'/'. DIR_MODULES . $moduleLocation .'/module.json';
 
 		$moduleConfig	= file_get_contents($moduleFilepath);
-
 
 		if($moduleConfig === false)
 			return false;
@@ -237,40 +236,26 @@ class	CModules extends CSingleton
 		{
 			foreach($moduleConfig -> module_sheme as $shemeItem)
 			{
-
 				include CMS_SERVER_ROOT . $moduleType .'/'. DIR_MODULES . $moduleLocation .'/'. $shemeItem -> filename .'.php';
-
-
-				$errorMsg = '';
 				
 				$sheme  = new $shemeItem -> filename();
 
 				if(!$sheme -> createTable($_sqlConnection, $errorMsg))
 				{
-
-					// TODO :: createTable failed, error in $errorMsg (todo: add error into this variable)
-
+					return false;
 				}
 			}
 		}
 
-
 		if($moduleConfig -> module_frontend == 0)
 		{
-
-
 			$backendObjFilepath = CMS_SERVER_ROOT . DIR_DATA .'/backend-id.json';
 			$backendObjectId	= file_get_contents($backendObjFilepath);
 			$backendObjectId	= json_decode($backendObjectId);
 
-
 			$backendFilepath 	= CMS_SERVER_ROOT . DIR_DATA .'/backend.json';
 			$backendPages		= file_get_contents($backendFilepath);
 			$backendPages		= json_decode($backendPages, true);
-
-
-
-
 
 			$backendPages[]		= 	[
 										"page_name"			=> $moduleConfig -> module_name,
@@ -291,13 +276,9 @@ class	CModules extends CSingleton
 																]
 									];
 
-
 			$backendPages		= json_encode($backendPages);
 
 			file_put_contents($backendFilepath, $backendPages);
-
-
-
 
 			$backendObjectId -> next_node_id = $backendObjectId -> next_node_id + 1;
 
@@ -305,24 +286,15 @@ class	CModules extends CSingleton
 
 			file_put_contents($backendObjFilepath, $backendObjectId);
 
-
 			$this -> modelModules	->	load($_sqlConnection);
 			$this -> modulesList 	 =	$this -> modelModules -> getDataInstance();
-
 
 			$_pHTAccess  = new CHTAccess();
 			$_pHTAccess -> generatePart4Backend();
 			$_pHTAccess -> writeHTAccess();
-
-
 		}
 
-
-
-
-
 		return true;
-
 	}
 
 	public function

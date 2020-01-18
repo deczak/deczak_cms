@@ -23,7 +23,8 @@ class 	modelSitemap extends CModel
 
 		##	Get node_id for language defined start page
 
-		$_sqlString =	"	SELECT 		tb_page_path.node_id
+#		$_sqlString =	"	SELECT 		tb_page_path.node_id
+		$_sqlString =	"	SELECT 		*
 							FROM 		tb_page_path
 						".	($_condition != NULL ? $_condition -> getConditions($_sqlConnection, $_condition) : '');
 
@@ -77,6 +78,7 @@ class 	modelSitemap extends CModel
 		while($_sqlNode = $_sqlNodeRes -> fetch_assoc())
 		{
 			$_sqlNode['page_path'] = $this -> getPagePath($_sqlConnection, $_sqlNode['node_id'], $_sqlNode['page_language']);
+
 			$_pages[]  = $_sqlNode;
 		}
 
@@ -149,7 +151,7 @@ class 	modelSitemap extends CModel
 									AND	p.node_rgt 
 								AND 	n.node_id 		= '". $_sqlConnection -> real_escape_string($_nodeID) ."'
 								AND 	p.page_language = '". $_sqlConnection -> real_escape_string($_language) ."'
-							ORDER BY 	n.node_lft
+							ORDER BY 	p.node_lft ASC
 						";
 
 		$_sqlNodeRes = $_sqlConnection -> query($_sqlString);

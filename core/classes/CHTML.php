@@ -31,7 +31,7 @@ class	CHTML extends CBasic
 
 		$sitemap		=	$pageRequest -> sitemap;
 
-		define('URL_LANG_PRREFIX', ((CONFIG::GET() -> LANGUAGE -> DEFAULT_IN_URL || $pageRequest -> page_language !== CONFIG::GET() -> LANGUAGE -> DEFAULT) ? $pageRequest -> page_language .'/' : '') );
+		define('URL_LANG_PRREFIX', ((CONFIG::GET() -> LANGUAGE -> DEFAULT_IN_URL || $pageRequest -> page_language !== CLanguage::instance() -> getDefault()) ? $pageRequest -> page_language .'/' : '') );
 
 		switch($pageRequest -> responseCode)
 		{
@@ -49,7 +49,7 @@ class	CHTML extends CBasic
 
 		if(!empty($pageRequest -> alternate_path))
 		foreach($pageRequest -> alternate_path as $_langKey => $_langPath) 	
-			echo "\t<link rel=\"alternate\" hreflang=\"". $_langKey ."\" href=\"". CMS_SERVER_URL . ((CONFIG::GET() -> LANGUAGE -> DEFAULT_IN_URL || $_langKey !== CONFIG::GET() -> LANGUAGE -> DEFAULT) ? $_langKey .'/' : '') . ($_langPath['path'] === '/' ? '' : substr($_langPath['path'],1)) ."\">\r\n";
+			echo "\t<link rel=\"alternate\" hreflang=\"". $_langKey ."\" href=\"". CMS_SERVER_URL . ((CONFIG::GET() -> LANGUAGE -> DEFAULT_IN_URL || $_langKey !== CLanguage::instance() -> getDefault()) ? $_langKey .'/' : '') . ($_langPath['path'] === '/' ? '' : substr($_langPath['path'],1)) ."\">\r\n";
 
 		##	Page Panel for editing sites
 		if(CMS_BACKEND && $pageRequest -> page_template !== CMS_BACKEND_TEMPLATE)

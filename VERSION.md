@@ -10,14 +10,30 @@ The version number is the release date. A letter as suffix indicates fixes on sa
 
 
 # Version history	    
-```
-master  20200112  Release version (alpha)
-  
-            - early version
 
-			- Mantle module mod_blogBackend unfinished
+### 20200118 Release version (alpha)
 
-master  20190922  Release version (alpha)
+** Notes **
+- Early version
+- Deleting a languages does not deletes added objects
+
+** Modules **
+- Added backend module for frontend languages, removed previous settings from config file
+
+** Changes **
+- Switched error message box styles
+- Added error message if module install fails
+- Added missing encryption base key replacement on install
+- Added backend module for frontend languages
+- Fixed wrong column name when calling moduleSitemap, which led to wrong URLs in sitemap.xml and .htaccess
+		
+### 20200112  Release version (alpha)
   
-            - early version
-```
+** Notes **
+- Early version
+- Mantle module mod_blogBackend unfinished (maybe will be dropped)
+
+### 20190922  Release version (alpha)
+  
+** Notes **
+- Early version

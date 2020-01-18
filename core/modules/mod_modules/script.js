@@ -134,6 +134,16 @@ class	cmsIndexList
 
 	onXHRInstallSuccess(response, instance)
 	{
+		let resultBox = document.getElementById('result-box-install');
+			resultBox.innerText = '';
+
+		if(response.state != 0)
+		{
+			resultBox.innerText = response.msg;
+			resultBox.setAttribute('data-error', response.state);
+			return;
+		}
+		
 		instance.requestData();
 	}
 }

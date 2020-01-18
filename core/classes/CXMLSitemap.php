@@ -18,14 +18,17 @@ class CXMLSitemap
 			fwrite($_hFile, '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">');
 			fwrite($_hFile, "\r\n");
 
-			foreach(CONFIG::GET() -> LANGUAGE -> SUPPORTED as $_lang)
+			foreach(CLanguage::instance() -> getLanguages() as $_lang)
 			{
-				$_langSuffix = $_lang['key'] .'/';
-				$_langSuffix = (!CONFIG::GET() -> LANGUAGE -> DEFAULT_IN_URL && CONFIG::GET() -> LANGUAGE -> DEFAULT === $_lang['key'] ? '' : $_langSuffix);
+				if($_lang -> lang_hidden)	continue;
+				if($_lang -> lang_locked)	continue;
+
+				$_langSuffix = $_lang -> lang_key .'/';
+				$_langSuffix = (!CONFIG::GET() -> LANGUAGE -> DEFAULT_IN_URL && CLanguage::instance() -> getDefault() === $_lang -> lang_key ? '' : $_langSuffix);
 
 
 				$modelCondition = new CModelCondition();
-				$modelCondition -> where('language', $_lang['key']);	
+				$modelCondition -> where('page_language', $_lang -> lang_key);	
 
 				$_pSitemap 	 = new modelSitemap();
 				$_pSitemap	-> load($_sqlConnection, $modelCondition);
@@ -33,7 +36,7 @@ class CXMLSitemap
 				$sitemap	= $_pSitemap	-> getDataInstance();
 
 				for($i = count($sitemap) - 1; $i >= 0; $i--)
-				{
+				{			
 					fwrite($_hFile, "\t<url>\r\n");
 					fwrite($_hFile, "\t\t<loc>". CMS_SERVER_URL . $_langSuffix . substr($sitemap[$i] -> page_path,1) ."</loc>\r\n");
 					fwrite($_hFile, "\t\t<changefreq>monthly</changefreq>\r\n");
