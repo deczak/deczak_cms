@@ -3,6 +3,8 @@
 
 I create this content management system primarily for myself and my requirements, but make it available to the general public. The abbreviation cos stands for cooking own soup, based on the fact that someone cooks their own soup instead of using others. I have no objection to participating in the project. Notes on errors and the like are welcome.
 
+Since I do all of this in my spare time, it may take some time until further updates come.
+
 ## Current status
 
 This version is an early, if you like to call it that, alpha version. You can do that:
