@@ -145,8 +145,6 @@ class 	modelPage extends CModel
 	insert(&$_sqlConnection, &$_dataset, &$_insertID)
 	{
 		$_bQueryResult = true;
-		##	Username userid nachtragen
-		##CSession::instance() -> getValue(string $_valueName)
 
 		$_tablePageHeader		=	$this -> m_shemePageHeader 	-> getTableName();
 		$_tablePagePath			=	$this -> m_shemePagePath 	-> getTableName();
@@ -157,16 +155,23 @@ class 	modelPage extends CModel
 		$_dataset['page_version'] 	= 	1;
 		$_dataset['page_language']	=	$_dataset['cms-edit-page-lang'];
 
-		$_dataset['page_path']		=	$this -> getValidPath($_sqlConnection, $_dataset['cms-edit-page-node'], $_dataset['page_name']) .'/';
-		
-		$_dataset['page_id'] 		= 	$this -> getFreePageID($_sqlConnection);
+		if(empty($_dataset['page_title']))
+			$_dataset['page_title'] = $_dataset['page_name'];
 
+		if(!isset($_dataset['page_id']))
+			$_dataset['page_id'] 		= 	$this -> getFreePageID($_sqlConnection);
+
+		if($_dataset['page_id'] !== '1')		
+			$_dataset['page_path']		=	$this -> getValidPath($_sqlConnection, $_dataset['cms-edit-page-node'], $_dataset['page_name']) .'/';
+		else
+			$_dataset['page_path']		= '/';
+			
 		##	Table tb_page_path
 	
 		$_parentNode = [];
 		if(!$this -> getNodeData($_sqlConnection, $_dataset['cms-edit-page-node'], $_parentNode))
 		{
-			trigger_error('modelSite::delete() - Node does not exists');
+			trigger_error('modelPage::delete() - Node does not exists');
 			return false;
 		}
 
@@ -258,7 +263,7 @@ class 	modelPage extends CModel
 		$_nodeData = [];
 		if(!$nodeId || !$this -> getNodeData($_sqlConnection, $nodeId, $_nodeData))
 		{
-			trigger_error('modelSite::delete() - Node does not exists');
+			trigger_error('modelPage::delete() - Node does not exists');
 			return false;
 		}
 
@@ -287,7 +292,7 @@ class 	modelPage extends CModel
 		$_nodeData = [];
 		if(!$nodeId || !$this -> getNodeData($_sqlConnection, $nodeId, $_nodeData))
 		{
-			trigger_error('modelSite::delete() - Node does not exists');
+			trigger_error('modelPage::delete() - Node does not exists');
 			return false;
 		}
 
@@ -306,6 +311,7 @@ class 	modelPage extends CModel
 		$_sqlConnection -> query("DELETE FROM $_tablePagePath WHERE node_lft BETWEEN ". $_nodeData['node_lft'] ." AND ". $_nodeData['node_rgt']);
 		$_sqlConnection -> query("UPDATE 	  $_tablePagePath SET node_lft=node_lft-ROUND(". ( $_nodeData['node_rgt'] - $_nodeData['node_lft'] + 1 ). ") WHERE node_lft > ". $_nodeData['node_rgt']);
 		$_sqlConnection -> query("UPDATE 	  $_tablePagePath SET node_rgt=node_rgt-ROUND(". ( $_nodeData['node_rgt'] - $_nodeData['node_lft'] + 1 ) .") WHERE node_rgt > ". $_nodeData['node_rgt']);
+
 
 		return true;
 	}

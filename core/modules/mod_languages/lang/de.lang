@@ -1,0 +1,24 @@
+
+	M_BELANG_NAMENKEY		= Sprachschlüssel
+	M_BELANG_NAMENATIVE		= Native Bezeichnung
+
+	M_BELANG_HIDDEN			= Sprache verstecken
+	M_BELANG_LOCKED			= Sprache sperren
+
+	M_BELANG_SETTINGS		= Allgemeine Einstellungen
+	M_BELANG_VISSETTINGS	= Visuelle Einstellungen
+
+	M_BELANG_DEFAULT		= Standard Sprache
+
+	M_BELANG_DEFWARNING		= Änderung der Standard Sprache kann zu ungültigen Verlinkungen dritter führen.
+	M_BELANG_DEFNOTE		= Wird eine Sprache als neuer Standard festgelegt, werden versteckt und gesperrt auf Nein gesetzt.
+	M_BELANG_DEFDELELTE		= Eine Standard sprache kann nicht gelöscht werden, Sie müssen erst eine andere als Standard setzen.
+
+	M_BELANG_CREATE			= Sprache erstellen
+	M_BELANG_BEENCREATED	= Sprache wurde erstellt
+	M_BELANG_BEENDELETED	= Sprache wurde gelöscht
+	
+
+
+	
+	

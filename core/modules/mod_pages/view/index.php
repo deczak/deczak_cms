@@ -31,19 +31,18 @@ draw(&$_nodeMap, $_nodeKey = 1, $_level = 1 )
 
 echo '<div class="language-select-container">';
 
-foreach(CONFIG::GET() -> LANGUAGE -> SUPPORTED as $language)
+foreach(CLanguage::instance() -> getLanguages() as $language)
 {
-	echo '<a class="trigger-language-select" data-language="'. $language['key'] .'"><span>'.  strtoupper($language['key']) .'</span>'. $language['name'] .'</a>';
+	echo '<a class="trigger-language-select" data-language="'. $language -> lang_key .'"><span>'.  strtoupper($language -> lang_key) .'</span>'. $language -> lang_name .'</a>';
 }
 echo '</div>';
-
 
 ?>
 
 <style>
 
 	.language-select-container { display:flex; padding:10px 20px; }
-	.language-select-container .trigger-language-select { border:1px solid grey; padding:3px 6px; padding-left:40px; position:relative; margin-right:10px; font-size:0.8em; }
+	.language-select-container .trigger-language-select { border:1px solid grey; padding:3px 6px; padding-left:34px; position:relative; margin-right:10px; font-size:0.8em; }
 	.language-select-container .trigger-language-select span { background:grey; color:white; position:absolute; display:block; left:0px; top:0px; height:100%; padding:3px 6px; font-weight:500; }
 
 
@@ -142,7 +141,7 @@ echo '</div>';
 	<td class="time-create">%CREATE_TIME%</td>
 	<td class="time-update">%UPDATE_TIME%</td>
 	<td class="bach-item-menu"><span>&equiv;</span><div class="dropdown-content"><div></div>
-		<a href="<?php echo CMS_SERVER_URL_BACKEND . $_pPageRequest -> urlPath; ?>view/%PAGE_LANGUAGE%/%NODE_ID%?language=<?= $language; ?>"><?php echo CLanguage::instance() -> getString('MOD_SITES_OV_TABLE_PAGEEDIT'); ?></a>
+		<a href="<?php echo CMS_SERVER_URL_BACKEND . $_pPageRequest -> urlPath; ?>view/%PAGE_LANGUAGE%/%NODE_ID%?language=<?= CLanguage::get() -> getActive(); ?>"><?php echo CLanguage::instance() -> getString('MOD_SITES_OV_TABLE_PAGEEDIT'); ?></a>
 		<a class="trigger-page-option" data-xhr-overwrite-target="create/%PAGE_LANGUAGE%/%NODE_ID%"><?php echo CLanguage::instance() -> getString('MOD_SITES_OV_TABLE_PAGECREATE'); ?></a>
 		<a class="trigger-page-option" data-xhr-overwrite-target="delete/%PAGE_LANGUAGE%/%NODE_ID%"><?php echo CLanguage::instance() -> getString('MOD_SITES_OV_TABLE_PAGEDELETE'); ?></a>
 		<a class="trigger-page-option" data-xhr-overwrite-target="deletetree/%PAGE_LANGUAGE%/%NODE_ID%"><?php echo CLanguage::instance() -> getString('MOD_SITES_OV_TABLE_PAGEDELETETREE'); ?></a>

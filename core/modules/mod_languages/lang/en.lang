@@ -1,0 +1,20 @@
+
+	M_BELANG_NAMENKEY		= Language Key
+	M_BELANG_NAMENATIVE		= Native description
+
+	M_BELANG_HIDDEN			= Hide Language
+	M_BELANG_LOCKED			= Lock language
+
+	M_BELANG_SETTINGS		= General Settings
+	M_BELANG_VISSETTINGS	= Visual Settings
+
+	M_BELANG_DEFAULT		= Default language
+
+	M_BELANG_DEFWARNING		= Changes on the default language may corrupt external links to this website.
+	M_BELANG_DEFNOTE		= If you set a language as new default value, hidden and locked will be set to No.
+	M_BELANG_DEFDELELTE		= A default Language cannot be deleted. You must first set a language other than the default.
+
+	M_BELANG_CREATE			= Create language
+
+	M_BELANG_BEENCREATED	= Language has been created
+	M_BELANG_BEENDELETED	= Language has been deleted

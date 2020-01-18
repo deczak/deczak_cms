@@ -64,15 +64,6 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 	$_pSysMailer	 =	CSysMailer::instance();
 	$_pSysMailer	->	initialize();
 
-##	L A N G U A G E   S Y S T E M   /   I N I T I A L   F I L E S
-
-	//	CLanguage is a singleton class
-	// 	Loads and manage language files
-
-	$_pLanguage		 = 	CLanguage::instance();		
-	$_pLanguage		-> 	initialize(CONFIG::GET() -> LANGUAGE -> DEFAULT);		
-	$_pLanguage		->	loadLanguageFile(CMS_SERVER_ROOT.DIR_CORE.DIR_LANGUAGES.CONFIG::GET() -> LANGUAGE -> DEFAULT .'/', CONFIG::GET() -> LANGUAGE -> DEFAULT );
-
 ##  S Q L   C O N N E C T I O N
 
 	//	CSQLConnect is a singleton class
@@ -83,6 +74,15 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 	{	##	create connection failed
 		CPageRequest::instance() -> setResponseCode(920);
 	}	
+
+##	L A N G U A G E   S Y S T E M   /   I N I T I A L   F I L E S
+
+	//	CLanguage is a singleton class
+	// 	Loads and manage language files
+
+	$_pLanguage		 = 	CLanguage::instance();		
+	$_pLanguage		-> 	initialize($_pSQLObject -> getConnection(CONFIG::GET() -> MYSQL -> PRIMARY_DATABASE));		
+	$_pLanguage		->	loadLanguageFile(CMS_SERVER_ROOT.DIR_CORE.DIR_LANGUAGES.CLanguage::instance() -> getDefault() .'/', CLanguage::instance() -> getDefault() );
 
 ##	C O O K I E   M A N A G E R
 
@@ -96,7 +96,7 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 
 	$_pURLVariables	 =	new CURLVariables();
 
-	$_request[] 	 = 	[	"input" => "cms-lang", 		  	 	"validate" => "strip_tags|strip_whitespaces|lowercase|!empty",          "use_default" => true, "default_value" => CONFIG::GET() -> LANGUAGE -> DEFAULT ]; // language key
+	$_request[] 	 = 	[	"input" => "cms-lang", 		  	 	"validate" => "strip_tags|strip_whitespaces|lowercase|!empty",          "use_default" => true, "default_value" => CLanguage::instance() -> getDefault() ]; // language key
 	$_request[] 	 = 	[	"input" => "cms-node",  		"validate" => "strip_tags|strip_whitespaces|lowercase|is_digit|!empty", "use_default" => true, "default_value" => false     ]; // node_id
 	$_request[] 	 = 	[	"input" => "cms-ctrl-action",	"validate" => "strip_tags|strip_whitespaces|lowercase|!empty", 			"use_default" => true, "default_value" => []	]; // requested controller action
 	$_pURLVariables -> retrieve($_request, true, false); // GET
@@ -152,7 +152,7 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 	if(CMS_BACKEND && CSession::instance() -> getValue('language') !== NULL)
 		$activeLanguage  = CSession::instance() -> getValue('language');
 
-	if(CMS_BACKEND && $activeLanguage !== NULL && CONFIG::GET() -> LANGUAGE -> DEFAULT !== $activeLanguage)
+	if(CMS_BACKEND && $activeLanguage !== NULL && CLanguage::instance() -> getDefault() !== $activeLanguage)
 		$_pLanguage		-> loadLanguageFile(CMS_SERVER_ROOT.DIR_CORE.DIR_LANGUAGES.$activeLanguage .'/', $activeLanguage );
 
 	$_pLanguage		-> 	setActiveLanguage($activeLanguage);		
@@ -191,15 +191,27 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 	$_pHTML -> openDocument($_pImperator -> m_page, $_pImperator, $_pPageRequest);
 
 
-#	$_pHTAccess  = new CHTAccess();
-#	$_pHTAccess -> generatePart4Backend();
-#	$_pHTAccess -> generatePart4Frontend($_pSQLObject -> getConnection(CONFIG::GET() -> MYSQL -> PRIMARY_DATABASE));
-#	$_pHTAccess -> generatePart4DeniedAddress($_pSQLObject -> getConnection(CONFIG::GET() -> MYSQL -> PRIMARY_DATABASE));
-#	$_pHTAccess -> writeHTAccess();
+	$_pHTAccess  = new CHTAccess();
+	$_pHTAccess -> generatePart4Backend();
+	$_pHTAccess -> generatePart4Frontend($_pSQLObject -> getConnection(CONFIG::GET() -> MYSQL -> PRIMARY_DATABASE));
+	$_pHTAccess -> generatePart4DeniedAddress($_pSQLObject -> getConnection(CONFIG::GET() -> MYSQL -> PRIMARY_DATABASE));
+	$_pHTAccess -> writeHTAccess();
 
 
 #	$sitemap  	 = new CXMLSitemap();
 #	$sitemap  	-> generate($_pSQLObject -> getConnection(CONFIG::GET() -> MYSQL -> PRIMARY_DATABASE));
+
+#	$errorMsg = '';
+#	include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SHEME.'shemeLanguages.php';	
+#	$newSheme = new shemeLanguages();
+#	$newSheme -> createTable($_pSQLObject -> getConnection(CONFIG::GET() -> MYSQL -> PRIMARY_DATABASE), $errorMsg);
+#	tk::dbug($errorMsg);
+
+
+#	include_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelLanguages.php';	
+#	$modelLanguages = new modelLanguages();
+#	$modelLanguages -> load($_pSQLObject -> getConnection(CONFIG::GET() -> MYSQL -> PRIMARY_DATABASE));
+#	tk::dbug($modelLanguages -> getDataInstance());
 
 
 ?>

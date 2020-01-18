@@ -110,11 +110,13 @@ button.ui,
 .ui .result-box { padding:10px 20px; font-size:0.9em; margin:15px 8px; border-radius:3px; color:white; font-weight:500; }
 .ui .result-box[data-error="0"] { background:rgba(0,153,51,0.6); }
 .ui .result-box[data-error="1"] { background:rgba(255,0,0,0.6); }
+.ui .result-box[data-error="2"] { background:rgba(40, 83, 131, 0.877); }
 .ui .result-box:empty { display:none; }
+.ui .result-box.big {font-size:1em; }
 
 .ui div.input > div.select-wrapper { position:relative; width:100%; }
 .ui div.input > div.select-wrapper > select { -webkit-appearance:none; -moz-appearance:none; appearance:none; width:100%; cursor:pointer; height:34px; }
-.ui div.input > div.select-wrapper:after { position:absolute; content:' '; width:8px; height:8px; transform-origin:50% 50%; transform:rotate(-45deg) translateY(-50%); border-width:0px 0px 2px 2px; border-color:black; border-style:solid; top:38%; right:10px; pointer-events:none; }
+.ui div.input > div.select-wrapper:not(.select-disabled):after { position:absolute; content:' '; width:8px; height:8px; transform-origin:50% 50%; transform:rotate(-45deg) translateY(-50%); border-width:0px 0px 2px 2px; border-color:black; border-style:solid; top:38%; right:10px; pointer-events:none; }
 
 .ui.button.icon { position:relative; width:35px; height:34px; }
 .ui.button.labeled.icon {  padding-left:45px; width:auto; }

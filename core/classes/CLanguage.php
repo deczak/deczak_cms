@@ -1,5 +1,7 @@
 <?php
 
+include_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelLanguages.php';	
+
 require_once 'CSingleton.php';
 
 class	CLanguage extends CSingleton
@@ -9,27 +11,53 @@ class	CLanguage extends CSingleton
 	private		$m_activeLanguage;
 	private		$m_defaultLanguage;
 
+	private		$languagesList;
+
 	public function
-	initialize(string $_activeLanguage)
+	initialize(&$_sqlConnection, string $_activeLanguage = '')
 	{
-		$this -> m_defaultLanguage		= CONFIG::GET() -> LANGUAGE -> DEFAULT;
+		$this -> languagesList = [];
+
+		$modelLanguages = new modelLanguages();
+		$modelLanguages -> load($_sqlConnection);
+		$srcLanguages = $modelLanguages -> getDataInstance();
+
+		foreach($srcLanguages as $lang)
+		{
+			if($lang -> lang_default)
+				$this -> m_defaultLanguage = $lang -> lang_key;
+
+			$this -> languagesList[$lang -> lang_key] = $lang;
+		}
+
+		$_activeLanguage = (empty($_activeLanguage) ? $this -> m_defaultLanguage : $_activeLanguage);
 
 		$this -> m_activeLanguage		= $_activeLanguage;
-		
-		if(!isset(CONFIG::GET() -> LANGUAGE -> SUPPORTED[$_activeLanguage]))
-			$this -> m_activeLanguage = CONFIG::GET() -> LANGUAGE -> DEFAULT;
+
+		if(!isset($this -> languagesList[$_activeLanguage]))
+			$this -> m_activeLanguage = $this -> m_defaultLanguage;
 
 		$this -> m_bInitialized			= true;
 	}
 
 	public function
+	getLanguages()
+	{
+		if(empty($this -> m_bInitialized)) return [];
+		return $this -> languagesList;
+	}
+
+	public function
+	getDefault()
+	{
+		return $this -> m_defaultLanguage;
+	}
+
+	public function
 	loadLanguageFile(string $_Filelocation , string $_LanguageKey, array $_compareData = [] )
 	{ 
-
-
 		if( !file_exists( $_Filelocation . $_LanguageKey .'.lang' ) )
 		{
-			
 			if( !file_exists( $_Filelocation . $this -> m_defaultLanguage .'.lang' ) )
 			{
 				return;
@@ -38,7 +66,6 @@ class	CLanguage extends CSingleton
 		}
 		
 		$_aFilepaths[] = $_Filelocation . $_LanguageKey .'.lang';
-
 		
 		for( $i = 0; $i < count($_aFilepaths); $i++)
 		{
@@ -53,21 +80,14 @@ class	CLanguage extends CSingleton
 
 			while( !feof($_pFileHandler) )
 			{
-
 				$_FileLine = fgets($_pFileHandler);
-
-				
-		
-
 
 				if ($_FileLine === false) 
 				{
 					break;
 				}
 				
-				
 				$_FileLine = trim( $_FileLine );
-
 				
 				if( !isset($_FileLine[0]) OR $_FileLine[0] === '#' OR strlen($_FileLine) === 0 )
 				{
@@ -128,7 +148,6 @@ class	CLanguage extends CSingleton
 	public function
 	getString(string $_StringID, string $_DefaultString = '???')
 	{
-
 		if(empty($this -> m_bInitialized)) return 'not_initialized';
 
 		$_StringID = explode(' ', $_StringID);
@@ -144,13 +163,10 @@ class	CLanguage extends CSingleton
 
 			if( isset( $this -> m_aStorage[$this -> m_activeLanguage][$stringId] ) )
 			{
-				
-
 				$returnValue .= $this -> m_aStorage[$this -> m_activeLanguage][$stringId];
 			}
 			else
 			{
-
 				$returnValue .= $_DefaultString;
 			}
 		}
@@ -236,6 +252,13 @@ class	CLanguage extends CSingleton
 	}
 
 	public function
+	getActive()
+	{
+		if(empty($this -> m_bInitialized)) return false;
+		return $this -> m_activeLanguage;
+	}
+
+	public function
 	setActiveLanguage(string $_activeLanguage)
 	{
 		if(empty($this -> m_bInitialized))
@@ -243,7 +266,7 @@ class	CLanguage extends CSingleton
 
 		if(!CMS_BACKEND)
 		{
-			if(!isset(CONFIG::GET() -> LANGUAGE -> SUPPORTED[$_activeLanguage]))
+			if(!isset($this -> languagesList[$_activeLanguage]))
 
 				$this -> m_activeLanguage = $this -> m_defaultLanguage;	
 

@@ -105,6 +105,10 @@
 			<div style="padding-top:10px;">
 				<div class="input width-100">
 					<div class="select-wrapper">
+					<?php
+					if($pageRequest -> page_path == '/')
+						echo '<input type="hidden" name="hidden_state" value="0">';
+					?>
 					<select name="hidden_state" <?= ($pageRequest -> page_path == '/' ? 'disabled' : ''); ?>>
 						<option value="0" <?= ($pageRequest -> hidden_state == 0 ? 'selected' : ''); ?>><?= CLanguage::GET() -> STRING('BEPE_PANEL_HIDDEN_0_VISIBLE'); ?></option>
 						<option value="1" <?= ($pageRequest -> hidden_state == 1 ? 'selected' : ''); ?>><?= CLanguage::GET() -> STRING('BEPE_PANEL_HIDDEN_1_LOCKED'); ?></option>
@@ -171,99 +175,84 @@
 		<fieldset class="ui fieldset submit-able">
 			<legend><?= CLanguage::GET() -> STRING('BEPE_PANEL_GROUP_ALTLANG'); ?></legend>
 
-			<div style="padding-top:10px;">
 
-				<div class="input width-100">
-					<label><?= CLanguage::GET() -> STRING('BEPE_PANEL_ALTLANGNODEID'); ?></label>
-					<input type="text" name="page_id" id="alt_page_id" value="">
+			<?php if($pageRequest -> page_id != 1) { ?>
+
+				<div style="padding-top:10px;">
+
+					<div class="input width-100">
+						<label><?= CLanguage::GET() -> STRING('BEPE_PANEL_ALTLANGNODEID'); ?></label>
+						<input type="text" name="page_id" id="alt_page_id" value="">
+					</div>
+
+					<div class="result-box" data-field="page_id" data-error=""></div>
+
 				</div>
 
-				<div class="result-box" data-field="page_id" data-error=""></div>
-
-			</div>
 				<hr>
 
-				<div class="input width-100" id="alterante-container" style="display:block;"></div>
+			<?php } else { echo '<div style="padding-top:10px;"></div>'; } ?>
 
+			<div class="input width-100" id="alterante-container" style="display:block;"></div>
 
-				<script>
+			<script>
 
-					function
-					updateAlternateList(pageId)
+				function
+				updateAlternateList(pageId)
+				{
+					var formData 		= new FormData();
+						formData.append('cms-xhrequest', 'raw-alternate');
+						formData.append('page_id', pageId);
+
+					var	requestTarget	= CMS.SERVER_URL_BACKEND + 'pages/';
+
+					TK.callXHR(requestTarget, formData, onSuccessRetrieveAlternates, TK.onXHRError, this);
+				}
+
+				function
+				onSuccessRetrieveAlternates(response, instance)
+				{
+					if(response.state != 0)
 					{
-						var formData 		= new FormData();
-							formData.append('cms-xhrequest', 'raw-alternate');
-							formData.append('page_id', pageId);
-
-						var	requestTarget	= CMS.SERVER_URL_BACKEND + 'pages/';
-
-						TK.callXHR(requestTarget, formData, onSuccessRetrieveAlternates, TK.onXHRError, this);
+						return;
 					}
 
-					function
-					onSuccessRetrieveAlternates(response, instance)
+					let nodeId = <?= $pageRequest -> node_id; ?>;
+
+					let altList = document.getElementById('alterante-container');
+						altList.innerHTML = '';
+
+					let numObjects 	= Object.keys(response.data).length;
+
+					let numValid = 0;
+
+					for(let i = 0; i < numObjects; i++)
 					{
+						if(nodeId === response.data[i].node_id)
+							continue;
 
+						let	link = document.createElement('a');
+							link.setAttribute('href', CMS.SERVER_URL_BACKEND + 'pages/view/' + response.data[i].page_language + '/' + response.data[i].node_id);
+							link.classList.add('yellow');
+							link.style.fontSize = '0.9em';
+							link.style.display = 'block';
+							link.innerHTML = '<span style="display:inline-block; width:20px;">' + response.data[i].page_language.toUpperCase() + '</span> | ' + response.data[i].page_name;
 
+							altList.append(link);
 
-						if(response.state != 0)
-						{
-							return;
-						}
-
-
-						let nodeId = <?= $pageRequest -> node_id; ?>;
-
-
-						let altList = document.getElementById('alterante-container');
-							altList.innerHTML = '';
-
-
-
-						let numObjects 	= Object.keys(response.data).length;
-
-						let numValid = 0;
-
-						for(let i = 0; i < numObjects; i++)
-						{
-
-							if(nodeId === response.data[i].node_id)
-								continue;
-
-
-							let	link = document.createElement('a');
-								link.setAttribute('href', CMS.SERVER_URL_BACKEND + 'pages/view/' + response.data[i].page_language + '/' + response.data[i].node_id);
-								link.classList.add('yellow');
-								link.style.fontSize = '0.9em';
-								link.style.display = 'block';
-								link.innerText = response.data[i].page_language.toUpperCase() + ' | ' + response.data[i].page_name;
-
-								altList.append(link);
-
-
-							numValid++;
-
-						}
-
-						if(numValid == 0)
-
-							altList.innerHTML = '<span style="font-size:0.75em;"><?= CLanguage::GET() -> STRING('BEPE_PANEL_NOALTLANGEXIST'); ?></span>';
-
-
+						numValid++;
 					}
 
-					document.addEventListener("DOMContentLoaded", function(){
+					if(numValid == 0)
+						altList.innerHTML = '<span style="font-size:0.75em;"><?= CLanguage::GET() -> STRING('BEPE_PANEL_NOALTLANGEXIST'); ?></span>';
+				}
 
+				document.addEventListener("DOMContentLoaded", function() {
+					window.updateAlternateList('<?= $pageRequest -> page_id; ?>');
+				});	
 				
-					
-						window.updateAlternateList('<?= $pageRequest -> page_id; ?>');
-
-					});	
-					
-				</script>
-
-
-
+			</script>
+			
 		</fieldset>	
 
 		

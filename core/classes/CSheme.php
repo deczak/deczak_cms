@@ -187,6 +187,7 @@ class CSheme
 				continue;
 
 			$columnData -> type = ($columnData -> type === 'string' ? 'VARCHAR' : $columnData -> type);
+			$columnData -> type = ($columnData -> type === 'bool' ? 'tinyint' : $columnData -> type);
 
 			if($isFirstColumn)
 				$isFirstColumn = false;

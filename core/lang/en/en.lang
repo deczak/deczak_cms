@@ -46,7 +46,11 @@
 	ACTIVE				=	Active
 	DEACTIVATED			=	Deactivated
 	WARNING				=	Warning
-		
+	HIDDEN				= 	Hidden
+	LOCKED				=	Locked
+	DEFAULT				=	Default
+	NOTE				=	Note
+
 	USERNAME			=	Username
 	
 ##	Messages

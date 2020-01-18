@@ -102,18 +102,7 @@ class CONFIG_ENCRYPTION extends CONFIG_BASE
 
 class CONFIG_LANGUAGE extends CONFIG_BASE
 {
-	protected 	$DEFAULT			=	'en';
 	protected	$DEFAULT_IN_URL		=	false;
-	protected 	$SUPPORTED			=	[					##	Will be replaced by json later for dynamic handling
-										"en" =>	[
-												"key"		=>	"en",
-												"name"		=>	"English"
-												],
-										"de" =>	[
-												"key"		=>	"de",
-												"name"		=>	"Deutsch"
-												]							
-										];
 	protected 	$BACKEND			=	[					
 										"en" =>	[
 												"key"		=>	"en",
