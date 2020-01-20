@@ -3,6 +3,7 @@
 
 Dieses Content Management System erstelle ich primär für mich und meinen Anforderungen, stelle es aber der allgemeinheit zur Verfügung. Das Kürzel cos steht dabei für cooking own soup, in Anlehnung dessen das jemand seine eigene Suppe kocht anstatt die von anderen zu verwenden. Gegen eine Mitarbeit am Projekt habe ich nichts einzuwenden. Hinweise zu Fehlern und der gleichen sind erwünscht.
 
+
 ###	Aktueller Stand
 
 Diese Version ist eine frühe, wenn man das so nennen möchte, Alpha Version. Das können Sie machen:

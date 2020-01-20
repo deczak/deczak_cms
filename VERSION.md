@@ -39,6 +39,7 @@ The version number is the release date. A letter as suffix indicates fixes on sa
 - Mantle module mod_blogBackend unfinished (maybe will be dropped)
 
 ### 20190922  Release version (alpha)
-  
+
 **Notes**
 - Early version
+
