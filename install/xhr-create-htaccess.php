@@ -1,6 +1,6 @@
 <?php
 
- error_reporting(E_ALL);
+ 	error_reporting(E_ALL);
 	ini_set('display_errors', 1);
 
 	include '../core/toolkit.php';
@@ -10,6 +10,7 @@
 	include '../core/classes/CModel.php';
 	include '../core/classes/CModules.php';
 	include '../core/classes/CModelCondition.php';
+	include '../core/classes/CLanguage.php';
 	include '../core/shemes/shemeSitemap.php';
 	include '../core/classes/CHTAccess.php';
 
@@ -35,6 +36,8 @@
 
 	file_put_contents('../data/htaccess/0-base', $configFile);
 
+	$_pLanguage	 = 	CLanguage::instance();
+	$_pLanguage	-> 	initialize($db);	
 
 	$_pHTAccess  = new CHTAccess();
 	$_pHTAccess -> generatePart4Backend();

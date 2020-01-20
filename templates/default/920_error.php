@@ -1,6 +1,0 @@
-fehler bla bla
-
-
-<?php
-
-?>

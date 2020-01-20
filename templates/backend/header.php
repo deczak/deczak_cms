@@ -9,7 +9,6 @@
 
 				if($session -> isAuthed(LOGIN_OBJECT_BACKEND) !== false)
 				{
-
 					$backendMenuGroups	= file_get_contents(CMS_SERVER_ROOT.DIR_DATA.'backend-menu.json');
 					$backendMenuGroups	= json_decode($backendMenuGroups);
 
@@ -18,20 +17,18 @@
 
 					foreach($backendMenuGroups as $menuGroup)
 					{
-
 						echo '<div class="menu-group-container">';
 
-						echo $menuGroup -> menu_name;
+						if(!empty($menuGroup -> menu_icon))
+							echo '<span style="font-family:icons-solid">'. $menuGroup -> menu_icon .'</span> &nbsp; ';
 
+						if(!empty($menuGroup -> menu_name))
+							echo $menuGroup -> menu_name;
 
 						echo '<div class="menu-group-subs">';
 
-
 						foreach($backendMenu as $menuItem)
 						{
-
-
-
 
 							if(empty($menuItem -> page_path))
 								continue;
@@ -39,19 +36,13 @@
 							if($menuItem -> menu_group !== $menuGroup -> menu_group)
 								continue;
 
-
-
 							echo '<a  class="menu-group-item" href="'. CMS_SERVER_URL_BACKEND . $menuItem -> page_path .'/">'. $menuItem -> page_name .'</a>';
-
-
 						}
 
 						echo '</div>';
 						echo '</div>';
 					}
-
 				}
-
 				?>
 
 				<style>

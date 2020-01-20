@@ -117,6 +117,7 @@
 									formData.append("database-database", document.querySelector('input[name="database-database"]').value);
 									formData.append("mail-name", document.querySelector('input[name="mail-name"]').value);
 									formData.append("mail-mail", document.querySelector('input[name="mail-mail"]').value);
+									formData.append("crypt-basekey", document.querySelector('input[name="crypt-basekey"]').value);
 
 								reportInstallStep('Create configuration file ... ');
 								TK.callXHR('<?php echo $protocol . $_SERVER['SERVER_NAME'] .''. $sub_path; ?>install/xhr-create-config.php', formData, onXHRInstallConfig, TK.onXHRError, than);

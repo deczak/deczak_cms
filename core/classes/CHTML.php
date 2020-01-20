@@ -11,9 +11,8 @@ class	CHTML extends CBasic
 	public function
 	openDocument(&$page, &$imperator, &$pageRequest)
 	{
-		if(isset($pageRequest -> cache_disabled) || $pageRequest -> cache_disabled == 1)
+		if(isset($pageRequest -> cache_disabled) && $pageRequest -> cache_disabled == 1)
 			$this -> disableCaching();
-
 		$pTemplate 		=	new CTemplates(CMS_SERVER_ROOT . DIR_TEMPLATES);
 
 		if(!isset($pageRequest -> page_template) || $pageRequest -> page_template == NULL)
@@ -35,9 +34,27 @@ class	CHTML extends CBasic
 
 		switch($pageRequest -> responseCode)
 		{
-			case 404:	header("HTTP/1.0 404 Not Found"); break;
-			case 403:	header('HTTP/1.0 403 Forbidden'); break;
+			case 404:	header("HTTP/1.0 404 Not Found");
+						$pageRequest -> crawler_index 	= 0;
+						$pageRequest -> crawler_follow 	= 0;
+						$pageRequest -> page_title		= '404 Not Found';
+						$pageRequest -> page_description= '';
+						break;
+			case 403:	header('HTTP/1.0 403 Forbidden'); 
+						$pageRequest -> crawler_index 	= 0;
+						$pageRequest -> crawler_follow 	= 0;
+						$pageRequest -> page_title		= '403 Forbidden';
+						$pageRequest -> page_description= '';
+						break;
+			case 920:	header('HTTP/1.0 403 Forbidden'); 
+						$pageRequest -> crawler_index 	= 0;
+						$pageRequest -> crawler_follow 	= 0;
+						$pageRequest -> page_title		= 'Database Error';
+						$pageRequest -> page_description= '';
+						break;
 		}
+
+		
 		
 		echo "<!DOCTYPE html>\r\n";
 		echo "<html lang=\"". $pageRequest -> page_language ."\">\r\n";

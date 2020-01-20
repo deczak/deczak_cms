@@ -82,7 +82,7 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 
 	$_pLanguage		 = 	CLanguage::instance();		
 	$_pLanguage		-> 	initialize($_pSQLObject -> getConnection(CONFIG::GET() -> MYSQL -> PRIMARY_DATABASE));		
-	$_pLanguage		->	loadLanguageFile(CMS_SERVER_ROOT.DIR_CORE.DIR_LANGUAGES.CLanguage::instance() -> getDefault() .'/', CLanguage::instance() -> getDefault() );
+	$_pLanguage		->	loadLanguageFile(CMS_SERVER_ROOT.DIR_CORE.DIR_LANGUAGES.CLanguage::instance() -> getDefault() .'/');
 
 ##	C O O K I E   M A N A G E R
 
@@ -99,6 +99,7 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 	$_request[] 	 = 	[	"input" => "cms-lang", 		  	 	"validate" => "strip_tags|strip_whitespaces|lowercase|!empty",          "use_default" => true, "default_value" => CLanguage::instance() -> getDefault() ]; // language key
 	$_request[] 	 = 	[	"input" => "cms-node",  		"validate" => "strip_tags|strip_whitespaces|lowercase|is_digit|!empty", "use_default" => true, "default_value" => false     ]; // node_id
 	$_request[] 	 = 	[	"input" => "cms-ctrl-action",	"validate" => "strip_tags|strip_whitespaces|lowercase|!empty", 			"use_default" => true, "default_value" => []	]; // requested controller action
+	$_request[] 	 = 	[	"input" => "cms-error",			"validate" => "strip_tags|strip_whitespaces|lowercase|!empty", 			"use_default" => true, "default_value" => false	]; // url rewrite error redirect (eg 403,404)
 	$_pURLVariables -> retrieve($_request, true, false); // GET
 
 	$_request		 =	[];
@@ -176,6 +177,9 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 							$_pURLVariables 	-> getValue("version"),
 							$_pURLVariables 	-> getValue("cms-xhrequest")
 							);
+
+	if($_pURLVariables -> getValue("cms-error") !== false)
+		CPageRequest::instance() -> setResponseCode($_pURLVariables -> getValue("cms-error"));
 			
 	$_pImperator	 =	new CImperator( $_pSQLObject -> getConnection(CONFIG::GET() -> MYSQL -> PRIMARY_DATABASE) );
 	$_pImperator	->	logic($_pSQLObject -> getConnection(CONFIG::GET() -> MYSQL -> PRIMARY_DATABASE), $_pPageRequest , $_pModules, $_rcaTarget, CMS_BACKEND);
@@ -189,29 +193,6 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 ##	V I E W 
 
 	$_pHTML -> openDocument($_pImperator -> m_page, $_pImperator, $_pPageRequest);
-
-
-	$_pHTAccess  = new CHTAccess();
-	$_pHTAccess -> generatePart4Backend();
-	$_pHTAccess -> generatePart4Frontend($_pSQLObject -> getConnection(CONFIG::GET() -> MYSQL -> PRIMARY_DATABASE));
-	$_pHTAccess -> generatePart4DeniedAddress($_pSQLObject -> getConnection(CONFIG::GET() -> MYSQL -> PRIMARY_DATABASE));
-	$_pHTAccess -> writeHTAccess();
-
-
-#	$sitemap  	 = new CXMLSitemap();
-#	$sitemap  	-> generate($_pSQLObject -> getConnection(CONFIG::GET() -> MYSQL -> PRIMARY_DATABASE));
-
-#	$errorMsg = '';
-#	include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SHEME.'shemeLanguages.php';	
-#	$newSheme = new shemeLanguages();
-#	$newSheme -> createTable($_pSQLObject -> getConnection(CONFIG::GET() -> MYSQL -> PRIMARY_DATABASE), $errorMsg);
-#	tk::dbug($errorMsg);
-
-
-#	include_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelLanguages.php';	
-#	$modelLanguages = new modelLanguages();
-#	$modelLanguages -> load($_pSQLObject -> getConnection(CONFIG::GET() -> MYSQL -> PRIMARY_DATABASE));
-#	tk::dbug($modelLanguages -> getDataInstance());
 
 
 ?>

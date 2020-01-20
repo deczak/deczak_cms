@@ -25,6 +25,9 @@ class CPageRequest extends CSingleton
 	public function
 	init(&$_sqlConnection, $_nodeId, $_language, $_version, $_xhRequest)
 	{
+		if($_sqlConnection === false)
+			return false; 
+			
 		if($this -> isEditMode === NULL)
 			$this -> isEditMode 	= false;
 
@@ -102,6 +105,7 @@ class CPageRequest extends CSingleton
 
 			if(		 $page -> hidden_state !== 0
 				&&	($page -> hidden_state !== 2 && !CMS_BACKEND)
+				&&	($page -> hidden_state !== 1 && !CMS_BACKEND)
 			)
 			{
 				$this -> node_id  = false;
@@ -112,11 +116,26 @@ class CPageRequest extends CSingleton
 					Muss später ergänzt werden wenn angemeldete Benutzer und restriktionen vorhanden sind
 				*/
 
-				$this -> responseCode 	= 901;	// Hinweis das diese Seite gesperrt ist
+				$this -> setResponseCode(901);	// Hinweis das diese Seite gesperrt ist
 
 				return false;			
 			}
 
+			if(($page -> hidden_state === 1 && !CMS_BACKEND)
+			  )
+			{
+				$this -> node_id  = false;
+
+				// TODO :: set error page for this 
+
+				/*
+					Muss später ergänzt werden wenn angemeldete Benutzer und restriktionen vorhanden sind
+				*/
+
+				$this -> setResponseCode(902);	// Hinweis das diese Seite gesperrt ist
+
+				return false;			
+			}
 
 
 			foreach((array)$page as $property => $value)
@@ -133,10 +152,6 @@ class CPageRequest extends CSingleton
 			$modelPageObject -> load($_sqlConnection, $sqlWhere);
 			$this -> objectsList = &$modelPageObject -> getDataInstance();
 		
-
-
-
-
 
 
 
@@ -250,7 +265,7 @@ class CPageRequest extends CSingleton
 			case 403:	// forbidden
 
 						$this -> node_id  		= false;
-						$this -> responseCode 	= 900;
+						$this -> responseCode 	= 403;
 						break;
 
 			case 404:	// page not found

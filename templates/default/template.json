@@ -15,18 +15,15 @@
 							"footer.php"
 						  ],
 	"include_error_404"	: [
-							"404_header.php", 
-							"404_error.php", 
-							"footer.php"
+							"4XX.php", 
+							"404.php"
 						  ],
 	"include_error_403"	: [
-							"403_header.php", 
-							"403_error.php", 
-							"footer.php"
+							"4XX.php", 
+							"403.php"
 						  ],
 	"include_error_920"	: [
-							"920_header.php", 
-							"920_error.php", 
-							"footer.php"
+							"9XX.php", 
+							"920.php"
 						  ]
 }
