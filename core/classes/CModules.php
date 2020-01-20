@@ -13,6 +13,8 @@ class	CModules extends CSingleton
 	public function
 	init(&$_sqlConnection)
 	{
+		if($_sqlConnection === false)
+			return; 
 		$this -> modelModules	 =	new modelModules();
 		$this -> modelModules	->	load($_sqlConnection);
 		$this -> modulesList 	 =	$this -> modelModules -> getDataInstance();

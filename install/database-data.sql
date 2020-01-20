@@ -13,12 +13,12 @@ INSERT INTO `tb_modules` (`module_id`, `module_location`, `module_controller`, `
 (9, 'mod_deniedRemote', 'controllerDeniedRemote', 'core', 'backend', 0, 1, '', 'Denied Remote Address', 0, 1, 0, 0),
 (10, 'mod_userAgent', 'controllerUserAgent', 'core', 'backend', 0, 1, '', 'User Agents', 0, 1, 0, 0),
 (11, 'mod_sessions', 'controllerSessions', 'core', 'backend', 0, 1, '', 'Sessions', 0, 1, 0, 0),
-(12, 'mod_modules', 'controllerModules', 'core', 'backend', 0, 1, '', 'Modules', 0, 1, 0, 0);
+(12, 'mod_modules', 'controllerModules', 'core', 'backend', 0, 1, '', 'Modules', 0, 1, 0, 0),
 (13, 'mod_languages', 'controllerLanguages', 'core', 'backend', 0, 1, '&#xf1ab;', 'Languages', 0, 1, 0, 0);
 
 INSERT INTO `tb_languages` (`data_id`, `lang_key`, `lang_name`, `lang_name_native`, `lang_hidden`, `lang_locked`, `lang_default`, `lang_fontend`, `lang_backend`, `create_time`, `create_by`, `update_time`, `update_by`) VALUES
 (1, 'en', 'English', 'English', 0, 0, 1, 1, 1, 0, 0, 0, 1),
-(1, 'de', 'German', 'Deutsch', 0, 0, 1, 1, 1, 0, 0, 0, 1);
+(2, 'de', 'German', 'Deutsch', 0, 0, 1, 1, 1, 0, 0, 0, 1);
 
 INSERT INTO `tb_login_objects` (`data_id`, `object_id`, `object_databases`, `object_table`, `object_fields`, `object_session_ext`, `object_description`, `is_disabled`, `is_protected`, `create_time`, `create_by`, `update_time`, `update_by`) VALUES
 (12, 'ABKND', '["1"]', 'tb_users_backend', '[{"name":"login_name","data_prc":"crypt","type":"text","is_username":"0"},{"name":"login_pass","data_prc":"hash","type":"password","is_username":"1"}]', '{"1":{"name":"user_name_last","data_prc":"crypt"},"2":{"name":"language","data_prc":"text"}}', 'Backend Access', 0, 1, 1569299590, 22, 1569903496, 0);

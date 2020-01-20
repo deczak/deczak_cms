@@ -1,11 +1,10 @@
 
-# Das Projekt - cosCMS
+## Das Projekt - cosCMS
 
 Dieses Content Management System erstelle ich primär für mich und meinen Anforderungen, stelle es aber der allgemeinheit zur Verfügung. Das Kürzel cos steht dabei für cooking own soup, in Anlehnung dessen das jemand seine eigene Suppe kocht anstatt die von anderen zu verwenden. Gegen eine Mitarbeit am Projekt habe ich nichts einzuwenden. Hinweise zu Fehlern und der gleichen sind erwünscht.
 
-Da ich das alles in meiner Freizeit mache, kann es auch mal etwas dauern bis weitere updates kommen.
 
-##	Aktueller Stand
+###	Aktueller Stand
 
 Diese Version ist eine frühe, wenn man das so nennen möchte, Alpha Version. Das können Sie machen:
 
@@ -18,7 +17,7 @@ Aufgrund dessen das ich noch einiges umbauen muss, verzichte ich noch auf eine e
 
 Ich schreibe es, obwohl dies sicher klar sein sollte, doch lieber: Das ist eine frühe Version und es fehlt noch eine Menge. Nutzen Sie diese Version nicht im Live Einsatz.
 
-##	Geplante Funktionen und Eigenschaften (Vorläufig)
+###	Geplante Funktionen und Eigenschaften (Vorläufig)
 
 + Authentifizierung der Benutzer über mehrere Datenbanken hinweg. Als Beispiel: Sie haben mehrere Projekte, aber die Benutzer sollten Zentral an einer Stelle sein.
 + Umsetzung des MVC Konzept aber in einer flachen Struktur für eine einfache Wartung und Erweiterbarkeit.
@@ -28,18 +27,18 @@ Ich schreibe es, obwohl dies sicher klar sein sollte, doch lieber: Das ist eine 
 + Vanilla Javascript ab ES6
 + Keine Rücksichtname auf den Internet Explorer
 
-## Nicht geplante Eigenschaften
+### Nicht geplante Eigenschaften
 
 + Nach Hause telefonieren
 + Automatische Updates
 + Bild und Video Bearbeitungsfunktionen
 
-# Voraussetzungen für dieses CMS
+## Voraussetzungen für dieses CMS
 
 + Ein Webserver mit PHP7+, HTAccess Support inklusive URL Rewrite sowie funktionierende sendmail Konfiguration in PHP.
 + Ein MySQL kompatible Datenbank Server
 
-# Installation
+## Installation
 
 Im Verzeichnis install gibt es eine index.php die alles übernimmt. Zur erfolgreichen installation werden grundsätzlich die Datenbank Informationen benötigt, eine eMail Adresse an der System Nachrichten gesendet werden sowie weitere Angabe die dort erklärt werden.
 

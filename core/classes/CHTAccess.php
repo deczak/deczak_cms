@@ -169,14 +169,35 @@ class	CHTAccess
 
 		$_hFile 	 = fopen($this -> m_dataLocation . $_targetFile, "w");
 
+		##	get environment data
+		$environment = file_get_contents(CMS_SERVER_ROOT.DIR_DATA.'environment.json');
+		$environment = json_decode($environment);
+
 		if (flock($_hFile, LOCK_EX))
 		{
 			ftruncate($_hFile, 0);
 
+
+				## Adding Env Data
+				if($environment !== NULL)
+				{
+					if($environment -> enable_custom_403)
+					{
+						fwrite($_hFile, 'RewriteRule ^403/?$ index.php?cms-error=403 [NC,L]');
+						fwrite($_hFile, "\r\n");
+					}
+
+					if($environment -> enable_custom_404)
+					{
+						fwrite($_hFile, 'RewriteRule ^404/?$ index.php?cms-error=404 [NC,L]');
+						fwrite($_hFile, "\r\n");
+					}
+				}
+
 			##	Read pages from sql and write it to file
 
 			$supportedLanguages = CLanguage::instance() -> getLanguages();
-
+			
 			$_numLanguages = count($supportedLanguages);
 			$_procLanguage = 0;
 
@@ -291,6 +312,12 @@ class	CHTAccess
 	public function
 	writeHTAccess()
 	{
+		##	get environment data
+
+		$environment = file_get_contents(CMS_SERVER_ROOT.DIR_DATA.'environment.json');
+		$environment = json_decode($environment);
+
+
 		##	get source files and order by name
 
 		$_filenames 	= [];
@@ -314,7 +341,24 @@ class	CHTAccess
 			ftruncate($_hDstFile, 0);
 
 			foreach($_filenames as $_file)
-			{
+			{		
+				## Adding Env Data
+
+				if($_file === '1-base' && $environment !== NULL)
+				{
+					if($environment -> enable_custom_403)
+					{
+						fwrite($_hDstFile, 'ErrorDocument 403 '. CMS_SERVER_URL .'404');
+						fwrite($_hDstFile, "\r\n");
+					}
+
+					if($environment -> enable_custom_404)
+					{
+						fwrite($_hDstFile, 'ErrorDocument 404 '. CMS_SERVER_URL .'404 ');
+						fwrite($_hDstFile, "\r\n");
+					}
+				}
+		
 				##	Read Source File
 
 				$_hSrcFile 	 = fopen($this -> m_dataLocation . $_file, "r");

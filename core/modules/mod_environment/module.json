@@ -1,0 +1,31 @@
+{
+	"module_controller" : "controllerEnvironment",
+	"rights"	:[
+					{"name":"index",	"desc":"OVERVIEW"},
+					{"name":"edit",		"desc":"EDIT"}
+				 ],
+	"sub"		:[
+					{
+						"url_name"	:"",
+						"ctl_target":"",
+						"menu_name"	:"OVERVIEW",
+						"menu_order":"0"
+					},
+					{
+						"url_name"	:"edit",
+						"ctl_target":"edit",
+						"menu_name"	:"",
+						"menu_order":"0"
+					}
+				 ],
+	"htaccess"	:{
+					"variables"		:[
+										{
+											"key" 		: "cms-system-id",
+											"wildcard"	:"(.*)"
+										}
+									 ]
+				 },
+	"include"	:[
+				 ]
+}

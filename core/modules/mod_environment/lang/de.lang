@@ -1,0 +1,13 @@
+
+	M_BEENV_GENERATE			= Aktualisieren
+	M_BEENV_GENERATE_NOTE		= Die htaccess und sitemap Dateien werden bei der Seitenbearbeitung und Sprachänderungen automatisch aktualisiert.
+
+	M_BEENV_GEN_HTACCESS		= Manuelles aktualisieren der htaccess-Datei
+	M_BEENV_GEN_SITEMAP			= Manuelles aktualisieren der sitemap-Datei
+
+	M_BEENV_UPDATE				= Aktualisieren
+	
+
+
+	
+	
