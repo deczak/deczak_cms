@@ -193,7 +193,7 @@ class	cmsHeadlineEditor
 				var txtareaContentWrapper = document.createElement(headlineTag);
 					txtareaContentWrapper.innerHTML = this.innerHTML;
 				var	textarea = this.parentNode.parentNode.querySelector('.rte-textarea');
-					textarea.innerHTML = txtareaContentWrapper.outerHTML;
+					textarea.innerText = txtareaContentWrapper.outerHTML;
 			};
 
 		oEditBoxWrapper.appendChild(oEditBox);	

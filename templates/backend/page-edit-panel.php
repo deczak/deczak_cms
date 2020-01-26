@@ -109,8 +109,9 @@
 					if($pageRequest -> page_path == '/')
 						echo '<input type="hidden" name="hidden_state" value="0">';
 					?>
-					<select name="hidden_state" <?= ($pageRequest -> page_path == '/' ? 'disabled' : ''); ?>>
+					<select name="hidden_state" id="select-visibleState" <?= ($pageRequest -> page_path == '/' ? 'disabled' : ''); ?>>
 						<option value="0" <?= ($pageRequest -> hidden_state == 0 ? 'selected' : ''); ?>><?= CLanguage::GET() -> STRING('BEPE_PANEL_HIDDEN_0_VISIBLE'); ?></option>
+						<option value="5" <?= ($pageRequest -> hidden_state == 5 ? 'selected' : ''); ?>><?= CLanguage::GET() -> STRING('BEPE_PANEL_HIDDEN_5_VISIBLEFROM'); ?></option>
 						<option value="1" <?= ($pageRequest -> hidden_state == 1 ? 'selected' : ''); ?>><?= CLanguage::GET() -> STRING('BEPE_PANEL_HIDDEN_1_LOCKED'); ?></option>
 						<option value="4" <?= ($pageRequest -> hidden_state == 4 ? 'selected' : ''); ?>><?= CLanguage::GET() -> STRING('BEPE_PANEL_HIDDEN_4_LOCKED'); ?></option>
 						<option value="2" <?= ($pageRequest -> hidden_state == 2 ? 'selected' : ''); ?>><?= CLanguage::GET() -> STRING('BEPE_PANEL_HIDDEN_2_HIDDEN'); ?></option>
@@ -119,7 +120,99 @@
 					</div>
 					<div class="result-box" data-field="hidden_state" data-error=""></div>
 				</div>
+
+
 			</div>
+
+		
+
+			<div id="publish_settings" style="<?= ($pageRequest -> hidden_state != 5 ? 'display:none;' : ''); ?>">
+
+				<?php
+					$pageRequest -> publish_from = ($pageRequest -> publish_from != 0 ? date('Y-m-d', $pageRequest -> publish_from) : '');
+					$pageRequest -> publish_until = ($pageRequest -> publish_until != 0 ? date('Y-m-d', $pageRequest -> publish_until) : '');
+				?>
+	
+
+				<div class="input width-100">
+					<label><?= CLanguage::GET() -> STRING('BEPE_PANEL_PUBLISHFROM'); ?></label>
+					<input type="text" class="datepicker-from" name="publish_from" id="" value="<?php echo $pageRequest -> publish_from; ?>">
+				</div>
+
+				<div class="result-box" data-field="publish_from" data-error=""></div>
+
+				<div class="input width-100">
+					<label><?= CLanguage::GET() -> STRING('BEPE_PANEL_PUBLISHUNTIL'); ?></label>
+					<input type="text" class="datepicker-until" name="publish_until" id="" value="<?php echo $pageRequest -> publish_until; ?>">
+				</div>
+
+				<div class="result-box" data-field="publish_until" data-error=""></div>
+
+				<div class="input width-100">
+					<label><?= CLanguage::GET() -> STRING('BEPE_PANEL_PUBLISHUNTIL_STATE'); ?></label>
+					<div class="select-wrapper">
+					<select name="publish_expired" <?= ($pageRequest -> page_path == '/' ? 'disabled' : ''); ?>>
+						<option value="0" <?= ($pageRequest -> publish_expired == 0 ? 'selected' : ''); ?>><?= CLanguage::GET() -> STRING('BEPE_PANEL_PUBLISHUNTIL_0_HIDDEN'); ?></option>
+						<option value="1" <?= ($pageRequest -> publish_expired == 1 ? 'selected' : ''); ?>><?= CLanguage::GET() -> STRING('BEPE_PANEL_PUBLISHUNTIL_1_LOCKED'); ?></option>
+					</select>
+					</div>
+				</div>
+
+				<div class="result-box" data-field="publish_expired" data-error=""></div>
+
+				<script>
+				document.getElementById('select-visibleState').onchange = function() {
+					var	publishBox = document.getElementById('publish_settings');
+
+					if(this.value == 5)
+					{
+						publishBox.style.display = 'block';
+
+						publishBox.querySelectorAll('select').forEach(function(element, key){
+							element.disabled = false;
+						});
+
+						publishBox.querySelectorAll('input').forEach(function(element, key){
+							element.disabled = false;
+						});
+					}
+					else
+					{
+						publishBox.style.display = 'none';
+
+						publishBox.querySelectorAll('select').forEach(function(element, key){
+							element.disabled = true;
+						});
+
+						publishBox.querySelectorAll('input').forEach(function(element, key){
+							element.disabled = true;
+						});
+					}
+				};
+
+				flatpickr('.datepicker-from',{
+					dateFormat: 'Y-m-d'
+				});
+				flatpickr('.datepicker-until',{
+					dateFormat: 'Y-m-d'
+				});
+				</script>
+
+				<style>
+				.flatpickr-calendar select,
+				.flatpickr-calendar input { padding:0px 6px !important; box-shadow:none !important; font-size:14px !important; height: 24px !important; }
+				.flatpickr-calendar select{ -moz-appearance: initial !important; appearance: initial !important; }
+				.flatpickr-calendar input { -moz-appearance: textfield !important; appearance: textfield !important; }
+				.flatpickr-calendar .flatpickr-months,
+				.flatpickr-calendar .flatpickr-weekdays { background:rgba(233,223,37,0.8); }
+				.flatpickr-calendar .flatpickr-months { border-top-left-radius:5px; border-top-right-radius:5px; }
+				.flatpickr-calendar { border: 1px solid grey; }
+				.flatpickr-calendar .flatpickr-day { border-radius:3px !important; }
+				</style>
+
+			</div>
+
+
 		</fieldset>				
 	
 		<fieldset class="ui fieldset submit-able">
@@ -273,8 +366,3 @@
 		
 </div>	
 
-
-<script>
-
-
-</script>

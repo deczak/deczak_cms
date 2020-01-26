@@ -16,6 +16,8 @@ Due to the fact that I still have to rebuild a lot, I do without a corresponding
 
 I write it, although it should be clear, but better: This is an early version and a lot is missing. Do not use this version in live stage.
 
+There is no update function at the moment, every new version may be requires a new installation.
+
 ### Planned functions and properties (provisional)
 
 + User authentication across multiple databases. As an example, you have several projects, but users should be central in one place.

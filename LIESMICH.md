@@ -17,6 +17,8 @@ Aufgrund dessen das ich noch einiges umbauen muss, verzichte ich noch auf eine e
 
 Ich schreibe es, obwohl dies sicher klar sein sollte, doch lieber: Das ist eine frühe Version und es fehlt noch eine Menge. Nutzen Sie diese Version nicht im Live Einsatz.
 
+Momentan gibt es keine Update-Funktion. Jede neue Version erfordert möglicherweise eine Neuinstallation
+
 ###	Geplante Funktionen und Eigenschaften (Vorläufig)
 
 + Authentifizierung der Benutzer über mehrere Datenbanken hinweg. Als Beispiel: Sie haben mehrere Projekte, aber die Benutzer sollten Zentral an einer Stelle sein.

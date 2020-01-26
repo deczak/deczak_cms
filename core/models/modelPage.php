@@ -41,6 +41,9 @@ class 	modelPage extends CModel
 											$_tablePage.page_id,
 											$_tablePage.create_time,
 											$_tablePage.update_time,
+											$_tablePage.publish_from,
+											$_tablePage.publish_until,
+											$_tablePage.publish_expired,
 											$_tablePage.create_by,
 											$_tablePage.update_by,
 											$_tablePage.page_version,
@@ -257,9 +260,6 @@ class 	modelPage extends CModel
 		
 		$nodeId = $_condition -> getConditionListValue('node_id');
 
-		var_dump($_condition);
-		var_dump($nodeId);
-
 		$_nodeData = [];
 		if(!$nodeId || !$this -> getNodeData($_sqlConnection, $nodeId, $_nodeData))
 		{
@@ -267,12 +267,12 @@ class 	modelPage extends CModel
 			return false;
 		}
 
-		$_tablePageHeader		=	$this -> m_shemePageHeader 	-> getTableName();
+#		$_tablePageHeader		=	$this -> m_shemePageHeader 	-> getTableName();
 		$_tablePagePath			=	$this -> m_shemePagePath 	-> getTableName();
 		$_tablePage				=	$this -> m_shemePage 		-> getTableName();
 
 		$_sqlConnection -> query("DELETE FROM $_tablePage 		". $_condition -> getConditions($_sqlConnection, $_condition));
-		$_sqlConnection -> query("DELETE FROM $_tablePageHeader ". $_condition -> getConditions($_sqlConnection, $_condition));
+#		$_sqlConnection -> query("DELETE FROM $_tablePageHeader ". $_condition -> getConditions($_sqlConnection, $_condition));
 
 		$_sqlConnection -> query("DELETE FROM $_tablePagePath WHERE node_lft = ". $_nodeData['node_lft']);
 		$_sqlConnection -> query("UPDATE 	  $_tablePagePath SET node_lft=node_lft-1, node_rgt=node_rgt-1 WHERE node_lft BETWEEN ". $_nodeData['node_lft'] ." AND ". $_nodeData['node_rgt']);
@@ -296,7 +296,7 @@ class 	modelPage extends CModel
 			return false;
 		}
 
-		$_tablePageHeader		=	$this -> m_shemePageHeader 	-> getTableName();
+	#	$_tablePageHeader		=	$this -> m_shemePageHeader 	-> getTableName();
 		$_tablePagePath			=	$this -> m_shemePagePath 	-> getTableName();
 		$_tablePage				=	$this -> m_shemePage 		-> getTableName();
 
@@ -305,7 +305,7 @@ class 	modelPage extends CModel
 		foreach($_nodeTree as $_node)
 		{
 			$_sqlConnection -> query("DELETE FROM $_tablePage 		WHERE node_id = '". $_node['node_id'] ."'");
-			$_sqlConnection -> query("DELETE FROM $_tablePageHeader WHERE node_id = '". $_node['node_id'] ."'");
+	#		$_sqlConnection -> query("DELETE FROM $_tablePageHeader WHERE node_id = '". $_node['node_id'] ."'");
 		}
 
 		$_sqlConnection -> query("DELETE FROM $_tablePagePath WHERE node_lft BETWEEN ". $_nodeData['node_lft'] ." AND ". $_nodeData['node_rgt']);
@@ -406,18 +406,36 @@ class 	modelPage extends CModel
 	private function
 	getAlternatePaths(&$_sqlConnection, $_pageID)
 	{
+
+		$timestamp 		= 	time();
+
 		$_returnArray	=	[];
 
 		$_sqlString 	=	"	SELECT 		tb_page_path.node_id,
-											tb_page_path.page_language
+											tb_page_path.page_language,
+											tb_page.hidden_state,
+											tb_page.publish_from,
+											tb_page.publish_until
 								FROM 		tb_page_path
-								WHERE 		tb_page_path.page_id 		= '". $_pageID ."'
+								JOIN		tb_page
+									ON		tb_page.node_id			= tb_page_path.node_id
+								WHERE 		tb_page_path.page_id 	= '". $_pageID ."'
 							";
 
 		$_sqlPagesRes 	= $_sqlConnection -> query($_sqlString);
 
 		while($_sqlPagesRes !== false && $_sqlPages = $_sqlPagesRes -> fetch_assoc())
 		{
+
+			if(
+					($_sqlPages['hidden_state'] == 0)
+				||	(	($_sqlPages['hidden_state'] == 5 && $_sqlPages['publish_from']  < $timestamp)
+					&&	($_sqlPages['hidden_state'] == 5 && $_sqlPages['publish_until'] > $timestamp && $_sqlPages['publish_until'] != 0)
+					)
+			); else continue;
+
+
+
 			$_sqlString =	"	SELECT 		p.node_id, 
 											p.page_path,
 											p.page_id,

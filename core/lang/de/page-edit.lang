@@ -6,6 +6,7 @@
 	BEPE_PANEL_MSG_PAGETITLE		=	Sie müssen einen gültigen Title angeben.
 	BEPE_PANEL_MSG_PAGETEMPLATE		=	Sie müssen einen gültiges Template angeben.
 	BEPE_PANEL_MSG_ALTLANGEVEN		=	Eine Seite gleicher Sprache kann nicht als Alternative Seite angegeben werden.
+	BEPE_PANEL_MSG_PUBEXPIRE		=	Das Ablaufdatum darf nicht vor dem Veröffentlichungsdatum liegen.
 	
 	BEPE_PANEL_BACKLINK				=	Zurück zur Übersicht
 
@@ -31,6 +32,7 @@
 	BEPE_PANEL_HIDDEN_4_LOCKED		=	Gesperrt für alle (404)
 	BEPE_PANEL_HIDDEN_2_HIDDEN		=	In Menüs ausblenden
 	BEPE_PANEL_HIDDEN_3_REGISTERED	=	Sichtbar für angemeldete
+	BEPE_PANEL_HIDDEN_5_VISIBLEFROM	=	Sichtbar ab
 
 	BEPE_PANEL_CACHING_0_ENABLED	=	Aktiviert
 	BEPE_PANEL_CACHING_1_DISABLED	=	Deaktiviert
@@ -48,7 +50,11 @@
 
 	BEPE_PANEL_ALTLANGNODEID		=	Seite verknüpfen mit Ziel Seiten-ID
 
-
+	BEPE_PANEL_PUBLISHFROM				=	Sichtbar ab
+	BEPE_PANEL_PUBLISHUNTIL				=	Sichtbar bis
+	BEPE_PANEL_PUBLISHUNTIL_STATE		=	Sichtbarkeit wenn abgelaufen
+	BEPE_PANEL_PUBLISHUNTIL_0_HIDDEN	=	In Menüs ausblenden
+	BEPE_PANEL_PUBLISHUNTIL_1_LOCKED	=	Gesperrt (403)
 
 
 

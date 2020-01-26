@@ -13,6 +13,9 @@ class shemeSimple extends CSheme
 		$this -> addColumn('object_id', 'int') -> setAttribute('UNSIGNED');
 		$this -> addColumn('body', 'text');
 		$this -> addColumn('params', 'text');
+
+
+		$this -> addConstraing('simple_object_id', 'object_id', 'tb_page_object', 'object_id', 'CASCADE', 'CASCADE');
 	}
 }
 

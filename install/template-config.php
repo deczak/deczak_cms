@@ -79,7 +79,7 @@ class CONFIG_MYSQL extends CONFIG_BASE
 {
 	protected	$TABLE_COLLATE		=	"utf8mb4_unicode_ci";
 	protected	$TABLE_CHARSET		=	"utf8mb4";
-	protected	$TABLE_ENGINE		=	"MyISAM";
+	protected	$TABLE_ENGINE		=	"innoDB";
 
 	protected	$PRIMARY_DATABASE	= 	'1';
 

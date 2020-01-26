@@ -48,6 +48,9 @@ class 	modelSitemap extends CModel
 										tb_page_header.page_version,
 										tb_page.create_time,
 										tb_page.update_time,
+										tb_page.publish_from,
+										tb_page.publish_until,
+										tb_page.publish_expired,
 										tb_page.hidden_state,
 										tb_page.menu_follow
 							FROM 		tb_page_path AS n,

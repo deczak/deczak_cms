@@ -15,7 +15,7 @@
 	function
 	enableFieldsetSubmit(element)
 	{ 
-		console.log(element);
+
 		var submitButton = element.closest('.submit-container').querySelector('.trigger-submit-fieldset');
 			submitButton.disabled = !element.checked;
 	}
@@ -35,6 +35,15 @@
 			requestTarget	= CMS.SERVER_URL_BACKEND + CMS.PAGE_PATH + customTarget;
 		}
 
+		// Reset Protector for Submit Button
+
+		var submitContainer = element.closest('.submit-container');
+			submitContainer.querySelector('.trigger-submit-protector').checked = false;
+
+			element.disabled = true;
+
+		//
+
 		xhr = new XMLHttpRequest();
 		xhr.open('POST', requestTarget, true);
 		xhr.onload = function()
@@ -43,19 +52,42 @@
 			{
 				case 200:	// OK					
 							var jsonObject = JSON.parse(xhr.response); 
-							console.log(jsonObject);
+					
 							if(typeof jsonObject.data.redirect != "undefined")
 							{
 								setTimeout(function(){ window.location.replace(jsonObject.data.redirect); }, 2000);
 							}		
-												
+
+							// Reset failed validation mark
+
+							fieldset.querySelectorAll('.validation-failed').forEach(function(element){
+								element.classList.remove('validation-failed');
+							});
+											
+							// mark fields that failed on validation
+
+							if(jsonObject.state == 1)
+							{
+								for (var key in jsonObject.data)
+								{
+									//let inputfield = fieldset.querySelector('input[name="'+ jsonObject.data[key] +'"]');
+									let inputfield = fieldset.querySelector('[name="'+ jsonObject.data[key] +'"]');
+									if(inputfield != null)
+									{
+										fieldFailed(inputfield);
+										continue;
+									}
+								}
+							}
+
+							// display return message
+
 							if(typeof resultBox != 'undefined')
 							{
 								resultBox.innerHTML = jsonObject.msg;
 								resultBox.setAttribute('data-error',jsonObject.state);
 							}	
-				
-					
+									
 					 		break;
 					
 				case 500:	// Error	
@@ -75,6 +107,12 @@
 			}
 		};
 		xhr.send(formData);
+	}
+
+	function
+	fieldFailed(inputfield)
+	{
+		inputfield.classList.add('validation-failed');
 	}
 
 	function

@@ -94,6 +94,8 @@
 .ui.fieldset .submit-container .protector { position:relative; border-color: rgb(140, 140, 140); border-style: solid; background:white; border-width: 1px 1px 1px 0px; padding: 7px 0px 3px 10px; border-top-right-radius:3px; border-bottom-right-radius:3px; height:34px; }
 .ui.fieldset .submit-container .protector > label { padding-left:1.70em; }
 
+.ui.fieldset .validation-failed { border:1px solid red; }
+
 .ui .input > div.select-wrapper > select,
 .ui .input > select,
 .ui .input > textarea,

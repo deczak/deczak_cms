@@ -80,7 +80,7 @@ class CPageRequest extends CSingleton
 
 
 		if($this -> responseCode === NULL)
-			$this -> responseCode		= 200;
+			$this -> responseCode	= 200;
 
 		if($this -> responseCode !== 200)
 		{
@@ -103,37 +103,34 @@ class CPageRequest extends CSingleton
 
 			##	Check visibility settings
 
-			if(		 $page -> hidden_state !== 0
-				&&	($page -> hidden_state !== 2 && !CMS_BACKEND)
-				&&	($page -> hidden_state !== 1 && !CMS_BACKEND)
-			)
-			{
-				$this -> node_id  = false;
+/*
 
-				// TODO :: set error page for this 
+TODO :: Add conditions for user auth
+TODO :: Add special notify sites if user not authed
+TODO :: Add special notify sites if pages expired
 
-				/*
-					Muss später ergänzt werden wenn angemeldete Benutzer und restriktionen vorhanden sind
-				*/
+*/
 
-				$this -> setResponseCode(901);	// Hinweis das diese Seite gesperrt ist
+			$timestamp = time();
 
+			if(		 $page -> hidden_state === 0
+				||	 $page -> hidden_state === 2
+				||	($page -> hidden_state === 4)
+				||	(	($page -> hidden_state == 5 &&  $page -> publish_from  < $timestamp && $page -> publish_expired == 0)
+					&&	($page -> hidden_state == 5 && ($page -> publish_until > $timestamp || $page -> publish_expired == 0) && $page -> publish_until != 0)
+					)	
+				||	CMS_BACKEND			
+			  ); else
+			{		
+				$this -> setResponseCode(403);
 				return false;			
 			}
 
-			if(($page -> hidden_state === 1 && !CMS_BACKEND)
+			if(	
+				($page -> hidden_state === 4 && !CMS_BACKEND)
 			  )
 			{
-				$this -> node_id  = false;
-
-				// TODO :: set error page for this 
-
-				/*
-					Muss später ergänzt werden wenn angemeldete Benutzer und restriktionen vorhanden sind
-				*/
-
-				$this -> setResponseCode(902);	// Hinweis das diese Seite gesperrt ist
-
+				$this -> setResponseCode(404);
 				return false;			
 			}
 
@@ -199,12 +196,8 @@ class CPageRequest extends CSingleton
 		$modelPage = new modelBackend();
 		if(!$modelPage -> load($this -> m_sqlConnection, $sqlWhere['node_id']))
 		{
-
-			$this -> node_id  = false;
-
-				$this -> responseCode 	= 404;
+			$this -> setResponseCode(404);
 			return false;
-
 		}
 
 
@@ -261,7 +254,6 @@ class CPageRequest extends CSingleton
 	{
 		switch($_responseCode)
 		{
-			case 902:	// page locked (note)
 			case 403:	// forbidden
 
 						$this -> node_id  		= false;
@@ -269,7 +261,6 @@ class CPageRequest extends CSingleton
 						break;
 
 			case 404:	// page not found
-			case 901:	// page locked (404)
 
 						$this -> node_id  		= false;
 						$this -> responseCode 	= 404;

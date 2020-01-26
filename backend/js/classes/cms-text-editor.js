@@ -107,9 +107,9 @@ class	cmsTextEditor
 				var plainText = (event.clipboardData || window.clipboardData).getData('text/plain');
 				that.formatContent(this, "insertHTML", plainText);
 			};
-			oEditBox.oninput	= function() {
+			oEditBox.oninput	= function(event) {
 				var	textarea = this.parentNode.querySelector('.rte-textarea');
-					textarea.innerHTML = this.innerHTML;
+					textarea.innerText = this.innerHTML;
 			};
 
 		this.aEditors.push(oEditBox);

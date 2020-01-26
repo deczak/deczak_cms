@@ -11,6 +11,12 @@ The version number is the release date. A letter as suffix indicates fixes on sa
 
 ## Version history	   
 
+### 20200126 Dev version (alpha)
+
+**Changes**
+- Add two new fields in page edit toolbar for publish from / until
+- Add constraints support to Shemes handling
+
 ### 20200120 Release version (alpha)
 
 **Modules**

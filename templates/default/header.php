@@ -6,6 +6,7 @@
 function
 createMenu(&$sitemap, $_pos = 1, $_level = 2 )
 {
+	$timestamp = time();
 	echo '<ul id="'. ($_pos === 1 ? 'menu-stucture' : '') .'">';
 	for($i = $_pos; $i < count($sitemap); $i++)
 	{
@@ -14,8 +15,13 @@ createMenu(&$sitemap, $_pos = 1, $_level = 2 )
 
 // TODO hidden_state checks 
 
-		if($sitemap[$i] -> hidden_state != 0 && !CMS_BACKEND)
-			continue;
+		if(
+				($sitemap[$i] -> hidden_state == 0)
+			||	(	($sitemap[$i] -> hidden_state == 5 && $sitemap[$i] -> publish_from  < $timestamp)
+				&&	($sitemap[$i] -> hidden_state == 5 && $sitemap[$i] -> publish_until > $timestamp && $sitemap[$i] -> publish_until != 0)
+				)
+			||  CMS_BACKEND
+		  ); else continue;
 
 			
 		if(CMS_BACKEND)
