@@ -22,6 +22,8 @@
 	
 	YES					=	Yes
 	NO					=	No
+
+	READMORE			=	Read more ...
 	
 	INFORMATION			=	Information
 	DESCRIPTION			=	Description
@@ -59,5 +61,6 @@
 	
 	WAS_DELETED			=	has been deleted
 	WAS_UPDATED			=	has been updated
+	WAS_CREATED			=	has been created
 	
 	IS_UNKNOWN			=	is unknown

@@ -4,7 +4,8 @@
 	BEPE_PANEL_MSG_PAGETITLE		=	You must provide a valid page title.
 	BEPE_PANEL_MSG_PAGETEMPLATE		=	You must provide a valid page template.
 	BEPE_PANEL_MSG_ALTLANGEVEN		=	A page of the same language cannot be specified as an alternative page.
-	
+	BEPE_PANEL_MSG_PUBEXPIRE		=	The expiration date cannot be earlier than the publication date.
+
 	
 	
 	BEPE_PANEL_BACKLINK				=	Back to Overview
@@ -14,6 +15,7 @@
 	BEPE_PANEL_GROUP_TEMPLATE		=	Template
 	BEPE_PANEL_GROUP_VISIBILTY		=	Visibility & Restrictions
 	BEPE_PANEL_GROUP_EXTSETTINGS	= 	Weitere Einstellungen
+	BEPE_PANEL_GROUP_TAGSCATS		= 	Categories & Tags
 	BEPE_PANEL_GROUP_SEARCHMACHINE	= 	Search engine settings
 	BEPE_PANEL_GROUP_ALTLANG		= 	Alternative Languages
 
@@ -25,12 +27,15 @@
 	BEPE_PANEL_PAGETITLE			=	Page title
 	BEPE_PANEL_PAGEDESCRIPTION		=	Page description
 	BEPE_PANEL_BROWSERCACHING		=	Browser caching
+	BEPE_PANEL_CATEGORIES			=	Kategorien
+	BEPE_PANEL_TAGS					=	Tags
 
 	BEPE_PANEL_HIDDEN_0_VISIBLE		=	Visible
 	BEPE_PANEL_HIDDEN_1_LOCKED		=	Locked for all (Note)
 	BEPE_PANEL_HIDDEN_4_LOCKED		=	Locked for all (404)
 	BEPE_PANEL_HIDDEN_2_HIDDEN		=	Hidden in Menus
 	BEPE_PANEL_HIDDEN_3_REGISTERED	=	Visible for Registered
+	BEPE_PANEL_HIDDEN_5_VISIBLEFROM	=	Publish from
 
 	BEPE_PANEL_CACHING_0_ENABLED	=	Enabled
 	BEPE_PANEL_CACHING_1_DISABLED	=	Disabled
@@ -47,5 +52,16 @@
 
 	BEPE_PANEL_NOALTLANGEXIST		=	No alternative Language exists
 
-
 	BEPE_PANEL_ALTLANGNODEID		=	Link page with dest. Page-ID
+
+	BEPE_PANEL_PUBLISHFROM				=	Publishment begin
+	BEPE_PANEL_PUBLISHUNTIL				=	Publishment until
+	BEPE_PANEL_PUBLISHUNTIL_STATE		=	Publishment expired
+	BEPE_PANEL_PUBLISHUNTIL_0_HIDDEN	=	Hidden in Menus
+	BEPE_PANEL_PUBLISHUNTIL_1_LOCKED	=	Locked (403)
+
+
+	BEPE_PANEL_ACCESSLEVEL			=	Display and accessibility
+	BEPE_PANEL_AUTHOBJECT			=	Authentication object
+	BEPE_PANEL_AUTHOBJECT_0_NONE	=	No Authentication
+	BEPE_PANEL_AUTHAPPLYCHILDS		=	Apply auth on sub-pages

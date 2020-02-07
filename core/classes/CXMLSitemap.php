@@ -5,6 +5,7 @@ class CXMLSitemap
 	public function
 	generate(&$_sqlConnection)
 	{
+		$timestamp = time();
 		$_targetFile	= 'sitemap.xml';
 
 		$publicLocation	= CMS_SERVER_ROOT.DIR_PUBLIC;
@@ -28,7 +29,8 @@ class CXMLSitemap
 
 
 				$modelCondition = new CModelCondition();
-				$modelCondition -> where('page_language', $_lang -> lang_key);	
+				$modelCondition -> where('page_language', $_lang -> lang_key);
+				$modelCondition -> where('page_path', '/');	
 
 				$_pSitemap 	 = new modelSitemap();
 				$_pSitemap	-> load($_sqlConnection, $modelCondition);
@@ -36,7 +38,17 @@ class CXMLSitemap
 				$sitemap	= $_pSitemap	-> getDataInstance();
 
 				for($i = count($sitemap) - 1; $i >= 0; $i--)
-				{			
+				{		
+					if(
+							($sitemap[$i] -> hidden_state == 0)
+						||	(!empty($sitemap[$i] -> page_auth))
+						||	(	($sitemap[$i] -> hidden_state == 5 && $sitemap[$i] -> publish_from  < $timestamp)
+							&&	($sitemap[$i] -> hidden_state == 5 && $sitemap[$i] -> publish_until > $timestamp && $sitemap[$i] -> publish_until != 0)
+							)
+					
+					  ); else continue;
+
+
 					fwrite($_hFile, "\t<url>\r\n");
 					fwrite($_hFile, "\t\t<loc>". CMS_SERVER_URL . $_langSuffix . substr($sitemap[$i] -> page_path,1) ."</loc>\r\n");
 					fwrite($_hFile, "\t\t<changefreq>monthly</changefreq>\r\n");

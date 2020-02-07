@@ -107,7 +107,7 @@
 
 					<div id="container-authentication-fields" style="margin-bottom:15px;"></div>
 				
-					<button class="ui button icon labeled" id="trigger-add-auth-field" type="button"><i class="fas fa-plus"></i>Add authentication field</button>
+					<button class="ui button icon labeled" id="trigger-add-auth-field" type="button"><span><i class="fas fa-plus" data-icon="fa-plus"></i></span>Add authentication field</button>
 
 					</div>
 				</div>	
@@ -125,7 +125,7 @@
 				
 					<div id="container-extend-session-fields" style="margin-bottom:15px;"></div>
 									
-					<button class="ui button icon labeled" id="trigger-add-extend-session-field" type="button"><i class="fas fa-plus"></i>Add extended session field</button>
+					<button class="ui button icon labeled" id="trigger-add-extend-session-field" type="button"><span><i class="fas fa-plus" data-icon="fa-plus"></i></span>Add extended session field</button>
 		
 					</div>
 				</div>	
@@ -138,7 +138,7 @@
 			<!-- Submit button - beware of fieldset name -->
 
 			<div class="submit-container">
-				<button class="ui button icon labeled trigger-submit-fieldset" type="button" disabled><i class="fas fa-save"></i><?php echo CLanguage::instance() -> getString('BUTTON_SAVE'); ?></button>
+				<button class="ui button icon labeled trigger-submit-fieldset" type="button" disabled><span><i class="fas fa-save" data-icon="fa-save"></i></span><?php echo CLanguage::instance() -> getString('BUTTON_SAVE'); ?></button>
 				<div class="protector"><input type="checkbox" class="trigger-submit-protector" id="protector-group-rights"><label for="protector-group-rights"></label></div>
 			</div>
 

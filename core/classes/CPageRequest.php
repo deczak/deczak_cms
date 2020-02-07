@@ -33,9 +33,11 @@ class CPageRequest extends CSingleton
 
 		$this -> objectsList 		= [];
 		$this -> crumbsList 		= [];
+										
 
 		$sitemapCondition = new CModelCondition();
-		$sitemapCondition -> where('page_language', $_language);		
+		$sitemapCondition -> where('page_language', $_language);	
+		$sitemapCondition -> where('page_path', '/');			
 
 		$modelSitemap = new modelSitemap();
 		$modelSitemap -> load($_sqlConnection, $sitemapCondition);
@@ -80,7 +82,7 @@ class CPageRequest extends CSingleton
 
 
 		if($this -> responseCode === NULL)
-			$this -> responseCode		= 200;
+			$this -> responseCode	= 200;
 
 		if($this -> responseCode !== 200)
 		{
@@ -90,9 +92,13 @@ class CPageRequest extends CSingleton
 
 		if(!CMS_BACKEND || (CMS_BACKEND && $this -> isEditMode))
 		{
+
+			##	Frontend handling
+			##
+
 			$modelPage = new modelPage();
 
-			if(!$modelPage -> load($_sqlConnection, $pageCondition))
+			if(!$modelPage -> loadOld($_sqlConnection, $pageCondition))
 			{	##	Page not found
 				$this -> node_id  		= false;
 				$this -> responseCode 	= 404;
@@ -103,37 +109,37 @@ class CPageRequest extends CSingleton
 
 			##	Check visibility settings
 
-			if(		 $page -> hidden_state !== 0
-				&&	($page -> hidden_state !== 2 && !CMS_BACKEND)
-				&&	($page -> hidden_state !== 1 && !CMS_BACKEND)
-			)
+
+			if(!CMS_BACKEND && !empty($page -> page_auth))
 			{
-				$this -> node_id  = false;
+				if(CSession::instance() -> isAuthed($page -> page_auth) === false)
+				{
+					header("Location: ". CMS_SERVER_URL ); 			
+					exit;		
+				}
+			}
 
-				// TODO :: set error page for this 
 
-				/*
-					Muss später ergänzt werden wenn angemeldete Benutzer und restriktionen vorhanden sind
-				*/
+			$timestamp = time();
 
-				$this -> setResponseCode(901);	// Hinweis das diese Seite gesperrt ist
-
+			if(		 $page -> hidden_state === 0
+				||	 $page -> hidden_state === 2
+				||	($page -> hidden_state === 4)
+				||	(	($page -> hidden_state == 5 &&  $page -> publish_from  < $timestamp && $page -> publish_expired == 0)
+					&&	($page -> hidden_state == 5 && ($page -> publish_until > $timestamp || $page -> publish_expired == 0) && $page -> publish_until != 0)
+					)	
+				||	CMS_BACKEND			
+			  ); else
+			{		
+				$this -> setResponseCode(403);
 				return false;			
 			}
 
-			if(($page -> hidden_state === 1 && !CMS_BACKEND)
+			if(	
+				($page -> hidden_state === 4 && !CMS_BACKEND)
 			  )
 			{
-				$this -> node_id  = false;
-
-				// TODO :: set error page for this 
-
-				/*
-					Muss später ergänzt werden wenn angemeldete Benutzer und restriktionen vorhanden sind
-				*/
-
-				$this -> setResponseCode(902);	// Hinweis das diese Seite gesperrt ist
-
+				$this -> setResponseCode(404);
 				return false;			
 			}
 
@@ -149,7 +155,7 @@ class CPageRequest extends CSingleton
 
 
 			$modelPageObject = new modelPageObject();
-			$modelPageObject -> load($_sqlConnection, $sqlWhere);
+			$modelPageObject -> loadOld($_sqlConnection, $sqlWhere);
 			$this -> objectsList = &$modelPageObject -> getDataInstance();
 		
 
@@ -197,14 +203,10 @@ class CPageRequest extends CSingleton
 
 
 		$modelPage = new modelBackend();
-		if(!$modelPage -> load($this -> m_sqlConnection, $sqlWhere['node_id']))
+		if(!$modelPage -> loadOld($this -> m_sqlConnection, $sqlWhere['node_id']))
 		{
-
-			$this -> node_id  = false;
-
-				$this -> responseCode 	= 404;
+			$this -> setResponseCode(404);
 			return false;
-
 		}
 
 
@@ -261,7 +263,6 @@ class CPageRequest extends CSingleton
 	{
 		switch($_responseCode)
 		{
-			case 902:	// page locked (note)
 			case 403:	// forbidden
 
 						$this -> node_id  		= false;
@@ -269,7 +270,6 @@ class CPageRequest extends CSingleton
 						break;
 
 			case 404:	// page not found
-			case 901:	// page locked (404)
 
 						$this -> node_id  		= false;
 						$this -> responseCode 	= 404;

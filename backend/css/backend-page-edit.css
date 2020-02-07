@@ -10,8 +10,8 @@
 		--panel-background-color-a: rgba(64,64,64,1);
 		--panel-background-color-b: rgba(74,74,74,1);
 		--panel-text-color: rgba(255,255,255,1);
-		--panel-width-a: 300px;
-		--panel-width-b: -300px;
+		--panel-width-a: 350px;
+		--panel-width-b: -350px;
 	}
 
 
@@ -110,8 +110,9 @@
 	#be-page-panel #table-page-informationen td { font-size:0.90em; color:white; }
 	#be-page-panel #table-page-informationen td:first-child { width: 125px;}
 
-
 	#be-page-panel  .result-box { font-size:0.85em; }
+
+	#be-page-panel .selected-items .selected-item-text { color:black; font-size:0.9em; }
 
 
 /**	

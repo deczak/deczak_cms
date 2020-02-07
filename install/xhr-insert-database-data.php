@@ -36,6 +36,8 @@
 	$sqlDump = str_replace('%USER_LAST_NAME%',$_POST['user-last-name'], $sqlDump);
 	$sqlDump = str_replace('%USER_MAIL%',$_POST['user-mail'], $sqlDump);
 
+	$sqlDump = str_replace('%TIMESTAMP%',time(), $sqlDump);
+
 	if( $db -> multi_query($sqlDump) === FALSE)
 		tk::xhrResult(1, 'SQL error on query - '. $db -> error);
 

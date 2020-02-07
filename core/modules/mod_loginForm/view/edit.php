@@ -1,16 +1,15 @@
 <?php
 
-	$object -> params = json_decode($object -> params);
+$object -> params = json_decode($object -> params);
 
-	$fieldsList = [];
+$fieldsList = [];
 
-	foreach($login_objects as $objecKey => $objectSet )
-		$fieldsList[] = [ "object_id" => $objectSet -> object_id, "object_fields" => json_decode( $objectSet -> object_fields, true ) ];
+foreach($login_objects as $objecKey => $objectSet )
+	$fieldsList[] = [ "object_id" => $objectSet -> object_id, "object_fields" => json_decode( $objectSet -> object_fields, true ) ];
 		
 ?>
+
 <input type="hidden" name="cms-object-id" value="<?php echo $object -> object_id; ?>">
-
-
 
 <div class="login-form-container" style="margin:0 auto; max-width:300px;">
 
@@ -24,10 +23,7 @@
 			<div>
 
 				<div class="login-fields">
-			
-
-
-
+		
 				</div>
 
 				<div class="input width-100">
@@ -66,35 +62,26 @@
 <script>
 (function() {
 	
-
-
 	function
 	onObjectChange(element = null)
 	{
 		if(element == null)
 			element = this;
 
-	//	var	selectedObject 	= document.getElementById('login-object-select-<?php echo $object -> object_id; ?>').value;
 		var	selectedObject 	= element.value;
 		var	fieldList 		= <?php echo json_encode($fieldsList); ?>;
 		var	fieldLabels 	= <?php echo json_encode($object -> params, JSON_HEX_QUOT | JSON_HEX_APOS | JSON_UNESCAPED_UNICODE); ?>;
-	//	var	formContainer 	= document.getElementById('login-object-select-<?php echo $object -> object_id; ?>').closest('fieldset');
 		var	formContainer 	= element.closest('fieldset');
 		var	fieldsContainer = formContainer.querySelector('.login-fields');
 			fieldsContainer.innerHTML = '';
 
-console.log(fieldLabels.labels);
 		for(var i = 0; i < fieldList.length; i++)
 		{
-
 			if(fieldList[i].object_id === selectedObject)
 			{
 
 				for(var f = 0; f < fieldList[i].object_fields.length; f++)
 				{
-					console.log(fieldList[i].object_fields[f]);
-
-
 					var	oFieldBox = document.createElement('div');
 						oFieldBox.classList.add('input', 'width-100');
 
@@ -117,15 +104,12 @@ console.log(fieldLabels.labels);
 					var	oFieldBox = document.createElement('div');
 						oFieldBox.classList.add('input', 'width-100');
 
-				//	var oLabel = document.createElement('label');
-				//		oLabel.innerHTML = 'todo';
 
 					var oInput = document.createElement('input');
 						oInput.setAttribute('type', fieldList[i].object_fields[f].type);
 						oInput.setAttribute('name', fieldList[i].object_fields[f].name);
 						oInput.setAttribute('value', '');
 
-				//	oFieldBox.appendChild(oLabel);
 					oFieldBox.appendChild(oInput);
 
 					fieldsContainer.appendChild(oFieldBox);
@@ -133,22 +117,11 @@ console.log(fieldLabels.labels);
 
 				break;
 			}
-
-/*
-
-*/
-
 		}
-
 
 	} onObjectChange(document.getElementById('login-object-select-<?php echo $object -> object_id; ?>'));
 
 	document.getElementById('login-object-select-<?php echo $object -> object_id; ?>').onchange = onObjectChange;
 
-
 }());
 </script>
-
-<style>
-
-</style>

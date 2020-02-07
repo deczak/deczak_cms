@@ -4,47 +4,34 @@ include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SHEME.'shemeUsersBackend.php';
 
 class 	modelUsersBackend extends CModel
 {
-	private	$m_shemeUsersBackend;
-
 	public function
 	__construct()
-	{		
-		parent::__construct();		
-
-		$this -> m_shemeUsersBackend = new shemeUsersBackend();
+	{			
+		parent::__construct('userBackend');		
+		$this -> m_sheme = new shemeUsersBackend();
 	}	
 
 	public function
-	load(&$_sqlConnection, array $_where = [])
+	load(&$_sqlConnection, CModelCondition $_condition = NULL)
 	{
-		$_className	=	$this -> createClass($this -> m_shemeUsersBackend,'userBackend');
+		$className	=	$this -> createClass($this -> m_sheme, $this -> m_className, '', $this -> m_additionalProperties);
+		$tableName	=	$this -> m_sheme -> getTableName();
 
-		$_tableUsers	=	$this -> m_shemeUsersBackend -> getTableName();
-
-		$_sqlWhere = [];
-
-		foreach($_where as $_whereKey => $_whereColumn)
-		{
-			$_sqlWhere[] = " `$_whereKey` = '". $_sqlConnection -> real_escape_string($_whereColumn) . "' ";
-		}
-
-		$_sqlSelect	=	"	SELECT		$_tableUsers.data_id,
-										$_tableUsers.user_id,
-										$_tableUsers.user_name_first,
-										$_tableUsers.user_name_last,
-										$_tableUsers.user_mail,
-										$_tableUsers.login_count,
-										$_tableUsers.time_login,
-										$_tableUsers.create_time,
-										$_tableUsers.update_time,
-										$_tableUsers.create_by,
-										$_tableUsers.update_by,
-										$_tableUsers.is_locked
-							FROM		$_tableUsers	
-						";
-
-		if(count($_sqlWhere) !== 0)
-			$_sqlSelect	.=	" WHERE ". implode(' AND ', $_sqlWhere);
+		$_sqlSelect	=	"	SELECT		$tableName.data_id,
+										$tableName.user_id,
+										$tableName.user_name_first,
+										$tableName.user_name_last,
+										$tableName.user_mail,
+										$tableName.login_count,
+										$tableName.time_login,
+										$tableName.create_time,
+										$tableName.update_time,
+										$tableName.create_by,
+										$tableName.update_by,
+										$tableName.language,
+										$tableName.is_locked
+							FROM		$tableName	
+						".	($_condition != NULL ? $_condition -> getConditions($_sqlConnection, $_condition) : '');
 			
 		$_sqlResult	=	 $_sqlConnection -> query($_sqlSelect);
 		
@@ -54,118 +41,64 @@ class 	modelUsersBackend extends CModel
 		{
 			$this -> decryptRawSQLDataset($_sqlRow, $_sqlRow['user_id'], ['user_name_first', 'user_name_last', 'user_mail']);
 
-			$this -> m_storage[] = new $_className($_sqlRow, $this -> m_shemeUsersBackend -> getColumns());
-
-
-
-
-
-
-
+			$this -> m_storage[] = new $className($_sqlRow, $this -> m_sheme -> getColumns());
 		}	
 		return true;
 	}
 
 	public function
-	insert(&$_sqlConnection, $_dataset)
+	insert(&$_sqlConnection, &$_dataset, &$_insertID)
 	{
-		$_tableUsers	=	$this -> m_shemeUsersBackend -> getTableName();
+		$className		=	$this -> createClass($this -> m_sheme,'userBackend');
+		$tableName	=	$this -> m_sheme -> getTableName();
 
 		$this -> encryptRawSQLDataset($_dataset, $_dataset['user_id'], ['user_name_first', 'user_name_last', 'user_mail']);
 
-		$_className		=	$this -> createClass($this -> m_shemeUsersBackend,'userBackend');
-		$_model 		= 	new $_className($_dataset, $this -> m_shemeUsersBackend -> getColumns());
+		$model 		= 	new $className($_dataset, $this -> m_sheme -> getColumns());
 
-		$_sqlString		=	"INSERT INTO $_tableUsers SET ";
+		$sqlString		=	"INSERT INTO $tableName SET ";
 
-		$_loopCounter = 0;
-		foreach($this -> m_shemeUsersBackend -> getColumns() as $_column)
+		$loopCounter = 0;
+		foreach($this -> m_sheme -> getColumns() as $column)
 		{
-			if(!$this -> m_shemeUsersBackend -> columnExists(true, $_column -> name)) continue;
-			if($_column -> name === 'data_id') continue;
-			if(isset($_column -> ignore)) continue;
-			$_tmp		 = $_column -> name;
-			$_sqlString .= ($_loopCounter != 0 ? ', ':'');
-			$_sqlString .= "`".$_column -> name ."` = '". $_model -> $_tmp ."'";
-			$_loopCounter++;
+			if($column -> isVirtual) continue;
+			$_tmp		 = $column -> name;
+			$sqlString .= ($loopCounter != 0 ? ', ':'');
+			$sqlString .= "`".$column -> name ."` = '". $model -> $_tmp ."'";
+			$loopCounter++;
 		}
 		
-		if($_sqlConnection -> query($_sqlString) !== false) return true;
+		if($_sqlConnection -> query($sqlString) !== false) return true;
 		return false;
 	}
 
 	public function
-	update(&$_sqlConnection, $_dataset)
+	update(&$_sqlConnection, &$_dataset, CModelCondition $_condition = NULL)
 	{
-		$_tableUsers	=	$this -> m_shemeUsersBackend -> getTableName();
+		if($_condition === NULL || !$_condition -> isSet()) return false;
 
-		$this -> encryptRawSQLDataset($_dataset, $_dataset['user_id'], ['user_name_first', 'user_name_last', 'user_mail']);
+		$userId = $_condition -> getConditionListValue('user_id');
+
+		$this -> encryptRawSQLDataset($_dataset, $userId, ['user_name_first', 'user_name_last', 'user_mail']);
+
+		$tableName	=	$this -> m_sheme -> getTableName();
 	
-		$_sqlString		 =	"UPDATE $_tableUsers SET ";
-		$_loopCounter 	= 0;
-		foreach($_dataset as $_column => $_value)
+		$sqlString		 =	"UPDATE $tableName SET ";
+		$loopCounter 	= 0;
+		foreach($_dataset as $column => $_value)
 		{	
-			if($_column === 'user_id') continue;
-			if(!$this -> m_shemeUsersBackend -> columnExists(true, $_column)) continue;
-			$_sqlString  .= ($_loopCounter != 0 ? ', ':'');
-			$_sqlString  .= "`". $_sqlConnection -> real_escape_string($_column) ."` = '". $_sqlConnection -> real_escape_string($_value) ."'";
-			$_loopCounter++;
+			if(!$this -> m_sheme -> columnExists(true, $column)) continue;
+			$sqlString  .= ($loopCounter != 0 ? ', ':'');
+			$sqlString  .= "`". $_sqlConnection -> real_escape_string($column) ."` = '". $_sqlConnection -> real_escape_string($_value) ."'";
+			$loopCounter++;
 		}
-		$_sqlString 	 .= " WHERE user_id = '". $_dataset['user_id'] ."'";
 
-		if($_sqlConnection -> query($_sqlString) !== false) return true;
+		$sqlString	.=	$_condition -> getConditions($_sqlConnection, $_condition);
+
+		if($_sqlConnection -> query($sqlString) !== false) return true;
 		return false;
 	}
-	
-	public function
-	delete( &$_sqlConnection, array $_where)
-	{
-		$_tableUsers	=	$this -> m_shemeUsersBackend -> getTableName();
-		
-		if(empty($_where)) return false;
-
-		$_sqlString		 =	"DELETE FROM $_tableUsers WHERE ";
-		$_loopCounter 	 = 0;
-		foreach($_where as $_column => $_value)
-		{
-			$_sqlString .= ($_loopCounter != 0 ? ', ':'');
-			$_sqlString .= "`".$_column ."` = '". $_value ."'";
-			$_loopCounter++;
-		}
-		
-		if($_sqlConnection -> query($_sqlString) !== false) return true;
-		return false;
-	}
-
-	public function
-	searchValue($_needle, string $_searchColumn, string $_returnColumn)
-	{
-		foreach($this -> m_storage as $_user)
-		{
-			if($_user -> $_searchColumn === $_needle) return $_user -> $_returnColumn;
-		}
-		return NULL;
-	}
-/*
-	public function
-	isDatasetExists(&$_sqlConnection, string $_tableName, array $_where)
-	{
-		$_tableName	=	$this -> m_shemeUsersBackend -> getTableName();
-		return parent::isDatasetExists($_sqlConnection, $_tableName, $_where);
-	}
-*/
-	public function
-	isUnique(&$_sqlConnection, array $_where, array $_whereNot = [])
-	{
-		$tableName	=	$this -> m_shemeUsersBackend -> getTableName();
-		return $this -> _isUnique($_sqlConnection, $tableName, $_where, $_whereNot);
-	}
-
-
-
 }
-
-
 
 /**
  * 	Parent class for the data class with toolkit functions. It get the child instance to access the child properties.

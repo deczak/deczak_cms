@@ -1,10 +1,28 @@
 <?php
 
+class	CModelRelations
+{
+	public	$joinType;
+	public	$tableName;
+	public	$condition;
+
+	public function
+	__construct(string $_joinType, string $_tableName, CModelCondition $_condition)
+	{
+		$this -> joinType 				= $_joinType;
+		$this -> tableName 				= $_tableName;
+		$this -> condition 				= $_condition;
+	}
+}
+
 class	CModel
 {
 	protected	$m_storage;
 	protected	$m_additionalProperties;		// deprecated
 	protected	$m_tableRelations;				// deprecated
+
+	protected	$m_relationsList;
+	protected	$m_selectList;
 
 	protected	$m_className;
 	protected	$m_sheme;
@@ -17,9 +35,166 @@ class	CModel
 		$this -> m_additionalProperties = [];			// deprecated
 		$this -> m_tableRelations		= [];			// deprecated
 
+		$this -> m_relationsList		= [];
+		$this -> m_selectList			= [];
 		$this -> m_className			= $_className;
 	}
+
+
+
+	public function
+	addRelation(string $_joinType, string $_tableName, CModelCondition $_condition)
+	{
+		$this -> m_relationsList[] = new CModelRelations($_joinType, $_tableName, $_condition);
+	}
+
+	public function
+	addSelectColumns()
+	{
+		$argList = func_get_args();
+		$this -> m_selectList = array_merge($this -> m_selectList, $argList);
+	}
+
+	private function
+	getSelectColumns()
+	{
+		if(count($this -> m_selectList) == 0)
+			return '*';
+
+		return implode(',', $this -> m_selectList);
+	}
+
+	/**
+	 * 	Function to load data from the database
+	 * @param object $_sqlConnection valid sql connection
+	 * @param object $_condition CModelCondition instance (optional)
+	 * @return bool	Returns true if succeeded, otherwise false
+	 */
+	public function
+	load(&$_sqlConnection, CModelCondition $_condition = NULL)
+	{
+		// Adding select columns to Sheme instance
+
+		foreach($this -> m_selectList as $selectItem)
+		{
+			if($selectItem === '*')
+				continue;
+
+			if(strpos($selectItem, '.*') !== false)
+				continue;
+
+			$selectItem = strtolower($selectItem);
+			$selectItem = explode(' as ', $selectItem);
+			$selectItem = (count($selectItem) == 1 ? $selectItem[0] : $selectItem[1]);
+			$selectItem = explode('.', $selectItem);
+			$selectItem = (count($selectItem) == 1 ? $selectItem[0] : $selectItem[1]);
+
+			$this -> m_sheme -> addColumn($selectItem, 'string');
+		}
+
+		// Create class prototpe
+
+		$className	=	$this -> createClass($this -> m_sheme, $this -> m_className, '', $this -> m_additionalProperties);
+
+		// Generate sql string
+
+		$sqlString   =  "";
+		$sqlString	.=	"	SELECT		". $this -> getSelectColumns();
+		$sqlString	.=	"	FROM		". $this -> m_sheme -> getTableName();
+
+		foreach($this -> m_relationsList as $relation)
+		{
+			$sqlString	.=	"	". $relation -> joinType ." ". $relation -> tableName;
+			$sqlString	.=	"		ON ". $relation -> condition -> getRelationConditions($_sqlConnection, $relation -> condition);
+		}
+
+		$sqlString	.=	"	". ($_condition != NULL ? $_condition -> getConditions($_sqlConnection, $_condition) : '');
+
+		// Query and process data
+
+		$sqlResult	 =	$_sqlConnection -> query($sqlString);
+
+		while($sqlResult !== false && $sqlRow = $sqlResult -> fetch_assoc())
+		{	
+			$this -> m_storage[] = new $className($sqlRow, $this -> m_sheme -> getColumns());
+		}
 		
+		return true;
+	}
+
+	/**
+	 * 	Function to load data from the database
+	 * @param object $_sqlConnection valid sql connection
+	 * @param array $_dataset Reference to Array with the values to be inserted
+	 * @param int $_condition Reference to variable that get the inserted id
+	 * @return bool	Returns true if succeeded, otherwise false
+	 */
+	public function
+	insert(&$_sqlConnection, &$_dataset, &$_insertID)
+	{
+		$className		 =	$this -> createClass($this -> m_sheme, $this -> m_className);
+		$tableName		 =	$this -> m_sheme -> getTableName();
+
+		$model 			 = 	new $className($_dataset, $this -> m_sheme -> getColumns());
+
+		$sqlString		 =	"INSERT INTO $tableName	SET ";
+
+		$loopCounter 	 = 0;
+		foreach($this -> m_sheme -> getColumns() as $column)
+		{
+			if($column -> isVirtual) continue;
+			if(!property_exists($model, $column -> name)) continue;
+			$tmp		 = $column -> name;
+			$sqlString 	.= ($loopCounter != 0 ? ', ':'');
+			$sqlString 	.= "`".$column -> name ."` = '". $model -> $tmp ."'";
+			$loopCounter++;
+		}
+		
+		if($_sqlConnection -> query($sqlString) !== false) 
+		{
+			$_insertID = $_sqlConnection -> insert_id;
+			return true;
+		}
+		return false;
+	}
+
+	public function
+	update(&$_sqlConnection, &$_dataset, CModelCondition $_condition = NULL)
+	{
+		if($_condition === NULL || !$_condition -> isSet()) return false;
+
+		$tableName	=	$this -> m_sheme -> getTableName();
+
+		$sqlString		 =	"UPDATE $tableName SET ";
+		$loopCounter 	= 0;
+		foreach($_dataset as $column => $_value)
+		{	
+			if(!$this -> m_sheme -> columnExists(true, $column)) continue;
+			$sqlString  .= ($loopCounter != 0 ? ', ':'');
+			$sqlString  .= "`". $_sqlConnection -> real_escape_string($column) ."` = '". $_sqlConnection -> real_escape_string($_value) ."'";
+			$loopCounter++;
+		}
+
+		$sqlString	.=	$_condition -> getConditions($_sqlConnection, $_condition);
+
+		if($_sqlConnection -> query($sqlString) !== false) return true;
+		return false;
+	}
+	
+	public function
+	delete( &$_sqlConnection, CModelCondition $_condition = NULL)
+	{
+		if($_condition === NULL || !$_condition -> isSet()) return false;
+	
+		$tableName	=	$this -> m_sheme -> getTableName();
+		
+		$sqlString	 =	"	DELETE FROM $tableName 
+						".	$_condition -> getConditions($_sqlConnection, $_condition);
+
+		if($_sqlConnection -> query($sqlString) !== false) return true;
+		return false;
+	}
+
 	#protected function ( temporär wegen backend handling)
 	public function
 	createClass(&$_targetSheme, string $_nameAppendix = '', string $_parentClass = '', array $_additionalProperties = [])
@@ -82,7 +257,6 @@ class	CModel
 					$_objectString .= " \$tmp = \$_column -> name;";
 					$_objectString .= " if( !property_exists(\$this, \$tmp ) ) continue; ";
 					$_objectString .= " if(\$this -> \$tmp === NULL && isset(\$_column -> defaultValue)) { \$this -> \$tmp = \$_column -> defaultValue; } ";
-					$_objectString .= " elseif(\$this -> \$tmp == NULL && \$_column -> isNull === 'NULL') { \$this -> \$tmp = isNull; } ";
 				
 				$_objectString .= " }";
 
@@ -165,6 +339,7 @@ class	CModel
 	public function
 	setReleation($_modelInstance, string $_joinType, array $_joinOn)
 	{
+		#deprecated
 		$this -> m_tableRelations[] = 	[
 											'shemeInstance'	=> $_modelInstance -> m_sheme,
 											'join'			=> $_joinType .' join',

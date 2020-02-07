@@ -33,7 +33,7 @@ class 	modelSimple extends CModel
 	}
 
 	public function
-	update(&$_sqlConnection, $_dataset, CModelCondition $_condition = NULL)
+	update(&$_sqlConnection, &$_dataset, CModelCondition $_condition = NULL)
 	{
 		##	
 
@@ -61,11 +61,6 @@ class 	modelSimple extends CModel
 			return false;
 
 		return true;
-	}
-
-	public function
-	insert(&$_sqlConnection, array $_dataset)
-	{	
 	}
 
 	public function

@@ -88,6 +88,26 @@ class CShemeColumn
 	}
 }
 
+class sqlConstraints
+{
+	public $name;
+	public $key;
+	public $refTable;
+	public $refColumn;
+	public $onDelete;
+	public $onUpdate;
+
+	public function
+	__construct($_constraintName, $_keyName, $_refTable, $_refColumn, $_onDelete, $_onUpdate)
+	{
+		$this -> name		= $_constraintName;
+		$this -> key		= $_keyName;
+		$this -> refTable	= $_refTable;
+		$this -> refColumn	= $_refColumn;
+		$this -> onDelete	= $_onDelete;
+		$this -> onUpdate	= $_onUpdate;
+	}
+}
 
 class CSheme
 {
@@ -103,6 +123,7 @@ class CSheme
 		$this -> m_tableEngine 		= '';
 
 		$this -> m_duplications		= [];
+		$this -> constraintsList	= [];
 	}
 
 	protected function
@@ -121,8 +142,15 @@ class CSheme
 	{
 		$this -> m_tableName 		= $_tableEngine;
 	}
+
 	
 	protected function
+	addConstraing($_constraintName, $_keyName, $_refTable, $_refColumn, $_onDelete, $_onUpdate)
+	{
+		$this -> constraintsList[] = new sqlConstraints($_constraintName, $_keyName, $_refTable, $_refColumn, $_onDelete, $_onUpdate);
+	}
+	
+	public function
 	&addColumn(string $_columnName, string $_dataType)
 	{
 		$this -> m_sheme['columns'][$_columnName] = new CShemeColumn($_columnName, $_dataType);
@@ -252,29 +280,6 @@ class CSheme
 			return false;			
 		}
 
-		## Keys
-/*
-		$sqlString 		= [];
-		$sqlString[] 	= "ALTER TABLE `". $this -> m_tableName ."`";
-		$isFirstColumn 	= true;
-		foreach($this -> m_sheme['columns'] as $columnName => $columnData)
-		{		
-
-			if($columnData -> keyType === NULL || $columnData -> keyType === 'PRIMARY')
-				continue;
-
-			if($isFirstColumn)
-				$isFirstColumn = false;
-			else
-				$sqlString[] 	= ",";
-
-
-
-			$sqlString[] 	= "ADD ". $columnData -> keyType." KEY (`". $columnData -> name ."`)";
-		}
-
-		$_sqlConnection -> query(implode(' ', $sqlString));
-*/
 		##	Index
 
 		$sqlString 		= [];
@@ -296,7 +301,34 @@ class CSheme
 		$_sqlConnection -> query(implode(' ', $sqlString));
 
 		return true;
+	}
 
+	public function
+	createTableConstraints(&$_sqlConnection)
+	{
+		if($this -> m_sheme['virtual'] === true || count($this -> constraintsList) == 0)
+			return true;
+
+		if(empty($_sqlConnection) || !property_exists($_sqlConnection, 'errno') || $_sqlConnection -> errno != 0)
+			return true;
+
+		##	Adding constraints if exists
+
+		foreach($this -> constraintsList as $constraint)
+		{	
+			$sqlString = 	"	ALTER TABLE 	 `". $this -> m_tableName ."` 
+								ADD	CONSTRAINT 	 `". $constraint -> name ."` 
+									FOREIGN KEY (`". $constraint -> key ."`) 
+									REFERENCES   `". $constraint -> refTable ."`(`". $constraint -> refColumn ."`) 
+									ON DELETE 	  ". $constraint -> onDelete ." 
+									ON UPDATE 	  ". $constraint -> onUpdate ."";
+
+			$_sqlConnection -> query($sqlString);
+
+			
+		}
+
+		return true;
 	}
 
 	public function

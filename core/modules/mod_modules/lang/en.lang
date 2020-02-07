@@ -3,6 +3,7 @@
 
 	M_BEMOULE_MSG_INSTALLED			=	Module has been installed
 	M_BEMOULE_MSG_REMOVED			=	Module has been removed
+	M_BEMOULE_MSG_MODULE			=	Module
 
 	M_BEMOULE_MSG_WARNINGNOTICE		=	When uninstalling a module, all data in the database belonging to this module are deleted.
 

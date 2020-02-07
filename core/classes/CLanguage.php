@@ -19,8 +19,6 @@ class	CLanguage extends CSingleton
 		if($_sqlConnection === false)
 		return false;
 
-
-
 		$this -> languagesList = [];
 
 		$modelLanguages = new modelLanguages();
@@ -61,7 +59,6 @@ class	CLanguage extends CSingleton
 	public function
 	loadLanguageFile(string $_Filelocation , $_LanguageKey = false, array $_compareData = [] )
 	{ 
-
 		if( !file_exists( $_Filelocation . $_LanguageKey .'.lang' ) )
 		{
 			if( !file_exists( $_Filelocation . $this -> m_defaultLanguage .'.lang' ) )
@@ -199,6 +196,8 @@ class	CLanguage extends CSingleton
 
 			if( isset( $this -> m_aStorage[$this -> m_activeLanguage][$stringId] ) )
 			{
+
+
 				$returnValue .= $this -> m_aStorage[$this -> m_activeLanguage][$stringId];
 			}
 			else

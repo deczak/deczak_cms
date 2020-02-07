@@ -191,5 +191,77 @@
 					 ],
 		"menu_group":"3",
 		"menu_order":"0"
+	},
+	{
+		"page_name"	:"Environment",
+		"page_title":"Environment",
+		"page_description":"",
+		"page_path"	:"environment",
+		"node_id"	:"13",
+		"page_auth"	:"ABKND",
+		"objects"	:[
+						{
+							"module_id"	:"14",
+							"object_id"	:"1680",
+							"body"		:"",
+							"params"	:""
+						}		
+					 ],
+		"menu_group":"3",
+		"menu_order":"0"
+	},
+	{
+		"page_name"	:"Users",
+		"page_title":"Users",
+		"page_description":"",
+		"page_path"	:"users",
+		"node_id"	:"14",
+		"page_auth"	:"ABKND",
+		"objects"	:[
+						{
+							"module_id"	:"15",
+							"object_id"	:"1680",
+							"body"		:"",
+							"params"	:""
+						}		
+					 ],
+		"menu_group":"3",
+		"menu_order":"0"
+	},
+	{
+		"page_name"	:"Categories",
+		"page_title":"Categories",
+		"page_description":"",
+		"page_path"	:"categories",
+		"node_id"	:"15",
+		"page_auth"	:"ABKND",
+		"objects"	:[
+						{
+							"module_id"	:"16",
+							"object_id"	:"1681",
+							"body"		:"",
+							"params"	:""
+						}		
+					 ],
+		"menu_group":"3",
+		"menu_order":"0"
+	},
+	{
+		"page_name"	:"Tags",
+		"page_title":"Tags",
+		"page_description":"",
+		"page_path"	:"tags",
+		"node_id"	:"16",
+		"page_auth"	:"ABKND",
+		"objects"	:[
+						{
+							"module_id"	:"17",
+							"object_id"	:"1682",
+							"body"		:"",
+							"params"	:""
+						}		
+					 ],
+		"menu_group":"3",
+		"menu_order":"0"
 	}
 ]

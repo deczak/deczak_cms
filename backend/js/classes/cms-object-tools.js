@@ -40,8 +40,8 @@
 		{			
 			var that 		= this;
 
-			var fontColor = TK.getVisibleBackgroundColor(objectElement);
-				fontColor = TK.invertRGBA(fontColor);
+			var fontColor = cmstk.getVisibleBackgroundColor(objectElement);
+				fontColor = cmstk.invertRGBA(fontColor);
 
 			var	eObjectTools = document.createElement('div');
 				eObjectTools.classList.add('cms-object-tools');

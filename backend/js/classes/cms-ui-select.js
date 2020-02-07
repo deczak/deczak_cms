@@ -53,7 +53,6 @@ class	cmsUiSelect
 		// set preset
 		var	preset 	= srcElement.getAttribute('data-preset');
 
-		console.log(preset);
 
 		if(preset == null)
 			return true;
@@ -62,41 +61,35 @@ class	cmsUiSelect
 
 		var	options = srcElement.querySelectorAll('option');
 
-		console.log(options);
 		preset.forEach(function(item) {
 
 			for(var i = 0; i < options.length; i++)
 			{
-console.log(item  +' === '+	options[i].innerHTML);
-				if(item === options[i].innerHTML)
+				let	valueAttr	= options[i].getAttribute('value');
+				let compareValue = (valueAttr != null ? valueAttr : options[i].innerText);
+
+				if(item === compareValue)
 				{
-					console.log('hit');
 					options[i].hidden = true;
 
-srcElement.value = item;
-srcElement.onchange();
+					srcElement.value = item;
+					srcElement.onchange();
 
 					break;
 				}
-
-
-			}
-
-			
+			}	
 		});
-
-
-		console.log(preset);
-
 	}
-
 
 	onChangeSelection()
 	{
+		var	option		= this.querySelector('option[value="'+this.value+'"]'); 
+		var optionValue = (option != null ? option.value : this.value);
+		var	optionText 	= (option != null ? option.innerText : this.value);
 
 		// create element for text
 		var selectedText = document.createElement('span');
-			selectedText.innerHTML = this.value;
+			selectedText.innerText = optionText;
 			selectedText.classList.add('selected-item-text');
 			selectedText.style.padding = '4px 8px';
 
@@ -108,6 +101,7 @@ srcElement.onchange();
 			selectRemBox.style.padding = '6px 8px';
 			selectRemBox.style.cursor = 'pointer';
 			selectRemBox.style.background = 'rgba(0,0,0,0.125)'; 
+			selectRemBox.style.borderRadius = '0px 3px 3px 0px';
 			selectRemBox.onclick = function() {
 
 				var	selectedItemBox 	= this.parentNode;
@@ -132,7 +126,7 @@ srcElement.onchange();
 		var oSelectedInput 		= document.createElement('input');
 			oSelectedInput.setAttribute('type', 'text');
 			oSelectedInput.setAttribute('name', this.getAttribute('data-name'));
-			oSelectedInput.setAttribute('value', this.value);
+			oSelectedInput.setAttribute('value', optionValue);
 			oSelectedInput.style.display = 'none';			
 
 		// create box for both inner elements and append
@@ -141,9 +135,10 @@ srcElement.onchange();
 			selectedItemBox.style.justifyContent = 'space-between';
 			selectedItemBox.style.margin = '6px 6px 0px 0px';
 			selectedItemBox.style.fontSize = '0.8em';
-			selectedItemBox.style.border = '1px solid rgba(0,0,0,0.2)';
+			//selectedItemBox.style.border = '1px solid rgba(0,0,0,0.2)';
 			selectedItemBox.style.background = 'linear-gradient(to bottom,rgb(233,223,37),rgb(214,187,35))';
 			selectedItemBox.style.borderRadius = '3px';
+			selectedItemBox.style.boxShadow = '1px 1px 2px 1px rgba(0,0,0,0.3)';
 
 			selectedItemBox.appendChild(oSelectedInput);
 			selectedItemBox.appendChild(selectedText);

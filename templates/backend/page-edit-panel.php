@@ -1,7 +1,13 @@
 <?php
 
+	require_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelLoginObjects.php';
+	require_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelCategories.php';
+	require_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelTags.php';
+
 	$pAvaiableTemplates	=	new CTemplates(CMS_SERVER_ROOT . DIR_TEMPLATES);
 	$avaiableTemplates 	= 	$pAvaiableTemplates -> searchTemplates(true);
+
+	$sqlConnection = CSQLConnect::instance() -> getConnection(CONFIG::GET() -> MYSQL -> PRIMARY_DATABASE)
 
 ?>
 
@@ -104,22 +110,147 @@
 			<legend><?= CLanguage::GET() -> STRING('BEPE_PANEL_GROUP_VISIBILTY'); ?></legend>
 			<div style="padding-top:10px;">
 				<div class="input width-100">
+					<label><?= CLanguage::GET() -> STRING('BEPE_PANEL_ACCESSLEVEL'); ?></label>
 					<div class="select-wrapper">
 					<?php
 					if($pageRequest -> page_path == '/')
 						echo '<input type="hidden" name="hidden_state" value="0">';
 					?>
-					<select name="hidden_state" <?= ($pageRequest -> page_path == '/' ? 'disabled' : ''); ?>>
+					<select name="hidden_state" id="select-visibleState" <?= ($pageRequest -> page_path == '/' ? 'disabled' : ''); ?>>
 						<option value="0" <?= ($pageRequest -> hidden_state == 0 ? 'selected' : ''); ?>><?= CLanguage::GET() -> STRING('BEPE_PANEL_HIDDEN_0_VISIBLE'); ?></option>
+						<option value="5" <?= ($pageRequest -> hidden_state == 5 ? 'selected' : ''); ?>><?= CLanguage::GET() -> STRING('BEPE_PANEL_HIDDEN_5_VISIBLEFROM'); ?></option>
 						<option value="1" <?= ($pageRequest -> hidden_state == 1 ? 'selected' : ''); ?>><?= CLanguage::GET() -> STRING('BEPE_PANEL_HIDDEN_1_LOCKED'); ?></option>
 						<option value="4" <?= ($pageRequest -> hidden_state == 4 ? 'selected' : ''); ?>><?= CLanguage::GET() -> STRING('BEPE_PANEL_HIDDEN_4_LOCKED'); ?></option>
 						<option value="2" <?= ($pageRequest -> hidden_state == 2 ? 'selected' : ''); ?>><?= CLanguage::GET() -> STRING('BEPE_PANEL_HIDDEN_2_HIDDEN'); ?></option>
-						<option value="3" <?= ($pageRequest -> hidden_state == 3 ? 'selected' : ''); ?>><?= CLanguage::GET() -> STRING('BEPE_PANEL_HIDDEN_3_REGISTERED'); ?></option>
+						<!--<option value="3" <?= ($pageRequest -> hidden_state == 3 ? 'selected' : ''); ?>><?= CLanguage::GET() -> STRING('BEPE_PANEL_HIDDEN_3_REGISTERED'); ?></option>-->
 					</select>
 					</div>
 					<div class="result-box" data-field="hidden_state" data-error=""></div>
 				</div>
+
+
+		
+
+			<div id="publish_settings" style="<?= ($pageRequest -> hidden_state != 5 ? 'display:none;' : ''); ?>">
+
+				<?php
+					$pageRequest -> publish_from = ($pageRequest -> publish_from != 0 ? date('Y-m-d', $pageRequest -> publish_from) : '');
+					$pageRequest -> publish_until = ($pageRequest -> publish_until != 0 ? date('Y-m-d', $pageRequest -> publish_until) : '');
+				?>
+	
+
+				<div class="input width-100">
+					<label><?= CLanguage::GET() -> STRING('BEPE_PANEL_PUBLISHFROM'); ?></label>
+					<input type="text" class="datepicker-from" name="publish_from" id="" value="<?php echo $pageRequest -> publish_from; ?>">
+				</div>
+
+				<div class="result-box" data-field="publish_from" data-error=""></div>
+
+				<div class="input width-100">
+					<label><?= CLanguage::GET() -> STRING('BEPE_PANEL_PUBLISHUNTIL'); ?></label>
+					<input type="text" class="datepicker-until" name="publish_until" id="" value="<?php echo $pageRequest -> publish_until; ?>">
+				</div>
+
+				<div class="result-box" data-field="publish_until" data-error=""></div>
+
+				<div class="input width-100">
+					<label><?= CLanguage::GET() -> STRING('BEPE_PANEL_PUBLISHUNTIL_STATE'); ?></label>
+					<div class="select-wrapper">
+					<select name="publish_expired" <?= ($pageRequest -> page_path == '/' ? 'disabled' : ''); ?>>
+						<option value="0" <?= ($pageRequest -> publish_expired == 0 ? 'selected' : ''); ?>><?= CLanguage::GET() -> STRING('BEPE_PANEL_PUBLISHUNTIL_0_HIDDEN'); ?></option>
+						<option value="1" <?= ($pageRequest -> publish_expired == 1 ? 'selected' : ''); ?>><?= CLanguage::GET() -> STRING('BEPE_PANEL_PUBLISHUNTIL_1_LOCKED'); ?></option>
+					</select>
+					</div>
+				</div>
+
+				<div class="result-box" data-field="publish_expired" data-error=""></div>
+
+				<script>
+				document.getElementById('select-visibleState').onchange = function() {
+					var	publishBox = document.getElementById('publish_settings');
+
+					if(this.value == 5)
+					{
+						publishBox.style.display = 'block';
+
+						publishBox.querySelectorAll('select').forEach(function(element, key){
+							element.disabled = false;
+						});
+
+						publishBox.querySelectorAll('input').forEach(function(element, key){
+							element.disabled = false;
+						});
+					}
+					else
+					{
+						publishBox.style.display = 'none';
+
+						publishBox.querySelectorAll('select').forEach(function(element, key){
+							element.disabled = true;
+						});
+
+						publishBox.querySelectorAll('input').forEach(function(element, key){
+							element.disabled = true;
+						});
+					}
+				};
+
+				flatpickr('.datepicker-from',{
+					dateFormat: 'Y-m-d'
+				});
+				flatpickr('.datepicker-until',{
+					dateFormat: 'Y-m-d'
+				});
+				</script>
+
+				<style>
+				.flatpickr-calendar select,
+				.flatpickr-calendar input { padding:0px 6px !important; box-shadow:none !important; font-size:14px !important; height: 24px !important; }
+				.flatpickr-calendar select{ -moz-appearance: initial !important; appearance: initial !important; }
+				.flatpickr-calendar input { -moz-appearance: textfield !important; appearance: textfield !important; }
+				.flatpickr-calendar .flatpickr-months,
+				.flatpickr-calendar .flatpickr-weekdays { background:rgba(233,223,37,0.8); }
+				.flatpickr-calendar .flatpickr-months { border-top-left-radius:5px; border-top-right-radius:5px; }
+				.flatpickr-calendar { border: 1px solid grey; }
+				.flatpickr-calendar .flatpickr-day { border-radius:3px !important; }
+				</style>
+
 			</div>
+
+
+
+
+
+
+				<div class="input width-100">
+					<label><?= CLanguage::GET() -> STRING('BEPE_PANEL_AUTHOBJECT'); ?></label>
+					<div class="select-wrapper">
+					<?php
+					if($pageRequest -> page_path == '/')
+						echo '<input type="hidden" name="page_auth" value="0">';
+					?>
+					<select name="page_auth" id="select-authobject" <?= ($pageRequest -> page_path == '/' ? 'disabled' : ''); ?>>
+						<option value="0" <?= ($pageRequest -> page_auth == 0 ? 'selected' : ''); ?>><?= CLanguage::GET() -> STRING('BEPE_PANEL_AUTHOBJECT_0_NONE'); ?></option>
+						<?php
+						$modelLoginObjects	 = new modelLoginObjects();
+						$modelLoginObjects	-> load($sqlConnection);
+						$loginObjectsList 	 = $modelLoginObjects -> getDataInstance();
+						foreach($loginObjectsList as $loginObject)
+							echo '<option value="'. $loginObject-> object_id .'" '. ($pageRequest -> page_auth == $loginObject-> object_id ? 'selected' : '') .'>'. $loginObject-> object_id .'</option>';
+						?>
+					</select>
+					</div>
+					<div class="result-box" data-field="page_auth" data-error=""></div>
+				</div>
+
+
+				<div class="input width-100">
+
+				<input type="checkbox" name="apply_childs_auth" value="1" id="apply_childs_auth">
+				<label for="apply_childs_auth"><?= CLanguage::GET() -> STRING('BEPE_PANEL_AUTHAPPLYCHILDS'); ?></label>	
+
+
+
 		</fieldset>				
 	
 		<fieldset class="ui fieldset submit-able">
@@ -156,6 +287,57 @@
 		</fieldset>		
 
 		<fieldset class="ui fieldset submit-able">
+			<legend><?= CLanguage::GET() -> STRING('BEPE_PANEL_GROUP_TAGSCATS'); ?></legend>
+			<div style="padding-top:10px;">
+
+				<?php
+				$selectedCategories = [];
+				foreach($pageRequest -> page_categories as $category)
+					$selectedCategories[] = $category['id'];
+				?>
+
+				<div class="input width-100">
+					<label><?php echo CLanguage::instance() -> getString('BEPE_PANEL_CATEGORIES'); ?></label>
+					<div class="select-wrapper">
+					<select name="page_categories[]" class="dropdown" data-preset="<?= implode(',', $selectedCategories); ?>">
+						<option value=""></option>
+						<?php
+						$modelCategories	 = new modelCategories();
+						$modelCategories	-> load($sqlConnection);
+						$categoriesList 	 = $modelCategories -> getDataInstance();
+						foreach($categoriesList as $category)
+							echo '<option value="'. $category -> category_id .'">'. $category -> category_name .'</option>';
+						?>
+					</select>		
+					</div>
+				</div>
+
+				<?php
+				$selectedTags = [];
+				foreach($pageRequest -> page_tags as $tag)
+					$selectedTags[] = $tag['id'];
+				?>
+
+				<div class="input width-100">
+					<label><?php echo CLanguage::instance() -> getString('BEPE_PANEL_TAGS'); ?></label>
+					<div class="select-wrapper">
+					<select name="page_tags[]" class="dropdown" data-preset="<?= implode(',', $selectedTags); ?>">
+						<option value=""></option>
+						<?php
+						$modelTags	 = new modelTags();
+						$modelTags	-> load($sqlConnection);
+						$tagsList 	 = $modelTags -> getDataInstance();
+						foreach($tagsList as $tag)
+							echo '<option value="'. $tag -> tag_id .'">'. $tag -> tag_name .'</option>';
+						?>
+					</select>		
+					</div>
+				</div>
+
+			</div>
+		</fieldset>	
+
+		<fieldset class="ui fieldset submit-able">
 			<legend><?= CLanguage::GET() -> STRING('BEPE_PANEL_GROUP_EXTSETTINGS'); ?></legend>
 			<div style="padding-top:10px;">
 				<div class="input width-100">
@@ -170,7 +352,6 @@
 				</div>
 			</div>
 		</fieldset>	
-
 
 		<fieldset class="ui fieldset submit-able">
 			<legend><?= CLanguage::GET() -> STRING('BEPE_PANEL_GROUP_ALTLANG'); ?></legend>
@@ -206,7 +387,7 @@
 
 					var	requestTarget	= CMS.SERVER_URL_BACKEND + 'pages/';
 
-					TK.callXHR(requestTarget, formData, onSuccessRetrieveAlternates, TK.onXHRError, this);
+					cmstk.callXHR(requestTarget, formData, onSuccessRetrieveAlternates, cmstk.onXHRError, this);
 				}
 
 				function
@@ -261,7 +442,7 @@
 	
 		<div id="be-page-panel-submit">
 
-			<button class="ui button labeled icon trigger-submit-site-edit" id="trigger-submit-site-edit" type="button"><i class="fas fa-save"></i><?= CLanguage::GET() -> STRING('BUTTON_SAVE'); ?></button>
+			<button class="ui button labeled icon trigger-submit-site-edit" id="trigger-submit-site-edit" type="button"><span><i class="fas fa-save" data-icon="fa-save"></i></span><?= CLanguage::GET() -> STRING('BUTTON_SAVE'); ?></button>
 
 		</div>	
 	
@@ -273,8 +454,3 @@
 		
 </div>	
 
-
-<script>
-
-
-</script>

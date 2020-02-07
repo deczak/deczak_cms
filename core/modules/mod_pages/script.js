@@ -34,6 +34,8 @@ class	cmsIndexList
 
 			tableBody.append(tableRow);
 		}
+		
+		document.pIndexSelector.bindEvents();
 	}
 
 	replaceProcess(object)
@@ -44,15 +46,21 @@ class	cmsIndexList
 			object.is_frontend = 'Backend';
 
 		let	spacer = (object.page_path !== '/' ? object.level * 20 : 0);
+		
+		console.log(object.update_time);
+		
+		if(object.create_time == '0') object.create_time = ''; else object.create_time = cmstk.formatDate(object.create_time, 'Y-m-d @ H:i:s');
+		if(object.update_time == '0') object.update_time = ''; else object.update_time = cmstk.formatDate(object.update_time, 'Y-m-d @ H:i:s');
 			
+		console.log(object.update_time);
 		let	template = document.getElementById('template-table-row-page').innerHTML;
 			template = template.replace(/%NODE_ID%/g, object.node_id);
 			template = template.replace(/%PAGE_NAME%/g, object.page_name);
 			template = template.replace(/%PAGE_LANGUAGE%/g, object.page_language);
 			template = template.replace(/%PAGE_PATH%/g, object.page_path);
 			template = template.replace(/%SPACER%/g, spacer);
-			template = template.replace(/%CREATE_TIME%/g, TK.formatDate(object.create_time, 'Y-m-d @ H:i:s'));
-			template = template.replace(/%UPDATE_TIME%/g, TK.formatDate(object.update_time, 'Y-m-d @ H:i:s'));
+			template = template.replace(/%CREATE_TIME%/g, object.create_time);
+			template = template.replace(/%UPDATE_TIME%/g, object.update_time);
 
 		return template;
 	}
@@ -69,7 +77,7 @@ class	cmsIndexList
 
 		var	requestTarget	= CMS.SERVER_URL_BACKEND + CMS.PAGE_PATH + CMS.MODULE_TARGET;
 
-		TK.callXHR(requestTarget, formData, that.onXHRSuccess, TK.onXHRError, that);
+		cmstk.callXHR(requestTarget, formData, that.onXHRSuccess, cmstk.onXHRError, that);
 	}
 
 

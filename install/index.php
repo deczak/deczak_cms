@@ -120,7 +120,7 @@
 									formData.append("crypt-basekey", document.querySelector('input[name="crypt-basekey"]').value);
 
 								reportInstallStep('Create configuration file ... ');
-								TK.callXHR('<?php echo $protocol . $_SERVER['SERVER_NAME'] .''. $sub_path; ?>install/xhr-create-config.php', formData, onXHRInstallConfig, TK.onXHRError, than);
+								cmstk.callXHR('<?php echo $protocol . $_SERVER['SERVER_NAME'] .''. $sub_path; ?>install/xhr-create-config.php', formData, onXHRInstallConfig, cmstk.onXHRError, than);
 								break;
 
 					case 2:		// create datebase structure
@@ -131,7 +131,7 @@
 									formData.append("database-database", document.querySelector('input[name="database-database"]').value);
 
 								reportInstallStep('Create database structure ... ');
-								TK.callXHR('<?php echo $protocol. $_SERVER['SERVER_NAME'] .''. $sub_path; ?>install/xhr-create-database-structure.php', formData, onXHRInstallDatabaseStructure, TK.onXHRError, than);
+								cmstk.callXHR('<?php echo $protocol. $_SERVER['SERVER_NAME'] .''. $sub_path; ?>install/xhr-create-database-structure.php', formData, onXHRInstallDatabaseStructure, cmstk.onXHRError, than);
 								break;
 
 					case 3:		// insert datebase initial data
@@ -144,7 +144,7 @@
 									formData.append("user-pass", document.querySelector('input[name="user-pass"]').value);
 
 								reportInstallStep('Insert database initial data ... ');
-								TK.callXHR('<?php echo $protocol. $_SERVER['SERVER_NAME'] .''. $sub_path; ?>install/xhr-insert-database-data.php', formData, onXHRInstallDatabaseData, TK.onXHRError, than);
+								cmstk.callXHR('<?php echo $protocol. $_SERVER['SERVER_NAME'] .''. $sub_path; ?>install/xhr-insert-database-data.php', formData, onXHRInstallDatabaseData, cmstk.onXHRError, than);
 								break;
 
 					case 5:		// create htaccess
@@ -156,7 +156,7 @@
 									formData.append("database-database", document.querySelector('input[name="database-database"]').value);
 
 								reportInstallStep('Create HTAccess ... ');
-								TK.callXHR('<?php echo $protocol. $_SERVER['SERVER_NAME'] .''. $sub_path; ?>install/xhr-create-htaccess.php', formData, onXHRInstallHTAccess, TK.onXHRError, than);
+								cmstk.callXHR('<?php echo $protocol. $_SERVER['SERVER_NAME'] .''. $sub_path; ?>install/xhr-create-htaccess.php', formData, onXHRInstallHTAccess, cmstk.onXHRError, than);
 								break;
 				}
 

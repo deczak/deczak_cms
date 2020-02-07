@@ -64,20 +64,19 @@ class	controllerSessions extends CController
 	private function
 	logicIndex(&$_sqlConnection, $_enableEdit = false, $_enableDelete = false)
 	{
+		$conditionPages = new CModelCondition();
+		$conditionPages -> where('tb_page_header.node_id', 'tb_sessions_access.node_id');
+
+		$modelSessionsAccess	 = new modelSessionsAccess();
+
+		$modelSessionsAccess -> addSelectColumns('tb_sessions_access.*','tb_page_header.page_title');
+		$modelSessionsAccess -> addRelation('left join', 'tb_page_header', $conditionPages);
+
 		$modelSACondition  		 = new CModelCondition();
 		$modelSACondition		-> groupBy('session_id') 
 								-> groupBy('node_id');
 
-
-			$modelPageHeader	 = new modelPageHeader();
-			$modelPageHeader	-> load($_sqlConnection);
-			
-			$modelComplementaryPH		 = new CModelComplementary();
-			$modelComplementaryPH		-> addValue('page_title','node_id', $modelPageHeader -> getDataInstance());
-
-
-		$modelSessionsAccess	 = new modelSessionsAccess();
-		$modelSessionsAccess	-> load($_sqlConnection, $modelSACondition, $modelComplementaryPH);
+		$modelSessionsAccess	-> load($_sqlConnection, $modelSACondition);
 
 		$modelComplementary		 = new CModelComplementary();
 		$modelComplementary		-> addArray('pages','session_id', $modelSessionsAccess -> getDataInstance());
@@ -185,21 +184,20 @@ class	controllerSessions extends CController
 			$modelCondition = new CModelCondition();
 			$modelCondition -> where('data_id', $_pURLVariables -> getValue("cms-system-id"));
 
-
 			$modelSACondition  		 = new CModelCondition();
 			$modelSACondition	#	-> groupBy('session_id') 
 								#	-> groupBy('node_id')
 									-> orderBy('time_access');
 
-
-			$modelPageHeader	 = new modelPageHeader();
-			$modelPageHeader	-> load($_sqlConnection);
-
-			$modelComplementaryPH		 = new CModelComplementary();
-			$modelComplementaryPH		-> addValue('page_title','node_id', $modelPageHeader -> getDataInstance());
+			$conditionPages = new CModelCondition();
+			$conditionPages -> where('tb_page_header.node_id', 'tb_sessions_access.node_id');
 
 			$modelSessionsAccess	 = new modelSessionsAccess();
-			$modelSessionsAccess	-> load($_sqlConnection, $modelSACondition, $modelComplementaryPH);
+
+			$modelSessionsAccess -> addSelectColumns('tb_sessions_access.*','tb_page_header.page_title');
+			$modelSessionsAccess -> addRelation('left join', 'tb_page_header', $conditionPages);
+
+			$modelSessionsAccess	-> load($_sqlConnection, $modelSACondition);
 
 			$modelComplementary		 = new CModelComplementary();
 			$modelComplementary		-> addArray('pages','session_id', $modelSessionsAccess -> getDataInstance());

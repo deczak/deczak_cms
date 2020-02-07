@@ -70,7 +70,6 @@ class	controllerLoginForm extends CController
 	public function
 	logicView(&$_sqlConnection, $_isXHRequest, &$_logicResult)
 	{
-
 		if(!isset($this -> m_aObject -> params))
 		{
 			$modelCondition = new CModelCondition();
@@ -79,15 +78,17 @@ class	controllerLoginForm extends CController
 			$this -> m_modelSimple -> load($_sqlConnection, $modelCondition);
 
 
+			$this -> m_modelSimple -> getDataInstance() -> params = json_decode($this -> m_modelSimple -> getDataInstance() -> params);
 
+$this -> m_aObject -> params = $this -> m_modelSimple -> getDataInstance() -> params;
+$this -> m_aObject -> body = $this -> m_modelSimple -> getDataInstance() -> body;
 
-			if(CSession::instance() -> isAuthed($this -> m_modelSimple -> getDataInstance() -> params) !== false)
+			if(CSession::instance() -> isAuthed($this -> m_modelSimple -> getDataInstance() -> params -> object_id) !== false)
 			{
+		
 				$this -> logicSuccess();
 			}
 
-
-			$this -> m_modelSimple -> getDataInstance() -> params = json_decode($this -> m_modelSimple -> getDataInstance() -> params);
 
 
 			$modelCondition = new CModelCondition();
@@ -169,11 +170,16 @@ class	controllerLoginForm extends CController
 			}
 			else
 			{
+
+				$_pModelLoginObjects	 =	new modelLoginObjects();
+				$_pModelLoginObjects	->	load($_sqlConnection);	
+
 				$this -> setView(	
 								'edit',	
 								'',
 								[
-									'object' 	=> $this -> m_modelSimple -> getDataInstance()
+									'object' 	=> $this -> m_modelSimple -> getDataInstance(),
+									'login_objects' => $_pModelLoginObjects -> getDataInstance()
 								]
 								);
 
@@ -228,7 +234,12 @@ class	controllerLoginForm extends CController
 									unset($_aFormData['login-object-id']);
 									unset($_aFormData['field_label']);
 
-									if($this -> m_modelSimple -> update($_sqlConnection, $_aFormData))
+
+
+								$modelCondition = new CModelCondition();
+								$modelCondition -> where('object_id', $_aFormData['object_id']);
+
+									if($this -> m_modelSimple -> update($_sqlConnection, $_aFormData, $modelCondition))
 									{
 										$_bValidationMsg = 'Object updated';
 
@@ -346,7 +357,9 @@ class	controllerLoginForm extends CController
 	public function
 	logicSuccess()
 	{
+	
 		$_redirectTarget = (empty($this -> m_aObject -> body) ? $_SERVER['REQUEST_URI'] : CMS_SERVER_URL . $this -> m_aObject -> body );
+
 		header("Location: ". $_redirectTarget ); 
 		exit;
 	}

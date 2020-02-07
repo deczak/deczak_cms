@@ -186,12 +186,14 @@ class	controllerLoginObjects extends CController
 		if($_pURLVariables -> getValue("cms-system-id") !== false)
 		{	
 
-											$modelCondition = new CModelCondition();
-											$modelCondition -> where('object_id', $_pURLVariables -> getValue("cms-system-id"));
+			$modelCondition = new CModelCondition();
+			$modelCondition -> where('object_id', $_pURLVariables -> getValue("cms-system-id"));
 
 			if($this -> m_pModel -> load($_sqlConnection, $modelCondition))
 			{
 				##	Gathering additional data
+
+				
 
 				$this -> setCrumbData('edit', $_pURLVariables -> getValue("cms-system-id"), true);
 				$this -> setView(

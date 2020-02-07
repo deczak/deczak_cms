@@ -10,8 +10,8 @@ class shemePageObject extends CSheme
 		$this -> setTable('tb_page_object');
 		
 		$this -> addColumn('object_id', 'int') -> setKey('PRIMARY') -> setAttribute('UNSIGNED') -> isAutoIncrement();
-
-		$this -> addColumn('node_id', 'int') -> setAttribute('UNSIGNED');
+		$this -> addColumn('node_id', 'int') -> setIndex('INDEX') -> setAttribute('UNSIGNED');
+		
 		$this -> addColumn('page_version', 'mediumint') -> setAttribute('UNSIGNED') -> setDefault('1');
 		$this -> addColumn('module_id', 'int') -> setAttribute('UNSIGNED');
 		$this -> addColumn('object_order_by', 'mediumint') -> setAttribute('UNSIGNED');	
@@ -26,6 +26,9 @@ class shemePageObject extends CSheme
 		$this -> addColumn('instance', 'int') -> isVirtual();
 		$this -> addColumn('body', 'string') -> isVirtual();
 		$this -> addColumn('params'	, 'array') -> isVirtual();
+
+		$this -> addConstraing('object_node_id', 'node_id', 'tb_page', 'node_id', 'CASCADE', 'CASCADE');
+
 	}
 }
 

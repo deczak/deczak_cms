@@ -25,7 +25,7 @@ class	cmsHeadlineEditor
 		this.cmdFilelocation= cmdFilelocation;
 		this.nameAttribute	= nameAttribute;
 	
-		TK.callXHR(this.cmdFilelocation, null, this.onXHRInit, TK.onXHRError, that);
+		cmstk.callXHR(this.cmdFilelocation, null, this.onXHRInit, cmstk.onXHRError, that);
 
 		document.addEventListener('mousedown', function(event) { that.hideToolbars(event.target); }, false);
 	}
@@ -62,7 +62,6 @@ class	cmsHeadlineEditor
 
 	editorExists(targetElement)
 	{
-
 		var childNodes = targetElement.childNodes;
 
 		if(childNodes.length == 3 && childNodes[0].classList !== undefined && childNodes[0].classList.contains('rte-editbox'))
@@ -75,8 +74,8 @@ class	cmsHeadlineEditor
 		var that 		= this;
 		var	nEditorId 	= this.aEditors.length;
 
-		var fontColor = TK.getVisibleBackgroundColor(srcElement);
-			fontColor = TK.invertRGBA(fontColor);
+		var fontColor = cmstk.getVisibleBackgroundColor(srcElement);
+			fontColor = cmstk.invertRGBA(fontColor);
 
 		var oParent 			= document.createElement("div");
 			oParent.classList.add(this.className);
@@ -137,6 +136,8 @@ class	cmsHeadlineEditor
 			else			
 				for (vOpt in oMenuOpts) { oMenu.appendChild(this.createMenuItem(vOpt, oMenuOpts[vOpt])); }							
 			oMenu.selectedIndex = 0;
+			oMenu.value = bodyData[0].toLowerCase();
+
 			oToolsBar.appendChild(oMenu);
 		}
 
@@ -193,7 +194,7 @@ class	cmsHeadlineEditor
 				var txtareaContentWrapper = document.createElement(headlineTag);
 					txtareaContentWrapper.innerHTML = this.innerHTML;
 				var	textarea = this.parentNode.parentNode.querySelector('.rte-textarea');
-					textarea.innerHTML = txtareaContentWrapper.outerHTML;
+					textarea.innerText = txtareaContentWrapper.outerHTML;
 			};
 
 		oEditBoxWrapper.appendChild(oEditBox);	

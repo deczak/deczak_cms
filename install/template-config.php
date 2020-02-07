@@ -65,7 +65,7 @@ class CONFIG_SESSION extends CONFIG_BASE
 {
 	protected	$SPAM_ACCESS_TIMEOUT	=	60;
 	protected	$SPAM_ACCESS_LIMIT		=	5;
-	protected	$COOKIE_HTTPS			=	false;
+	protected	$COOKIE_HTTPS			=	%COOKIE_HTTPS%;
 
 	protected	$TIMEOUT				= 	60 * 60 * 4;
 }
@@ -79,7 +79,7 @@ class CONFIG_MYSQL extends CONFIG_BASE
 {
 	protected	$TABLE_COLLATE		=	"utf8mb4_unicode_ci";
 	protected	$TABLE_CHARSET		=	"utf8mb4";
-	protected	$TABLE_ENGINE		=	"MyISAM";
+	protected	$TABLE_ENGINE		=	"innoDB";
 
 	protected	$PRIMARY_DATABASE	= 	'1';
 

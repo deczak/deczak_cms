@@ -15,47 +15,33 @@
 
 	if (mysqli_connect_errno())
 		tk::xhrResult(1, 'SQL error on connection - '. mysqli_connect_error());
+	
+	$shemeInstance 	= [];
+	$_dirIterator 	= new DirectoryIterator('../core/shemes/');
 
+	foreach($_dirIterator as $_dirItem)
+	{
+		if($_dirItem -> isDot() || $_dirItem -> getType() === 'dir')
+			continue;
 
+		include	'../core/shemes/'. $_dirItem -> getFilename();
 
-/*
+		$className = explode('.',$_dirItem -> getFilename())[0];
 
-Alle Shemen Dateien loopen und mit diesen die Tabellen erstellen
+		$instanceKey = count($shemeInstance);
+		$shemeInstance[$instanceKey] = new $className();
 
-
-*/
-
-
-		$_dirIterator = new DirectoryIterator('../core/shemes/');
-
-		foreach($_dirIterator as $_dirItem)
+		$errorMsg = '';
+		if(!$shemeInstance[$instanceKey] -> createTable($db, $errorMsg))
 		{
-
-			if($_dirItem -> isDot() || $_dirItem -> getType() === 'dir')
-				continue;
-
-			include	'../core/shemes/'. $_dirItem -> getFilename();
-
-			$className = explode('.',$_dirItem -> getFilename())[0];
-
-			$shemeInstance = new $className();
-
-			$errorMsg = '';
-
-			if(!$shemeInstance -> createTable($db, $errorMsg))
-			{
-				tk::xhrResult(1, $errorMsg);
-			}
-
+			tk::xhrResult(1, $errorMsg);
 		}
+	}
 
-
-#	$sqlDump = file_get_contents('database-structure.sql');
-
-#	if( $db -> multi_query($sqlDump) === FALSE)
-#		tk::xhrResult(1, 'SQL error on query - '. $db -> error);
-
-#	sleep(5); // its required, multi_query returns ok even if the server still not finished with all 
+	foreach($shemeInstance as $instance)
+	{
+		$instance -> createTableConstraints($db);
+	}
 
 	tk::xhrResult(0, 'OK');
 

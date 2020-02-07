@@ -4,6 +4,9 @@
 include_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelSitemap.php';	
 include_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelPage.php';	
 
+include_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelCategoriesAllocation.php';	
+include_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelTagsAllocation.php';	
+
 include_once CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CHTAccess.php';	
 
 
@@ -87,7 +90,8 @@ class	controllerPages extends CController
 									$_aFormData		 = $_pURLVariables ->getArray();
 
 									$modelCondition = new CModelCondition();
-									$modelCondition -> where('page_language', $_aFormData['language']);		
+									$modelCondition -> where('page_language', $_aFormData['language']);
+									$modelCondition -> where('page_path', '/');		
 
 									$this -> m_modelSitemap  = new modelSitemap();
 									if(!$this -> m_modelSitemap -> load($_sqlConnection, $modelCondition))
@@ -112,7 +116,7 @@ class	controllerPages extends CController
 									$modelCondition -> where('tb_page.page_id', $_aFormData['page_id']);		
 
 									$modelPage  = new modelPage();
-									if(!$modelPage -> load($_sqlConnection, $modelCondition))
+									if(!$modelPage -> loadOld($_sqlConnection, $modelCondition))
 									{
 										$_bValidationMsg .= CLanguage::get() -> string('ERR_SQL_ERROR');
 										$_bValidationErr = true;
@@ -173,7 +177,7 @@ class	controllerPages extends CController
 			$modelCondition -> limit(1);		
 
 			$this -> m_modelPage  = new modelPage();
-			$this -> m_modelPage -> load($_sqlConnection, $modelCondition);
+			$this -> m_modelPage -> loadOld($_sqlConnection, $modelCondition);
 
 			$_logicResult['state']			=	1;
 			$_logicResult['node_id']		=	$this -> m_modelPage -> getDataInstance()[0] -> node_id;
@@ -200,12 +204,13 @@ class	controllerPages extends CController
 
 		if($_isXHRequest !== false && $_isXHRequest === 'update-site' && $_aFormData['cms-edit-page-node'] !== false)
 		{
+			$nodeId = $_aFormData['cms-edit-page-node'];
 
 			$modelCondition = new CModelCondition();
-			$modelCondition -> where('tb_page_path.node_id', $_aFormData['cms-edit-page-node']);		
+			$modelCondition -> where('tb_page_path.node_id', $nodeId);		
 
 			$this -> m_modelPage  = new modelPage();
-			$this -> m_modelPage -> load($_sqlConnection, $modelCondition);
+			$this -> m_modelPage -> loadOld($_sqlConnection, $modelCondition);
 
 			$_logicResult['state']			=	1;
 			$_logicResult['node_id']		=	$this -> m_modelPage -> getDataInstance()[0] -> node_id;
@@ -228,12 +233,19 @@ class	controllerPages extends CController
 										$_request[] 	 = 	[	"input" => "page_title",   		"validate" => "strip_tags|!empty" ]; 	
 										$_request[] 	 = 	[	"input" => "page_description",  "validate" => "strip_tags|!empty" ]; 	
 										$_request[] 	 = 	[	"input" => "page_template", 	"validate" => "strip_tags|!empty" ]; 	
-										$_request[] 	 = 	[	"input" => "hidden_state", 	"validate" => "strip_tags|!empty" ]; 	
+										$_request[] 	 = 	[	"input" => "hidden_state", 		"validate" => "strip_tags|!empty" ]; 	
 										$_request[] 	 = 	[	"input" => "cache_disabled", 	"validate" => "strip_tags|!empty" ]; 	
 										$_request[] 	 = 	[	"input" => "crawler_index", 	"validate" => "strip_tags|!empty" ]; 	
 										$_request[] 	 = 	[	"input" => "crawler_follow", 	"validate" => "strip_tags|!empty" ]; 	
 										$_request[] 	 = 	[	"input" => "menu_follow", 		"validate" => "strip_tags|!empty" ]; 	
-										$_request[] 	 = 	[	"input" => "page_id", 			"validate" => "strip_tags|!empty" , 	"use_default" => true, "default_value" => false ]; 	
+										$_request[] 	 = 	[	"input" => "page_id", 			"validate" => "strip_tags|!empty" , 		"use_default" => true, "default_value" => false ]; 	
+										$_request[] 	 = 	[	"input" => "publish_from",		"validate" => "strip_tags|trim|!empty" , 	"use_default" => true, "default_value" => 0 ]; 	
+										$_request[] 	 = 	[	"input" => "publish_until", 	"validate" => "strip_tags|trim|!empty" , 	"use_default" => true, "default_value" => 0 ]; 	
+										$_request[] 	 = 	[	"input" => "publish_expired", 	"validate" => "strip_tags|trim|!empty" , 	"use_default" => true, "default_value" => 0 ]; 	
+										$_request[] 	 = 	[	"input" => "page_auth", 		"validate" => "strip_tags|trim|!empty" , 	"use_default" => true, "default_value" => 0 ]; 	
+										$_request[] 	 = 	[	"input" => "apply_childs_auth", "validate" => "strip_tags|trim|!empty" , 	"use_default" => true, "default_value" => 0 ]; 	
+										$_request[] 	 = 	[	"input" => "page_categories", 	"validate" => "strip_tags|trim|!empty" , 	"use_default" => true, "default_value" => [] ]; 	
+										$_request[] 	 = 	[	"input" => "page_tags", 		"validate" => "strip_tags|trim|!empty" , 	"use_default" => true, "default_value" => [] ]; 	
 										$_pFormVariables-> retrieve($_request, false, true); // POST 
 										$_aFormData		 = $_pFormVariables ->getArray();
 
@@ -248,6 +260,25 @@ class	controllerPages extends CController
 										if(!isset($_aFormData['crawler_follow']) || strlen($_aFormData['crawler_follow']) == 0) { 	$_bValidationErr = true; 	$_bValidationDta['crawler_follow'] 	= 'Not valid value'; 	}
 										if(!isset($_aFormData['menu_follow']) || strlen($_aFormData['menu_follow']) == 0) 		{	$_bValidationErr = true; 	$_bValidationDta['menu_follow'] 	= 'Not valid value'; 	}
 
+										##	Set off publish expiration if start is not set (keep structure clear)
+										if(empty($_aFormData['publish_from']))
+										{
+											$_aFormData['publish_from']		= 0;
+											$_aFormData['publish_until']	= 0;
+											$_aFormData['publish_expired']	= 0;
+										}
+
+										if($_aFormData['publish_from']  != 0) { $_aFormData['publish_from']  = strtotime($_aFormData['publish_from']);  }
+										if($_aFormData['publish_until'] != 0) { $_aFormData['publish_until'] = strtotime($_aFormData['publish_until']) + 79200; }
+
+
+										if($_aFormData['publish_until'] != 0 && $_aFormData['publish_until'] < $_aFormData['publish_from'])
+										{
+											$_bValidationErr = true;
+											$_bValidationDta['publish_until'] = CLanguage::get() -> string('BEPE_PANEL_MSG_PUBEXPIRE');	
+										}
+
+
 
 
 
@@ -259,7 +290,7 @@ class	controllerPages extends CController
 											$pageCondition 	-> where('tb_page_path.page_id', $_aFormData['page_id']);		
 
 											$pageCheck  	 = new modelPage();
-											$pageCheck 		-> load($_sqlConnection, $pageCondition);
+											$pageCheck 		-> loadOld($_sqlConnection, $pageCondition);
 
 											foreach($pageCheck -> getDataInstance() as $pageItm)
 											{
@@ -290,8 +321,53 @@ class	controllerPages extends CController
 											if($_aFormData['page_id'] === false)
 												unset($_aFormData['page_id']);
 
-											if($this -> m_modelPage -> update($_sqlConnection, $_aFormData))
+											##	apply auth settings to target node and child nodes
+											
+											if(intval($_aFormData['apply_childs_auth']) === 1)
 											{
+												$authFields = [];
+												$authFields['page_auth'] = $_aFormData['page_auth'];
+
+												$authCondition = new CModelCondition();
+												$authCondition -> where('node_id', $nodeId );	
+												$this -> m_modelPage -> updateChilds($_sqlConnection, $authFields, $authCondition);
+											}
+
+											unset($_aFormData['apply_childs_auth']);
+
+											if($this -> m_modelPage -> updateOld($_sqlConnection, $_aFormData))
+											{
+												## update categorie allocations
+
+												$categorieAllocCondition 	 = new CModelCondition();
+												$categorieAllocCondition 	-> where('node_id', $nodeId);		
+
+												$modelCategoriesAllocation	 = new modelCategoriesAllocation();
+												$modelCategoriesAllocation	-> delete($_sqlConnection, $categorieAllocCondition);
+
+												foreach($_aFormData['page_categories'] as $categorie)
+												{
+													$alloc_id = 0;
+													$newAlloc = ["category_id" => $categorie, "node_id" => $nodeId];
+													$modelCategoriesAllocation	-> insert($_sqlConnection, $newAlloc, $alloc_id);
+												}
+
+												## update tag allocations
+
+												$tagAllocCondition 	 = new CModelCondition();
+												$tagAllocCondition 	-> where('node_id', $nodeId);		
+
+												$modelTagsAllocation	 = new modelTagsAllocation();
+												$modelTagsAllocation	-> delete($_sqlConnection, $tagAllocCondition);
+
+												foreach($_aFormData['page_tags'] as $tag)
+												{
+													$alloc_id = 0;
+													$newAlloc = ["tag_id" => $tag, "node_id" => $nodeId];
+													$modelTagsAllocation	-> insert($_sqlConnection, $newAlloc, $alloc_id);
+												}
+
+												## update htaccess and sitemap
 
 												$_pHTAccess  = new CHTAccess();
 												$_pHTAccess -> generatePart4Frontend($_sqlConnection);

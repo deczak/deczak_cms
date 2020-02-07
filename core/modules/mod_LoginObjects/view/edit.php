@@ -1,8 +1,5 @@
 <?php
 
-#tk::dbug($right_groups);
-#tk::dbug($user_groups);
-
 	$login_object = &$login_objects[0];
 
 	$login_object -> object_fields 		= json_decode($login_object -> object_fields, true);
@@ -52,7 +49,7 @@
 
 				<fieldset class="ui fieldset" data-xhr-target="object-delete" data-xhr-overwrite-target="delete/<?php echo $login_object -> object_id; ?>">	
 					<div class="submit-container button-only">
-						<button class="ui button icon labeled trigger-submit-fieldset" type="button" disabled><i class="fas fa-trash-alt"></i><?php echo CLanguage::instance() -> getString('BUTTON_DELETE'); ?></button>
+						<button class="ui button icon labeled trigger-submit-fieldset" type="button" disabled><span><i class="fas fa-trash-alt" data-icon="fa-trash-alt"></i></span><?php echo CLanguage::instance() -> getString('BUTTON_DELETE'); ?></button>
 						<div class="protector"><input type="checkbox" class="trigger-submit-protector" id="protector-login-objects-delete"><label for="protector-login-objects-delete"></label></div>
 					</div>
 					<div class="result-box" data-error=""></div>
@@ -73,7 +70,7 @@
 
 
 	
-		<fieldset class="ui fieldset submit-able" id="group-data" data-xhr-target="login-data" style="">
+		<fieldset class="ui fieldset submit-able" id="group-data" data-xhr-target="login-data" data-xhr-overwrite-target="edit/<?php echo $login_object -> object_id; ?>">
 			<legend style=""><?php echo CLanguage::instance() -> getString('MOD_LOGINO_OBJECT'); ?></legend>
 			<div>
 
@@ -175,7 +172,7 @@
 
 					<div id="container-authentication-fields" style="margin-bottom:15px;"></div>
 				
-					<button class="ui button icon labeled" id="trigger-add-auth-field" type="button"><i class="fas fa-plus"></i>Add authentication field</button>
+					<button class="ui button icon labeled" id="trigger-add-auth-field" type="button"><span><i class="fas fa-plus" data-icon="fa-plus"></i></span>Add authentication field</button>
 
 					</div>
 				</div>	
@@ -188,7 +185,7 @@
 				
 					<div id="container-extend-session-fields" style="margin-bottom:15px;"></div>
 									
-					<button class="ui button icon labeled" id="trigger-add-extend-session-field" type="button"><i class="fas fa-plus"></i>Add extended session field</button>
+					<button class="ui button icon labeled" id="trigger-add-extend-session-field" type="button"><span><i class="fas fa-plus" data-icon="fa-plus"></i></span>Add extended session field</button>
 		
 					</div>
 				</div>	
@@ -202,7 +199,7 @@
 				<!-- Submit button - beware of fieldset name -->
 
 				<div class="submit-container" style="">
-					<button class="ui button icon labeled trigger-submit-fieldset" type="button" disabled><i class="fas fa-save"></i><?php echo CLanguage::instance() -> getString('BUTTON_SAVE'); ?></button>
+					<button class="ui button icon labeled trigger-submit-fieldset" type="button" disabled><span><i class="fas fa-save" data-icon="fa-save"></i></span><?php echo CLanguage::instance() -> getString('BUTTON_SAVE'); ?></button>
 					<div class="protector"><input type="checkbox" class="trigger-submit-protector" id="protector-login-objects"><label for="protector-login-objects"></label></div>
 				</div>
 

@@ -1,0 +1,61 @@
+
+##	
+
+	MOD_BEUSER_SEC_INDEX_NAME		=	Overview
+	MOD_BEUSER_SEC_CREATE_NAME		=	Create user
+
+	MOD_BEUSER_ERR_USERID_UK		=	This user does not exists
+	
+	
+
+
+	M_BEUSER_MSG_ISCREATED		=	User account was created
+	M_BEUSER_MSG_ISUPDATED		=	User account was updated
+	M_BEUSER_MSG_ISDELETED		=	User account was deleted
+
+	M_BEUSER_MSG_USERNAMEEXIST	=	Username exist already
+
+
+
+	M_BEUSER_MSG_PASSNOTEQUAL			=	The login password fields are not equal
+
+##	Overview
+
+	MOD_BEUSER_OV_TABLE_USERID		=	User-ID
+	MOD_BEUSER_OV_TABLE_LASTLOGIN	=	Last login
+	MOD_BEUSER_OV_TABLE_NUMLOGIN	=	Num of login
+
+	
+	
+##	Edit / Create
+
+	MOD_BEUSER_FM_CREATEUSER		=	Create user
+	MOD_BEUSER_FM_USERINFO			=	User information
+	MOD_BEUSER_FM_FIRSTNAME			=	User first name
+	MOD_BEUSER_FM_LASTNAME			=	User last name
+	MOD_BEUSER_FM_MAILADDRESS		=	User mail address
+	MOD_BEUSER_FM_LOGININFO			=	Login information
+	MOD_BEUSER_FM_LOGINUSERNAME		=	Login username
+	MOD_BEUSER_FM_LOGINPASSWORD		=	Login password
+	MOD_BEUSER_FM_LOGINPASSWORD2	=	Login password (repetition)
+	MOD_BEUSER_FM_ACCOUNTINFO		=	Account information
+	MOD_BEUSER_FM_USERID			=	User-ID
+	MOD_BEUSER_FM_CREATEDAT			=	Account created at
+	MOD_BEUSER_FM_LASTLOGIN			=	Last login
+	MOD_BEUSER_FM_LOGINCOUNT		=	Num of login
+	MOD_BEUSER_FM_USERAUTH			=	User authentication
+	MOD_BEUSER_FM_USERRIGHTS		=	User rights
+	MOD_BEUSER_FM_RIGTHGROUPS		=	Right groups
+	MOD_BEUSER_FM_LOCKEDSTATE		=	Account locked state
+	
+	MOD_BEUSER_FM_FRONTENDSTTNGS	= 	Frontend settings
+
+
+	MOD_BEUSER_FM_LOCKED_0_NOTLOCKED	=	not locked
+	MOD_BEUSER_FM_LOCKED_1_NOTVERIFIED	=	locked by not verified
+	MOD_BEUSER_FM_LOCKED_2_FAILEDLOGIN	=	locked by failed login limit
+
+
+	
+	
+	

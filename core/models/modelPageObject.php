@@ -4,22 +4,17 @@ include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SHEME.'shemePageObject.php';
 
 class 	modelPageObject extends CModel
 {
-
-
 	public function
 	__construct()
 	{		
-		parent::__construct();		
-
-		$this -> m_sheme	= new shemePageObject();
+		parent::__construct('pageHeader');		
+		$this -> m_sheme = new shemePageObject();
 	}	
 
 
 	public function
-	load(&$_sqlConnection, array $_where = [])
+	loadOld(&$_sqlConnection, array $_where = [])
 	{
-
-
 		$_className	=	$this -> createClass($this -> m_sheme, 'shemePageObject', '', $this -> m_additionalProperties);
 
 		$_tableName	=	$this -> m_sheme -> getTableName();
@@ -96,7 +91,7 @@ $_sqlString	.= " ORDER BY 	$_tableName.object_order_by ";
 	}
 
 	public function
-	update(&$_sqlConnection, $_dataset)
+	updateOld(&$_sqlConnection, $_dataset)
 	{	
 
 		if(empty($_dataset['object_id'])) return false;
@@ -147,15 +142,11 @@ $_sqlString	.= " ORDER BY 	$_tableName.object_order_by ";
 
 		return true;
 	}	
-	
-	public function
-	insert(&$_sqlConnection, &$_dataset)
-	{
-	}
+
 	
 
 	public function
-	delete(&$_sqlConnection, array $_deleteWhere)	
+	deleteOld(&$_sqlConnection, array $_deleteWhere)	
 	{
 		$_tableName			=	$this -> m_sheme -> getTableName();
 		

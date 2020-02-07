@@ -278,7 +278,7 @@ class	controllerModules extends CController
 											$_pFormVariables-> retrieve($_request, false, true); // POST 
 											$_aFormData		 = $_pFormVariables ->getArray();
 
-											if(empty($_aFormData['is_active'])) { 	$_bValidationErr = true; 	$_bValidationDta[] = 'is_active'; 	}
+											#if(empty($_aFormData['is_active'])) { 	$_bValidationErr = true; 	$_bValidationDta[] = 'is_active'; 	}
 
 											if(!$_bValidationErr)	// Validation OK (by pre check)
 											{		
@@ -298,7 +298,7 @@ class	controllerModules extends CController
 												
 												if($this -> m_pModel -> update($_sqlConnection, $_aFormData, $modelCondition))
 												{
-													$_bValidationMsg = CLanguage::get() -> string('M_BERMADDR_MSG_ISUPDATED');
+													$_bValidationMsg = CLanguage::get() -> string('M_BEMOULE_MSG_MODULE') .' '. CLanguage::get() -> string('WAS_UPDATED');
 												}
 												else
 												{

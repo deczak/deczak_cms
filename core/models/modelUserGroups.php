@@ -33,23 +33,6 @@ class 	modelUserGroups extends CModel
 		return true;
 	}
 
-	public function
-	insert(&$_sqlConnection, $_dataset)
-	{
-
-	}
-
-	public function
-	update(&$_sqlConnection, $_dataset, CModelCondition $_condition = NULL)
-	{
-
-	}
-	
-	public function
-	delete( &$_sqlConnection, CModelCondition $_condition = NULL)
-	{
-	
-	}
 }
 
 

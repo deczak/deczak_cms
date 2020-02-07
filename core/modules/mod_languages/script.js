@@ -59,6 +59,6 @@ class	cmsIndexList
 
 		var	requestTarget	= CMS.SERVER_URL_BACKEND + CMS.PAGE_PATH + CMS.MODULE_TARGET;
 
-		TK.callXHR(requestTarget, formData, that.onXHRSuccess, TK.onXHRError, that);
+		cmstk.callXHR(requestTarget, formData, that.onXHRSuccess, cmstk.onXHRError, that);
 	}
 }

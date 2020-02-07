@@ -3,34 +3,34 @@
 
 I create this content management system primarily for myself and my requirements, but make it available to the general public. The abbreviation cos stands for cooking own soup, based on the fact that someone cooks their own soup instead of using others. I have no objection to participating in the project. Notes on errors and the like are welcome.
 
+There are two branches:
+
++ master-branch, the version that was tested so far and should tend to work (errors are of course not excluded)
++ dev-branch, the version that contains the newest features but it could contains bugs
+
+Documentation on the CMS will be built up in stages later.
+
 ### Current status
 
-This version is an early, if you like to call it that, alpha version. You can do that:
+The CMS is still in an early stage of development. There may be errors that can lead to inoperability or data loss in the data entered in the CMS. There is no CMS own backup or restore function of the data. There is also no update function at the moment, so new versions may require a new installation. Therefore, please do not use the CMS **productively**, an update function will follow in the course of the year.
 
+**Functions that exists**
 + Create, edit, delete, but not move pages
-+ Text and headline insert, edit, delete
-+ Create, edit, delete user for backend
-+ Create, edit, delete rights groups for backend users
++ Text, Headline and source module
++ Create and manage users for backend and frontend (the areas have their own user tables)
++ Add languages for frontend
++ Restrict site access for Authed users
++ Various visibility settings of the pages
++ Automated blocking of access under certain conditions
++ Block access based on IP/CIDR notation
++ Block access using the user agent
 
-Due to the fact that I still have to rebuild a lot, I do without a corresponding documentation of the internal processes.
+### Properties of this CMS
 
-I write it, although it should be clear, but better: This is an early version and a lot is missing. Do not use this version in live stage.
-
-### Planned functions and properties (provisional)
-
-+ User authentication across multiple databases. As an example, you have several projects, but users should be central in one place.
-+ Implementation of the MVC concept but in a flat structure for easy maintenance and extensibility.
-+ Implementation of fixed CORE modules and project related MANTLE modules.
-+ Expandability of the CORE with the possibility to supply existing projects with the new CORE without breaking the function of the existing MANTLE modules.
-+ Simple uncomplicated procedure to install a new module.
-+ Vanilla Javascript ES6 and above
-+ No support for the Internet Explorer
-
-### Properties that will not happens
-
-+ Call home
-+ Automatic updates
-+ Image and video editing
++ User authentication across multiple databases. As an example: You have several projects, but the users should be in one place.
++ Modules as fixed core and project-related shell modules, shell modules can (in concept) overload core modules.
++ Vanilla Javascript in the backend from ES6
++ No support for Internet Explorer
 
 ## Requirements
 
@@ -39,6 +39,18 @@ I write it, although it should be clear, but better: This is an early version an
 
 ## Install information
 
-In the install directory there is an index.php that does everything. For successful installation, the database information is generally required, an email address to which system messages are sent and other information that is explained there.
+In the install directory there is an index.php that does everything, keep the necessary data such as database information ready. A manual installation is not possible, a new installation is not possible until you have deleted the database tables and the htaccess file.
 
-A manual installation is not possible, you could do this to the extent that you can access the public area, but for the backend (administration) you need a user whose access data is hashed separately. To explain that is too complicated to be put in a manual. And if I would create a helper script for it.
+If the CMS is used productively, the cronjobs must be created as these on the server. There are 3 files in the / cron directory:
++ cron_24_hours.php, this file every 24 hours
++ cron_7_days.php, this file once a week
++ cron_6_hours.php, this file every 6 hours
+
+During the installation, it is checked whether the CMS was installed using SSL transport encryption. If this state changes, the value under $COOKIE_HTTPS must be changed in the configuration under /config/standard.php. Otherwise, a login in the backend could fail.
+
+###	Third party content
+
+The content management system contains the following third-party sources:
+
++ Font Awesome
++ Flatpickr

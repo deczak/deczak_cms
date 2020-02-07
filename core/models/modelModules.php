@@ -14,57 +14,7 @@ class 	modelModules extends CModel
 	}	
 
 	public function
-	load(&$_sqlConnection, CModelCondition $_condition = NULL)
-	{
-		$className	=	$this -> createClass($this -> m_sheme, $this -> m_className, '', $this -> m_additionalProperties);
-		$tableName	=	$this -> m_sheme -> getTableName();
-
-		$sqlString	=	"	SELECT		*
-							FROM		$tableName
-						".	($_condition != NULL ? $_condition -> getConditions($_sqlConnection, $_condition) : '');
-
-		$sqlResult =	$_sqlConnection -> query($sqlString);
-
-		while($sqlResult !== false && $sqlRow = $sqlResult -> fetch_assoc())
-		{	
-			$this -> m_storage[] = new $className($sqlRow, $this -> m_sheme -> getColumns());
-		}
-		
-		return true;
-	}
-
-	public function
-	insert(&$_sqlConnection, $_dataset, &$_insertID)
-	{
-		if($_sqlConnection === false)
-			return false;
-
-		$tableName		=	$this -> m_sheme -> getTableName();
-
-		$_className		=	$this -> createClass($this -> m_sheme,'Modules');
-		$_model 		= 	new $_className($_dataset, $this -> m_sheme -> getColumns());
-
-		$sqlString		=	"INSERT INTO $tableName	SET ";
-
-		$_loopCounter = 0;
-		foreach($this -> m_sheme -> getColumns() as $_column)
-		{
-			$_tmp		 = $_column -> name;
-			$sqlString .= ($_loopCounter != 0 ? ', ':'');
-			$sqlString .= "`".$_column -> name ."` = '". $_model -> $_tmp ."'";
-			$_loopCounter++;
-		}
-
-		if($_sqlConnection -> query($sqlString) !== false) 
-		{
-			$_insertID = $_sqlConnection -> insert_id;
-			return true;
-		}
-		return false;
-	}
-
-	public function
-	update(&$_sqlConnection, $_dataset, CModelCondition $_condition = NULL)
+	update(&$_sqlConnection, &$_dataset, CModelCondition $_condition = NULL)
 	{
 		if($_condition === NULL || !$_condition -> isSet()) return false;
 		
@@ -100,19 +50,6 @@ class 	modelModules extends CModel
 		return false;
 	}
 
-/*
-
-
-
-	isUniqueValue(&$_sqlConnection, string $tableName, string $_columnName, string $_value)
-
-	public function
-	includeDataByComparsion($_includeDataInstance = NULL, string $_includeOn = '', array $_includeValues = [])
-	{
-		foreach($this -> m_storage as &$_dataInstance)
-			$this -> _includeDataByComparsion($_dataInstance, $_includeDataInstance, $_includeOn, $_includeValues);
-	}
-*/
 
 }
 
@@ -121,7 +58,7 @@ class 	modelModules extends CModel
 /**
  * 	Parent class for the data class with toolkit functions. It get the child instance to access the child properties.
 
-class 	toolkitUsersBackend
+class 	toolkitModules
 {
 	protected	$m_childInstance;
 

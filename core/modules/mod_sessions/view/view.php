@@ -21,7 +21,7 @@ $_dataSet -> time_create 	= ($_dataSet -> time_create == 0 ? '-' : date(TIME_FOR
 				<?php if($enableDelete) { ?>
 					<fieldset class="ui fieldset button-only" data-xhr-target="session-delete" data-xhr-overwrite-target="delete/<?php echo $_dataSet -> data_id; ?>">	
 						<div class="submit-container button-only">
-							<button class="ui button icon labeled trigger-submit-fieldset" type="button" disabled><i class="fas fa-trash-alt"></i><?php echo $language -> string('BUTTON_DELETE'); ?></button>
+							<button class="ui button icon labeled trigger-submit-fieldset" type="button" disabled><span><i class="fas fa-trash-alt" data-icon="fa-trash-alt"></i></span><?php echo $language -> string('BUTTON_DELETE'); ?></button>
 							<div class="protector"><input type="checkbox" class="trigger-submit-protector" id="protector-session-delete"><label for="protector-session-delete"></label></div>
 						</div>
 						<div class="result-box" data-error=""></div>

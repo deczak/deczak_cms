@@ -38,7 +38,7 @@ class 	modelRightGroups extends CModel
 	}
 	
 		public function
-	insert( &$_sqlConnection, $_dataset, &$_insertID)
+	insert( &$_sqlConnection, &$_dataset, &$_insertID)
 	{
 		$_tableRight	=	$this -> m_sheme -> getTableName();
 
@@ -70,7 +70,7 @@ class 	modelRightGroups extends CModel
 	}
 	
 	public function
-	update( &$_sqlConnection, $_dataset, CModelCondition $_condition = NULL)
+	update( &$_sqlConnection, &$_dataset, CModelCondition $_condition = NULL)
 	{
 		if($_condition === NULL || !$_condition -> isSet()) return false;
 
@@ -92,21 +92,6 @@ class 	modelRightGroups extends CModel
 		$_sqlString	.=	$_condition -> getConditions($_sqlConnection, $_condition);
 
 		if($_sqlConnection -> query($_sqlString) !== false) return true;
-		return false;
-	}
-	
-	public function
-	delete(&$_sqlConnection, CModelCondition $_condition = NULL)
-	{
-
-		if($_condition === NULL || !$_condition -> isSet()) return false;
-
-		$tableName	=	$this -> m_sheme -> getTableName();
-
-		$sqlString	 =	"DELETE FROM $tableName
-						". $_condition -> getConditions($_sqlConnection, $_condition);
-
-		if($_sqlConnection -> query($sqlString) !== false) return true;
 		return false;
 	}
 }

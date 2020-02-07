@@ -81,7 +81,7 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 	// 	Loads and manage language files
 
 	$_pLanguage		 = 	CLanguage::instance();		
-	$_pLanguage		-> 	initialize($_pSQLObject -> getConnection(CONFIG::GET() -> MYSQL -> PRIMARY_DATABASE));		
+	$_pLanguage		-> 	initialize($_pSQLObject -> getConnection(CONFIG::GET() -> MYSQL -> PRIMARY_DATABASE));	
 	$_pLanguage		->	loadLanguageFile(CMS_SERVER_ROOT.DIR_CORE.DIR_LANGUAGES.CLanguage::instance() -> getDefault() .'/');
 
 ##	C O O K I E   M A N A G E R
@@ -153,7 +153,8 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 	if(CMS_BACKEND && CSession::instance() -> getValue('language') !== NULL)
 		$activeLanguage  = CSession::instance() -> getValue('language');
 
-	if(CMS_BACKEND && $activeLanguage !== NULL && CLanguage::instance() -> getDefault() !== $activeLanguage)
+	#if(CMS_BACKEND && $activeLanguage !== NULL && CLanguage::instance() -> getDefault() !== $activeLanguage)
+	if($activeLanguage !== NULL && CLanguage::instance() -> getDefault() !== $activeLanguage)
 		$_pLanguage		-> loadLanguageFile(CMS_SERVER_ROOT.DIR_CORE.DIR_LANGUAGES.$activeLanguage .'/', $activeLanguage );
 
 	$_pLanguage		-> 	setActiveLanguage($activeLanguage);		

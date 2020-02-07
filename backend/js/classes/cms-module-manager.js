@@ -115,7 +115,7 @@ class	cmsModuleManager
 	{
 		var moduleContainer	= this.closest('.cms-edit-new-module-container'); 
 		var moduleID 		= this.getAttribute('data-module-id'); 
-		var orderBy 		= TK.getNodeIndex(moduleContainer); 
+		var orderBy 		= cmstk.getNodeIndex(moduleContainer); 
 		var nodeID			= document.querySelector('body').getAttribute('data-node-id');
 		var contentContainer= this.closest('.cms-edit-content-container'); 
 
@@ -156,7 +156,7 @@ class	cmsModuleManager
 
 								var contentObjects = contentContainer.querySelectorAll('.cms-content-object');
 
-								var targetElement = TK.getChildNodeByIndex(orderBy, contentObjects);
+								var targetElement = cmstk.getChildNodeByIndex(orderBy, contentObjects);
 
 								if(targetElement != null)
 								{	//	Add the new element before
@@ -164,7 +164,7 @@ class	cmsModuleManager
 								}
 								else
 								{	//	Add the new elment after last
-									var targetElement = TK.getChildNodeByIndex((orderBy - 2), contentObjects);
+									var targetElement = cmstk.getChildNodeByIndex((orderBy - 2), contentObjects);
 
 									if(targetElement !== undefined)
 										targetElement.insertAdjacentElement('afterend', newObject);
