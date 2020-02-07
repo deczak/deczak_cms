@@ -167,8 +167,7 @@ class	CSession extends CSingleton
 			{
 
 
-				// get login objects
-				$_pModelLoginObjects	 =	new modelLoginObjects();
+
 
 				foreach($_COOKIE as $_cookieKey => $_cookieValue)
 				{
@@ -178,9 +177,13 @@ class	CSession extends CSingleton
 			$modelCondition = new CModelCondition();
 			$modelCondition -> where('object_id', $_cookieKey);
 
+				// get login objects
+				$_pModelLoginObjects	 =	new modelLoginObjects();
+
 					$_pModelLoginObjects	->	load($_db, $modelCondition);	
 
 					$_loginObjects			 = 	$_pModelLoginObjects -> getDataInstance();
+
 
 					if($_loginObjects !== NULL && count($_loginObjects) != 0)
 					{
@@ -192,6 +195,8 @@ class	CSession extends CSingleton
 					$_loginObject -> object_session_ext = json_decode($_loginObject -> object_session_ext);
 					}
 					
+			
+
 					if(isset($_loginObject))
 					{	##	Login object for this cookies exists
 
@@ -212,12 +217,20 @@ class	CSession extends CSingleton
 
 							$_sqlLoginChkRes		=	$_dbLogin -> query($_sqlString);	
 
+		
+
+
 
 							if($_sqlLoginChkRes !== false && $_sqlLoginChkRes -> num_rows > 0)
 							{
+
 								$_sqlLoginChk = $_sqlLoginChkRes -> fetch_assoc();
+
+
 								if(CCookie::instance() -> isCookieIdinatorValid($_cookieKey, $_sqlLoginChk['time_login'], $this -> m_aSessionData['session_id']))
 								{	##	User auth positiv
+
+
 
 			
 									$this -> m_aSessionData['is_auth']						=	true;
@@ -226,7 +239,8 @@ class	CSession extends CSingleton
 																								'table'		=>	$_loginObject -> object_table,
 																								'data_id'	=>	$_sqlLoginChk['data_id']
 																								];			
-
+																								
+																							
 									## Gathering additional columns
 									
 									if(!empty($_loginObject -> object_session_ext))
@@ -280,20 +294,23 @@ class	CSession extends CSingleton
 
 									while($_sqlUserRightsRes !== false && $_sqlUserRights = $_sqlUserRightsRes -> fetch_assoc())
 									{
-							
+						
 										$_sqlUserRights['group_rights'] = json_decode($_sqlUserRights['group_rights'], true);
-
+										if(!empty($_sqlUserRights['group_rights']))
 										foreach($_sqlUserRights['group_rights'] as $_moduleRights  => $_rightsSet)
 										{
 											$this -> m_aSessionData['user_rights'][$_moduleRights] = $_rightsSet;
 										}										
 									}
 								}
-								return false;
+								
 							}
 						}
-					}					
+					}	
+			
 				}
+				
+				return false;	
 			}
 		}
 		else
@@ -310,6 +327,7 @@ class	CSession extends CSingleton
 			{
 				$modelCondition = new CModelCondition();
 				$modelCondition -> where('page_language', $_language);
+				$modelCondition -> where('page_path', '/');	
 				
 				$modelSitemap = new modelSitemap();
 				$modelSitemap -> load($_db, $modelCondition);

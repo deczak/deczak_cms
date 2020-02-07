@@ -150,7 +150,7 @@ class CSheme
 		$this -> constraintsList[] = new sqlConstraints($_constraintName, $_keyName, $_refTable, $_refColumn, $_onDelete, $_onUpdate);
 	}
 	
-	protected function
+	public function
 	&addColumn(string $_columnName, string $_dataType)
 	{
 		$this -> m_sheme['columns'][$_columnName] = new CShemeColumn($_columnName, $_dataType);

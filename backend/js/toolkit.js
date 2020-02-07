@@ -1,5 +1,5 @@
 
-class TK
+class cmstk
 {
 	static
 	getNodeIndex(childNode)
@@ -28,7 +28,7 @@ class TK
 		var bg = getComputedStyle(node).backgroundColor;
 
 		if(bg === transparent)	
-			return TK.getVisibleBackgroundColor(node.parentElement);
+			return cmstk.getVisibleBackgroundColor(node.parentElement);
 		else
 			return bg;   
 	}

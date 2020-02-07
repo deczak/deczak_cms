@@ -32,10 +32,10 @@ class	TK
 
  		$_filename 	= str_replace($search, $replace, strtolower($_filename));
 
-		if($_replaceSlashes)
+#		if($_replaceSlashes)
 			$_filename = preg_replace( '/[^a-z0-9_\-]+/', '', $_filename);
-		else
-			$_filename = preg_replace( '/[^a-z0-9_-\/]+/', '', $_filename);
+#		else
+#			$_filename = preg_replace( '/[^a-z0-9_-\/]+/', '', $_filename); bugged
 	
 		return $_filename;
 	}
@@ -59,8 +59,10 @@ class	TK
 	getBackendUserName(&$_sqlConnection, int $_userId)
 	{
 		require_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelUsersBackend.php';
+		$modelCondition = new CModelCondition();
+		$modelCondition -> where('user_id', strval($_userId));
 		$pModel = new modelUsersBackend();
-		if(!$pModel -> load($_sqlConnection, [ 'user_id' => $_userId ]))
+		if(!$pModel -> load($_sqlConnection, $modelCondition))	
 			return '';
 		$user = $pModel -> getDataInstance()[0];
 		return $user -> user_name_first .' '. $user -> user_name_last;
@@ -73,6 +75,14 @@ class	TK
 			if(isset($dataset -> $_searchKey) && isset($dataset -> $_returnKey) && stripos($_searchValue, $dataset -> $_searchKey) !== false)
 				return $dataset -> $_returnKey;
 		return $_returnDefault;
+	}
+
+	public static function
+	isSSL()
+	{
+		if(!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' )
+			return true;
+		return false;
 	}
 }
 

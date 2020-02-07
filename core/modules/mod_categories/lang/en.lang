@@ -1,0 +1,17 @@
+
+##	
+
+	MOD_BECATEGORIES_CATEGORY		= 	Category
+
+	MOD_BECATEGORIES_ERR_USERID_UK	=	Category is unknown
+
+	MOD_BECATEGORIES_CREATE			=	Create categories
+	MOD_BECATEGORIES_EDIT			=	Category
+	
+	MOD_BECATEGORIES_NAME			=	Name
+	MOD_BECATEGORIES_URLAPPENDIX	=	Name in URL
+	MOD_BECATEGORIES_HIDDEN			=	Visible in Cloud
+	MOD_BECATEGORIES_DISABLED		=	Useable
+	MOD_BECATEGORIES_ALLOCATION		=	Count of allocation
+
+	MOD_BECATEGORIES_INFO			=	Category informationen

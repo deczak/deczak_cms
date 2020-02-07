@@ -1,0 +1,50 @@
+{
+	"module_controller" : "controllerCategories",
+	"rights"	:[
+					{"name":"index",	"desc":"OVERVIEW"},
+					{"name":"view",		"desc":"VIEW"},
+					{"name":"create",	"desc":"CREATE"},
+					{"name":"edit",		"desc":"EDIT"},
+					{"name":"delete",	"desc":"DELETE"}
+				 ],
+	"sub"		:[
+					{
+						"url_name"	:"",
+						"ctl_target":"",
+						"menu_name"	:"OVERVIEW",
+						"menu_order":"0"
+					},
+					{
+						"url_name"	:"create",
+						"ctl_target":"create",
+						"menu_name"	:"MOD_BECATEGORIES_CREATE",
+						"menu_order":"0"
+					},
+					{
+						"url_name"	:"category",
+						"ctl_target":"view",
+						"menu_name"	:"",
+						"menu_order":"0"
+					},
+					{
+						"url_name"	:"edit",
+						"ctl_target":"edit",
+						"menu_name"	:"",
+						"menu_order":"0"
+					},
+					{
+						"url_name"	:"delete",
+						"ctl_target":"delete",
+						"menu_name"	:"",
+						"menu_order":"0"
+					}
+				 ],
+	"htaccess"	:{
+					"variables"		:[
+										{
+											"key" 		: "cms-system-id",
+											"wildcard"	:"(.*)"
+										}
+									 ]
+				 }
+}

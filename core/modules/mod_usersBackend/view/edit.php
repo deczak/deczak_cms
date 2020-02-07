@@ -30,7 +30,7 @@
 			<div class="delete-box">	
 				<fieldset class="ui fieldset" data-xhr-target="user-delete" data-xhr-overwrite-target="delete/<?php echo $users -> user_id; ?>">	
 					<div class="submit-container button-only">
-						<button class="ui button icon labeled trigger-submit-fieldset" type="button" disabled><i class="fas fa-trash-alt"></i><?php echo CLanguage::get() -> string('BUTTON_DELETE'); ?></button>
+						<button class="ui button icon labeled trigger-submit-fieldset" type="button" disabled><span><i class="fas fa-trash-alt" data-icon="fa-trash-alt"></i></span><?php echo CLanguage::get() -> string('BUTTON_DELETE'); ?></button>
 						<div class="protector"><input type="checkbox" class="trigger-submit-protector" id="protector-user-delete"><label for="protector-user-delete"></label></div>
 					</div>
 					<div class="result-box" data-error=""></div>
@@ -41,7 +41,7 @@
 	<div>
 
 		
-		<fieldset class="ui fieldset submit-able" id="user-data" data-xhr-target="user-data">
+		<fieldset class="ui fieldset submit-able" id="user-data" data-xhr-target="user-data" data-xhr-overwrite-target="edit/<?php echo $users -> user_id; ?>">
 			<legend><?php echo CLanguage::get() -> string('MOD_BEUSER_FM_USERINFO'); ?></legend>
 			<div>
 				<!-- group -->
@@ -127,7 +127,7 @@
 			<!-- Submit button - beware of fieldset name -->
 
 			<div class="submit-container">
-				<button class="ui button icon labeled trigger-submit-fieldset" type="button" disabled><i class="fas fa-save"></i><?php echo CLanguage::get() -> string('BUTTON_SAVE'); ?></button>
+				<button class="ui button icon labeled trigger-submit-fieldset" type="button" disabled><span><i class="fas fa-save" data-icon="fa-save"></i></span><?php echo CLanguage::get() -> string('BUTTON_SAVE'); ?></button>
 				<div class="protector"><input type="checkbox" class="trigger-submit-protector" id="protector-user-data"><label for="protector-user-data"></label></div>
 			</div>
 
@@ -135,7 +135,7 @@
 
 
 
-		<fieldset class="ui fieldset submit-able" id="user-auth" data-xhr-target="user-auth">
+		<fieldset class="ui fieldset submit-able" id="user-auth" data-xhr-target="user-auth" data-xhr-overwrite-target="edit/<?php echo $users -> user_id; ?>">
 			<legend><?php echo CLanguage::get() -> string('MOD_BEUSER_FM_USERAUTH'); ?></legend>
 
 			<div>
@@ -169,14 +169,14 @@
 			<!-- Submit button - beware of fieldset name -->
 
 			<div class="submit-container">
-				<button class="ui button icon labeled trigger-submit-fieldset" type="button" disabled><i class="fas fa-save"></i><?php echo CLanguage::get() -> string('BUTTON_SAVE'); ?></button>
+				<button class="ui button icon labeled trigger-submit-fieldset" type="button" disabled><span><i class="fas fa-save" data-icon="fa-save"></i></span><?php echo CLanguage::get() -> string('BUTTON_SAVE'); ?></button>
 				<div class="protector"><input type="checkbox" class="trigger-submit-protector" id="protector-user-auth"><label for="protector-user-auth"></label></div>
 			</div>
 
 		</fieldset>
 
 
-		<fieldset class="ui fieldset submit-able" id="user-rights" data-xhr-target="user-rights">
+		<fieldset class="ui fieldset submit-able" id="user-rights" data-xhr-target="user-rights" data-xhr-overwrite-target="edit/<?php echo $users -> user_id; ?>">
 			<legend><?php echo CLanguage::get() -> string('MOD_BEUSER_FM_USERRIGHTS'); ?></legend>
 			<div>
 
@@ -223,7 +223,7 @@
 			<!-- Submit button - beware of fieldset name -->
 
 			<div class="submit-container">
-				<button class="ui button icon labeled trigger-submit-fieldset " type="button" disabled><i class="fas fa-save"></i><?php echo CLanguage::get() -> string('BUTTON_SAVE'); ?></button>
+				<button class="ui button icon labeled trigger-submit-fieldset " type="button" disabled><span><i class="fas fa-save" data-icon="fa-save"></i></span><?php echo CLanguage::get() -> string('BUTTON_SAVE'); ?></button>
 				<div class="protector"><input type="checkbox" class="trigger-submit-protector" id="protector-user-rights"><label for="protector-user-rights"></label></div>
 			</div>
 

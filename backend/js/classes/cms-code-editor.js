@@ -14,7 +14,7 @@ class	cmsCodeEditor
 	//	this.cmdFilelocation= cmdFilelocation;
 		this.nameAttribute	= nameAttribute;
 	
-	//	TK.callXHR(this.cmdFilelocation, null, this.onXHRInit, TK.onXHRError, that);
+	//	cmstk.callXHR(this.cmdFilelocation, null, this.onXHRInit, cmstk.onXHRError, that);
 
 	//	document.addEventListener('mousedown', function(event) { that.hideToolbars(event.target); }, false);
 	}
@@ -57,8 +57,8 @@ class	cmsCodeEditor
 		var that 		= this;
 		var	nEditorId 	= this.aEditors.length;
 
-		var fontColor = TK.getVisibleBackgroundColor(srcElement);
-			fontColor = TK.invertRGBA(fontColor);
+		var fontColor = cmstk.getVisibleBackgroundColor(srcElement);
+			fontColor = cmstk.invertRGBA(fontColor);
 
 
 		var oParent 			= document.createElement("div");

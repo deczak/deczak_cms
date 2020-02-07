@@ -12,54 +12,7 @@ class 	modelDeniedRemote extends CModel
 	}	
 
 	public function
-	load(&$_sqlConnection, CModelCondition $_condition = NULL)
-	{
-		$className	=	$this -> createClass($this -> m_sheme, $this -> m_className, '', $this -> m_additionalProperties);
-		$tableName	=	$this -> m_sheme -> getTableName();
-
-		$sqlString	=	"	SELECT		*
-							FROM		$tableName
-							".	($_condition != NULL ? $_condition -> getConditions($_sqlConnection, $_condition) : '');
-
-		$sqlResult =	$_sqlConnection -> query($sqlString);
-
-		while($sqlResult !== false && $sqlRow = $sqlResult -> fetch_assoc())
-		{	
-			$this -> m_storage[] = new $className($sqlRow, $this -> m_sheme -> getColumns());
-		}
-		
-		return true;
-	}
-
-	public function
-	insert(&$_sqlConnection, $_dataset, &$_insertID)
-	{
-		$className		 =	$this -> createClass($this -> m_sheme, $this -> m_className);
-		$tableName		 =	$this -> m_sheme -> getTableName();
-
-		$model 			 = 	new $className($_dataset, $this -> m_sheme -> getColumns());
-
-		$sqlString		 =	"INSERT INTO $tableName	SET ";
-
-		$loopCounter 	 = 0;
-		foreach($this -> m_sheme -> getColumns() as $column)
-		{
-			$tmp		 = $column -> name;
-			$sqlString 	.= ($loopCounter != 0 ? ', ':'');
-			$sqlString 	.= "`".$column -> name ."` = '". $model -> $tmp ."'";
-			$loopCounter++;
-		}
-
-		if($_sqlConnection -> query($sqlString) !== false) 
-		{
-			$_insertID = $_sqlConnection -> insert_id;
-			return true;
-		}
-		return false;
-	}
-
-	public function
-	update(&$_sqlConnection, $_dataset, CModelCondition $_condition = NULL)
+	update(&$_sqlConnection, &$_dataset, CModelCondition $_condition = NULL)
 	{
 		if($_condition === NULL || !$_condition -> isSet()) return false;
 

@@ -19,7 +19,7 @@ $data = &$languagesList[0];
 				<?php if($enableDelete && !$data -> lang_default) { ?>
 					<fieldset class="ui fieldset" data-xhr-target="delete" data-xhr-overwrite-target="delete/<?php echo $data -> lang_key; ?>">	
 						<div class="submit-container button-only">
-							<button class="ui button icon labeled trigger-submit-fieldset" type="button" disabled><i class="fas fa-trash-alt"></i><?php echo $language -> string('BUTTON_DELETE'); ?></button>
+							<button class="ui button icon labeled trigger-submit-fieldset" type="button" disabled><span><i class="fas fa-trash-alt" data-icon="fa-trash-alt"></i></span><?php echo $language -> string('BUTTON_DELETE'); ?></button>
 							<div class="protector"><input type="checkbox" class="trigger-submit-protector" id="protector-language-delete"><label for="protector-language-delete"></label></div>
 						</div>
 						<div class="result-box" data-error=""></div>
@@ -78,8 +78,8 @@ $data = &$languagesList[0];
 						<label><?php echo CLanguage::instance() -> getString('M_BELANG_HIDDEN'); ?></label>
 						<div class="select-wrapper">
 						<select name="lang_hidden">
-							<option value="0" <?php echo ($data -> lang_hidden ? 'selected' : ''); ?>><?php echo CLanguage::get() -> string('NO'); ?></option>
-							<option value="1" <?php echo ($data -> lang_hidden ? 'selected' : ''); ?>><?php echo CLanguage::get() -> string('YES'); ?></option>
+							<option value="0" <?php echo ($data -> lang_hidden ? 'selected' : ''); ?>><?php echo CLanguage::get() -> string('YES'); ?></option>
+							<option value="1" <?php echo ($data -> lang_hidden ? 'selected' : ''); ?>><?php echo CLanguage::get() -> string('NO'); ?></option>
 						</select>	
 						</div>
 					</div>
@@ -88,8 +88,8 @@ $data = &$languagesList[0];
 						<label><?php echo CLanguage::instance() -> getString('M_BELANG_LOCKED'); ?></label>
 						<div class="select-wrapper">
 						<select name="lang_locked">
-							<option value="0" <?php echo ($data -> lang_locked ? 'selected' : ''); ?>><?php echo CLanguage::get() -> string('NO'); ?></option>
-							<option value="1" <?php echo ($data -> lang_locked ? 'selected' : ''); ?>><?php echo CLanguage::get() -> string('YES'); ?></option>
+							<option value="0" <?php echo ($data -> lang_locked ? 'selected' : ''); ?>><?php echo CLanguage::get() -> string('YES'); ?></option>
+							<option value="1" <?php echo ($data -> lang_locked ? 'selected' : ''); ?>><?php echo CLanguage::get() -> string('NO'); ?></option>
 						</select>	
 						</div>
 					</div>
@@ -111,7 +111,7 @@ $data = &$languagesList[0];
 				<!-- Submit button - beware of fieldset name -->
 
 				<div class="submit-container">
-					<button class="ui button icon labeled trigger-submit-fieldset" type="button" disabled><i class="fas fa-save"></i><?php echo $language -> string('BUTTON_SAVE'); ?></button>
+					<button class="ui button icon labeled trigger-submit-fieldset" type="button" disabled><span><i class="fas fa-save" data-icon="fa-save"></i></span><?php echo $language -> string('BUTTON_SAVE'); ?></button>
 					<div class="protector"><input type="checkbox" class="trigger-submit-protector" id="protector-lang-data"><label for="protector-lang-data"></label></div>
 				</div>
 

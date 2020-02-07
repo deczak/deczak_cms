@@ -35,6 +35,11 @@
 			requestTarget	= CMS.SERVER_URL_BACKEND + CMS.PAGE_PATH + customTarget;
 		}
 
+		var iconElement	= element.querySelector('i');
+			iconElement.classList.remove(iconElement.getAttribute('data-icon'));
+			iconElement.classList.add('fa-sync-alt');
+			iconElement.classList.add('loading');
+
 		// Reset Protector for Submit Button
 
 		var submitContainer = element.closest('.submit-container');
@@ -82,7 +87,7 @@
 
 							// display return message
 
-							if(typeof resultBox != 'undefined')
+							if(typeof resultBox != 'undefined' && resultBox != null)
 							{
 								resultBox.innerHTML = jsonObject.msg;
 								resultBox.setAttribute('data-error',jsonObject.state);
@@ -105,6 +110,11 @@
 								resultBox.setAttribute('data-error',1);
 							}
 			}
+
+			iconElement.classList.remove('fa-sync-alt');
+			iconElement.classList.remove('loading');
+			iconElement.classList.add(iconElement.getAttribute('data-icon'));
+
 		};
 		xhr.send(formData);
 	}
@@ -138,42 +148,9 @@
 	document.addEventListener('click', function(event) { var element = event.target; if(element !== null && element.classList.contains('trigger-submit-fieldset')) submitFieldset(element); }, false);
 
 
-/**
- *	Functions for overview tables
- */
 
-
-	function
-	updateBatchItemCheckbox(element)
-	{
-		element.querySelector('.trigger-batch-item-checkbox').checked = !element.querySelector('.trigger-batch-item-checkbox').checked;
-		var	allItemCheckboxes 	= document.querySelectorAll('.trigger-batch-item-checkbox');
-		var	allSelected 		= true;
-		for(var i = 0; i < allItemCheckboxes.length; i++)
-		{
-			if(!allItemCheckboxes[i].checked) 
-			{
-				allSelected = false;
-				break;
-			}
-		}
-		document.querySelector('.trigger-batch-item-all-checkbox').checked = allSelected;
-	}
-
-	function
-	updateBatchItemAllCheckbox()
-	{
-		var	allItemCheckboxes 	= 	document.querySelectorAll('.trigger-batch-item-checkbox');
-		for(var i = 0; i < allItemCheckboxes.length; i++)
-		{
-			allItemCheckboxes[i].checked = this.checked
-		}
-	}
-
-	// EventListener
-
-	document.querySelector("input.trigger-batch-item-all-checkbox").addEventListener('click', updateBatchItemAllCheckbox);
-	document.addEventListener('click', function(event) { var element = event.target.closest('tr'); if(element !== null && element.classList.contains('trigger-batch-item') && !event.target.classList.contains('item-menu')) updateBatchItemCheckbox(element); }, false);
+	// Modules Index Checkbox Handling
+	document.pIndexSelector.bindEvents();
 
 }());
 

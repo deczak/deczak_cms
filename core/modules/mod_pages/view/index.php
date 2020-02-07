@@ -155,8 +155,10 @@ echo '</div>';
 	var	activeLanguage 	= '';
 
 	document.addEventListener("DOMContentLoaded", function(){
+
 		indexList = new cmsIndexList();
 		indexList.init();
+
 	});	
 
 	document.addEventListener('click', function(event) {
@@ -189,7 +191,7 @@ echo '</div>';
 		var formData 		= new FormData();
 		var	requestTarget	= CMS.SERVER_URL_BACKEND + CMS.PAGE_PATH + CMS.MODULE_TARGET + element.getAttribute('data-xhr-overwrite-target');
 
-		TK.callXHR(requestTarget, formData, onSuccessPageOption, TK.onXHRError, this);
+		cmstk.callXHR(requestTarget, formData, onSuccessPageOption, cmstk.onXHRError, this);
 
 		return false;
 	}

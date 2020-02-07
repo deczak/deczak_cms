@@ -2,8 +2,8 @@
 	M_BELANG_NAMENKEY		= Language Key
 	M_BELANG_NAMENATIVE		= Native description
 
-	M_BELANG_HIDDEN			= Hide Language
-	M_BELANG_LOCKED			= Lock language
+	M_BELANG_HIDDEN			= Display language
+	M_BELANG_LOCKED			= Language active
 
 	M_BELANG_SETTINGS		= General Settings
 	M_BELANG_VISSETTINGS	= Visual Settings

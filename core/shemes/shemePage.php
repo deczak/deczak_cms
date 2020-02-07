@@ -27,6 +27,8 @@ class shemePage extends CSheme
 		$this -> addColumn('publish_until', 'bigint') -> setAttribute('UNSIGNED') -> setDefault('0');
 		$this -> addColumn('publish_expired', 'tinyint') -> setAttribute('UNSIGNED') -> setDefault('0');
 
+		$this -> addColumn('page_auth', 'string') -> setLength(25)-> setDefault('NULL');
+
 		$this -> addColumn('create_time', 'bigint') -> setAttribute('UNSIGNED');
 		$this -> addColumn('create_by', 'smallint') -> setAttribute('UNSIGNED');
 		$this -> addColumn('update_time', 'bigint') -> setAttribute('UNSIGNED') -> setDefault('0');
@@ -38,6 +40,8 @@ class shemePage extends CSheme
 		$this -> addColumn('page_language', 'string') -> isVirtual();
 		$this -> addColumn('page_description', 'string') -> isVirtual();
 		$this -> addColumn('alternate_path', 'array') -> isVirtual();
+		$this -> addColumn('page_categories', 'array') -> isVirtual();
+		$this -> addColumn('page_tags', 'array') -> isVirtual();
 		$this -> addColumn('objects', 'array') -> isVirtual();
 	}
 }

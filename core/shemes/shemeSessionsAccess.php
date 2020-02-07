@@ -16,6 +16,8 @@ class shemeSessionsAccess extends CSheme
 		$this -> addColumn('node_id', 'int') -> setAttribute('UNSIGNED');
 		$this -> addColumn('time_access', 'bigint')  -> setAttribute('UNSIGNED');
 		$this -> addColumn('referer', 'string') -> setLength(250);
+
+		$this -> addColumn('page_title', 'string') -> isVirtual() -> setDefault('');
 	}
 }
 

@@ -26,6 +26,7 @@ class shemeSitemap extends CSheme
 		$this -> addColumn('node_id'		, 'int');
 		$this -> addColumn('level'			, 'int');
 		$this -> addColumn('offspring'		, 'int');
+		$this -> addColumn('page_auth'		, 'string');
 		$this -> addColumn('menu_follow'	, 'tinyint');
 		$this -> addColumn('publish_from'	, 'bigint');
 		$this -> addColumn('publish_until'	, 'bigint');

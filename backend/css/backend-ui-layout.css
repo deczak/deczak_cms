@@ -122,7 +122,9 @@ button.ui,
 
 .ui.button.icon { position:relative; width:35px; height:34px; }
 .ui.button.labeled.icon {  padding-left:45px; width:auto; }
-.ui.button.icon > i { padding: 9px 10px; font-size:1.1em; position:absolute; top:0px; left:0px; height:100%; width:35px; background-color:rgba(255,255,255,0.3); }
+
+.ui.button.icon > span { padding: 5px 10px; font-size:1.1em; position:absolute; top:0px; left:0px; height:100%; width:35px; background-color:rgba(255,255,255,0.3); display:flex; align-items:center; }
+
 
 .ui.button.icon.right { padding-left:10px; padding-right:45px; }
 .ui.button.icon.right > i { left:initial; right:0px; height:100%; width:35px; background-color:rgba(255,255,255,0.3); }

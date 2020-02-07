@@ -25,5 +25,7 @@ $modules = CModules::instance() -> getModules();
 	<script src="<?php echo CMS_SERVER_URL_BACKEND; ?>js/classes/cms-code-editor.js"></script>
 	<script src="<?php echo CMS_SERVER_URL_BACKEND; ?>js/classes/cms-object-tools.js"></script>
 	<script src="<?php echo CMS_SERVER_URL_BACKEND; ?>js/classes/cms-module-manager.js"></script>
-
+	<script src="<?php echo CMS_SERVER_URL_BACKEND; ?>js/classes/cms-ui-select.js"></script>
+	<script src="<?php echo CMS_SERVER_URL_BACKEND; ?>js/classes/cms-page-edit.js"></script>
+	
 	<script src="<?php echo CMS_SERVER_URL_BACKEND; ?>js/backend-edit.js"></script>

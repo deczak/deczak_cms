@@ -29,6 +29,7 @@
 
 	$configFile = str_replace('%BASEKEY%',$_POST['crypt-basekey'], $configFile);
 
+	$configFile = str_replace('%COOKIE_HTTPS%', (TK::isSSL() ? 'true' : 'false'), $configFile);
 
 	file_put_contents('../config/standard.php', $configFile);
 

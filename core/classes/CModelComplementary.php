@@ -1,5 +1,8 @@
 <?php
 
+// possible bugged at some point on load functions
+// string behaviour maybe deprecated since models can handle joins
+
 class CModelComplementaryArray
 {
 	public	$type;
@@ -19,7 +22,6 @@ class CModelComplementaryArray
 
 class CModelComplementary
 {
-
 	public $complementaryList;
 
 	public function
@@ -31,7 +33,6 @@ class CModelComplementary
 	public function
 	addArray($_propertyName, $_propertyCompare, &$_storageInstance)
 	{
-		$index = count($this -> complementaryList);
 		$this -> complementaryList[] 		 = new CModelComplementaryArray($_propertyName, $_propertyCompare, 'array', $_storageInstance);
 		return $this;
 	}

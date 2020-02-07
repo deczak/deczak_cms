@@ -33,7 +33,7 @@ class 	modelLoginObjects extends CModel
 	}
 
 	public function
-	insert(&$_sqlConnection, $_dataset, &$_insertID)
+	insert(&$_sqlConnection, &$_dataset, &$_insertID)
 	{
 		$className		 =	$this -> createClass($this -> m_sheme, $this -> m_className);
 		$tableName		 =	$this -> m_sheme -> getTableName();
@@ -60,7 +60,7 @@ class 	modelLoginObjects extends CModel
 	}
 
 	public function
-	update(&$_sqlConnection, $_dataset, CModelCondition $_condition = NULL)
+	update(&$_sqlConnection, &$_dataset, CModelCondition $_condition = NULL)
 	{
 		if($_condition === NULL || !$_condition -> isSet()) return false;
 

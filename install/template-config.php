@@ -65,7 +65,7 @@ class CONFIG_SESSION extends CONFIG_BASE
 {
 	protected	$SPAM_ACCESS_TIMEOUT	=	60;
 	protected	$SPAM_ACCESS_LIMIT		=	5;
-	protected	$COOKIE_HTTPS			=	false;
+	protected	$COOKIE_HTTPS			=	%COOKIE_HTTPS%;
 
 	protected	$TIMEOUT				= 	60 * 60 * 4;
 }

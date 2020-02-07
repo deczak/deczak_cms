@@ -4,7 +4,6 @@ require_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelRightGroups.php';
 require_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelUserGroups.php';	
 require_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelUsersBackend.php';	
 
-
 class	controllerUsersBackend extends CController
 {
 	private		$m_modelRightGroups;
@@ -145,7 +144,9 @@ class	controllerUsersBackend extends CController
 				$_aFormData['create_by'] 	= CSession::instance() -> getValue('user_id');
 				$_aFormData['create_time'] 	= time();
 
-				if($this -> m_pModel -> insert($_sqlConnection, $_aFormData))
+				$dataId = 0;
+				
+				if($this -> m_pModel -> insert($_sqlConnection, $_aFormData, $dataId))
 				{
 					$_bValidationMsg = CLanguage::get() -> string('M_BEUSER_MSG_ISCREATED') .' - '. CLanguage::get() -> string('WAIT_FOR_REDIRECT');
 					$_bValidationDta['redirect'] = CMS_SERVER_URL_BACKEND . CPageRequest::instance() -> urlPath .'user/'.$_aFormData['user_id'];
@@ -183,15 +184,13 @@ class	controllerUsersBackend extends CController
 			$this -> m_modelRightGroups -> load($_sqlConnection);
 
 			$this -> m_pModelUserGroups	 = new modelUserGroups();
-		#	$this -> m_pModelUserGroups -> setAdditionalProperties(['group_name', 'group_rights']);
-		#	$this -> m_pModelUserGroups -> setReleation($this -> m_modelRightGroups, '', ['group_id']);
 
 			$modelCondition = new CModelCondition();
 			$modelCondition -> where('user_id', $_pURLVariables -> getValue("cms-system-id"));
 
 			$this -> m_pModelUserGroups -> load($_sqlConnection, $modelCondition);
 
-			if($this -> m_pModel -> load($_sqlConnection, [ 'user_id' => $_pURLVariables -> getValue("cms-system-id") ]))
+			if($this -> m_pModel -> load($_sqlConnection, $modelCondition))
 			{
 				##	Gathering additional data
 
@@ -204,7 +203,7 @@ class	controllerUsersBackend extends CController
 								'edit',
 								'user/'. $_pURLVariables -> getValue("cms-system-id"),								
 								[
-									'usersList' 		=> $this -> m_pModel -> getDataInstance(),
+									'usersList' 	=> $this -> m_pModel -> getDataInstance(),
 									'right_groups' 	=> $this -> m_modelRightGroups -> getDataInstance(),
 									'user_groups' 	=> $this -> m_pModelUserGroups -> getDataInstance()
 								]								
@@ -251,12 +250,13 @@ class	controllerUsersBackend extends CController
 
 									if(!$_bValidationErr)
 									{
-										$_aFormData['user_id'] = $_pURLVariables -> getValue("cms-system-id");
-
 										$_aFormData['update_by'] 	= CSession::instance() -> getValue('user_id');
 										$_aFormData['update_time'] 	= time();
 
-										if($this -> m_pModel -> update($_sqlConnection, $_aFormData))
+										$modelCondition = new CModelCondition();
+										$modelCondition -> where('user_id', $_pURLVariables -> getValue("cms-system-id"));
+
+										if($this -> m_pModel -> update($_sqlConnection, $_aFormData, $modelCondition))
 										{
 											$_bValidationMsg = CLanguage::get() -> string('M_BEUSER_MSG_ISUPDATED');
 										}
@@ -321,12 +321,13 @@ class	controllerUsersBackend extends CController
 
 									if(!$_bValidationErr)
 									{
-										$_aFormData['user_id'] = $_pURLVariables -> getValue("cms-system-id");
-
 										$_aFormData['update_by'] 	= CSession::instance() -> getValue('user_id');
 										$_aFormData['update_time'] 	= time();
 
-										if($this -> m_pModel -> update($_sqlConnection, $_aFormData))
+										$modelCondition = new CModelCondition();
+										$modelCondition -> where('user_id', $_pURLVariables -> getValue("cms-system-id"));
+
+										if($this -> m_pModel -> update($_sqlConnection, $_aFormData, $modelCondition))
 										{
 											$_bValidationMsg = CLanguage::get() -> string('M_BEUSER_MSG_ISUPDATED');
 										}
@@ -355,29 +356,27 @@ class	controllerUsersBackend extends CController
 
 									##	Updating rights table
 
+									$modelCondition = new CModelCondition();
+									$modelCondition -> where('user_id', $_pURLVariables -> getValue("cms-system-id"));
+
 									$this -> m_modelRightGroups = new modelRightGroups();
-									$this -> m_modelRightGroups -> delete($_sqlConnection, ['user_id' => $_pURLVariables -> getValue("cms-system-id")]);
+									$this -> m_modelRightGroups -> delete($_sqlConnection, $modelCondition);
 
 									$_sqlConnection -> query("DELETE FROM tb_users_groups WHERE tb_users_groups.user_id = '". $_pURLVariables -> getValue("cms-system-id") ."'");
 
 									foreach($_aFormData['groups'] as $_groupID)
 									{
-										#$this -> xxx -> insert($_sqlConnection, ['group_id' => $_groupID, 'user_id' => $_pURLVariables -> getValue("cms-system-id")]);
-										echo "INSERT INTO tb_users_groups SET tb_users_groups.user_id = '". $_sqlConnection -> real_escape_string($_pURLVariables -> getValue('cms-system-id')) ."', tb_users_groups.group_id = '". $_sqlConnection -> real_escape_string($_groupID) ."'";
 										$_sqlConnection -> query("INSERT INTO tb_users_groups SET tb_users_groups.user_id = '". $_sqlConnection -> real_escape_string($_pURLVariables -> getValue('cms-system-id')) ."', tb_users_groups.group_id = '". $_sqlConnection -> real_escape_string($_groupID) ."'");
-
 									}
 
 									##	Updating locked state
 
 									unset($_aFormData['groups']);
 
-									$_aFormData['user_id'] = $_pURLVariables -> getValue("cms-system-id");
-
 									$_aFormData['update_by'] 	= CSession::instance() -> getValue('user_id');
 									$_aFormData['update_time'] 	= time();
 
-									if($this -> m_pModel -> update($_sqlConnection, $_aFormData))
+									if($this -> m_pModel -> update($_sqlConnection, $_aFormData, $modelCondition))
 									{
 										$_bValidationMsg = CLanguage::get() -> string('M_BEUSER_MSG_ISUPDATED');
 									}
@@ -386,10 +385,7 @@ class	controllerUsersBackend extends CController
 										$_bValidationMsg .= CLanguage::get() -> string('ERR_SQL_ERROR');
 									}	
 
-
 									break;
-
-
 			}
 
 			tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $_bValidationDta);	// contains exit call	
@@ -420,7 +416,10 @@ class	controllerUsersBackend extends CController
 				{
 					case 'user-delete': // delete user
 
-										if($this -> m_pModel -> delete($_sqlConnection, ['user_id' => $_pURLVariables -> getValue("cms-system-id")]))
+										$modelCondition = new CModelCondition();
+										$modelCondition -> where('user_id', $_pURLVariables -> getValue("cms-system-id"));
+
+										if($this -> m_pModel -> delete($_sqlConnection, $modelCondition))
 										{
 											$_bValidationMsg = 'User account was deleted - please wait for redirect';
 											$_bValidationDta['redirect'] = CMS_SERVER_URL_BACKEND . CPageRequest::instance() -> urlPath;

@@ -59,8 +59,8 @@
 						<label><?php echo CLanguage::instance() -> getString('M_BELANG_HIDDEN'); ?></label>
 						<div class="select-wrapper">
 						<select name="lang_hidden">
-							<option value="0" ><?php echo CLanguage::get() -> string('NO'); ?></option>
-							<option value="1" selected><?php echo CLanguage::get() -> string('YES'); ?></option>
+							<option value="0" ><?php echo CLanguage::get() -> string('YES'); ?></option>
+							<option value="1" selected><?php echo CLanguage::get() -> string('NO'); ?></option>
 						</select>	
 						</div>
 					</div>
@@ -69,8 +69,8 @@
 						<label><?php echo CLanguage::instance() -> getString('M_BELANG_LOCKED'); ?></label>
 						<div class="select-wrapper">
 						<select name="lang_locked">
-							<option value="0" selected><?php echo CLanguage::get() -> string('NO'); ?></option>
-							<option value="1"><?php echo CLanguage::get() -> string('YES'); ?></option>
+							<option value="0" selected><?php echo CLanguage::get() -> string('YES'); ?></option>
+							<option value="1"><?php echo CLanguage::get() -> string('NO'); ?></option>
 						</select>	
 						</div>
 					</div>
@@ -90,7 +90,7 @@
 			<!-- Submit button - beware of fieldset name -->
 
 			<div class="submit-container">
-				<button class="ui button icon labeled trigger-submit-fieldset" type="button" disabled><i class="fas fa-save"></i><?php echo $language -> string('BUTTON_SAVE'); ?></button>
+				<button class="ui button icon labeled trigger-submit-fieldset" type="button" disabled><span><i class="fas fa-save" data-icon="fa-save"></i></span><?php echo $language -> string('BUTTON_SAVE'); ?></button>
 				<div class="protector"><input type="checkbox" class="trigger-submit-protector" id="protector-lang-data"><label for="protector-lang-data"></label></div>
 			</div>
 

@@ -16,9 +16,9 @@ class shemeSessions extends CSheme
 		$this -> addColumn('user_agent', 'text');
 		$this -> addColumn('user_ip', 'string') -> setLength(40);
 		$this -> addColumn('time_create', 'bigint') -> setAttribute('UNSIGNED');
-		$this -> addColumn('time_update', 'bigint') -> setAttribute('UNSIGNED') -> setDefault('0');;
+		$this -> addColumn('time_update', 'bigint') -> setAttribute('UNSIGNED') -> setDefault('0');
 		$this -> addColumn('time_out', 'bigint') -> setAttribute('UNSIGNED');
-		$this -> addColumn('login_fail_count', 'int') -> setAttribute('UNSIGNED') -> setDefault('0');;
+		$this -> addColumn('login_fail_count', 'int') -> setAttribute('UNSIGNED') -> setDefault('0');
 	}
 }
 

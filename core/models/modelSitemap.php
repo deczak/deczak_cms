@@ -15,13 +15,13 @@ class 	modelSitemap extends CModel
 	}	
 				
 	public function
-	load(&$_sqlConnection, CModelCondition $_condition = NULL)
+	load(&$_sqlConnection, CModelCondition $_condition = NULL, CModelComplementary $_complementary = NULL)
 	{
 		$_mainpageNodeID = 1;
 
-		$_condition -> where('page_path', $_sqlConnection -> real_escape_string('/'));
+		#$_condition -> where('page_path', $_sqlConnection -> real_escape_string('/'));
 
-		##	Get node_id for language defined start page
+		##
 
 #		$_sqlString =	"	SELECT 		tb_page_path.node_id
 		$_sqlString =	"	SELECT 		*
@@ -48,6 +48,7 @@ class 	modelSitemap extends CModel
 										tb_page_header.page_version,
 										tb_page.create_time,
 										tb_page.update_time,
+										tb_page.page_auth,
 										tb_page.publish_from,
 										tb_page.publish_until,
 										tb_page.publish_expired,
@@ -81,7 +82,6 @@ class 	modelSitemap extends CModel
 		while($_sqlNode = $_sqlNodeRes -> fetch_assoc())
 		{
 			$_sqlNode['page_path'] = $this -> getPagePath($_sqlConnection, $_sqlNode['node_id'], $_sqlNode['page_language']);
-
 			$_pages[]  = $_sqlNode;
 		}
 

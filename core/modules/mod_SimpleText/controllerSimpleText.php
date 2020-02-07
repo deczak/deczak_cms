@@ -128,7 +128,7 @@ class	controllerSimpleText extends CController
 										$_objectUpdate['update_by']			=	0;
 										$_objectUpdate['update_reason']		=	'';
 
-										$this -> m_modelPageObject -> update($_sqlConnection, $_objectUpdate);
+										$this -> m_modelPageObject -> updateOld($_sqlConnection, $_objectUpdate);
 									
 									}
 									else
@@ -237,7 +237,7 @@ class	controllerSimpleText extends CController
 										if($this -> m_modelSimple -> delete($_sqlConnection, $modelCondition))
 										{
 											$_objectModel  	 = new modelPageObject();
-											$_objectModel	-> delete($_sqlConnection, $_aFormData);
+											$_objectModel	-> deleteOld($_sqlConnection, $_aFormData);
 
 											$_bValidationMsg = 'Object deleted';
 										

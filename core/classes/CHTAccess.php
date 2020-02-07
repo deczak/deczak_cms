@@ -210,6 +210,7 @@ class	CHTAccess
 
 				$modelCondition = new CModelCondition();
 				$modelCondition -> where('page_language', $_lang -> lang_key);	
+				$modelCondition -> where('page_path', '/');		
 
 				$_pSitemap 	 = new modelSitemap();
 				$_pSitemap	-> load($_sqlConnection, $modelCondition);

@@ -27,7 +27,7 @@
 				<?php if($enableDelete) { ?>
 					<fieldset class="ui fieldset" data-xhr-target="group-delete" data-xhr-overwrite-target="delete/<?php echo $right_group -> group_id; ?>">	
 						<div class="submit-container button-only">
-							<button class="ui button icon labeled trigger-submit-fieldset" type="button" disabled><i class="fas fa-trash-alt"></i><?php echo CLanguage::get() -> string('BUTTON_DELETE'); ?></button>
+							<button class="ui button icon labeled trigger-submit-fieldset" type="button" disabled><span><i class="fas fa-trash-alt" data-icon="fa-trash-alt"></i></span><?php echo CLanguage::get() -> string('BUTTON_DELETE'); ?></button>
 							<div class="protector"><input type="checkbox" class="trigger-submit-protector" id="protector-user-delete"><label for="protector-user-delete"></label></div>
 						</div>
 						<div class="result-box" data-error=""></div>
@@ -71,7 +71,7 @@
 				<!-- Submit button - beware of fieldset name -->
 
 				<div class="submit-container">
-					<button class="ui button icon labeled trigger-submit-fieldset" type="button" disabled><i class="fas fa-save"></i><?php echo CLanguage::get() -> string('BUTTON_SAVE'); ?></button>
+					<button class="ui button icon labeled trigger-submit-fieldset" type="button" disabled><span><i class="fas fa-save" data-icon="fa-save"></i></span><?php echo CLanguage::get() -> string('BUTTON_SAVE'); ?></button>
 					<div class="protector"><input type="checkbox" class="trigger-submit-protector" id="protector-group-data"><label for="protector-group-data"></label></div>
 				</div>
 				
@@ -171,7 +171,7 @@
 				<!-- Submit button - beware of fieldset name -->
 
 				<div class="submit-container">
-					<button class="ui button icon labeled trigger-submit-fieldset " type="button" disabled><i class="fas fa-save"></i><?php echo CLanguage::get() -> string('BUTTON_SAVE'); ?></button>
+					<button class="ui button icon labeled trigger-submit-fieldset " type="button" disabled><span><i class="fas fa-save" data-icon="fa-save"></i></span><?php echo CLanguage::get() -> string('BUTTON_SAVE'); ?></button>
 					<div class="protector"><input type="checkbox" class="trigger-submit-protector" id="protector-group-rights"><label for="protector-group-rights"></label></div>
 				</div>
 

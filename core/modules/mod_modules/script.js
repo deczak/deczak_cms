@@ -56,7 +56,7 @@ class	cmsIndexList
 				buttonInstall.classList.add('ui', 'button', 'labeled', 'icon', 'trigger-install-module');
 				buttonInstall.setAttribute('data-module', response.data.available[i].module_location);
 				buttonInstall.setAttribute('data-type', response.data.available[i].module_type);
-				buttonInstall.innerHTML = '<i class="fas fa-box"></i>Install';
+				buttonInstall.innerHTML = '<span><i class="fas fa-box" data-icon="fa-box"></i></span>Install';
 				buttonInstall.style.width = "125px";
 				buttonInstall.style.textAlign = "left";
 				buttonInstall.onclick = function() { callInstance.onInstall(this, callInstance); }
@@ -80,7 +80,7 @@ class	cmsIndexList
 			template = template.replace(/%MODULE_ID%/g, object.module_id);
 			template = template.replace(/%IS_FRONTEND%/g, object.is_frontend);
 			template = template.replace(/%IS_ACTIVE%/g, object.is_active);
-			template = template.replace(/%MODULE_TYPE%/g, TK.ucfirst(object.module_type));
+			template = template.replace(/%MODULE_TYPE%/g, cmstk.ucfirst(object.module_type));
 
 		return template;
 	}
@@ -98,7 +98,7 @@ class	cmsIndexList
 			template = template.replace(/%MODULE_ID%/g, "");
 			template = template.replace(/%IS_FRONTEND%/g, object.module_frontend);
 			template = template.replace(/%IS_ACTIVE%/g, "");
-			template = template.replace(/%MODULE_TYPE%/g, TK.ucfirst(object.module_type));
+			template = template.replace(/%MODULE_TYPE%/g, cmstk.ucfirst(object.module_type));
 
 		return template;
 	}
@@ -112,7 +112,7 @@ class	cmsIndexList
 
 		var	requestTarget	= CMS.SERVER_URL_BACKEND + CMS.PAGE_PATH + CMS.MODULE_TARGET;
 
-		TK.callXHR(requestTarget, formData, that.onXHRSuccess, TK.onXHRError, that);
+		cmstk.callXHR(requestTarget, formData, that.onXHRSuccess, cmstk.onXHRError, that);
 	}
 
 	onInstall(button, instance)
@@ -129,7 +129,7 @@ class	cmsIndexList
 
 		var	requestTarget	= CMS.SERVER_URL_BACKEND + CMS.PAGE_PATH + CMS.MODULE_TARGET;
 
-		TK.callXHR(requestTarget, formData, instance.onXHRInstallSuccess, TK.onXHRError, that);
+		cmstk.callXHR(requestTarget, formData, instance.onXHRInstallSuccess, cmstk.onXHRError, that);
 	}
 
 	onXHRInstallSuccess(response, instance)

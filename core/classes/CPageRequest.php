@@ -33,9 +33,11 @@ class CPageRequest extends CSingleton
 
 		$this -> objectsList 		= [];
 		$this -> crumbsList 		= [];
+										
 
 		$sitemapCondition = new CModelCondition();
-		$sitemapCondition -> where('page_language', $_language);		
+		$sitemapCondition -> where('page_language', $_language);	
+		$sitemapCondition -> where('page_path', '/');			
 
 		$modelSitemap = new modelSitemap();
 		$modelSitemap -> load($_sqlConnection, $sitemapCondition);
@@ -90,9 +92,13 @@ class CPageRequest extends CSingleton
 
 		if(!CMS_BACKEND || (CMS_BACKEND && $this -> isEditMode))
 		{
+
+			##	Frontend handling
+			##
+
 			$modelPage = new modelPage();
 
-			if(!$modelPage -> load($_sqlConnection, $pageCondition))
+			if(!$modelPage -> loadOld($_sqlConnection, $pageCondition))
 			{	##	Page not found
 				$this -> node_id  		= false;
 				$this -> responseCode 	= 404;
@@ -103,13 +109,16 @@ class CPageRequest extends CSingleton
 
 			##	Check visibility settings
 
-/*
 
-TODO :: Add conditions for user auth
-TODO :: Add special notify sites if user not authed
-TODO :: Add special notify sites if pages expired
+			if(!CMS_BACKEND && !empty($page -> page_auth))
+			{
+				if(CSession::instance() -> isAuthed($page -> page_auth) === false)
+				{
+					header("Location: ". CMS_SERVER_URL ); 			
+					exit;		
+				}
+			}
 
-*/
 
 			$timestamp = time();
 
@@ -146,7 +155,7 @@ TODO :: Add special notify sites if pages expired
 
 
 			$modelPageObject = new modelPageObject();
-			$modelPageObject -> load($_sqlConnection, $sqlWhere);
+			$modelPageObject -> loadOld($_sqlConnection, $sqlWhere);
 			$this -> objectsList = &$modelPageObject -> getDataInstance();
 		
 
@@ -194,7 +203,7 @@ TODO :: Add special notify sites if pages expired
 
 
 		$modelPage = new modelBackend();
-		if(!$modelPage -> load($this -> m_sqlConnection, $sqlWhere['node_id']))
+		if(!$modelPage -> loadOld($this -> m_sqlConnection, $sqlWhere['node_id']))
 		{
 			$this -> setResponseCode(404);
 			return false;

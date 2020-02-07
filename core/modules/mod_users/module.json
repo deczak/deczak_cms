@@ -1,0 +1,50 @@
+{
+	"module_controller" : "controllerUsers",
+	"rights"	:[
+					{"name":"index",	"desc":"OVERVIEW"},
+					{"name":"view",		"desc":"VIEW"},
+					{"name":"create",	"desc":"CREATE"},
+					{"name":"edit",		"desc":"EDIT"},
+					{"name":"delete",	"desc":"DELETE"}
+				 ],
+	"sub"		:[
+					{
+						"url_name"	:"",
+						"ctl_target":"",
+						"menu_name"	:"MOD_BEUSER_SEC_INDEX_NAME",
+						"menu_order":"0"
+					},
+					{
+						"url_name"	:"create",
+						"ctl_target":"create",
+						"menu_name"	:"MOD_BEUSER_SEC_CREATE_NAME",
+						"menu_order":"0"
+					},
+					{
+						"url_name"	:"user",
+						"ctl_target":"view",
+						"menu_name"	:"",
+						"menu_order":"0"
+					},
+					{
+						"url_name"	:"edit",
+						"ctl_target":"edit",
+						"menu_name"	:"",
+						"menu_order":"0"
+					},
+					{
+						"url_name"	:"delete",
+						"ctl_target":"delete",
+						"menu_name"	:"",
+						"menu_order":"0"
+					}
+				 ],
+	"htaccess"	:{
+					"variables"		:[
+										{
+											"key" 		: "cms-system-id",
+											"wildcard"	:"(.*)"
+										}
+									 ]
+				 }
+}

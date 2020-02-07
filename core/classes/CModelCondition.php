@@ -54,6 +54,7 @@ class CModelCondition
 		$this -> conditionList 		= [];
 		$this -> conditionLevel 	= 0;
 		$this -> groupByList 		= [];
+		$this -> oderByList 		= [];
 
 		$this -> limit				= 0;
 		$this -> offset				= 0;
@@ -173,6 +174,45 @@ class CModelCondition
 					$_sqlString	.= " LIMIT ". $this -> offset .", ". $this -> limit ." " ;				
 				else	
 					$_sqlString	.= " LIMIT ". $this -> limit ." " ;
+			}
+			
+			return $_sqlString;
+		}	
+		return '';	
+	}
+
+	public function
+	getRelationConditions(&$_sqlConnection, &$_condition)
+	{
+		if($_condition !== NULL)
+		{
+			$_sqlString = '';
+			if(count($_condition -> conditionList) != 0)
+			{
+				$firstCondition = true;
+
+				foreach($_condition -> conditionList as $condition)
+				{
+					if(!$firstCondition)
+					{
+						$_sqlString .= " OR ";
+						$firstCondition = true;
+					}
+
+					foreach($condition as $conditionStage)
+					{
+						if($firstCondition)
+						{
+							$firstCondition = false;
+						}
+						else
+						{
+							$_sqlString .= " AND ";
+						}
+
+						$_sqlString .= " ". $conditionStage -> column ." ". $conditionStage -> type ." ". $_sqlConnection -> real_escape_string($conditionStage -> value) . " ";
+					}
+				}
 			}
 			
 			return $_sqlString;

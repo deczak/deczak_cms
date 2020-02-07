@@ -62,7 +62,7 @@
 					<div style="width:213px; border-radius:3px; background:white;">
 					<fieldset class="ui fieldset" data-xhr-target="update-htaccess" data-xhr-overwrite-target="edit/1" style="margin:0px;">	
 						<div class="submit-container button-only">
-							<button class="ui button icon labeled trigger-submit-fieldset" type="button" disabled><i class="fas fa-sync-alt"></i><?php echo $language -> string('M_BEENV_UPDATE'); ?></button>
+							<button class="ui button icon labeled trigger-submit-fieldset" type="button" disabled><span><i class="fas fa-sync-alt" data-icon="fa-sync-alt"></i></span><?php echo $language -> string('M_BEENV_UPDATE'); ?></button>
 							<div class="protector"><input type="checkbox" class="trigger-submit-protector" id="protector-update-htaccess"><label for="protector-update-htaccess"></label></div>
 						</div>
 					</fieldset>
@@ -76,7 +76,7 @@
 					<div style="width:213px; border-radius:3px; background:white;">
 					<fieldset class="ui fieldset" data-xhr-target="update-sitemap" data-xhr-overwrite-target="edit/1" style="margin:0px;">	
 						<div class="submit-container button-only">
-							<button class="ui button icon labeled trigger-submit-fieldset" type="button" disabled><i class="fas fa-sync-alt"></i><?php echo $language -> string('M_BEENV_UPDATE'); ?></button>
+							<button class="ui button icon labeled trigger-submit-fieldset" type="button" disabled><span><i class="fas fa-sync-alt" data-icon="fa-sync-alt"></i></span><?php echo $language -> string('M_BEENV_UPDATE'); ?></button>
 							<div class="protector"><input type="checkbox" class="trigger-submit-protector" id="protector-update-sitemap"><label for="protector-update-sitemap"></label></div>
 						</div>
 					</fieldset>

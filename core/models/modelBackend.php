@@ -18,7 +18,7 @@ class 	modelBackend extends CModel
 	}	
 	
 	public function
-	load(&$_sqlConnection, string $_nodeID)
+	loadOld(&$_sqlConnection, string $_nodeID)
 	{
 		## Create Class
 

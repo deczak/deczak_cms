@@ -13,16 +13,14 @@ createMenu(&$sitemap, $_pos = 1, $_level = 2 )
 		if($_level !== intval($sitemap[$i] -> level)) 
 			break;
 
-// TODO hidden_state checks 
-
 		if(
 				($sitemap[$i] -> hidden_state == 0)
+			&&	(empty($sitemap[$i] -> page_auth) || (!empty($sitemap[$i] -> page_auth) && CSession::instance() -> isAuthed($sitemap[$i] -> page_auth) === true))
 			||	(	($sitemap[$i] -> hidden_state == 5 && $sitemap[$i] -> publish_from  < $timestamp)
 				&&	($sitemap[$i] -> hidden_state == 5 && $sitemap[$i] -> publish_until > $timestamp && $sitemap[$i] -> publish_until != 0)
 				)
 			||  CMS_BACKEND
 		  ); else continue;
-
 			
 		if(CMS_BACKEND)
 			echo '<li><a href="'. CMS_SERVER_URL_BACKEND .'pages/view/'. $sitemap[$i] -> page_language .'/'. $sitemap[$i] -> node_id .'" title="'. $sitemap[$i] -> page_title .'">'. $sitemap[$i] -> page_name  .'</a>';
