@@ -1,5 +1,5 @@
 
-## Das Projekt - cosCMS
+## Das Projekt
 
 Dieses Content Management System erstelle ich primär für mich und meinen Anforderungen, stelle es aber der Allgemeinheit zur Verfügung. Das Kürzel cos steht dabei für cooking own soup, in Anlehnung dessen das jemand seine eigene Suppe kocht anstatt die von anderen zu verwenden.
 
