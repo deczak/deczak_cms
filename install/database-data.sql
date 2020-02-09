@@ -27,48 +27,30 @@ INSERT INTO `tb_languages` (`data_id`, `lang_key`, `lang_name`, `lang_name_nativ
 INSERT INTO `tb_login_objects` (`data_id`, `object_id`, `object_databases`, `object_table`, `object_fields`, `object_session_ext`, `object_description`, `is_disabled`, `is_protected`, `create_time`, `create_by`, `update_time`, `update_by`) VALUES
 (12, 'ABKND', '["1"]', 'tb_users_backend', '[{"name":"login_name","data_prc":"crypt","type":"text","is_username":"0"},{"name":"login_pass","data_prc":"hash","type":"password","is_username":"1"}]', '{"1":{"name":"user_name_last","data_prc":"crypt"},"2":{"name":"language","data_prc":"text"}}', 'Backend Access', 0, 1, %TIMESTAMP%, 1, 0, 0);
 
+INSERT INTO `tb_page` (`data_id`, `node_id`, `page_id`, `page_version`, `page_template`, `update_reason`, `hidden_state`, `cache_disabled`, `crawler_index`, `crawler_follow`, `menu_follow`, `publish_from`, `publish_until`, `publish_expired`, `page_auth`, `create_time`, `create_by`, `update_time`, `update_by`) VALUES
+(1, 2, 1, 1, 'default', '', 0, 0, 1, 1, 1, 0, 0, 0, NULL, %TIMESTAMP%, 1, 0, 0),
+(2, 3, 1, 1, 'default', '', 0, 0, 1, 1, 1, 0, 0, 0, '0', %TIMESTAMP%, 1, 0, 0);
 
-INSERT INTO `tb_page` (`data_id`, `page_id`, `node_id`, `page_version`, `page_template`, `create_time`, `update_time`, `create_by`, `update_by`, `update_reason`) VALUES
-(1, 1, 2, 1, 'default', %TIMESTAMP%, 0, 1, 0, ''),
-(2, 2, 3, 1, 'default', %TIMESTAMP%, 0, 1, 0, ''),
-(3, 3, 4, 1, 'default', %TIMESTAMP%, 0, 1, 0, ''),
-(4, 4, 5, 1, 'default', %TIMESTAMP%, 0, 1, 0, ''),
-(5, 5, 6, 1, 'default', %TIMESTAMP%, 0, 1, 0, '');
+INSERT INTO `tb_page_header` (`data_id`, `node_id`, `page_id`, `page_language`, `page_title`, `page_name`, `page_description`, `page_version`) VALUES
+(1, 2, 1, 'en', 'Home', 'Home ', 'Home Description', 1),
+(2, 3, 1, 'de', 'Startseite', 'Startseite', 'Startseiten Beschreibung', 1);
 
-INSERT INTO `tb_page_header` (`data_id`, `page_id`, `node_id`, `page_language`, `page_title`, `page_name`, `page_description`, `page_version`) VALUES
-(1, 1, 2, 'en', 'Home', 'Home ', 'Home Description', 1),
-(2, 2, 3, 'en', 'Page A', 'Page A', '', 1),
-(3, 3, 4, 'en', 'Sub page of A', 'Sub page of A', '', 1),
-(4, 4, 5, 'en', 'Page B', 'Page B', '', 1),
-(5, 5, 6, 'en', 'Sub page of B', 'Sub page of B', '', 1);
+INSERT INTO `tb_page_path` (`node_id`, `page_id`, `page_language`, `page_path`, `node_rgt`, `node_lft`) VALUES
+(1, 0, '0', '', 6, 1),
+(2, 1, 'en', '/', 3, 2),
+(3, 1, 'de', '/', 5, 4);
 
-INSERT INTO `tb_page_object` (`node_id`, `page_version`, `module_id`, `object_id`, `object_order_by`, `create_time`, `update_time`, `create_by`, `update_by`, `update_reason`) VALUES
-(4, 1, '5', 1, 1, 0, 0, 0, 0, ''),
-(2, 1, '4', 3, 2, 0, 0, 0, 0, ''),
-(2, 1, '5', 4, 1, 0, 0, 0, 0, ''),
-(3, 1, '5', 6, 1, 0, 0, 0, 0, ''),
-(2, 1, '4', 8, 4, 0, 0, 0, 0, ''),
-(2, 1, '5', 9, 3, 0, 0, 0, 0, ''),
-(2, 1, '5', 10, 5, 0, 0, 0, 0, ''),
-(2, 1, '4', 11, 6, 0, 0, 0, 0, '');
+INSERT INTO `tb_page_object` (`object_id`, `node_id`, `page_version`, `module_id`, `object_order_by`, `update_reason`, `create_time`, `create_by`, `update_time`, `update_by`) VALUES
+(1, 2, 1, 4, 2, '', %TIMESTAMP%, 1, 0, 0),
+(2, 2, 1, 5, 1, '', %TIMESTAMP%, 1, 0, 0),
+(3, 3, 1, 5, 1, '', %TIMESTAMP%, 1, 0, 0),
+(4, 3, 1, 4, 2, '', %TIMESTAMP%, 1, 0, 0);
 
 INSERT INTO `tb_page_object_simple` (`data_id`, `object_id`, `body`, `params`) VALUES
-(1, 1, '<h1>This is a headline<br></h1>', ''),
-(3, 3, '<span title="">If everything went well, you should now have a working website in front of you.</span> <span title="">The layout of this page is a simple standard template that you can edit with an HTML editor.</span> <span title="">At the top left you see the title of the entire pages which is identical on all pages.</span> <span title="" class="">Below that is the breadcrumb menu.</span> <span title="">And on the right the main menu with language selection.</span><br><br><span title="" class="">At the beginning only the english language is activated.</span> <span title="" class="">Although the system supports multilingualism, this is somewhat impractical in page creation and therefore disabled.<br></span></span><br><span class="tlid-translation translation" lang="en"><span title="" class=""><span class="tlid-translation translation" lang="en"><span title="">At the beginning there are 2 standard modules</span><br></span></span></span><ul><li><span class="tlid-translation translation" lang="en"><span title="" class=""><span class="tlid-translation translation" lang="en"><span class="tlid-translation translation" lang="en"><span title="" class=""><span class="tlid-translation translation" lang="en"><span title="" class="">Headline module</span></span></span></span></span></span></span></li></ul><ul><li><span class="tlid-translation translation" lang="en"><span title="" class=""><span class="tlid-translation translation" lang="en"><span class="tlid-translation translation" lang="en"><span title="" class=""><span class="tlid-translation translation" lang="en"><span title="" class=""></span></span></span></span><span title="">Text module</span></span></span></span></li></ul><span class="tlid-translation translation" lang="en"><span title="" class=""><span class="tlid-translation translation" lang="en"> <span title="" class="">The login module can be inserted, but it has no function because a lot has to be changed here.</span></span></span>', ''),
-(4, 4, '<h1>Welcome to your new CMS<br></h1>', ''),
-(6, 6, '<h1>This is a headline<br></h1>', ''),
-(8, 8, '<span title="">The area for the administration is called Backend by me.</span> <span title="">If you see a sign up there is a blank page, it will probably be the dashboard.</span> <span title="">There later information should be found, for example about the current status of the CMS.</span><br><br><span title="">There are currently three areas available there:</span><br><br></span><ul><li><span class="tlid-translation translation" lang="en"><span title="" class=""><b>Right groups</b><br><br>Here you can create rights groups that are currently only relevant for backend users.</span> <span title="">The rights of the modules are always opt-in.</span> <span title="" class="">If a right is not granted, the user can not use it.<br><br></span></span></li><li><span class="tlid-translation translation" lang="en"><span title="" class=""><b>Sites</b><br><br>Here you can create, edit or delete pages.</span> <span title="">What is currently not possible is moving pages.</span> <span title="">You can not switch to another language right now either. </span></span><span class="tlid-translation translation" lang="en"><span title=""><span class="tlid-translation translation" lang="en"><span title="">Small note: Do not refresh the page after creating a page.</span> <span title="" class="">Otherwise you will create another page.<br><br></span></span></span></span></li><li><span class="tlid-translation translation" lang="en"><span title="" class=""><b>Backend users</b><br><br>Here you can create users who are allowed to log in to the backend.</span> <span title="" class="">In this case, appropriate rights groups must be assigned.</span> <span title="" class="">A user can be assigned to multiple groups.<br><br></span></li></ul>', ''),
-(9, 9, '<h1>The Backend<br></h1>', ''),
-(10, 10, '<h1>Page editing<br></h1>', ''),
-(11, 11, '<span title="">In page editing you will see a small dotted frame, this is your content area.</span> <span title="">Currently only one area is possible.</span> <span title="">The plus buttons open a menu with which you can insert modules.</span> <span title="">Please ignore the login module.</span> <span title="">The whole is not perfect, with the headline module it could happen that you see the placeholder text even though you entered something.</span> <span title="">Theoretically, you can use HTML in the modules, but this is not intended and will be changed later.</span> <span title="">For HTML & Co a separate module should be used later.</span><br><br>Every changes requires a click on the floppy disk icon to save those!<br><br><span title="" class="">And if you look closely, you\'ll see a yellow bar on the left that you can click on.</span> <span title="" class="">What you see then is not pretty and can not do much.</span> <span title="">But at least you can change the page name and description etc.</span> <span title="" class="">Page name is what you see in the URL, page title is what you see in the tab as page name.</span> <span title="" class="">These two details are mandatory (currently no feedback if not valid)<br><br><br></span>', '');
-
-INSERT INTO `tb_page_path` (`page_id`, `page_language`, `page_path`, `node_id`, `node_lft`, `node_rgt`) VALUES
-(0, '0', '', 1, 1, 12),
-(1, 'en', '/', 2, 2, 11),
-(2, 'en', 'page-a/', 3, 3, 6),
-(3, 'en', 'sub-page-of-a/', 4, 4, 5),
-(4, 'en', 'page-b/', 5, 7, 10),
-(5, 'en', 'sub-page-of-b/', 6, 8, 9);
+(1, 1, 'For more information and the documentation about the content management system see <a href="https://www.dennczak.de/en/projects/content-managment-system/" style="">this website</a>&nbsp;(external link)', ''),
+(2, 2, '<h1>Welcome to your new<p>Content Management System<br></p></h1>', ''),
+(3, 3, '<h1>Willkommen zu Ihrem neuen<p>Content Management System</p></h1>', ''),
+(4, 4, 'Für weitere Informationen und die Dokumentation zu diesem Content Management System schauen Sie auf <a href="https://www.dennczak.de/projekte/content-managment-system/">diese Website</a> (externer Link)', '');
 
 INSERT INTO `tb_right_groups` (`group_id`, `group_name`, `group_rights`, `create_time`, `create_by`, `update_time`, `update_by`) VALUES
 (1, 'administrator', '{"1":["view","create","edit","delete"],"2":["index","view","create","edit","delete"],"3":["index","view","create","edit","delete"],"4":["view","create","edit","delete"],"5":["view","create","edit","delete"],"6":["index","view","create","edit","delete"],"7":["view","create","edit","delete"],"8":["index","view","create","edit","delete"],"9":["index","view","create","edit","delete"],"10":["index","view","create","edit","delete"],"11":["index","view","edit","delete"],"12":["index","view","create","edit","delete"],"13":["index","view","create","edit","delete"],"14":["index","edit"],"15":["index","view","create","edit","delete"],"16":["index","view","create","edit","delete"],"17":["index","view","create","edit","delete"]}', %TIMESTAMP%, 1, 0, 0);

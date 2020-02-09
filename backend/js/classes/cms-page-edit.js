@@ -81,16 +81,21 @@ class cmsPageEdit
 										pageIdError = true;
 								}
 
+								let altPageInput =  document.getElementById('alt_page_id');
+								if(altPageInput != null)
+								{
 								if(!pageIdError)
 								{
-									let altPageId = document.getElementById('alt_page_id').value;
+								
+										let altPageId = altPageInput.value;
 
-									if(altPageId != '')
-										window.updateAlternateList(altPageId);
+										if(altPageId != '')
+											window.updateAlternateList(altPageId);
+								
 								}
 					
 								document.getElementById('alt_page_id').value = "";
-						
+							}
 								break;
 						
 					case 500:	// Error	

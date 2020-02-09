@@ -31,6 +31,8 @@
 		$instanceKey = count($shemeInstance);
 		$shemeInstance[$instanceKey] = new $className();
 
+		$shemeInstance[$instanceKey] -> dropTable($db);
+
 		$errorMsg = '';
 		if(!$shemeInstance[$instanceKey] -> createTable($db, $errorMsg))
 		{

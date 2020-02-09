@@ -5,6 +5,7 @@ include_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelBackend.php';
 include_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelPage.php';	
 include_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelPageObject.php';	
 include_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelSitemap.php';	
+include_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelRedirect.php';	
 
 class CPageRequest extends CSingleton
 {
@@ -61,6 +62,42 @@ class CPageRequest extends CSingleton
 		{
 			$_nodeId = 2;
 		}
+
+		## Checking internal redirect settings
+
+		$redirectCondition = new CModelCondition();
+		$redirectCondition -> where('node_id', $_nodeId);			
+
+		$modelRedirect	= new modelRedirect();
+		$modelRedirect -> load($_sqlConnection, $redirectCondition);
+
+		$redirectList	= &$modelRedirect -> getDataInstance();
+
+		$this -> canonical = false;
+		$this -> page_redirect = '';
+
+		if(!empty($redirectList) && !CMS_BACKEND)
+		{
+			$redirectTarget = $redirectList[0] -> redirect_target;
+		
+			if(ctype_digit($redirectTarget)) {
+				$_nodeId = $redirectTarget;
+				$this -> canonical = true;
+			}
+			else
+			{
+				// TODO :: Redirect to this string 
+			}
+		}
+		elseif(!empty($redirectList) && CMS_BACKEND)
+		{
+			$redirectTarget = $redirectList[0] -> redirect_target;
+		
+			$this -> page_redirect = $redirectTarget;
+
+		}
+
+		##	
 
 		$this -> node_id 			= $_nodeId;
 		$this -> page_language 		= $_language;

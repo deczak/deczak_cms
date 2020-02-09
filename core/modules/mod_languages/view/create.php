@@ -24,7 +24,7 @@
 					<div class="group-head width-100"><?php echo $language -> string('M_BELANG_SETTINGS'); ?> </div>
 
 					<div class="input width-25">
-						<label><?php echo $language -> string('LANGUAGE'); ?></label>
+						<label><?php echo $language -> string('M_BELANG_NAMENKEY'); ?></label>
 						<input type="text" name="lang_key" value="">
 					</div>
 					

@@ -68,6 +68,9 @@ class	CHTML extends CBasic
 		foreach($pageRequest -> alternate_path as $_langKey => $_langPath) 	
 			echo "\t<link rel=\"alternate\" hreflang=\"". $_langKey ."\" href=\"". CMS_SERVER_URL . ((CONFIG::GET() -> LANGUAGE -> DEFAULT_IN_URL || $_langKey !== CLanguage::instance() -> getDefault()) ? $_langKey .'/' : '') . ($_langPath['path'] === '/' ? '' : substr($_langPath['path'],1)) ."\">\r\n";
 
+		if($pageRequest -> canonical)
+			echo "\t<link rel=\"canonical\" href=\"". CMS_SERVER_URL . ((CONFIG::GET() -> LANGUAGE -> DEFAULT_IN_URL || $pageRequest -> page_language !== CLanguage::instance() -> getDefault()) ? $pageRequest -> page_language .'/' : '') . $pageRequest -> page_path ."\">";
+
 		##	Page Panel for editing sites
 		if(CMS_BACKEND && $pageRequest -> page_template !== CMS_BACKEND_TEMPLATE)
 			@include CMS_SERVER_ROOT . DIR_TEMPLATES . CMS_BACKEND_TEMPLATE .'/page-edit-head.php';				
@@ -81,12 +84,10 @@ class	CHTML extends CBasic
 			echo "<body data-node-id=\"". $pageRequest -> node_id."\">\r\n";
 		else		
 			echo "<body>\r\n";
-		
+
 		##	Page edit
 		if(CMS_BACKEND && $pageRequest -> page_template !== CMS_BACKEND_TEMPLATE)									
 			@include CMS_SERVER_ROOT . DIR_TEMPLATES . CMS_BACKEND_TEMPLATE .'/page-edit-panel.php';		
-
-
 
 		switch($pageRequest -> responseCode)
 		{

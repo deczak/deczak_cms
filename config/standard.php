@@ -4,7 +4,7 @@
 
 ##  S E R V E R   R O O T   &   U R L
 
-	define('CMS_SERVER_ROOT', '</www/htdcos/>');
+	define('CMS_SERVER_ROOT', '</www/htdocs/>');
 
 	define('CMS_SERVER_URL' , '<protocol>://www.<domain>.<tld>/');
 	define('CMS_SERVER_URL_BACKEND' , '<protocol>://www.<domain>.<tld>/backend/');

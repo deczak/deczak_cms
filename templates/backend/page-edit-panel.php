@@ -436,6 +436,22 @@
 			
 		</fieldset>	
 
+		<fieldset class="ui fieldset submit-able">
+			<legend><?= CLanguage::GET() -> STRING('BEPE_PANEL_GROUP_REDIRECT'); ?></legend>
+
+				<div style="padding-top:10px;">
+
+					<div class="input width-100">
+						<label><?= CLanguage::GET() -> STRING('BEPE_PANEL_REDIRECTNODEID'); ?></label>
+						<input type="text" name="page_redirect" id="page_redirect" value="<?= $pageRequest -> page_redirect; ?>" placehoder="node-id">
+					</div>
+
+					<div class="result-box" data-field="page_redirect" data-error=""></div>
+
+				</div>
+			
+		</fieldset>	
+
 		
 		</div>
 		

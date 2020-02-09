@@ -184,7 +184,7 @@ class CSheme
 	dropTable(&$_sqlConnection)
 	{
 		if(empty($_sqlConnection) || !property_exists($_sqlConnection, 'errno') || $_sqlConnection -> errno != 0)
-			trigger_error("CImperator::__construct -- Invalid SQL connection", E_USER_ERROR);
+			return false;
 
 		$_sqlConnection -> query("DROP TABLE IF EXISTS `". $this -> m_tableName ."`");	
 	}

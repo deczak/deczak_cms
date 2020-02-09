@@ -6,6 +6,7 @@ include_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelPage.php';
 
 include_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelCategoriesAllocation.php';	
 include_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelTagsAllocation.php';	
+include_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelRedirect.php';	
 
 include_once CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CHTAccess.php';	
 
@@ -246,6 +247,7 @@ class	controllerPages extends CController
 										$_request[] 	 = 	[	"input" => "apply_childs_auth", "validate" => "strip_tags|trim|!empty" , 	"use_default" => true, "default_value" => 0 ]; 	
 										$_request[] 	 = 	[	"input" => "page_categories", 	"validate" => "strip_tags|trim|!empty" , 	"use_default" => true, "default_value" => [] ]; 	
 										$_request[] 	 = 	[	"input" => "page_tags", 		"validate" => "strip_tags|trim|!empty" , 	"use_default" => true, "default_value" => [] ]; 	
+										$_request[] 	 = 	[	"input" => "page_redirect", 	"validate" => "strip_tags|trim|!empty" , 	"use_default" => true, "default_value" => '' ]; 	
 										$_pFormVariables-> retrieve($_request, false, true); // POST 
 										$_aFormData		 = $_pFormVariables ->getArray();
 
@@ -365,6 +367,24 @@ class	controllerPages extends CController
 													$alloc_id = 0;
 													$newAlloc = ["tag_id" => $tag, "node_id" => $nodeId];
 													$modelTagsAllocation	-> insert($_sqlConnection, $newAlloc, $alloc_id);
+												}
+
+												## update redirection
+
+												$redirectCondition 	 = new CModelCondition();
+												$redirectCondition 	-> where('node_id', $nodeId);	
+
+												$modelRedirect	 = new modelRedirect();
+												$modelRedirect	-> delete($_sqlConnection, $redirectCondition);
+
+												if(!empty($_aFormData['page_redirect']))
+												{
+													$redirect_id = 0;
+													$newRedirect["node_id"] 		= $nodeId;
+													$newRedirect["redirect_target"]	= $_aFormData['page_redirect'];
+													$newRedirect["create_time"] 	= time();
+													$newRedirect["create_by"]	 	= CSession::instance() -> getValue('user_id');
+													$modelRedirect				   -> insert($_sqlConnection, $newRedirect, $redirect_id);
 												}
 
 												## update htaccess and sitemap
