@@ -1,0 +1,6 @@
+{
+	"ERROR_PAGES" 		:	{
+							"ERROR404"	: false,
+							"ERROR403"	: false
+							}
+}

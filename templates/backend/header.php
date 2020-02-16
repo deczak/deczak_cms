@@ -9,10 +9,10 @@
 
 				if($session -> isAuthed(LOGIN_OBJECT_BACKEND) !== false)
 				{
-					$backendMenuGroups	= file_get_contents(CMS_SERVER_ROOT.DIR_DATA.'backend-menu.json');
+					$backendMenuGroups	= file_get_contents(CMS_SERVER_ROOT.DIR_DATA.'backend/backend-menu.json');
 					$backendMenuGroups	= json_decode($backendMenuGroups);
 
-					$backendMenu	= file_get_contents(CMS_SERVER_ROOT.DIR_DATA.'backend.json');
+					$backendMenu	= file_get_contents(CMS_SERVER_ROOT.DIR_DATA.'backend/backend.json');
 					$backendMenu	= json_decode($backendMenu);
 
 					foreach($backendMenuGroups as $menuGroup)

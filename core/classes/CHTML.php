@@ -16,10 +16,9 @@ class	CHTML extends CBasic
 		$pTemplate 		=	new CTemplates(CMS_SERVER_ROOT . DIR_TEMPLATES);
 
 		if(!isset($pageRequest -> page_template) || $pageRequest -> page_template == NULL)
-			$pageRequest -> page_template = CONFIG::GET() -> TEMPLATE -> ERROR_TEMPLATE;
+			$pageRequest -> page_template = CFG::GET() -> TEMPLATE -> ERROR_TEMPLATE;
 		
-		$template 	= 	$pTemplate -> readTemplateData($pageRequest -> page_template);
-
+		$template 		= 	$pTemplate -> readTemplateData($pageRequest -> page_template);
 
 		$templatePath	= 	CMS_SERVER_ROOT . DIR_TEMPLATES . $pageRequest -> page_template .'/';
 
@@ -30,7 +29,7 @@ class	CHTML extends CBasic
 
 		$sitemap		=	$pageRequest -> sitemap;
 
-		define('URL_LANG_PRREFIX', ((CONFIG::GET() -> LANGUAGE -> DEFAULT_IN_URL || $pageRequest -> page_language !== CLanguage::instance() -> getDefault()) ? $pageRequest -> page_language .'/' : '') );
+		define('URL_LANG_PRREFIX', ((CFG::GET() -> LANGUAGE -> DEFAULT_IN_URL || $pageRequest -> page_language !== CLanguage::instance() -> getDefault()) ? $pageRequest -> page_language .'/' : '') );
 
 		switch($pageRequest -> responseCode)
 		{
@@ -53,9 +52,7 @@ class	CHTML extends CBasic
 						$pageRequest -> page_description= '';
 						break;
 		}
-
-		
-		
+			
 		echo "<!DOCTYPE html>\r\n";
 		echo "<html lang=\"". $pageRequest -> page_language ."\">\r\n";
 		echo "<head>\r\n";
@@ -66,10 +63,10 @@ class	CHTML extends CBasic
 
 		if(!empty($pageRequest -> alternate_path))
 		foreach($pageRequest -> alternate_path as $_langKey => $_langPath) 	
-			echo "\t<link rel=\"alternate\" hreflang=\"". $_langKey ."\" href=\"". CMS_SERVER_URL . ((CONFIG::GET() -> LANGUAGE -> DEFAULT_IN_URL || $_langKey !== CLanguage::instance() -> getDefault()) ? $_langKey .'/' : '') . ($_langPath['path'] === '/' ? '' : substr($_langPath['path'],1)) ."\">\r\n";
+			echo "\t<link rel=\"alternate\" hreflang=\"". $_langKey ."\" href=\"". CMS_SERVER_URL . ((CFG::GET() -> LANGUAGE -> DEFAULT_IN_URL || $_langKey !== CLanguage::instance() -> getDefault()) ? $_langKey .'/' : '') . ($_langPath['path'] === '/' ? '' : substr($_langPath['path'],1)) ."\">\r\n";
 
 		if($pageRequest -> canonical)
-			echo "\t<link rel=\"canonical\" href=\"". CMS_SERVER_URL . ((CONFIG::GET() -> LANGUAGE -> DEFAULT_IN_URL || $pageRequest -> page_language !== CLanguage::instance() -> getDefault()) ? $pageRequest -> page_language .'/' : '') . $pageRequest -> page_path ."\">";
+			echo "\t<link rel=\"canonical\" href=\"". CMS_SERVER_URL . ((CFG::GET() -> LANGUAGE -> DEFAULT_IN_URL || $pageRequest -> page_language !== CLanguage::instance() -> getDefault()) ? $pageRequest -> page_language .'/' : '') . $pageRequest -> page_path ."\">";
 
 		##	Page Panel for editing sites
 		if(CMS_BACKEND && $pageRequest -> page_template !== CMS_BACKEND_TEMPLATE)
@@ -100,84 +97,28 @@ class	CHTML extends CBasic
 
 			default:
 
-
 						if(property_exists($template, 'include_error_'. $pageRequest -> responseCode))
 						{
-
 							$propertyName = 'include_error_'. $pageRequest -> responseCode;
 
 							foreach($template -> $propertyName as $_file)
 								@include $templatePath . $_file;	
-
 						}
 						else
 						{
-
 							foreach($template -> include_error as $_file)
 								@include $templatePath . $_file;	
-
 						}
 
-
-
-
-						break;
-
+						break;						
 		}
-/*
 
-?>
-
-
-
-
-<div style="display:flex;">
-
-		<div class="ui pick-item">
-			<input type="checkbox" id="bbb" name="group_rights[][]" value="" >
-			<label for="bbb" title="fgfgfgfgf">
-				Random Item
-			</label>
-			<span class="trigger-pick-item-rm">&times;</span>
-		</div>
-
-
-		<div class="ui pick-item">
-			<input type="radio" id="bbb" name="group_rights[][]" value="" >
-			<label for="bbb" title="fgfgfgfgf">
-				Random Item
-			</label>
-			<span class="trigger-pick-item-rm">&times;</span>
-		</div>
-
-
-		<div class="ui pick-item">
-			<label for="bbb" title="fgfgfgfgf">
-				<i class="fas fa-hashtag"></i> &nbsp;&nbsp;Random Item
-			</label>
-			<span class="trigger-pick-item-rm">&times;</span>
-		</div>
-
-
-		<div class="ui pick-item">
-			<label for="bbb" title="fgfgfgfgf">
-				<i class="fas fa-hashtag"></i> &nbsp;&nbsp;Random Item
-			</label>
-		</div>
-
-
-		</div>
-
-
-
-
-<?php 
-*/
 
 		##	temporary solution for js only
 		/*
 			Später durch Klasse ersetzen die in CModules die Pfade zu den Dateien erfasst und eine sammel js/css erstellt 
 		*/
+		
 		echo '<script>';
 		foreach($modules -> loadedList as $loadedModule)
 		{

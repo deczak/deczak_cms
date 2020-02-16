@@ -7,6 +7,8 @@
 	
 	M_BEMOULE_MSG_WARNINGNOTICE		=	Beim deinstallieren eines Moduls werden alle Daten in der Datenbank die zu diesem Modul gehören gelöscht.
 
+	M_BEMOULE_MSG_INSTALLNOTICE		=	Nach der Installation eines neuen Moduls ist es in der Regel erforderlich die Rechtegruppen anzupassen damit Sie das Modul verwenden können.
+
 ##	
 
 	M_BEMOULE_NAME					=	Modul Name

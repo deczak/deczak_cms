@@ -16,7 +16,7 @@ class	controllerTags extends CController
 	}
 	
 	public function
-	logic(&$_sqlConnection, array $_rcaTarget, array $_userRights, $_isXHRequest)
+	logic(&$_sqlConnection, array $_rcaTarget, $_isXHRequest)
 	{
 		##	Set default target if not exists
 
@@ -24,8 +24,8 @@ class	controllerTags extends CController
 
 		##	Check user rights for this target
 
-		if(!$this -> hasRights($_userRights, $_controllerAction))
-		{ 
+		if(!$this -> detectRights($_controllerAction))
+		{
 			if($_isXHRequest !== false)
 			{
 				$_bValidationErr =	true;
@@ -41,8 +41,8 @@ class	controllerTags extends CController
 
 		##	Call sub-logic function by target, if there results are false, we make a fall back to default view
 
-		$enableEdit 	= $this -> hasRights($_userRights, 'edit');
-		$enableDelete	= $this -> hasRights($_userRights, 'delete');
+		$enableEdit 	= $this -> existsUserRight('edit');
+		$enableDelete	= $enableEdit;
 
 		$_logicResults = false;
 		switch($_controllerAction)
@@ -115,9 +115,6 @@ class	controllerTags extends CController
 
 			if(!$_bValidationErr)	// Validation OK
 			{
-				#$_aFormData['create_by'] 	= CSession::instance() -> getValue('user_id');
-				#$_aFormData['create_time'] 	= time();
-
 				$_aFormData['tag_url'] 	= tk::normalizeFilename($_aFormData['tag_name'], true);
 
 				$dataId = 0;
@@ -216,9 +213,6 @@ class	controllerTags extends CController
 
 										if(!$_bValidationErr)
 										{
-											#$_aFormData['update_by'] 	= CSession::instance() -> getValue('user_id');
-											#$_aFormData['update_time'] 	= time();
-
 											$_aFormData['tag_url'] 	= tk::normalizeFilename($_aFormData['tag_name'], true);
 
 											$modelCondition = new CModelCondition();

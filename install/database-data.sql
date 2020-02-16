@@ -20,7 +20,7 @@ INSERT INTO `tb_modules` (`module_id`, `module_location`, `module_controller`, `
 (16, 'mod_categories', 'controllerCategories', 'core', 'backend', 0, 1, '', 'Categories', %TIMESTAMP%, 1, 0, 0),
 (17, 'mod_tags', 'controllerTags', 'core', 'backend', 0, 1, '', 'Tags', %TIMESTAMP%, 1, 0, 0);
 
-INSERT INTO `tb_languages` (`data_id`, `lang_key`, `lang_name`, `lang_name_native`, `lang_hidden`, `lang_locked`, `lang_default`, `lang_fontend`, `lang_backend`, `create_time`, `create_by`, `update_time`, `update_by`) VALUES
+INSERT INTO `tb_languages` (`data_id`, `lang_key`, `lang_name`, `lang_name_native`, `lang_hidden`, `lang_locked`, `lang_default`, `lang_frontend`, `lang_backend`, `create_time`, `create_by`, `update_time`, `update_by`) VALUES
 (1, 'en', 'English', 'English', 0, 0, 1, 1, 1, %TIMESTAMP%, 1, 0, 0),
 (2, 'de', 'German', 'Deutsch', 1, 0, 0, 1, 1, %TIMESTAMP%, 1, 0, 0);
 

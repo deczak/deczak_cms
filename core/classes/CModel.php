@@ -18,8 +18,6 @@ class	CModelRelations
 class	CModel
 {
 	protected	$m_storage;
-	protected	$m_additionalProperties;		// deprecated
-	protected	$m_tableRelations;				// deprecated
 
 	protected	$m_relationsList;
 	protected	$m_selectList;
@@ -31,9 +29,6 @@ class	CModel
 	__construct(string $_className = '')
 	{
 		$this -> m_storage 				= [];
-
-		$this -> m_additionalProperties = [];			// deprecated
-		$this -> m_tableRelations		= [];			// deprecated
 
 		$this -> m_relationsList		= [];
 		$this -> m_selectList			= [];
@@ -94,7 +89,7 @@ class	CModel
 
 		// Create class prototpe
 
-		$className	=	$this -> createClass($this -> m_sheme, $this -> m_className, '', $this -> m_additionalProperties);
+		$className	=	$this -> createClass($this -> m_sheme, $this -> m_className, '');
 
 		// Generate sql string
 
@@ -197,19 +192,19 @@ class	CModel
 
 	#protected function ( temporär wegen backend handling)
 	public function
-	createClass(&$_targetSheme, string $_nameAppendix = '', string $_parentClass = '', array $_additionalProperties = [])
+	createClass(&$_targetSheme, string $_nameAppendix = '', string $_parentClass = '')
 	{
 		$_className = __CLASS__.'_data'.(!empty($_nameAppendix) ? '_'.$_nameAppendix : '');
 
 		if(!class_exists($_className))
 		{
-			$this -> _createClass( $_className , $_targetSheme -> getColumns(), $_parentClass, $_additionalProperties);
+			$this -> _createClass( $_className , $_targetSheme -> getColumns(), $_parentClass);
 		}
 		return $_className;
 	}
 
 	private function
-	_createClass(string $_objectName , array $_columns , string $_extends = '', array $_additionalProperties = [] )
+	_createClass(string $_objectName , array $_columns , string $_extends = '')
 	{
 		$_objectString  = "class $_objectName ". (!empty($_extends) ? "extends $_extends " : "") ." {";
 
@@ -240,12 +235,6 @@ class	CModel
 								case 'bool'     : $_objectString .= " case '". $_column -> name ."': \$this->". $_column -> name ." = boolval(\$_initialValue); break;"; break;				
 								default         : $_objectString .= " case '". $_column -> name ."': \$this->". $_column -> name ." = \$_initialValue; break;"; break;				
 							}
-						}
-						
-						##	Adding additional properties 
-						foreach($_additionalProperties as $_column)
-						{
-							$_objectString .= " case '". $_column."': \$this->". $_column ." = \$_initialValue; break;";				
 						}
 
 					$_objectString .= " }";
@@ -278,12 +267,12 @@ class	CModel
 	}
 
 	protected function
-	decryptRawSQLDataset(array &$_sqlDataset, string $_key, array $_columns)
+	decryptRawSQLDataset(&$_sqlDataset, string $_key, array $_columns)
 	{		
 		foreach($_columns as $_column)
 		{
-			if(!empty($_sqlDataset[$_column]))	
-				$_sqlDataset[$_column] = CRYPT::DECRYPT($_sqlDataset[$_column], $_key, true);
+			if(!empty($_sqlDataset -> $_column))	
+				$_sqlDataset -> $_column = CRYPT::DECRYPT($_sqlDataset -> $_column, $_key, true);
 		}	
 	}
 
@@ -328,24 +317,6 @@ class	CModel
 
 		if($_sqlResult -> num_rows > 0) return true;
 		return false;
-	}
-
-	public function
-	setAdditionalProperties(array $_additionalProperties)
-	{
-		$this -> m_additionalProperties = array_merge($this -> m_additionalProperties, $_additionalProperties);
-	}
-
-	public function
-	setReleation($_modelInstance, string $_joinType, array $_joinOn)
-	{
-		#deprecated
-		$this -> m_tableRelations[] = 	[
-											'shemeInstance'	=> $_modelInstance -> m_sheme,
-											'join'			=> $_joinType .' join',
-											'on'			=> $_joinOn
-
-										];
 	}
 
 	public function

@@ -25,7 +25,7 @@ class CXMLSitemap
 				if($_lang -> lang_locked)	continue;
 
 				$_langSuffix = $_lang -> lang_key .'/';
-				$_langSuffix = (!CONFIG::GET() -> LANGUAGE -> DEFAULT_IN_URL && CLanguage::instance() -> getDefault() === $_lang -> lang_key ? '' : $_langSuffix);
+				$_langSuffix = (!CFG::GET() -> LANGUAGE -> DEFAULT_IN_URL && CLanguage::instance() -> getDefault() === $_lang -> lang_key ? '' : $_langSuffix);
 
 
 				$modelCondition = new CModelCondition();

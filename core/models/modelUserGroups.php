@@ -16,7 +16,7 @@ class 	modelUserGroups extends CModel
 	public function
 	load(&$_sqlConnection, CModelCondition $_condition = NULL)
 	{
-		$className		=	$this -> createClass($this -> m_sheme, 'userGroup', '', $this -> m_additionalProperties);
+		$className		=	$this -> createClass($this -> m_sheme, 'userGroup', '');
 		$tableName		=	$this -> m_sheme -> getTableName();
 
 		$sqlString		=	"	SELECT		*

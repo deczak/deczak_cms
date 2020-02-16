@@ -222,7 +222,7 @@ class CPageRequest extends CSingleton
 					$this 	-> addCrumb($this -> sitemap[$i] -> page_name, $this -> sitemap[$i] -> page_path, $this -> sitemap[$i] -> node_id, $this -> sitemap[$i] -> page_language, $this -> sitemap[$i] -> level)
 							-> setTitle($this -> sitemap[$i] -> page_title);
 
-	#					$this -> m_page -> crumb_path[] = $this -> sitemap[$i];
+					#$this -> m_page -> crumb_path[] = $this -> sitemap[$i];
 						$_level--;
 					}
 				}
@@ -231,6 +231,14 @@ class CPageRequest extends CSingleton
 
 				$this -> crumbsList = array_reverse($this -> crumbsList);
 			}
+
+			##	Add detailed Language information
+
+			$languagesList = CLanguage::instance() -> getLanguages();
+			if(isset($languagesList[$_language]))
+				$this -> languageInfo = $languagesList[$_language];
+			else
+				$this -> languageInfo = NULL;
 
 
 

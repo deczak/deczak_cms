@@ -1,24 +1,9 @@
-
-##	
-
-	MOD_BERMADDR_SEC_INDEX_NAME		=	Overview
 	MOD_BERMADDR_SEC_CREATE_NAME	=	Create denied address
-
-	
-##	Messages
 
 	M_BERMADDR_MSG_DENIEDUK			=	This denied address does not exists
 	M_BERMADDR_MSG_DENIEDEXIST		=	This denied address exists already
 	
-	M_BERMADDR_MSG_ISCREATED		=	Denied address was created
-	M_BERMADDR_MSG_ISUPDATED		=	Denied address was updated
-	M_BERMADDR_MSG_ISDELETED		=	Denied address was deleted
-
-##	Overview
-
-
-
-##	Edit / Create
+	MOD_BE_RMADDR_DENIEDADDR		=	Denied address
 
 
 

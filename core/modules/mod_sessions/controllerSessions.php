@@ -17,7 +17,7 @@ class	controllerSessions extends CController
 	}
 	
 	public function
-	logic(&$_sqlConnection, array $_rcaTarget, array $_userRights, $_isXHRequest)
+	logic(&$_sqlConnection, array $_rcaTarget, $_isXHRequest)
 	{
 		##	Set default target if not exists
 
@@ -25,8 +25,8 @@ class	controllerSessions extends CController
 
 		##	Check user rights for this target
 
-		if(!$this -> hasRights($_userRights, $_controllerAction))
-		{ 
+		if(!$this -> detectRights($_controllerAction))
+		{
 			if($_isXHRequest !== false)
 			{
 				$_bValidationErr =	true;
@@ -42,8 +42,8 @@ class	controllerSessions extends CController
 
 		##	Call sub-logic function by target, if there results are false, we make a fall back to default view
 
-		$enableEdit 	= $this -> hasRights($_userRights, 'edit');
-		$enableDelete	= $this -> hasRights($_userRights, 'delete');
+		$enableEdit 	= $this -> existsUserRight('edit');
+		$enableDelete	= $enableEdit;
 
 		$_logicResults = false;
 		switch($_controllerAction)
@@ -67,6 +67,8 @@ class	controllerSessions extends CController
 		$conditionPages = new CModelCondition();
 		$conditionPages -> where('tb_page_header.node_id', 'tb_sessions_access.node_id');
 
+
+
 		$modelSessionsAccess	 = new modelSessionsAccess();
 
 		$modelSessionsAccess -> addSelectColumns('tb_sessions_access.*','tb_page_header.page_title');
@@ -77,6 +79,11 @@ class	controllerSessions extends CController
 								-> groupBy('node_id');
 
 		$modelSessionsAccess	-> load($_sqlConnection, $modelSACondition);
+
+
+
+		##
+
 
 		$modelComplementary		 = new CModelComplementary();
 		$modelComplementary		-> addArray('pages','session_id', $modelSessionsAccess -> getDataInstance());

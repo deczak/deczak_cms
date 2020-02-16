@@ -1,10 +1,3 @@
-<?php
-
-	#tk::dbug($deniedList);
-
-	
-?>
-
 <div class="be-module-container">
 
 	<table class="table-overview">

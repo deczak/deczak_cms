@@ -1,21 +1,8 @@
 
-##	Sub Sections
 
-	MOD_RGROUP_SUB_CREATE_NAME			=	Gruppe erstellen
 
-##	Error
-
-	MOD_RGROUP_ERR_RGROUP_ID_UK			=	Gruppe existiert nicht
-	MOD_RGROUP_ERR_NOTUPDATED			=	Gruppe wurde nicht aktualisiert
-	MOD_RGROUP_ERR_NOTCREATED			=	Gruppe wurde nicht erstellt
-
-##	Positive returns
-		
-	MOD_RGROUP_OK_UPDATED				=	Gruppe wurde aktualisiert
-	MOD_RGROUP_OK_DELETED				=	Gruppe wurde gelöscht
-	MOD_RGROUP_OK_CREATED				=	Gruppe wurde erstellt
+	MOD_RGROUP_SUB_CREATE_NAME			=	Gruppe erstellen	
 	
-##		
 
 	MOD_RGROUPS_GROUP_ID				=	Gruppen-ID
 	MOD_RGROUPS_GROUP_NAME				=	Gruppen Name

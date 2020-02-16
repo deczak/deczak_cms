@@ -14,7 +14,7 @@ class 	modelPageHeader extends CModel
 	public function
 	load(&$_sqlConnection, CModelCondition $_condition = NULL, CModelComplementary $_complementary = NULL)
 	{
-		$className	=	$this -> createClass($this -> m_sheme, $this -> m_className, '', $this -> m_additionalProperties);
+		$className	=	$this -> createClass($this -> m_sheme, $this -> m_className, '');
 		$tableName	=	$this -> m_sheme -> getTableName();
 
 		$sqlString	=	"	SELECT		*

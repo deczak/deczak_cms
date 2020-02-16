@@ -29,7 +29,7 @@ class	CSession extends CSingleton
 	}
 
 	public function
-	updateSession(int $_nodeId, string $_language)
+	updateSession(int $_nodeId, string $_language, CUserRights &$_pUserRights)
 	{
 		## Check if class got initialized 
 		if($this -> m_bInitialized === NULL || $this -> m_bInitialized === false) $this -> initialize();
@@ -41,12 +41,12 @@ class	CSession extends CSingleton
 		$_sessionTimeout 	= 	$_timestamp + $this -> m_iTimeout;
 		$_bIsNewSession 	= 	false;
 
-		$spamAccessTimeout	= 	$_timestamp - CONFIG::GET() -> SESSION -> SPAM_ACCESS_TIMEOUT;
-		$spamAccessLimit	= 	CONFIG::GET() -> SESSION -> SPAM_ACCESS_LIMIT;
+		$spamAccessTimeout	= 	$_timestamp - CFG::GET() -> SESSION -> SPAM_ACCESS_TIMEOUT;
+		$spamAccessLimit	= 	CFG::GET() -> SESSION -> SPAM_ACCESS_LIMIT;
 
 		##	Check if session already exists
 
-		$_db = CSQLConnect::instance() -> getConnection(CONFIG::GET() -> MYSQL -> PRIMARY_DATABASE);
+		$_db = CSQLConnect::instance() -> getConnection(CFG::GET() -> MYSQL -> PRIMARY_DATABASE);
 
 		if($_db === false)
 			return false;
@@ -280,6 +280,11 @@ class	CSession extends CSingleton
 											$this -> m_aSessionData[$_datKey] = $_dataValue;
 										}
 									}
+// HIER CUSERRIGHTS
+// $_pUserRights
+
+$_pUserRights -> loadUserRights($_db, $_sqlLoginChk['user_id']);
+
 
 									##	Gathering user group rights
 
@@ -423,7 +428,7 @@ class	CSession extends CSingleton
 	private function
 	updateDatabaseTable(string $_columnName, $_value)
 	{
-		$_db = CSQLConnect::instance() -> getConnection(CONFIG::GET() -> MYSQL -> PRIMARY_DATABASE);
+		$_db = CSQLConnect::instance() -> getConnection(CFG::GET() -> MYSQL -> PRIMARY_DATABASE);
 
 		$_sqlString			=	"	UPDATE		tb_sessions
 									SET			tb_sessions.". $_columnName ." = '". $_db -> real_escape_string($_value) ."'

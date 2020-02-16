@@ -31,7 +31,11 @@
 		$instanceKey = count($shemeInstance);
 		$shemeInstance[$instanceKey] = new $className();
 
-		$shemeInstance[$instanceKey] -> dropTable($db);
+
+		// error on costraints
+		#$db -> query("SET FOREIGN_KEY_CHECKS=0");
+		#$shemeInstance[$instanceKey] -> dropTable($db);
+		#$db -> query("SET FOREIGN_KEY_CHECKS=1");
 
 		$errorMsg = '';
 		if(!$shemeInstance[$instanceKey] -> createTable($db, $errorMsg))

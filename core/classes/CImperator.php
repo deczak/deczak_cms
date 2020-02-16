@@ -6,6 +6,8 @@ class	CImperator extends CBasic
 {
 	private	$m_sqlConnection;
 
+	private $m_pUserRights;
+
 	public function
 	__construct(&$_sqlConnection)
 	{
@@ -16,7 +18,7 @@ class	CImperator extends CBasic
 
 
 	public function
-	logic(&$_sqlConnection, &$_pPageRequest, $_modules, array $_rcaTarget, bool $_isBackendMode)
+	logic(&$_sqlConnection, &$_pPageRequest, $_modules, array $_rcaTarget, bool $_isBackendMode, CUserRights &$_pUserRights)
 	{
 		if($_isBackendMode)
 		{
@@ -26,7 +28,15 @@ class	CImperator extends CBasic
 				if(!$_pPageRequest -> isEditMode)
 					return;		
 
+				$pageRequest = CPageRequest::instance();
+
 				$_pPageRequest -> init($_sqlConnection, $_pPageRequest -> node_id, $_pPageRequest -> page_language, $_pPageRequest -> page_version, $_pPageRequest -> xhRequest);
+
+				$_pPageRequest -> enablePageEdit = ((!empty($pageRequest -> languageInfo) && !$pageRequest -> languageInfo -> lang_locked) ? $_pPageRequest -> enablePageEdit : false);
+				
+				$_pUserRights -> disableEditRights(!$_pPageRequest -> enablePageEdit);
+
+				$this -> m_pUserRights = $_pUserRights;
 			}
 		}		
 
@@ -55,8 +65,7 @@ class	CImperator extends CBasic
 			$_pPageRequest -> objectsList[$_objectIndex] -> instance	 = 	new $module -> module_controller($module, $_object);
 			$_pPageRequest -> objectsList[$_objectIndex] -> instance	->	logic(
 																				$this -> m_sqlConnection, 
-																				$_rcaTarget, 
-																				CSession::instance() -> getUserRights($_object -> module_id), 
+																				$_rcaTarget,
 																				$_pPageRequest -> xhRequest, 
 																				$_logicResult, 
 																				$_pPageRequest -> isEditMode
@@ -117,6 +126,7 @@ class	CImperator extends CBasic
 				{
 
 
+
 					$_initObj	 =	[
 										'page_version'		=>	'1',
 										'object_id'			=>	0,
@@ -135,8 +145,7 @@ class	CImperator extends CBasic
 					$_objectInstance  = new $module -> module_controller($module, $objectData);
 					$_objectInstance -> logic(
 												$this -> m_sqlConnection, 
-												[ $objectData -> object_id => 'create' ], 
-												CSession::instance() -> getUserRights($_pURLVariables -> getValue("cms-insert-module")), 
+												[ $objectData -> object_id => 'create' ],
 												$_pPageRequest -> xhRequest, 
 												$_logicResult, 
 												true
@@ -208,16 +217,18 @@ class	CImperator extends CBasic
 
 			$_logicResult =	false;
 			$_pPageRequest -> objectsList[$_objectKey] -> instance 	 = 	new $module -> module_controller($module, $_object);
-			$_pPageRequest -> objectsList[$_objectKey] -> instance	->	logic($this -> m_sqlConnection, $_rcaTarget, CSession::instance() -> getUserRights($_object -> module_id), $_pPageRequest -> xhRequest, $_logicResult, false);
+			$_pPageRequest -> objectsList[$_objectKey] -> instance	->	logic($this -> m_sqlConnection, $_rcaTarget, $_pPageRequest -> xhRequest, $_logicResult, false);
 
 			if($_logicResult !== false && $_logicResult['state'] === 1)
 			{	## 	This means exit function and recall imperator public logic
 
 				$_pPageRequest -> node_id		=	$_logicResult['node_id'];
-				$_pPageRequest -> page_language		=	$_logicResult['page_language'];
-				$_pPageRequest -> page_version		=	$_logicResult['page_version'];
+				$_pPageRequest -> page_language	=	$_logicResult['page_language'];
+				$_pPageRequest -> page_version	=	$_logicResult['page_version'];
 				$_pPageRequest -> isEditMode	=	true;
 				$_pPageRequest -> urlPath		=	$_pPageRequest -> page_path .'/'.$_rcaTarget[ $_pPageRequest -> objectsList[$_objectKey] -> object_id ] .'/';
+
+				$_pPageRequest -> enablePageEdit	=	$_logicResult['enablePageEdit'];
 
 				$_pPageRequest -> isEditMode = true;
 				return false;
@@ -243,7 +254,12 @@ class	CImperator extends CBasic
 				if($_object -> instance === NULL)
 					continue; 
 
-				echo '<div class="cms-content-object">';
+				$rightsString = json_encode($this -> m_pUserRights -> getModuleRights($_object -> module_id));
+				$rightsString = str_replace('"', "", $rightsString);
+				$rightsString = str_replace('[', "", $rightsString);
+				$rightsString = str_replace(']', "", $rightsString);
+
+				echo '<div class="cms-content-object" data-rights="'. $rightsString .'">';
 				$_object -> instance -> view();
 				echo '</div>';
 			}

@@ -53,7 +53,7 @@ class	CLogin extends CBasic
 		$_loginFailCount	= $_pSession -> getValue('login_fail_count');
 
 
-		if($_loginFailCount > CONFIG::GET() -> LOGIN -> FAIL_LIMIT)
+		if($_loginFailCount > CFG::GET() -> LOGIN -> FAIL_LIMIT)
 		{	##	Login limit reached
 			$this -> setError('ERR_CR_LOGIN_5');
 			return false;
@@ -101,7 +101,7 @@ class	CLogin extends CBasic
 
 				case 'hash':	##	Hash form data for validation
 				default:
-								$_generatedValue = CRYPT::LOGIN_CRYPT($_formData[ $_field -> name ], CONFIG::GET() -> ENCRYPTION -> BASEKEY);					
+								$_generatedValue = CRYPT::LOGIN_CRYPT($_formData[ $_field -> name ], CFG::GET() -> ENCRYPTION -> BASEKEY);					
 				
 			}
 
@@ -188,7 +188,7 @@ class	CLogin extends CBasic
 		{
 			$_db 	= CSQLConnect::instance() -> getConnection($_dbName);
 
-			if($_loginFailCount > CONFIG::GET() -> LOGIN -> FAIL_LIMIT)
+			if($_loginFailCount > CFG::GET() -> LOGIN -> FAIL_LIMIT)
 			{	##	Login limit reached -> lock account, update session for login kill
 				
 				$_sqlString			=	"	SELECT		". $_loginObject -> object_table .".user_mail,

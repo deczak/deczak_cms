@@ -91,7 +91,7 @@ class	CRYPT
 	private static function
 	CRYPTKEY(string $_key, bool $_appendKey )
 	{
-		$_CryptKey	=	CONFIG::GET() -> ENCRYPTION -> BASEKEY;
+		$_CryptKey	=	CFG::GET() -> ENCRYPTION -> BASEKEY;
 		if( !empty($_key) AND !$_appendKey)
 		{
 			$_CryptKey	=	$_key;
@@ -107,7 +107,7 @@ class	CRYPT
 	private static function
 	CRYPTVECTOR(string $_key, bool $_appendKey )
 	{
-		$_CryptKey		=	CONFIG::GET() -> ENCRYPTION -> BASEKEY;
+		$_CryptKey		=	CFG::GET() -> ENCRYPTION -> BASEKEY;
 		if( !empty($_key) AND !$_appendKey)
 		{
 			$_CryptKey	=	$_key;
@@ -122,13 +122,13 @@ class	CRYPT
 	public static function
 	ENCRYPT(string $_string, string $_key = '', bool $_appendKey = false )
 	{	
-		return	base64_encode( openssl_encrypt( $_string, CONFIG::GET() -> ENCRYPTION -> METHOD, CRYPT::CRYPTKEY($_key,$_appendKey), 0, CRYPT::CRYPTVECTOR($_key,$_appendKey) ) );	
+		return	base64_encode( openssl_encrypt( $_string, CFG::GET() -> ENCRYPTION -> METHOD, CRYPT::CRYPTKEY($_key,$_appendKey), 0, CRYPT::CRYPTVECTOR($_key,$_appendKey) ) );	
 	}
 
 	public static function
 	DECRYPT(string $_string, string $_key = '', bool $_appendKey = false )
 	{
-		return	openssl_decrypt( base64_decode( $_string ), CONFIG::GET() -> ENCRYPTION -> METHOD, CRYPT::CRYPTKEY($_key,$_appendKey), 0, CRYPT::CRYPTVECTOR($_key,$_appendKey) );		
+		return	openssl_decrypt( base64_decode( $_string ), CFG::GET() -> ENCRYPTION -> METHOD, CRYPT::CRYPTKEY($_key,$_appendKey), 0, CRYPT::CRYPTVECTOR($_key,$_appendKey) );		
 	}	
 
 	public static function

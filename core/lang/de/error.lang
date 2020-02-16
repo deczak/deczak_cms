@@ -12,10 +12,10 @@
 
 ##	CLogin.php
 
-	ERR_CR_LOGIN_1		= No valid login objects on initializing
-	ERR_CR_LOGIN_2		= Login object does not exists
+	ERR_CR_LOGIN_1		= Keine gültigen Login-Objekte bei der Anmeldung
+	ERR_CR_LOGIN_2		= Login-Objekt existiert nicht
 	ERR_CR_LOGIN_3		= Requested field name does not exists on transmitted form data
-	ERR_CR_LOGIN_4		= Class not initialized
+	ERR_CR_LOGIN_4		= Klasse wurde nicht initialisiert
 	ERR_CR_LOGIN_5		= Login failed on locked account due to login fail limit reached
 	ERR_CR_LOGIN_6		= Login failed on not verified mail address
 	ERR_CR_LOGIN_7		= Login failed on unclear account state
@@ -25,6 +25,6 @@
 
 ##	Controllers
 
-	ERR_PERMISSON		= You do not have sufficient permissions
-	ERR_SQL_ERROR		= Unknown error on sql query
-	ERR_VALIDATIONFAIL	= Data validation failed
+	ERR_PERMISSON		= Sie haben nicht die erforderlichen rechte
+	ERR_SQL_ERROR		= Unbekannter Datenbank fehler
+	ERR_VALIDATIONFAIL	= Daten Validierung ist gescheitert

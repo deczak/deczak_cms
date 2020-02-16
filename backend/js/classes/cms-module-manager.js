@@ -14,6 +14,9 @@ class	cmsModuleManager
 	
 	create()
 	{
+		if(Object.keys(this.activeModules).length == 0)
+			return false;
+
 		var targetElements = Array.prototype.slice.call(document.getElementsByClassName(this.className), 0);
 
 		for(var nItem = 0; nItem < targetElements.length; nItem++)

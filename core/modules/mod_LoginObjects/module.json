@@ -1,50 +1,53 @@
 {
 	"module_controller" : "controllerLoginObjects",
-	"rights"	:[
-					{"name":"index",	"desc":"OVERVIEW"},
-					{"name":"view",		"desc":"VIEW"},
-					{"name":"create",	"desc":"CREATE"},
-					{"name":"edit",		"desc":"EDIT"},
-					{"name":"delete",	"desc":"DELETE"}
-				 ],
-	"sub"		:[
-					{
-						"url_name"	:"",
-						"ctl_target":"",
-						"menu_name"	:"OVERVIEW",
-						"menu_order":"0"
-					},
-					{
-						"url_name"	:"create",
-						"ctl_target":"create",
-						"menu_name"	:"MOD_LOGINO_SUB_CREATE_NAME",
-						"menu_order":"0"
-					},
-					{
-						"url_name"	:"object",
-						"ctl_target":"view",
-						"menu_name"	:"",
-						"menu_order":"0"
-					},
-					{
-						"url_name"	:"edit",
-						"ctl_target":"edit",
-						"menu_name"	:"",
-						"menu_order":"0"
-					},
-					{
-						"url_name"	:"delete",
-						"ctl_target":"delete",
-						"menu_name"	:"",
-						"menu_order":"0"
-					}
-				 ],
-	"htaccess"	:{
-					"variables"		:[
-										{
-											"key" 		: "cms-system-id",
-											"wildcard"	:"(.*)"
-										}
-									 ]
-				 }
+	"module_rights"		:[
+							{"name":"index",	"desc":"OVERVIEW"},
+							{"name":"view",		"desc":"VIEW"},
+							{"name":"edit",		"desc":"EDIT"}
+						],
+	"module_subs"		:[
+							{
+								"url_name"	:"",
+								"ctl_target":"index",
+								"menu_name"	:"OVERVIEW",
+								"menu_order":"0",
+								"use_right" :"index"
+							},
+							{
+								"url_name"	:"create",
+								"ctl_target":"create",
+								"menu_name"	:"MOD_LOGINO_SUB_CREATE_NAME",
+								"menu_order":"0",
+								"use_right" :"edit"
+							},
+							{
+								"url_name"	:"object",
+								"ctl_target":"view",
+								"menu_name"	:"",
+								"menu_order":"0",
+								"use_right" :"view"
+							},
+							{
+								"url_name"	:"edit",
+								"ctl_target":"edit",
+								"menu_name"	:"",
+								"menu_order":"0",
+								"use_right" :"edit"
+							},
+							{
+								"url_name"	:"delete",
+								"ctl_target":"delete",
+								"menu_name"	:"",
+								"menu_order":"0",
+								"use_right" :"edit"
+							}
+						],
+	"htaccess"			:{
+							"variables"		:[
+												{
+													"key" 		: "cms-system-id",
+													"wildcard"	:"(.*)"
+												}
+											]
+						}
 }

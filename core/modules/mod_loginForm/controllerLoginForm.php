@@ -11,31 +11,27 @@ class	controllerLoginForm extends CController
 	{		
 		$this -> m_modelSimple = new modelSimple();
 		parent::__construct($_module, $_object);
+
+		$this -> m_aModule -> user_rights[] = 'view';			// add view right as default for everyone
 	}
 	
 	public function
-	logic(&$_sqlConnection, array $_rcaTarget, array $_userRights, $_isXHRequest, &$_logicResult, bool $_bEditMode)
+	logic(&$_sqlConnection, array $_rcaTarget, $_isXHRequest, &$_logicResult, bool $_bEditMode)
 	{
-
 		$_controllerAction = $this -> getControllerAction($_rcaTarget, 'view');
 
-		##	Check user rights for this target
-
-		$_userRights[] = 'view';			// Default Right for everyone
-		$_userRights[] = 'loginSuccess';		// Default Right for everyone
-
-		if(!$this -> hasRights($_userRights, $_controllerAction))	
-		{ 
+		if(!$this -> detectRights($_controllerAction) && $_controllerAction != 'loginSuccess')
+		{
 			if($_isXHRequest !== false)
 			{
 				$_bValidationErr =	true;
-				$_bValidationMsg =	CLanguage::instance() -> getString('ERR_PERMISSON');
+				$_bValidationMsg =	CLanguage::get() -> string('ERR_PERMISSON');
 				$_bValidationDta = 	[];
 
 				tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $_bValidationDta);	// contains exit call
 			}
 
-			CMessages::instance() -> addMessage(CLanguage::instance() -> getString('ERR_PERMISSON') , MSG_WARNING);
+			CMessages::instance() -> addMessage(CLanguage::get() -> string('ERR_PERMISSON') , MSG_WARNING);
 			return;
 		}
 
@@ -46,8 +42,8 @@ class	controllerLoginForm extends CController
 
 		##	Call sub-logic function by target, if there results are false, we make a fall back to default view
 		
-		$enableEdit 	= $this -> hasRights($_userRights, 'edit');
-		$enableDelete	= $this -> hasRights($_userRights, 'delete');
+		$enableEdit 	= $this -> existsUserRight('edit');
+		$enableDelete	= $enableEdit;
 
 		$_logicResults = false;
 		switch($_controllerAction)
@@ -327,7 +323,7 @@ $this -> m_aObject -> body = $this -> m_modelSimple -> getDataInstance() -> body
 										if($this -> m_modelSimple -> delete($_sqlConnection, $modelCondition))
 										{
 											$_objectModel  	 = new modelPageObject();
-											$_objectModel	-> delete($_sqlConnection, $_aFormData);
+											$_objectModel	-> deleteOld($_sqlConnection, $_aFormData);
 
 											$_bValidationMsg = 'Object deleted';
 										

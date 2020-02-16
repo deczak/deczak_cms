@@ -8,20 +8,31 @@ The version number is the release date. A letter as suffix indicates fixes on sa
 
 (the versions handling may get changed later)
 
-## Version history	   
+## Version history	  
 
-### 20200209 Dev version
+### 20200216
+
+**Modules**
+- Added frontend/mantle Blog Post Headline Modul, creates a headline similar to blog-module
+- Various changes and bug fixes in modules
+
+**Changes**
+- Rework of user-rights system, the part for remote users is still on todo
+
+
+### 20200209
 
 **Changes**
 - Added page edit toolbar option for internal redirect, loads content from other node-id and sets canonical to this
-- changes page content that comes with the fresh install, also added missing german root page
-- some various bugfixes (page edit toolbar
+- Changes page content that comes with the fresh install, also added missing german root page
+- Various bug fixes (page edit toolbar)
 
 **Notes**
 - Removed previous project name as is was already in use by an other project
 - Installing Blog Module requires the rights, see right groups after install
 
-### 20200207 Dev version
+
+### 20200207
 
 **Modules**
 - Added backend module for frontent user management
@@ -36,20 +47,20 @@ The version number is the release date. A letter as suffix indicates fixes on sa
 - Various bugs fixed, maybe added new bugs
 
 
-### 20200126 Dev version
+### 20200126
 
 **Changes**
 - Add two new fields in page edit toolbar for publish from / until
 - Add constraints support to Shemes handling
 
 
-### 20200120 Release version
+### 20200120
 
 **Modules**
 - Added backend module for manually update of htaccess and sitemap.xml if needed
 
 
-### 20200118 Release version
+### 20200118
 
 **Notes**
 - Early version
@@ -66,14 +77,14 @@ The version number is the release date. A letter as suffix indicates fixes on sa
 - Fixed wrong column name when calling moduleSitemap, which led to wrong URLs in sitemap.xml and .htaccess
 		
 
-### 20200112  Release version
+### 20200112
   
 **Notes**
 - Early version
 - Mantle module mod_blogBackend unfinished (maybe will be dropped)
 
 
-### 20190922  Release version
+### 20190922
 
 **Notes**
 - Early version

@@ -62,5 +62,9 @@
 	WAS_DELETED			=	has been deleted
 	WAS_UPDATED			=	has been updated
 	WAS_CREATED			=	has been created
+
+	WAS_NOT_DELETED		=	has been not deleted
+	WAS_NOT_UPDATED		=	has been not updated
+	WAS_NOT_CREATED		=	has been not created
 	
 	IS_UNKNOWN			=	is unknown

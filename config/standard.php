@@ -127,8 +127,9 @@ class	CONFIG_BASE
 	}	
 }
 
-class	CONFIG extends CSingleton
+class	CFG extends CSingleton
 {
+	##	inside
 	protected	$LANGUAGE;
 	protected	$ENCRYPTION;
 	protected	$MYSQL;
@@ -137,6 +138,9 @@ class	CONFIG extends CSingleton
 	protected	$SYSTEM_MAILER;
 	protected	$TEMPLATE;
 	protected	$CRONJOB;
+	
+	##	configuration file
+	protected	$ERROR_PAGES;
 
 	public function
 	initialize()
@@ -149,6 +153,11 @@ class	CONFIG extends CSingleton
 		$this -> SYSTEM_MAILER 	= new CONFIG_SYSTEM_MAILER();
 		$this -> TEMPLATE 		= new CONFIG_TEMPLATE();
 		$this -> CRONJOB 		= new CONFIG_CRONJOB();
+
+		$configuration = file_get_contents(CMS_SERVER_ROOT.DIR_DATA.'configuration.json');
+		$configuration = json_decode($configuration);
+
+		$this -> ERROR_PAGES	= $configuration -> ERROR_PAGES;
 	}
 
 	public function
@@ -158,7 +167,7 @@ class	CONFIG extends CSingleton
 	}
 }
 
-$config 	= CONFIG::instance();
+$config 	= CFG::instance();
 $config    -> initialize();	
 
 ?>

@@ -77,7 +77,7 @@ createMenu(&$sitemap, $_pos = 1, $_level = 2 )
 					if(isset($pageRequest -> alternate_path[ $_lang -> lang_key ]))
 						$_url = substr($pageRequest -> alternate_path[ $_lang -> lang_key ]['path'],1);
 
-					$_url = CMS_SERVER_URL . ((CONFIG::GET() -> LANGUAGE -> DEFAULT_IN_URL || $_lang -> lang_key !== CLanguage::instance() -> getDefault()) ? $_lang -> lang_key .'/' : '') . ($_url === '/' ? '' : $_url);
+					$_url = CMS_SERVER_URL . ((CFG::GET() -> LANGUAGE -> DEFAULT_IN_URL || $_lang -> lang_key !== CLanguage::instance() -> getDefault()) ? $_lang -> lang_key .'/' : '') . ($_url === '/' ? '' : $_url);
 
 					echo '<a href="'. $_url .'" title="'. $_lang -> lang_name .'">'. $_lang -> lang_key .'</a>';
 				}

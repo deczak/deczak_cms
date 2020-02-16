@@ -25,33 +25,33 @@ class	controllerPages extends CController
 	}
 	
 	public function
-	logic(&$_sqlConnection, array $_rcaTarget, array $_userRights, $_isXHRequest, &$_logicResult)
+	logic(&$_sqlConnection, array $_rcaTarget, $_isXHRequest, &$_logicResult)
 	{
 		##	Set default target if not exists
-
+	
 		$_controllerAction = $this -> getControllerAction($_rcaTarget,'view');
 
 		##	Check user rights for this target
 
-		if(!$this -> hasRights($_userRights, $_controllerAction))	
-		{ 
+		if(!$this -> detectRights($_controllerAction))
+		{
 			if($_isXHRequest !== false && $_isXHRequest === 'update-site') // update-site check benötigt weil im bearbeitungs modus zwei controller actions erzeugt werden wenn ein modul bearbeitet wird.
 			{
 				$_bValidationErr =	true;
-				$_bValidationMsg =	CLanguage::instance() -> getString('ERR_PERMISSON');
+				$_bValidationMsg =	CLanguage::get() -> string('ERR_PERMISSON');
 				$_bValidationDta = 	[];
-
+		
 				tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $_bValidationDta);	// contains exit call
 			}
 
-			CMessages::instance() -> addMessage(CLanguage::instance() -> getString('ERR_PERMISSON') , MSG_WARNING);
+			CMessages::instance() -> addMessage(CLanguage::get() -> string('ERR_PERMISSON') , MSG_WARNING);
 			return;
 		}
 
 		##	Call sub-logic function by target, if there results are false, we make a fall back to default view
 
-		$enableEdit 	= $this -> hasRights($_userRights, 'edit');
-		$enableDelete	= $this -> hasRights($_userRights, 'delete');
+		$enableEdit 	= $this -> existsUserRight('edit');
+		$enableDelete	= $enableEdit;
 
 		switch($_controllerAction)
 		{
@@ -139,16 +139,10 @@ class	controllerPages extends CController
 		$_pURLVariables -> retrieve($_request, true, false); 
 		$_aFormData		 = $_pURLVariables ->getArray();
 
-	#	$modelCondition = new CModelCondition();
-	#	$modelCondition -> where('page_language', $_aFormData['language']);		
-
-	#	$this -> m_modelSitemap  = new modelSitemap();
-	#	$this -> m_modelSitemap -> load($_sqlConnection, $modelCondition);
 		$this -> setView(	
 						'index',	
 						'',
 						[
-						#	'pages' 	=> $this -> m_modelSitemap -> getDataInstance(),
 							'language'	=>	$_aFormData['language'],
 							'enableEdit'	=> $_enableEdit,
 							'enableDelete'	=> $_enableDelete
@@ -184,6 +178,7 @@ class	controllerPages extends CController
 			$_logicResult['node_id']		=	$this -> m_modelPage -> getDataInstance()[0] -> node_id;
 			$_logicResult['page_version']	=	$this -> m_modelPage -> getDataInstance()[0] -> page_version;
 			$_logicResult['page_language']	=	$this -> m_modelPage -> getDataInstance()[0] -> page_language;
+			$_logicResult['enablePageEdit']	=	$_enableEdit;
 
 			return true;
 		}

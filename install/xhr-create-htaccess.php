@@ -1,8 +1,5 @@
 <?php
 
- 	error_reporting(E_ALL);
-	ini_set('display_errors', 1);
-
 	include '../core/toolkit.php';
 	include '../config/directories.php';
 	include '../config/standard.php';
@@ -13,6 +10,10 @@
 	include '../core/classes/CLanguage.php';
 	include '../core/shemes/shemeSitemap.php';
 	include '../core/classes/CHTAccess.php';
+	include '../core/classes/CUserRights.php';
+
+
+	$pUserRights	 = 	new CUserRights();
 
 	if(empty($_POST['server-subpath'])) 	tk::xhrResult(1, 'Sub directory not set');				else $_POST['server-subpath'] 	 = trim(strip_tags($_POST['server-subpath']));
 
@@ -27,7 +28,7 @@
 	if (mysqli_connect_errno())
 		tk::xhrResult(1, 'SQL error on connection - '. mysqli_connect_error());
 
-	CModules::instance() -> init($db);
+	CModules::instance() -> init($db, $pUserRights);
 
 
 	$configFile = file_get_contents('0-base');

@@ -18,7 +18,7 @@ class	CView
 	view()
 	{
 
-		$sqlConnection 	= CSQLConnect::instance() -> getConnection(CONFIG::GET() -> MYSQL -> PRIMARY_DATABASE);
+		$sqlConnection 	= CSQLConnect::instance() -> getConnection(CFG::GET() -> MYSQL -> PRIMARY_DATABASE);
 		$pageRequest 	= CPageRequest::instance();
 		$language		= CLanguage::instance();
 

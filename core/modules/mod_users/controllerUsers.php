@@ -18,7 +18,7 @@ class	controllerUsers extends CController
 	}
 	
 	public function
-	logic(&$_sqlConnection, array $_rcaTarget, array $_userRights, $_isXHRequest)
+	logic(&$_sqlConnection, array $_rcaTarget, $_isXHRequest)
 	{
 		##	Set default target if not exists
 
@@ -26,8 +26,8 @@ class	controllerUsers extends CController
 
 		##	Check user rights for this target
 
-		if(!$this -> hasRights($_userRights, $_controllerAction))
-		{ 
+		if(!$this -> detectRights($_controllerAction))
+		{
 			if($_isXHRequest !== false)
 			{
 				$_bValidationErr =	true;
@@ -43,8 +43,8 @@ class	controllerUsers extends CController
 
 		##	Call sub-logic function by target, if there results are false, we make a fall back to default view
 
-		$enableEdit 	= $this -> hasRights($_userRights, 'edit');
-		$enableDelete	= $this -> hasRights($_userRights, 'delete');
+		$enableEdit 	= $this -> existsUserRight('edit');
+		$enableDelete	= $enableEdit;
 
 		$_logicResults = false;
 		switch($_controllerAction)
@@ -126,7 +126,7 @@ class	controllerUsers extends CController
 				if(isset($_aFormData['login_pass_a']) && isset($_aFormData['login_pass_b']) && $_aFormData['login_pass_a'] === $_aFormData['login_pass_b'])
 				{
 					$_aFormData['login_pass'] = $_aFormData['login_pass_a'];
-					$_aFormData['login_pass'] = CRYPT::LOGIN_CRYPT($_aFormData['login_pass'], CONFIG::GET() -> ENCRYPTION -> BASEKEY);
+					$_aFormData['login_pass'] = CRYPT::LOGIN_CRYPT($_aFormData['login_pass'], CFG::GET() -> ENCRYPTION -> BASEKEY);
 				} 
 				elseif(isset($_aFormData['login_pass_a']) && isset($_aFormData['login_pass_b']) && $_aFormData['login_pass_a'] !== $_aFormData['login_pass_b'])
 				{
@@ -148,7 +148,7 @@ class	controllerUsers extends CController
 
 				if($this -> m_pModel -> insert($_sqlConnection, $_aFormData, $dataId))
 				{
-					$_bValidationMsg = CLanguage::get() -> string('M_BEUSER_MSG_ISCREATED') .' - '. CLanguage::get() -> string('WAIT_FOR_REDIRECT');
+					$_bValidationMsg = CLanguage::get() -> string('USER WAS_CREATED') .' - '. CLanguage::get() -> string('WAIT_FOR_REDIRECT');
 					$_bValidationDta['redirect'] = CMS_SERVER_URL_BACKEND . CPageRequest::instance() -> urlPath .'user/'.$_aFormData['user_id'];
 				}
 				else
@@ -258,7 +258,7 @@ class	controllerUsers extends CController
 
 										if($this -> m_pModel -> update($_sqlConnection, $_aFormData, $modelCondition))
 										{
-											$_bValidationMsg = CLanguage::get() -> string('M_BEUSER_MSG_ISUPDATED');
+											$_bValidationMsg = CLanguage::get() -> string('USER WAS_UPDATED');
 										}
 										else
 										{
@@ -308,7 +308,7 @@ class	controllerUsers extends CController
 										if(isset($_aFormData['login_pass_a']) && isset($_aFormData['login_pass_b']) && $_aFormData['login_pass_a'] === $_aFormData['login_pass_b'])
 										{
 											$_aFormData['login_pass'] = $_aFormData['login_pass_a'];
-											$_aFormData['login_pass'] = CRYPT::LOGIN_CRYPT($_aFormData['login_pass'], CONFIG::GET() -> ENCRYPTION -> BASEKEY);
+											$_aFormData['login_pass'] = CRYPT::LOGIN_CRYPT($_aFormData['login_pass'], CFG::GET() -> ENCRYPTION -> BASEKEY);
 											unset($_aFormData['login_pass_a']);
 											unset($_aFormData['login_pass_b']);
 										} 
@@ -329,7 +329,7 @@ class	controllerUsers extends CController
 
 										if($this -> m_pModel -> update($_sqlConnection, $_aFormData, $modelCondition))
 										{
-											$_bValidationMsg = CLanguage::get() -> string('M_BEUSER_MSG_ISUPDATED');
+											$_bValidationMsg = CLanguage::get() -> string('USER WAS_UPDATED');
 										}
 										else
 										{
@@ -378,7 +378,7 @@ class	controllerUsers extends CController
 
 									if($this -> m_pModel -> update($_sqlConnection, $_aFormData, $modelCondition))
 									{
-										$_bValidationMsg = CLanguage::get() -> string('M_BEUSER_MSG_ISUPDATED');
+										$_bValidationMsg = CLanguage::get() -> string('USER WAS_UPDATED');
 									}
 									else
 									{
@@ -421,7 +421,7 @@ class	controllerUsers extends CController
 
 										if($this -> m_pModel -> delete($_sqlConnection, $modelCondition))
 										{
-											$_bValidationMsg = 'User account was deleted - please wait for redirect';
+											$_bValidationMsg = CLanguage::get() -> string('USER WAS_DELETED') .' - '. CLanguage::get() -> string('WAIT_FOR_REDIRECT');
 											$_bValidationDta['redirect'] = CMS_SERVER_URL_BACKEND . CPageRequest::instance() -> urlPath;
 
 											$_sqlConnection -> query("DELETE FROM tb_users_groups WHERE tb_users_groups.user_id = '". $_pURLVariables -> getValue("cms-system-id") ."'");

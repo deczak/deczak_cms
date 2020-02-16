@@ -15,7 +15,7 @@ class 	modelPageObject extends CModel
 	public function
 	loadOld(&$_sqlConnection, array $_where = [])
 	{
-		$_className	=	$this -> createClass($this -> m_sheme, 'shemePageObject', '', $this -> m_additionalProperties);
+		$_className	=	$this -> createClass($this -> m_sheme, 'shemePageObject', '');
 
 		$_tableName	=	$this -> m_sheme -> getTableName();
 
