@@ -34,8 +34,6 @@ else
 	<script>
 	(function() {
 
-		console.log(MODULES);
-
 		var	pEditorText = new cmsTextEditor();	
 			pEditorText.init('editor-simple-text', CMS.SERVER_URL_BACKEND +'json/editor-text.json', 'simple-text');
 			pEditorText.create();

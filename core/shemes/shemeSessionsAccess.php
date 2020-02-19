@@ -18,6 +18,9 @@ class shemeSessionsAccess extends CSheme
 		$this -> addColumn('referer', 'string') -> setLength(250);
 
 		$this -> addColumn('page_title', 'string') -> isVirtual() -> setDefault('');
+
+
+
 	}
 }
 

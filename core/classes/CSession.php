@@ -32,10 +32,11 @@ class	CSession extends CSingleton
 	updateSession(int $_nodeId, string $_language, CUserRights &$_pUserRights)
 	{
 		## Check if class got initialized 
-		if($this -> m_bInitialized === NULL || $this -> m_bInitialized === false) $this -> initialize();
+		if($this -> m_bInitialized === NULL || $this -> m_bInitialized === false) 
+			$this -> initialize();
 
 		## Required data
-		$this -> m_aSessionData['session_id'] = $this -> createSessionID();
+		$this -> m_aSessionData['session_id'] = $this -> _createSessionID();
 
 		$_timestamp			= 	time();
 		$_sessionTimeout 	= 	$_timestamp + $this -> m_iTimeout;
@@ -280,33 +281,9 @@ class	CSession extends CSingleton
 											$this -> m_aSessionData[$_datKey] = $_dataValue;
 										}
 									}
-// HIER CUSERRIGHTS
-// $_pUserRights
 
-$_pUserRights -> loadUserRights($_db, $_sqlLoginChk['user_id']);
-
-
-									##	Gathering user group rights
-
-									$_sqlString			=	"	SELECT		tb_users_groups.*,
-																			tb_right_groups.*
-																FROM		tb_users_groups
-																LEFT JOIN	tb_right_groups ON tb_right_groups.group_id = tb_users_groups.group_id
-																WHERE		tb_users_groups.user_id	= '". $_sqlLoginChk['user_id'] ."'
-															";
-
-									$_sqlUserRightsRes	= 	$_db -> query($_sqlString);		
-
-									while($_sqlUserRightsRes !== false && $_sqlUserRights = $_sqlUserRightsRes -> fetch_assoc())
-									{
-						
-										$_sqlUserRights['group_rights'] = json_decode($_sqlUserRights['group_rights'], true);
-										if(!empty($_sqlUserRights['group_rights']))
-										foreach($_sqlUserRights['group_rights'] as $_moduleRights  => $_rightsSet)
-										{
-											$this -> m_aSessionData['user_rights'][$_moduleRights] = $_rightsSet;
-										}										
-									}
+									$_pUserRights -> loadUserRights($_db, $_sqlLoginChk['user_id']);
+			
 								}
 								
 							}
@@ -356,7 +333,6 @@ $_pUserRights -> loadUserRights($_db, $_sqlLoginChk['user_id']);
 										LIMIT		1
 									";
 
-
 			$accessRes 	= $_db -> query($_sqlString);	
 			$accessData	=	$accessRes -> fetch_array();
 
@@ -364,6 +340,9 @@ $_pUserRights -> loadUserRights($_db, $_sqlLoginChk['user_id']);
 			{
 				if(empty($_SERVER['HTTP_REFERER']))
 					$_SERVER['HTTP_REFERER'] = '';
+
+
+
 
 				$_sqlString		=	"	INSERT INTO	tb_sessions_access
 													(
@@ -380,6 +359,7 @@ $_pUserRights -> loadUserRights($_db, $_sqlLoginChk['user_id']);
 														'". $_db -> real_escape_string(substr(trim(strip_tags($_SERVER['HTTP_REFERER'])),0,250)) ."'
 													)
 									";
+
 
 					$_db -> query($_sqlString);	
 			}
@@ -403,30 +383,18 @@ $_pUserRights -> loadUserRights($_db, $_sqlLoginChk['user_id']);
 			return false;
 	}
 
-	/*
-	public function
-	setSessionValue(string $_valueName, $_value, bool $_bUpdateDatabase = false)
-	{
-		switch($_valueName)
-		{
-			case   'LOGIN_FAIL_COUNT':		$this -> m_aSessionData['login_fail_count']		= $_value; if($_bUpdateDatabase) $this -> updateDatabaseTable('login_fail_count', $_value); break;
-		}
-		return $_value;
-	}
-	*/
-
 	public function
 	setValue(string $_valueKey, $_value, bool $_bUpdateDatabase = false)
 	{
 		switch($_valueKey)
 		{
-			case   'login_fail_count':		$this -> m_aSessionData['login_fail_count']		= $_value; if($_bUpdateDatabase) $this -> updateDatabaseTable('login_fail_count', $_value); break;
+			case   'login_fail_count':		$this -> m_aSessionData['login_fail_count']		= $_value; if($_bUpdateDatabase) $this -> _updateValue('login_fail_count', $_value); break;
 		}
 		return $_value;
 	}
 
 	private function
-	updateDatabaseTable(string $_columnName, $_value)
+	_updateValue(string $_columnName, $_value)
 	{
 		$_db = CSQLConnect::instance() -> getConnection(CFG::GET() -> MYSQL -> PRIMARY_DATABASE);
 
@@ -439,16 +407,9 @@ $_pUserRights -> loadUserRights($_db, $_sqlLoginChk['user_id']);
 	}
 
 	private function
-	createSessionID()
+	_createSessionID()
 	{
 		return md5($this -> m_aSessionData['user_agent']) . md5($this -> m_aSessionData['user_ip']);
-	}
-
-	public function
-	getUserRights(string $_moduleID)
-	{
-		if(isset($this -> m_aSessionData['user_rights'][$_moduleID])) return $this -> m_aSessionData['user_rights'][$_moduleID];
-		return [];
 	}
 }
 

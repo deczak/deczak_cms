@@ -426,6 +426,8 @@ class	controllerPages extends CController
 		$_aFormData['page_name'] = CLanguage::instance() -> getString('MOD_SITES_NEWPAGE_NAME');
 		$_aFormData['page_template'] = 'default';
 
+		$_aFormData['hidden_state']	=	4;
+
 		$_aFormData['create_time']	=	time();
 		$_aFormData['create_by']		= CSession::instance() -> getValue('user_id');
 

@@ -129,7 +129,6 @@ class	CImperator extends CBasic
 
 					$_initObj	 =	[
 										'page_version'		=>	'1',
-										'object_id'			=>	0,
 										'module_id'			=>	$_pURLVariables -> getValue("cms-insert-module"),
 										'object_order_by'	=>	$_pURLVariables -> getValue("cms-insert-after"),
 										'node_id'			=>	$_pURLVariables -> getValue("cms-insert-node-id"),
@@ -137,9 +136,13 @@ class	CImperator extends CBasic
 										'create_by'			=>	CSession::instance() -> getValue('user_id')
 									];
 
+					$objectId = 0;				
+
 					$_objectModel  = new modelPageObject();
-					$_objectModel -> create($this -> m_sqlConnection, $_initObj);
+					$_objectModel -> insert($this -> m_sqlConnection, $_initObj, $objectId);
 					$objectData	   = $_objectModel -> getDataInstance();
+					$objectData	   = current($objectData);
+					$objectData -> object_id = $objectId;
 
 					$_logicResult 	  = [];
 					$_objectInstance  = new $module -> module_controller($module, $objectData);
@@ -174,11 +177,13 @@ class	CImperator extends CBasic
 
 				foreach($_pURLVariables -> getValue("cms-order-by-modules") as $_objectIndex =>  $_objectID)
 				{
-					$_updateSet['node_id']			= $_pageNodeID;
-					$_updateSet['object_id']		= $_objectID;
 					$_updateSet['object_order_by']	= ($_objectIndex + 1);
 
-					$_objectModel -> updateOrderBy($this -> m_sqlConnection, $_updateSet);					
+					$modelCondition = new CModelCondition();
+					$modelCondition -> where('node_id', $_pageNodeID);
+					$modelCondition -> where('object_id', $_objectID);
+					
+					$_objectModel -> update($this -> m_sqlConnection, $_updateSet, $modelCondition);					
 				}
 
 				tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $_bValidationDta);	// contains exit call

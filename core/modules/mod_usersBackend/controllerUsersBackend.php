@@ -4,6 +4,8 @@ require_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelRightGroups.php';
 require_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelUserGroups.php';	
 require_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelUsersBackend.php';	
 
+require_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelUsersRegister.php';	
+
 class	controllerUsersBackend extends CController
 {
 	private		$m_modelRightGroups;
@@ -114,12 +116,25 @@ class	controllerUsersBackend extends CController
 				$_aFormData['is_locked'] 	= '0';
 				$_aFormData['login_name'] 	= CRYPT::LOGIN_HASH($_aFormData['login_name']);
 
+				$modelUserRegister	 	= new modelUserRegister();
+				$_aFormData['user_id'] 	= $modelUserRegister -> registerUserId($_sqlConnection, 0);
+
+			
+
+
+
+				/*
 				while(true)
 				{
 					$_aFormData['user_id']  = substr(rand(),0,10);
 					if($this -> m_pModel -> isUnique($_sqlConnection, ['user_id' => $_aFormData['user_id']]))
 						break;
 				}
+				*/
+				
+
+
+
 
 				// Checking password	
 
@@ -154,6 +169,8 @@ class	controllerUsersBackend extends CController
 				else
 				{
 					$_bValidationMsg .= CLanguage::get() -> string('ERR_SQL_ERROR');
+
+					$modelUserRegister -> removeUserId($_sqlConnection, $_aFormData['user_id']);
 				}
 			}
 
@@ -424,6 +441,9 @@ class	controllerUsersBackend extends CController
 											$_bValidationMsg = CLanguage::get() -> string('USER WAS_DELETED') .' - '. CLanguage::get() -> string('WAIT_FOR_REDIRECT');
 											$_bValidationDta['redirect'] = CMS_SERVER_URL_BACKEND . CPageRequest::instance() -> urlPath;
 
+											$modelUserRegister  = new modelUserRegister();
+											$modelUserRegister -> removeUserId($_sqlConnection, $_pURLVariables -> getValue("cms-system-id"));
+											
 											$_sqlConnection -> query("DELETE FROM tb_users_groups WHERE tb_users_groups.user_id = '". $_pURLVariables -> getValue("cms-system-id") ."'");
 										}
 										else

@@ -78,7 +78,7 @@ class	controllerSimpleSource extends CController
 						'view',	
 						'',
 						[
-							'object' 	=> $this -> m_modelSimple -> getDataInstance()
+							'object' 	=> $this -> m_modelSimple -> getDataInstance()[0]
 						]
 						);
 
@@ -127,12 +127,11 @@ class	controllerSimpleSource extends CController
 
 										$this -> m_modelPageObject = new modelPageObject();
 
-										$_objectUpdate['object_id']			=	$objectId;
-										$_objectUpdate['time_update']		=	time();
+										$_objectUpdate['update_time']		=	time();
 										$_objectUpdate['update_by']			=	0;
 										$_objectUpdate['update_reason']		=	'';
 
-										$this -> m_modelPageObject -> updateOld($_sqlConnection, $_objectUpdate);
+										$this -> m_modelPageObject -> update($_sqlConnection, $_objectUpdate, $modelCondition);
 									
 									}
 									else
@@ -163,7 +162,7 @@ class	controllerSimpleSource extends CController
 						'edit',	
 						'',
 						[
-							'object' 	=> $this -> m_modelSimple -> getDataInstance()
+							'object' 	=> $this -> m_modelSimple -> getDataInstance()[0]
 						]
 						);
 
@@ -185,8 +184,11 @@ class	controllerSimpleSource extends CController
 			$_dataset['object_id'] 	= $this -> m_aObject -> object_id;
 			$_dataset['body'] 		= '';
 			$_dataset['params'] 	= '';
+
+
+			$insertedId = 0;
 			
-			if(!$this -> m_modelSimple -> create($_sqlConnection, $_dataset))
+			if(!$this -> m_modelSimple -> insert($_sqlConnection, $_dataset, $insertedId))
 			{
 				$_bValidationErr =	true;
 				$_bValidationMsg =	'sql insert failed';
@@ -197,7 +199,7 @@ class	controllerSimpleSource extends CController
 								'edit',	
 								'',
 								[
-									'object' 	=> $this -> m_modelSimple -> getDataInstance()
+									'object' 	=> $this -> m_modelSimple -> getDataInstance()[0]
 								]
 								);
 
@@ -241,7 +243,7 @@ class	controllerSimpleSource extends CController
 										if($this -> m_modelSimple -> delete($_sqlConnection, $modelCondition))
 										{
 											$_objectModel  	 = new modelPageObject();
-											$_objectModel	-> deleteOld($_sqlConnection, $_aFormData);
+											$_objectModel	-> delete($_sqlConnection, $modelCondition);
 
 											$_bValidationMsg = 'Object deleted';
 										

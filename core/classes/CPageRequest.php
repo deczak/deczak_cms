@@ -187,12 +187,20 @@ class CPageRequest extends CSingleton
 			}
 
 			// fällt später weg beim umbau vom backend
-			$sqlWhere['node_id']		= $this -> node_id;
-			$sqlWhere['page_version']	= $this -> page_version;
+			#$sqlWhere['node_id']		= $this -> node_id;
+			#$sqlWhere['page_version']	= $this -> page_version;
+
+
+
+			$modelCondition = new CModelCondition();
+			$modelCondition -> where('node_id', $this -> node_id);
+			$modelCondition -> where('page_version', $this -> page_version);
+			$modelCondition -> orderBy('object_order_by');
+
 
 
 			$modelPageObject = new modelPageObject();
-			$modelPageObject -> loadOld($_sqlConnection, $sqlWhere);
+			$modelPageObject -> load($_sqlConnection, $modelCondition);
 			$this -> objectsList = &$modelPageObject -> getDataInstance();
 		
 

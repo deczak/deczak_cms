@@ -12,7 +12,7 @@ class 	modelUsers extends CModel
 	}	
 
 	public function
-	load(&$_sqlConnection, CModelCondition $_condition = NULL)
+	load(&$_sqlConnection, CModelCondition $_condition = NULL, CModelComplementary $_complementary = NULL)
 	{
 		if(!parent::load($_sqlConnection, $_condition))
 			return false;

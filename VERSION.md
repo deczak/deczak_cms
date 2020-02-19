@@ -10,6 +10,13 @@ The version number is the release date. A letter as suffix indicates fixes on sa
 
 ## Version history	  
 
+### 20200219
+
+**Changes**
+- bugfix on adding module on page edit
+- New sub page set with locked for all as default value
+- Various changes and bug fixes in modules after audit
+
 ### 20200216
 
 **Modules**

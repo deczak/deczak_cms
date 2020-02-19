@@ -2,8 +2,7 @@
 
 include_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelSessions.php';	
 include_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelSessionsAccess.php';	
-include_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelUserAgent.php';	
-include_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelPageHeader.php';	
+include_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelUserAgent.php';		
 
 class	controllerSessions extends CController
 {
@@ -49,8 +48,6 @@ class	controllerSessions extends CController
 		switch($_controllerAction)
 		{
 			case 'view'		: $_logicResults = $this -> logicView(	$_sqlConnection, $_isXHRequest, $enableEdit, $enableDelete);	break;
-			case 'create'	: $_logicResults = $this -> logicCreate($_sqlConnection, $_isXHRequest);	break;
-			case 'edit'		: $_logicResults = $this -> logicEdit(	$_sqlConnection, $_isXHRequest);	break;	
 			case 'delete'	: $_logicResults = $this -> logicDelete($_sqlConnection, $_isXHRequest);	break;	
 		}
 
@@ -64,37 +61,31 @@ class	controllerSessions extends CController
 	private function
 	logicIndex(&$_sqlConnection, $_enableEdit = false, $_enableDelete = false)
 	{
-		$conditionPages = new CModelCondition();
-		$conditionPages -> where('tb_page_header.node_id', 'tb_sessions_access.node_id');
+		$conditionPages		 = new CModelCondition();
+		$conditionPages		-> where('tb_page_header.node_id', 'tb_sessions_access.node_id');
 
+		$modelSessionsAccess = new modelSessionsAccess();
+		$modelSessionsAccess-> addSelectColumns('tb_sessions_access.*','tb_page_header.page_title');
+		$modelSessionsAccess-> addRelation('left join', 'tb_page_header', $conditionPages);
 
+		$modelSACondition  	 = new CModelCondition();
+		$modelSACondition	-> groupBy('session_id') 
+							-> groupBy('node_id');
 
-		$modelSessionsAccess	 = new modelSessionsAccess();
-
-		$modelSessionsAccess -> addSelectColumns('tb_sessions_access.*','tb_page_header.page_title');
-		$modelSessionsAccess -> addRelation('left join', 'tb_page_header', $conditionPages);
-
-		$modelSACondition  		 = new CModelCondition();
-		$modelSACondition		-> groupBy('session_id') 
-								-> groupBy('node_id');
-
-		$modelSessionsAccess	-> load($_sqlConnection, $modelSACondition);
-
-
+		$modelSessionsAccess-> load($_sqlConnection, $modelSACondition);
 
 		##
+		
+		$modelComplementary	 = new CModelComplementary();
+		$modelComplementary	-> addComplemantary('pages','session_id', $modelSessionsAccess -> getDataInstance());
 
+		$modelCondition  	 = new CModelCondition();
+		$modelCondition		-> orderBy('time_create', 'DESC');
 
-		$modelComplementary		 = new CModelComplementary();
-		$modelComplementary		-> addArray('pages','session_id', $modelSessionsAccess -> getDataInstance());
+		$this -> m_pModel 	-> load($_sqlConnection, $modelCondition, $modelComplementary);	
 
-		$modelCondition  = new CModelCondition();
-		$modelCondition	-> orderBy('time_create', 'DESC');
-
-		$this -> m_pModel -> load($_sqlConnection, $modelCondition, $modelComplementary);	
-
-		$modelUserAgent	 = new modelUserAgent();
-		$modelUserAgent	-> load($_sqlConnection);
+		$modelUserAgent	 	 = new modelUserAgent();
+		$modelUserAgent		-> load($_sqlConnection);
 
 		$this -> setView(	
 						'index',	
@@ -111,70 +102,6 @@ class	controllerSessions extends CController
 	private function
 	logicCreate(&$_sqlConnection, $_isXHRequest)
 	{
-		/*
-		if($_isXHRequest !== false)
-		{
-			$_bValidationErr =	false;
-			$_bValidationMsg =	'';
-			$_bValidationDta = 	[];
-
-			$_pURLVariables	 =	new CURLVariables();
-			$_request		 =	[];
-			$_request[] 	 = 	[	"input" => "denied_ip",  	"validate" => "strip_tags|strip_whitespaces|!empty" ]; 	
-			$_request[] 	 = 	[	"input" => "denied_desc",  	"validate" => "strip_tags|!empty" ]; 	
-			$_pURLVariables -> retrieve($_request, false, true); // POST 
-			$_aFormData		 = $_pURLVariables ->getArray();
-
-			if(empty($_aFormData['denied_ip'])) { 	$_bValidationErr = true; 	$_bValidationDta[] = 'denied_ip'; 	}
-
-			if(!$_bValidationErr)	// Validation OK (by pre check)
-			{		
-				if(!$this -> m_pModel -> isUnique($_sqlConnection, ['denied_ip' => $_aFormData['denied_ip']]))
-				{
-					$_bValidationMsg .= CLanguage::get() -> string('M_BERMADDR_MSG_DENIEDEXIST');
-					$_bValidationErr = true;
-				}
-			}
-			else	// Validation Failed 
-			{
-				$_bValidationMsg .= CLanguage::get() -> string('ERR_VALIDATIONFAIL');
-			}
-
-			if(!$_bValidationErr)	// Validation OK
-			{
-
-				$_aFormData['create_by'] 	= CSession::instance() -> getValue('user_id');
-				$_aFormData['create_time'] 	= time();
-
-				$dataId = 0;
-
-				if($this -> m_pModel -> insert($_sqlConnection, $_aFormData, $dataId))
-				{
-					$_bValidationMsg = CLanguage::get() -> string('M_BERMADDR_MSG_ISCREATED') .' - '. CLanguage::get() -> string('WAIT_FOR_REDIRECT');
-					$_bValidationDta['redirect'] = CMS_SERVER_URL_BACKEND . CPageRequest::instance() -> urlPath .'address/'.$dataId;
-
-					$_pHTAccess  = new CHTAccess();
-					$_pHTAccess -> generatePart4DeniedAddress($_sqlConnection);
-					$_pHTAccess -> writeHTAccess();
-				}
-				else
-				{
-					$_bValidationMsg .= CLanguage::get() -> string('ERR_SQL_ERROR');
-				}
-			}
-
-
-			tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $_bValidationDta);	// contains exit call
-		}
-
-		$this -> setCrumbData('create');
-		$this -> setView(
-						'create',
-						'create/'
-						);
-
-		return true;
-		*/
 	}
 
 	private function
@@ -207,7 +134,7 @@ class	controllerSessions extends CController
 			$modelSessionsAccess	-> load($_sqlConnection, $modelSACondition);
 
 			$modelComplementary		 = new CModelComplementary();
-			$modelComplementary		-> addArray('pages','session_id', $modelSessionsAccess -> getDataInstance());
+			$modelComplementary		-> addComplemantary('pages','session_id', $modelSessionsAccess -> getDataInstance());
 
 			if($this -> m_pModel -> load($_sqlConnection, $modelCondition, $modelComplementary))
 			{
@@ -236,118 +163,6 @@ class	controllerSessions extends CController
 	private function
 	logicEdit(&$_sqlConnection, $_isXHRequest = false)
 	{	
-
-		$_pURLVariables	 =	new CURLVariables();
-		$_request		 =	[];
-		$_request[] 	 = 	[	"input" => "cms-system-id",  	"validate" => "strip_tags|!empty" ,	"use_default" => true, "default_value" => false ]; 		
-		$_pURLVariables -> retrieve($_request, true, false); // POST 
-	
-		if($_pURLVariables -> getValue("cms-system-id") !== false)
-		{	
-
-			/*	
-			##	XHR Function call
-
-			if($_isXHRequest !== false)
-			{
-				$_bValidationErr =	false;
-				$_bValidationMsg =	'';
-				$_bValidationDta = 	[];
-
-				switch($_isXHRequest)
-				{
-					case 'denied-address'  :	// Update user data
-
-												$_pFormVariables =	new CURLVariables();
-												$_request		 =	[];
-												$_request[] 	 = 	[	"input" => "data_id",  	"validate" => "strip_tags|strip_whitespaces|!empty" ]; 	
-												$_request[] 	 = 	[	"input" => "denied_ip",  	"validate" => "strip_tags|strip_whitespaces|!empty" ]; 	
-												$_request[] 	 = 	[	"input" => "denied_desc",  	"validate" => "strip_tags|!empty" ]; 	
-												$_pFormVariables-> retrieve($_request, false, true); // POST 
-												$_aFormData		 = $_pFormVariables ->getArray();
-
-												if(empty($_aFormData['data_id'])) { 	$_bValidationErr = true; 	$_bValidationDta[] = 'data_id'; 	}
-												if(empty($_aFormData['denied_ip'])) { 	$_bValidationErr = true; 	$_bValidationDta[] = 'denied_ip'; 	}
-
-												if(!$_bValidationErr)	// Validation OK (by pre check)
-												{		
-													if(!$this -> m_pModel -> isUnique($_sqlConnection, ['denied_ip' => $_aFormData['denied_ip']], ['data_id' => $_aFormData['denied_ip']]))
-													{
-														$_bValidationMsg .= CLanguage::get() -> string('M_BERMADDR_MSG_DENIEDEXIST');
-														$_bValidationErr = true;
-													}
-												}
-												else	// Validation Failed 
-												{
-													$_bValidationMsg .= CLanguage::get() -> string('ERR_VALIDATIONFAIL');
-												}
-
-												if(!$_bValidationErr)
-												{
-												#	$_aFormData['update_by'] 	= CSession::instance() -> getValue('user_id');
-												#	$_aFormData['update_time'] 	= time();
-
-													$modelCondition = new CModelCondition();
-													$modelCondition -> where('data_id', $_pURLVariables -> getValue("cms-system-id"));
-
-													if($this -> m_pModel -> update($_sqlConnection, $_aFormData, $modelCondition))
-													{
-														$_bValidationMsg = CLanguage::get() -> string('SESSION WAS_UPDATED');
-
-														$_pHTAccess  = new CHTAccess();
-														$_pHTAccess -> generatePart4DeniedAddress($_sqlConnection);
-														$_pHTAccess -> writeHTAccess();
-
-													}
-													else
-													{
-														$_bValidationMsg .= CLanguage::get() -> string('ERR_SQL_ERROR');
-														$_bValidationErr = true;
-													}											
-												}
-												else	// Validation Failed
-												{
-													$_bValidationMsg .= CLanguage::get() -> string('ERR_VALIDATIONFAIL');
-													$_bValidationErr = true;
-												}
-
-												break;
-					}
-
-				tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $_bValidationDta);	// contains exit call
-			}
-		
-			*/
-			##	Non XHR call
-
-
-			$modelCondition = new CModelCondition();
-			$modelCondition -> where('data_id', $_pURLVariables -> getValue("cms-system-id"));
-
-
-			if($this -> m_pModel -> load($_sqlConnection, $modelCondition))
-			{
-				##	Gathering additional data
-
-
-
-
-				$_crumbName	 = $this -> m_pModel -> searchValue(intval($_pURLVariables -> getValue("cms-system-id")),'data_id','denied_ip');
-
-				$this -> setCrumbData('edit', $_crumbName, true);
-				$this -> setView(
-								'edit',
-								'address/'. $_pURLVariables -> getValue("cms-system-id"),								
-								[
-									'deniedList' 	=> $this -> m_pModel -> getDataInstance()
-								]								
-								);
-				return true;
-			}
-		}
-
-		CMessages::instance() -> addMessage(CLanguage::get() -> string('SESSION IS_UNKNOWN') , MSG_WARNING);
-		return false;
 	}
 
 	private function
@@ -403,7 +218,6 @@ class	controllerSessions extends CController
 		CMessages::instance() -> addMessage(CLanguage::get() -> string('SESSION IS_UNKNOWN') , MSG_WARNING);
 		return false;
 	}
-
 }
 
 ?>

@@ -167,12 +167,11 @@ class	controllerBlogPostHeadline extends CController
 
 										$this -> m_modelPageObject = new modelPageObject();
 
-										$_objectUpdate['object_id']		=	$objectId;
-										$_objectUpdate['time_update']		=	time();
+										$_objectUpdate['update_time']		=	time();
 										$_objectUpdate['update_by']			=	0;
 										$_objectUpdate['update_reason']		=	'';
 
-										$this -> m_modelPageObject -> updateOld($_sqlConnection, $_objectUpdate);
+										$this -> m_modelPageObject -> update($_sqlConnection, $_objectUpdate, $modelCondition);
 									
 									}
 									else
@@ -374,7 +373,7 @@ class	controllerBlogPostHeadline extends CController
 										{
 											
 											$_objectModel  	 = new modelPageObject();
-											$_objectModel	-> deleteOld($_sqlConnection, $_aFormData);
+											$_objectModel	-> delete($_sqlConnection, $modelCondition);
 
 											$_bValidationMsg = 'Object deleted';
 										

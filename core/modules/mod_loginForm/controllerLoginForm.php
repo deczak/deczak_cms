@@ -74,12 +74,12 @@ class	controllerLoginForm extends CController
 			$this -> m_modelSimple -> load($_sqlConnection, $modelCondition);
 
 
-			$this -> m_modelSimple -> getDataInstance() -> params = json_decode($this -> m_modelSimple -> getDataInstance() -> params);
+			$this -> m_modelSimple -> getDataInstance()[0] -> params = json_decode($this -> m_modelSimple -> getDataInstance()[0] -> params);
 
-$this -> m_aObject -> params = $this -> m_modelSimple -> getDataInstance() -> params;
-$this -> m_aObject -> body = $this -> m_modelSimple -> getDataInstance() -> body;
+$this -> m_aObject -> params = $this -> m_modelSimple -> getDataInstance()[0] -> params;
+$this -> m_aObject -> body = $this -> m_modelSimple -> getDataInstance()[0] -> body;
 
-			if(CSession::instance() -> isAuthed($this -> m_modelSimple -> getDataInstance() -> params -> object_id) !== false)
+			if(CSession::instance() -> isAuthed($this -> m_modelSimple -> getDataInstance()[0] -> params -> object_id) !== false)
 			{
 		
 				$this -> logicSuccess();
@@ -88,7 +88,7 @@ $this -> m_aObject -> body = $this -> m_modelSimple -> getDataInstance() -> body
 
 
 			$modelCondition = new CModelCondition();
-			$modelCondition -> where('object_id', $this -> m_modelSimple -> getDataInstance() -> params -> object_id);
+			$modelCondition -> where('object_id', $this -> m_modelSimple -> getDataInstance()[0] -> params -> object_id);
 			
 			$_pModelLoginObjects	 =	new modelLoginObjects();
 			$_pModelLoginObjects	->	load($_sqlConnection, $modelCondition);	
@@ -97,7 +97,7 @@ $this -> m_aObject -> body = $this -> m_modelSimple -> getDataInstance() -> body
 							'view',	
 							'',
 							[
-								'object' 	=> $this -> m_modelSimple -> getDataInstance(),
+								'object' 	=> $this -> m_modelSimple -> getDataInstance()[0],
 								'login_objects' => $_pModelLoginObjects -> getDataInstance()
 							]
 							);
@@ -159,7 +159,9 @@ $this -> m_aObject -> body = $this -> m_modelSimple -> getDataInstance() -> body
 
 			$_dataset['params'] = json_encode($_dataset['params'], JSON_HEX_QUOT | JSON_HEX_APOS | JSON_UNESCAPED_UNICODE);
 
-			if(!$this -> m_modelSimple -> create($_sqlConnection, $_dataset))
+			$insertedId = 0;
+
+			if(!$this -> m_modelSimple -> insert($_sqlConnection, $_dataset, $insertedId))
 			{
 				$_bValidationErr =	true;
 				$_bValidationMsg =	'sql insert failed';
@@ -174,7 +176,7 @@ $this -> m_aObject -> body = $this -> m_modelSimple -> getDataInstance() -> body
 								'edit',	
 								'',
 								[
-									'object' 	=> $this -> m_modelSimple -> getDataInstance(),
+									'object' 	=> $this -> m_modelSimple -> getDataInstance()[0],
 									'login_objects' => $_pModelLoginObjects -> getDataInstance()
 								]
 								);
@@ -241,12 +243,11 @@ $this -> m_aObject -> body = $this -> m_modelSimple -> getDataInstance() -> body
 
 										$this -> m_modelPageObject = new modelPageObject();
 
-										$_objectUpdate['object_id']		=	$_aFormData['object_id'];
-										$_objectUpdate['time_update']		=	time();
+										$_objectUpdate['update_time']		=	time();
 										$_objectUpdate['update_by']			=	0;
 										$_objectUpdate['update_reason']		=	'';
 
-										$this -> m_modelPageObject -> update($_sqlConnection, $_objectUpdate);
+										$this -> m_modelPageObject -> update($_sqlConnection, $_objectUpdate, $modelCondition);
 									
 									}
 									else
@@ -280,7 +281,7 @@ $this -> m_aObject -> body = $this -> m_modelSimple -> getDataInstance() -> body
 						'edit',	
 						'',
 						[
-							'object' 		=> $this -> m_modelSimple -> getDataInstance(),
+							'object' 		=> $this -> m_modelSimple -> getDataInstance()[0],
 							'login_objects' => $_pModelLoginObjects -> getDataInstance()
 						]
 						);
@@ -323,7 +324,7 @@ $this -> m_aObject -> body = $this -> m_modelSimple -> getDataInstance() -> body
 										if($this -> m_modelSimple -> delete($_sqlConnection, $modelCondition))
 										{
 											$_objectModel  	 = new modelPageObject();
-											$_objectModel	-> deleteOld($_sqlConnection, $_aFormData);
+											$_objectModel	-> delete($_sqlConnection, $modelCondition);
 
 											$_bValidationMsg = 'Object deleted';
 										

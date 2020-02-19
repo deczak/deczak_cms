@@ -4,7 +4,7 @@ include_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelModules.php';
 
 class	controllerModules extends CController
 {
-	private		$m_modelRightGroups;
+	#private		$m_modelRightGroups;
 
 	public function
 	__construct($_module, &$_object)
