@@ -9,9 +9,8 @@ There are two branches:
 + dev-branch, the version that contains the newest features but it could contains bugs
 
 Further information at: 
-EN: [https://www.dennczak.de/en/projects/content-management-system/](https://www.dennczak.de/en/projects/content-management-system/) 
-
-DE: [https://www.dennczak.de/projekte/content-managment-system/](https://www.dennczak.de/projekte/content-managment-system/) 
++ EN: [https://www.dennczak.de/en/projects/content-management-system/](https://www.dennczak.de/en/projects/content-management-system/) 
++ DE: [https://www.dennczak.de/projekte/content-managment-system/](https://www.dennczak.de/projekte/content-managment-system/) 
 
 ### Current status
 
