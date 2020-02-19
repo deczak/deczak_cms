@@ -9,8 +9,9 @@ Es existieren zwei Branchens:
 + dev-branch, Version die in Entwicklung ist, Fehler enthalten kann und in einigen Bereichen möglicherweise nicht funktioniert
 
 Weitere Informationen unter:
-EN: [https://www.dennczak.de/en/projects/content-management-system/](https://www.dennczak.de/en/projects/content-management-system/)
-DE: [https://www.dennczak.de/projekte/content-managment-system/](https://www.dennczak.de/projekte/content-managment-system/)
+
+EN: [https://www.dennczak.de/en/projects/content-management-system/](https://www.dennczak.de/en/projects/content-management-system/) 
+DE: [https://www.dennczak.de/projekte/content-managment-system/](https://www.dennczak.de/projekte/content-managment-system/) 
 
 ###	Aktueller Stand
 
