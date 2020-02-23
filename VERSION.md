@@ -10,6 +10,19 @@ The version number is the release date. A letter as suffix indicates fixes on sa
 
 ## Version history	  
 
+
+### 20200219
+
+**Modules**
+- Added backend module for remote users to assign them rights
+
+**Changes**
+- Changed various table columns types
+
+**Notes**
+- Remote users for backend requires to edit the login-object, but this is atm not possible. After I got some additional stuff done with this, I will create a documentation for it.
+
+
 ### 20200219
 
 **Changes**

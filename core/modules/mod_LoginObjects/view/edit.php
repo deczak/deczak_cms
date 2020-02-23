@@ -97,7 +97,7 @@
 						<i class="fas fa-lock"></i>
 					</div>
 					<div class="input width-25">
-						<label><?php echo CLanguage::instance() -> getString('UPDATE_By'); ?></label>
+						<label><?php echo CLanguage::instance() -> getString('UPDATE_BY'); ?></label>
 						<input type="text" disabled name="group_name" value="<?php echo $login_object -> update_by; ?>">
 						<i class="fas fa-lock"></i>
 					</div>
@@ -230,7 +230,7 @@
 						<i class="fas fa-lock"></i>
 					</div>
 					<div class="input width-25">
-						<label><?php echo CLanguage::instance() -> getString('UPDATE_By'); ?></label>
+						<label><?php echo CLanguage::instance() -> getString('UPDATE_BY'); ?></label>
 						<input type="text" disabled name="group_name" value="<?php echo $login_object -> update_by; ?>">
 						<i class="fas fa-lock"></i>
 					</div>

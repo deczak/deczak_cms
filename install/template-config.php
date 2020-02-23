@@ -81,7 +81,7 @@ class CONFIG_MYSQL extends CONFIG_BASE
 	protected	$TABLE_CHARSET		=	"utf8mb4";
 	protected	$TABLE_ENGINE		=	"innoDB";
 
-	protected	$PRIMARY_DATABASE	= 	'1';
+	protected	$PRIMARY_DATABASE	= 	'primary';
 
 	protected	$DATABASE 			= 	[
 											[
@@ -89,7 +89,7 @@ class CONFIG_MYSQL extends CONFIG_BASE
 											"user"			=>	"%DATABASE_USER%",
 											"password"		=>	"%DATABASE_PASSWORD%",
 											"database"		=>	"%DATABASE_DATABASE%",
-											"name"			=>	'1'						
+											"name"			=>	'primary'						
 											]
 										];		
 }

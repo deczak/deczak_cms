@@ -5,6 +5,7 @@ require_once 'CSingleton.php';
 require_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelLoginObjects.php';
 require_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelDeniedRemote.php';
 require_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelUserAgent.php';
+require_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelUsersRegister.php';
 
 class	CSession extends CSingleton
 {
@@ -23,7 +24,8 @@ class	CSession extends CSingleton
 										"session_id"		=>	'',
 										"is_auth"			=>	false,
 										"is_auth_objects"	=>	[],
-										"login_fail_count"	=>	0
+										"login_fail_count"	=>	0,
+										"is_remote"			=>	false
 									];
 		$this -> m_bInitialized	= 	true;
 	}
@@ -209,19 +211,22 @@ class	CSession extends CSingleton
 							$_sqlString			=	"	SELECT		". $_loginObject -> object_table .".data_id,
 																	". $_loginObject -> object_table .".time_login,
 																	". $_loginObject -> object_table .".cookie_id,
-																	". $_loginObject -> object_table .".user_id
+																	". $_loginObject -> object_table .".user_id,
+																	". $_loginObject -> object_table .".login_name
 														FROM		". $_loginObject -> object_table ."
 														WHERE 		". $_loginObject -> object_table .".cookie_id LIKE '%\"". $_dbLogin -> real_escape_string($_cookieKey) ."\":{\"id\":\"". $_dbLogin -> real_escape_string($_cookieID) ."\"}%'
 															AND		". $_loginObject -> object_table .".is_locked = '0'
-														LIMIT		1
+											
 													";
 
+							if(CFG::GET() -> MYSQL -> PRIMARY_DATABASE !== $_dbName)
+								$_sqlString		.=	"		AND		". $_loginObject -> object_table .".allow_remote = '1' ";
+
+							$_sqlString			.=	"	LIMIT		1 ";
+
+
 							$_sqlLoginChkRes		=	$_dbLogin -> query($_sqlString);	
-
 		
-
-
-
 							if($_sqlLoginChkRes !== false && $_sqlLoginChkRes -> num_rows > 0)
 							{
 
@@ -282,14 +287,53 @@ class	CSession extends CSingleton
 										}
 									}
 
+									$userHash = NULL;
+
+									/*
+										Temporary Solution for remote users
+
+										if dbname unequal to primary db, this is a remote user
+									*/
+
+									if(CFG::GET() -> MYSQL -> PRIMARY_DATABASE !== $_dbName)
+									{
+										foreach(CFG::GET() -> MYSQL -> DATABASE as $database)
+										{
+											if($database['name'] !== $_dbName)
+												continue;
+											$userHash = hash('sha256', $database['name'] . $database['server'] . $_sqlLoginChk['user_id'] . $_sqlLoginChk['login_name']);
+										}
+
+										$modelUsersRegister	 	= new modelUsersRegister();
+
+										$registerCondition = new CModelCondition();
+										$registerCondition -> where('user_hash', $userHash);
+
+										$modelUsersRegister -> load($_db, $registerCondition);
+
+										if(!empty($modelUsersRegister -> getDataInstance())) {
+
+											$_sqlLoginChk['user_id'] = $modelUsersRegister -> getDataInstance()[0] -> user_id;
+
+
+											$this -> m_aSessionData['user_id'] = $_sqlLoginChk['user_id'];
+											$this -> m_aSessionData['is_remote'] = true;
+
+
+										}
+										else
+										{
+											$_sqlLoginChk['user_id'] = 0;
+										}
+
+
+									}
+
 									$_pUserRights -> loadUserRights($_db, $_sqlLoginChk['user_id']);
-			
-								}
-								
+								}								
 							}
 						}
-					}	
-			
+					}				
 				}
 				
 				return false;	

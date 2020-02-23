@@ -50,7 +50,7 @@ class CShemeColumn
 	}
 
 	public function
-	setDefault(string $_default)
+	setDefault($_default)
 	{
 		if($_default === 'NULL')
 		{
@@ -234,6 +234,15 @@ class CSheme
 
 			elseif($columnData -> isNull && $columnData -> defaultValue === NULL)
 				$sqlString[] 	= "DEFAULT NULL";
+
+			elseif(!$columnData -> isNull && $columnData -> defaultValue === false)
+
+				$sqlString[] 	= "DEFAULT '0'";
+
+			elseif(!$columnData -> isNull && $columnData -> defaultValue === true)
+
+				$sqlString[] 	= "DEFAULT '1'";
+
 			else
 				$sqlString[] 	= "DEFAULT '". $columnData -> defaultValue ."'";
 

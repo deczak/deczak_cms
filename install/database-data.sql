@@ -18,14 +18,15 @@ INSERT INTO `tb_modules` (`module_id`, `module_location`, `module_controller`, `
 (14, 'mod_environment', 'controllerEnvironment', 'core', 'backend', 0, 1, '', 'Environment', %TIMESTAMP%, 1, 0, 0),
 (15, 'mod_users', 'controllerUsers', 'core', 'backend', 0, 1, '', 'Users', %TIMESTAMP%, 1, 0, 0),
 (16, 'mod_categories', 'controllerCategories', 'core', 'backend', 0, 1, '', 'Categories', %TIMESTAMP%, 1, 0, 0),
-(17, 'mod_tags', 'controllerTags', 'core', 'backend', 0, 1, '', 'Tags', %TIMESTAMP%, 1, 0, 0);
+(17, 'mod_tags', 'controllerTags', 'core', 'backend', 0, 1, '', 'Tags', %TIMESTAMP%, 1, 0, 0),
+(17, 'mod_remoteUsers', 'controllerRemoteUsers', 'core', 'backend', 0, 1, '', 'Remote Users', %TIMESTAMP%, 1, 0, 0);
 
 INSERT INTO `tb_languages` (`data_id`, `lang_key`, `lang_name`, `lang_name_native`, `lang_hidden`, `lang_locked`, `lang_default`, `lang_frontend`, `lang_backend`, `create_time`, `create_by`, `update_time`, `update_by`) VALUES
 (1, 'en', 'English', 'English', 0, 0, 1, 1, 1, %TIMESTAMP%, 1, 0, 0),
 (2, 'de', 'German', 'Deutsch', 1, 0, 0, 1, 1, %TIMESTAMP%, 1, 0, 0);
 
 INSERT INTO `tb_login_objects` (`data_id`, `object_id`, `object_databases`, `object_table`, `object_fields`, `object_session_ext`, `object_description`, `is_disabled`, `is_protected`, `create_time`, `create_by`, `update_time`, `update_by`) VALUES
-(12, 'ABKND', '["1"]', 'tb_users_backend', '[{"name":"login_name","data_prc":"crypt","type":"text","is_username":"0"},{"name":"login_pass","data_prc":"hash","type":"password","is_username":"1"}]', '{"1":{"name":"user_name_last","data_prc":"crypt"},"2":{"name":"language","data_prc":"text"}}', 'Backend Access', 0, 1, %TIMESTAMP%, 1, 0, 0);
+(12, 'ABKND', '["primary"]', 'tb_users_backend', '[{"name":"login_name","data_prc":"crypt","type":"text","is_username":"0"},{"name":"login_pass","data_prc":"hash","type":"password","is_username":"1"}]', '{"1":{"name":"user_name_last","data_prc":"crypt"},"2":{"name":"language","data_prc":"text"}}', 'Backend Access', 0, 1, %TIMESTAMP%, 1, 0, 0);
 
 INSERT INTO `tb_page` (`data_id`, `node_id`, `page_id`, `page_version`, `page_template`, `update_reason`, `hidden_state`, `cache_disabled`, `crawler_index`, `crawler_follow`, `menu_follow`, `publish_from`, `publish_until`, `publish_expired`, `page_auth`, `create_time`, `create_by`, `update_time`, `update_by`) VALUES
 (1, 2, 1, 1, 'default', '', 0, 0, 1, 1, 1, 0, 0, 0, NULL, %TIMESTAMP%, 1, 0, 0),
@@ -47,10 +48,10 @@ INSERT INTO `tb_page_object` (`object_id`, `node_id`, `page_version`, `module_id
 (4, 3, 1, 4, 2, '', %TIMESTAMP%, 1, 0, 0);
 
 INSERT INTO `tb_page_object_simple` (`data_id`, `object_id`, `body`, `params`) VALUES
-(1, 1, 'For more information and the documentation about the content management system see <a href="https://www.dennczak.de/en/projects/content-managment-system/" style="">this website</a>&nbsp;(external link)', ''),
+(1, 1, '<p>For more information and the documentation about the content management system see <a href="https://www.dennczak.de/en/projects/content-managment-system/" style="">this website</a>&nbsp;(external link)</p>', ''),
 (2, 2, '<h1>Welcome to your new<p>Content Management System<br></p></h1>', ''),
 (3, 3, '<h1>Willkommen zu Ihrem neuen<p>Content Management System</p></h1>', ''),
-(4, 4, 'Für weitere Informationen und die Dokumentation zu diesem Content Management System schauen Sie auf <a href="https://www.dennczak.de/projekte/content-managment-system/">diese Website</a> (externer Link)', '');
+(4, 4, '<p>Für weitere Informationen und die Dokumentation zu diesem Content Management System schauen Sie auf <a href="https://www.dennczak.de/projekte/content-managment-system/">diese Website</a> (externer Link)</p>', '');
 
 INSERT INTO `tb_right_groups` (`group_id`, `group_name`, `group_rights`, `create_time`, `create_by`, `update_time`, `update_by`) VALUES
 (1, 'administrator', '{"1":["view","create","edit","delete"],"2":["index","view","create","edit","delete"],"3":["index","view","create","edit","delete"],"4":["view","create","edit","delete"],"5":["view","create","edit","delete"],"6":["index","view","create","edit","delete"],"7":["view","create","edit","delete"],"8":["index","view","create","edit","delete"],"9":["index","view","create","edit","delete"],"10":["index","view","create","edit","delete"],"11":["index","view","edit","delete"],"12":["index","view","create","edit","delete"],"13":["index","view","create","edit","delete"],"14":["index","edit"],"15":["index","view","create","edit","delete"],"16":["index","view","create","edit","delete"],"17":["index","view","create","edit","delete"]}', %TIMESTAMP%, 1, 0, 0);

@@ -18,10 +18,12 @@ class shemePageObject extends CSheme
 			
 		$this -> addColumn('update_reason', 'string') -> setLength(250) -> setDefault('NULL');
 		
+
 		$this -> addColumn('create_time', 'bigint') -> setAttribute('UNSIGNED');
-		$this -> addColumn('create_by', 'smallint') -> setAttribute('UNSIGNED');
+		$this -> addColumn('create_by', 'string') -> setLength(25);
 		$this -> addColumn('update_time', 'bigint') -> setAttribute('UNSIGNED') -> setDefault('0');
-		$this -> addColumn('update_by', 'smallint') -> setAttribute('UNSIGNED') -> setDefault('0');
+		$this -> addColumn('update_by', 'string') -> setLength(25) -> setDefault('NULL');
+
 
 		$this -> addColumn('instance', 'int') -> isVirtual();
 		$this -> addColumn('body', 'string') -> isVirtual();

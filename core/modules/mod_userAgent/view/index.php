@@ -69,4 +69,8 @@
 
 
 
+<?php
 
+tk::dbug($agentsList);
+
+?>

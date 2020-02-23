@@ -20,6 +20,8 @@ class	CUserRights
 								WHERE		tb_users_groups.user_id	= '". $_sqlConnection -> real_escape_string($_userId) ."'
 							";
 
+
+
 		$sqlURightsRes	= 	$_sqlConnection -> query($sqlString);		
 
 		while($sqlURightsRes !== false && $sqlURightsItm = $sqlURightsRes -> fetch_assoc())

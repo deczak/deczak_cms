@@ -113,6 +113,8 @@ class	controllerUserAgent extends CController
 				$_aFormData['create_by'] 	= CSession::instance() -> getValue('user_id');
 				$_aFormData['create_time'] 	= time();
 
+
+
 				$dataId = 0;
 
 				if($this -> m_pModel -> insert($_sqlConnection, $_aFormData, $dataId))
@@ -211,6 +213,9 @@ class	controllerUserAgent extends CController
 										{
 											$_aFormData['update_by'] 	= CSession::instance() -> getValue('user_id');
 											$_aFormData['update_time'] 	= time();
+
+											print_r($_aFormData);
+									
 
 											$modelCondition = new CModelCondition();
 											$modelCondition -> where('data_id', $_pURLVariables -> getValue("cms-system-id"));

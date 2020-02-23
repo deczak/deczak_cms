@@ -36,7 +36,7 @@
 	MOD_BEUSER_FM_LOGINCOUNT		=	Num of login
 	MOD_BEUSER_FM_USERAUTH			=	User authentication
 	MOD_BEUSER_FM_USERRIGHTS		=	User rights
-	MOD_BEUSER_FM_RIGTHGROUPS		=	Right groups
+	MOD_BEUSER_FM_RIGTHGROUPS		=	Rights groups
 	MOD_BEUSER_FM_LOCKEDSTATE		=	Account locked state
 	
 	MOD_BEUSER_FM_FRONTENDSTTNGS	= 	Frontend settings

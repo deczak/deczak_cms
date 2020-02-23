@@ -20,8 +20,8 @@ class shemeSitemap extends CSheme
 		$this -> addColumn('hidden_state'	, 'tinyint');
 		$this -> addColumn('create_time'	, 'bigint');
 		$this -> addColumn('update_time'	, 'bigint');
-		$this -> addColumn('create_by'		, 'mediumint');
-		$this -> addColumn('update_by'		, 'mediumint');
+		$this -> addColumn('create_by'		, 'string');
+		$this -> addColumn('update_by'		, 'string');
 		$this -> addColumn('alternate_path'	, 'array');
 		$this -> addColumn('node_id'		, 'int');
 		$this -> addColumn('level'			, 'int');

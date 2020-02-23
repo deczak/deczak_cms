@@ -15,7 +15,7 @@ class shemeRedirect extends CSheme
 		$this -> addColumn('redirect_desc', 'string') -> setLength(250) -> setDefault('NULL');
 
 		$this -> addColumn('create_time', 'bigint') -> setAttribute('UNSIGNED');
-		$this -> addColumn('create_by', 'smallint') -> setAttribute('UNSIGNED');
+		$this -> addColumn('create_by', 'string') -> setLength(25);
 
 		$this -> addConstraing('redirect_node_id', 'node_id', 'tb_page', 'node_id', 'CASCADE', 'CASCADE');
 	}

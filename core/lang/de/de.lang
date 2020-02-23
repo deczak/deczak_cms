@@ -13,7 +13,7 @@
 	TIME_CREATE_AT		=	Erstellt am
 	TIME_UPDATE_AT		=	Bearbeitet am
 	CREATE_BY			=	Erstellt von
-	UPDATE_By			=	Bearbeitet von
+	UPDATE_BY			=	Bearbeitet von
 	
 	BUTTON_SAVE			=	Speichern
 	BUTTON_DELETE		=	Löschen

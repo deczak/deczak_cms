@@ -100,6 +100,7 @@ class	controllerUsersBackend extends CController
 			$_request[] 	 = 	[	"input" => "login_pass_a",    	"validate" => "strip_tags|!empty" ]; 	
 			$_request[] 	 = 	[	"input" => "login_pass_b",    	"validate" => "strip_tags|!empty" ]; 
 			$_request[] 	 = 	[	"input" => "language",    		"validate" => "strip_tags|strip_whitespaces|!empty" ]; 		
+			$_request[] 	 = 	[	"input" => "allow_remote",    		"validate" => "strip_tags|strip_whitespaces|!empty" ]; 		
 			$_pURLVariables -> retrieve($_request, false, true); // POST 
 			$_aFormData		 = $_pURLVariables ->getArray();
 
@@ -116,8 +117,8 @@ class	controllerUsersBackend extends CController
 				$_aFormData['is_locked'] 	= '0';
 				$_aFormData['login_name'] 	= CRYPT::LOGIN_HASH($_aFormData['login_name']);
 
-				$modelUserRegister	 	= new modelUserRegister();
-				$_aFormData['user_id'] 	= $modelUserRegister -> registerUserId($_sqlConnection, 0);
+				$modelUsersRegister	 	= new modelUsersRegister();
+				$_aFormData['user_id'] 	= $modelUsersRegister -> registerUserId($_sqlConnection, 0);
 
 			
 
@@ -170,7 +171,7 @@ class	controllerUsersBackend extends CController
 				{
 					$_bValidationMsg .= CLanguage::get() -> string('ERR_SQL_ERROR');
 
-					$modelUserRegister -> removeUserId($_sqlConnection, $_aFormData['user_id']);
+					$modelUsersRegister -> removeUserId($_sqlConnection, $_aFormData['user_id']);
 				}
 			}
 
@@ -257,6 +258,7 @@ class	controllerUsersBackend extends CController
 									$_request[] 	 = 	[	"input" => "user_name_last",   	"validate" => "strip_tags|!empty" ]; 	
 									$_request[] 	 = 	[	"input" => "user_mail",    		"validate" => "strip_tags|strip_whitespaces|!empty" ]; 	
 									$_request[] 	 = 	[	"input" => "language",    		"validate" => "strip_tags|strip_whitespaces|!empty" ]; 	
+									$_request[] 	 = 	[	"input" => "allow_remote",   	"validate" => "strip_tags|strip_whitespaces|!empty" ]; 	
 									$_pFormVariables-> retrieve($_request, false, true); // POST 
 									$_aFormData		 = $_pFormVariables ->getArray();
 
@@ -371,27 +373,34 @@ class	controllerUsersBackend extends CController
 									$_pFormVariables -> retrieve($_request, false, true); // POST 
 									$_aFormData		 = $_pFormVariables ->getArray();
 
+									$_aFormData['update_by'] 	= CSession::instance() -> getValue('user_id');
+									$_aFormData['update_time'] 	= time();
+
 									##	Updating rights table
 
 									$modelCondition = new CModelCondition();
 									$modelCondition -> where('user_id', $_pURLVariables -> getValue("cms-system-id"));
 
-									$this -> m_modelRightGroups = new modelRightGroups();
-									$this -> m_modelRightGroups -> delete($_sqlConnection, $modelCondition);
-
-									$_sqlConnection -> query("DELETE FROM tb_users_groups WHERE tb_users_groups.user_id = '". $_pURLVariables -> getValue("cms-system-id") ."'");
+									$modelUserGroups = new modelUserGroups();
+									$modelUserGroups -> delete($_sqlConnection, $modelCondition);
 
 									foreach($_aFormData['groups'] as $_groupID)
 									{
-										$_sqlConnection -> query("INSERT INTO tb_users_groups SET tb_users_groups.user_id = '". $_sqlConnection -> real_escape_string($_pURLVariables -> getValue('cms-system-id')) ."', tb_users_groups.group_id = '". $_sqlConnection -> real_escape_string($_groupID) ."'");
+										$insertedId = 0;
+
+										$insertData = [
+														'user_id' 	=> $_pURLVariables -> getValue('cms-system-id'),
+														'group_id' 	=> $_groupID,
+														'update_by' 	=> $_aFormData['update_by'],
+														'update_time' 	=> $_aFormData['update_time']
+													  ];
+
+										$modelUserGroups -> insert($_sqlConnection,$insertData, $insertedId);
 									}
 
 									##	Updating locked state
 
 									unset($_aFormData['groups']);
-
-									$_aFormData['update_by'] 	= CSession::instance() -> getValue('user_id');
-									$_aFormData['update_time'] 	= time();
 
 									if($this -> m_pModel -> update($_sqlConnection, $_aFormData, $modelCondition))
 									{
@@ -441,8 +450,8 @@ class	controllerUsersBackend extends CController
 											$_bValidationMsg = CLanguage::get() -> string('USER WAS_DELETED') .' - '. CLanguage::get() -> string('WAIT_FOR_REDIRECT');
 											$_bValidationDta['redirect'] = CMS_SERVER_URL_BACKEND . CPageRequest::instance() -> urlPath;
 
-											$modelUserRegister  = new modelUserRegister();
-											$modelUserRegister -> removeUserId($_sqlConnection, $_pURLVariables -> getValue("cms-system-id"));
+											$modelUsersRegister  = new modelUsersRegister();
+											$modelUsersRegister -> removeUserId($_sqlConnection, $_pURLVariables -> getValue("cms-system-id"));
 											
 											$_sqlConnection -> query("DELETE FROM tb_users_groups WHERE tb_users_groups.user_id = '". $_pURLVariables -> getValue("cms-system-id") ."'");
 										}

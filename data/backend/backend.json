@@ -263,5 +263,23 @@
 					 ],
 		"menu_group":"3",
 		"menu_order":"0"
+	},
+	{
+		"page_name"	:"Remote Users",
+		"page_title":"Remote Users",
+		"page_description":"",
+		"page_path"	:"remote-users",
+		"node_id"	:"17",
+		"page_auth"	:"ABKND",
+		"objects"	:[
+						{
+							"module_id"	:"21",
+							"object_id"	:"1683",
+							"body"		:"",
+							"params"	:""
+						}		
+					 ],
+		"menu_group":"2",
+		"menu_order":"0"
 	}
 ]
