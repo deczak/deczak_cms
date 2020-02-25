@@ -19,7 +19,7 @@ INSERT INTO `tb_modules` (`module_id`, `module_location`, `module_controller`, `
 (15, 'mod_users', 'controllerUsers', 'core', 'backend', 0, 1, '', 'Users', %TIMESTAMP%, 1, 0, 0),
 (16, 'mod_categories', 'controllerCategories', 'core', 'backend', 0, 1, '', 'Categories', %TIMESTAMP%, 1, 0, 0),
 (17, 'mod_tags', 'controllerTags', 'core', 'backend', 0, 1, '', 'Tags', %TIMESTAMP%, 1, 0, 0),
-(17, 'mod_remoteUsers', 'controllerRemoteUsers', 'core', 'backend', 0, 1, '', 'Remote Users', %TIMESTAMP%, 1, 0, 0);
+(18, 'mod_remoteUsers', 'controllerRemoteUsers', 'core', 'backend', 0, 1, '', 'Remote Users', %TIMESTAMP%, 1, 0, 0);
 
 INSERT INTO `tb_languages` (`data_id`, `lang_key`, `lang_name`, `lang_name_native`, `lang_hidden`, `lang_locked`, `lang_default`, `lang_frontend`, `lang_backend`, `create_time`, `create_by`, `update_time`, `update_by`) VALUES
 (1, 'en', 'English', 'English', 0, 0, 1, 1, 1, %TIMESTAMP%, 1, 0, 0),
@@ -54,7 +54,7 @@ INSERT INTO `tb_page_object_simple` (`data_id`, `object_id`, `body`, `params`) V
 (4, 4, '<p>Für weitere Informationen und die Dokumentation zu diesem Content Management System schauen Sie auf <a href="https://www.dennczak.de/projekte/content-managment-system/">diese Website</a> (externer Link)</p>', '');
 
 INSERT INTO `tb_right_groups` (`group_id`, `group_name`, `group_rights`, `create_time`, `create_by`, `update_time`, `update_by`) VALUES
-(1, 'administrator', '{"1":["view","create","edit","delete"],"2":["index","view","create","edit","delete"],"3":["index","view","create","edit","delete"],"4":["view","create","edit","delete"],"5":["view","create","edit","delete"],"6":["index","view","create","edit","delete"],"7":["view","create","edit","delete"],"8":["index","view","create","edit","delete"],"9":["index","view","create","edit","delete"],"10":["index","view","create","edit","delete"],"11":["index","view","edit","delete"],"12":["index","view","create","edit","delete"],"13":["index","view","create","edit","delete"],"14":["index","edit"],"15":["index","view","create","edit","delete"],"16":["index","view","create","edit","delete"],"17":["index","view","create","edit","delete"]}', %TIMESTAMP%, 1, 0, 0);
+(1, 'administrator', '{"1":["view","create","edit","delete"],"2":["index","view","create","edit","delete"],"3":["index","view","create","edit","delete"],"4":["view","create","edit","delete"],"5":["view","create","edit","delete"],"6":["index","view","create","edit","delete"],"7":["view","create","edit","delete"],"8":["index","view","create","edit","delete"],"9":["index","view","create","edit","delete"],"10":["index","view","create","edit","delete"],"11":["index","view","edit","delete"],"12":["index","view","create","edit","delete"],"13":["index","view","create","edit","delete"],"14":["index","edit"],"15":["index","view","create","edit","delete"],"16":["index","view","create","edit","delete"],"17":["index","view","create","edit","delete"],"18":["index","view","edit"]}', %TIMESTAMP%, 1, 0, 0);
 
 INSERT INTO `tb_users_backend` (`data_id`, `login_name`, `login_pass`, `login_count`, `user_id`, `user_name_first`, `user_name_last`, `user_mail`, `time_login`, `create_time`, `update_time`, `cookie_id`, `recover_key`, `recover_timeout`, `is_locked`,`language`) VALUES
 (1, '%USER_NAME%', '%USER_PASSWORD%', 0, '1', '%USER_FIRST_NAME%', '%USER_LAST_NAME%', '%USER_MAIL%', 0, %TIMESTAMP%, 0, '{}', 0, 0, 0,'en');

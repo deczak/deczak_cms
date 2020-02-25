@@ -410,6 +410,12 @@ class	CModules extends CSingleton
 		$modelModules -> delete($_sqlConnection, $modelCondition);	
 	}
 
+	public function
+	existsRights(int $_moduleId, string $_rightsId)
+	{
+		return $this -> m_pUserRights -> existsRight($_moduleId, $_rightsId);
+	}
+
 
 }
 ?>

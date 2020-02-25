@@ -116,10 +116,15 @@ class	CLogin
 
 		foreach($_loginObject -> object_databases as $_dbName)
 		{
+			if(		CFG::GET() -> MYSQL -> PRIMARY_DATABASE !== $_dbName 
+				&& !CFG::GET() -> USER_SYSTEM -> REMOTE_USER -> ENABLED
+			  )	continue;
+
+
 			$_db 	= CSQLConnect::instance() -> getConnection($_dbName);
 
 			if(CFG::GET() -> MYSQL -> PRIMARY_DATABASE !== $_dbName)
-				$_columnsValue[] = $_loginObject -> object_table ."allow_remote = '1'";
+				$_columnsValue[] = $_loginObject -> object_table .".allow_remote = '1' ";
 				
 			$_sqlString			=	"	SELECT		". $_loginObject -> object_table .".is_locked,
 													". $_loginObject -> object_table .".login_count,
@@ -129,6 +134,8 @@ class	CLogin
 										WHERE		". implode(' AND ',$_columnsValue) ."
 										LIMIT		1
 									";
+
+
 
 			$_sqlLoginChkRes		=	$_db -> query($_sqlString);	
 

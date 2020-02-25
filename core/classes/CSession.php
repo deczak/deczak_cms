@@ -205,6 +205,10 @@ class	CSession extends CSingleton
 
 						foreach($_loginObject -> object_databases as $_dbName)
 						{
+							if(		CFG::GET() -> MYSQL -> PRIMARY_DATABASE !== $_dbName 
+								&& !CFG::GET() -> USER_SYSTEM -> REMOTE_USER -> ENABLED
+							)	continue;
+
 							$_dbLogin 	=	CSQLConnect::instance() -> getConnection($_dbName);
 							$_cookieID	=	CCookie::instance() -> getCookieID($_cookieKey);
 				

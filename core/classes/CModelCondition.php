@@ -7,11 +7,20 @@ class CModelConditionStage
 	public	$value;
 
 	public function
-	__construct($_type, $_column, $_value)
+	__construct($_type, $_column, $_value = NULL)
 	{
 		$this -> type 		= $_type;
 		$this -> column 	= $_column;
 		$this -> value 		= $_value;
+	}
+
+	public function
+	getValue(&$_sqlConnection)
+	{
+		if($this -> value === NULL)
+			return '';
+
+		return "'". $_sqlConnection -> real_escape_string($this -> value) ."'";
 	}
 }
 
@@ -83,6 +92,22 @@ class CModelCondition
 	}
 
 	public function
+	whereNull(string $_columnName)
+	{
+
+		$this -> conditionList[$this -> conditionLevel][] = new CModelConditionStage('IS NULL', $_columnName);
+		return $this;		
+	}
+
+	public function
+	whereNotNull(string $_columnName)
+	{
+	
+		$this -> conditionList[$this -> conditionLevel][] = new CModelConditionStage('IS NOT NULL', $_columnName);
+		return $this;	
+	}
+
+	public function
 	orderBy(string $_columnName, string $_direction = 'ASC')
 	{
 		$this -> oderByList[] = new CModelConditionOrder($_columnName, $_direction);
@@ -143,7 +168,7 @@ class CModelCondition
 							$_sqlString .= " AND ";
 						}
 
-						$_sqlString .= " ". $conditionStage -> column ." ". $conditionStage -> type ." '". $_sqlConnection -> real_escape_string($conditionStage -> value) . "' ";
+						$_sqlString .= " ". $conditionStage -> column ." ". $conditionStage -> type ." ". $conditionStage -> getValue($_sqlConnection) ." ";
 					}
 				}
 			}
@@ -175,7 +200,6 @@ class CModelCondition
 				else	
 					$_sqlString	.= " LIMIT ". $this -> limit ." " ;
 			}
-			
 			return $_sqlString;
 		}	
 		return '';	

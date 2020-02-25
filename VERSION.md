@@ -11,6 +11,14 @@ The version number is the release date. A letter as suffix indicates fixes on sa
 ## Version history	  
 
 
+### 20200225
+
+**Changes**
+- Changed backend module for login-objects to add additional databases to the backend login-object
+- Added cron job file for remote users
+- Added settings to environment module to set remote users configuration
+
+
 ### 20200219
 
 **Modules**

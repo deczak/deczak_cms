@@ -239,14 +239,14 @@ class	controllerLoginObjects extends CController
 										$_request[] 	 = 	[	"input" => "object_databases",  	 	"validate" => "strip_tags|!empty" ]; 	
 										$_request[] 	 = 	[	"input" => "object_table",   			"validate" => "strip_tags|!empty" ]; 	
 										$_request[] 	 = 	[	"input" => "object_fields",   			"validate" => "strip_tags|!empty" ]; 	
-										$_request[] 	 = 	[	"input" => "object_session_ext",   		"validate" => "strip_tags|!empty",	 "use_default" => true, "default_value" => '[]'  ]; 	
+										$_request[] 	 = 	[	"input" => "object_session_ext",   		"validate" => "strip_tags|!empty" ]; 	
 										$_request[] 	 = 	[	"input" => "object_field_is_username",  "validate" => "strip_tags|!empty" ]; 	
 										$_pFormVariables -> retrieve($_request, false, true);
 										$_aFormData		 = $_pFormVariables ->getArray();
 
 										if(empty($_aFormData['object_databases'])) { 	$_bValidationErr = true; 	$_bValidationDta[] = 'object_databases'; 	}
-										if(empty($_aFormData['object_table'])) { 	$_bValidationErr = true; 	$_bValidationDta[] = 'object_table'; 	}
-										if(empty($_aFormData['object_fields'])) { 	$_bValidationErr = true; 	$_bValidationDta[] = 'object_fields'; 	}
+									#	if(empty($_aFormData['object_table'])) { 	$_bValidationErr = true; 	$_bValidationDta[] = 'object_table'; 	}
+									#	if(empty($_aFormData['object_fields'])) { 	$_bValidationErr = true; 	$_bValidationDta[] = 'object_fields'; 	}
 
 
 										if(!$_bValidationErr)	// Validation OK (by pre check)
@@ -259,23 +259,29 @@ class	controllerLoginObjects extends CController
 
 										if(!$_bValidationErr)	// Validation OK
 										{
-											foreach($_aFormData['object_fields'] as $key => $fields)
+											if(!empty($_aFormData['object_fields']))
 											{
-												if($key == intval($_aFormData['object_field_is_username'])) 
-													$_aFormData['object_fields'][ $key ]['is_username'] = '1';
-												else
-													$_aFormData['object_fields'][ $key ]['is_username'] = '0';
+												foreach($_aFormData['object_fields'] as $key => $fields)
+												{
+													if($key == intval($_aFormData['object_field_is_username'])) 
+														$_aFormData['object_fields'][ $key ]['is_username'] = '1';
+													else
+														$_aFormData['object_fields'][ $key ]['is_username'] = '0';
+												}
+
+												// Re-Index Array for Javascript
+												$tempArray = $_aFormData['object_fields'];
+												$_aFormData['object_fields'] = [];
+												foreach($tempArray as $key => $fields)
+													$_aFormData['object_fields'][] = $fields;
+
+												$_aFormData['object_fields'] 		= json_encode($_aFormData['object_fields']);
 											}
 
-											// Re-Index Array for Javascript
-											$tempArray = $_aFormData['object_fields'];
-											$_aFormData['object_fields'] = [];
-											foreach($tempArray as $key => $fields)
-												$_aFormData['object_fields'][] = $fields;
-
 											$_aFormData['object_databases'] 	= json_encode($_aFormData['object_databases']);
-											$_aFormData['object_fields'] 		= json_encode($_aFormData['object_fields']);
-											$_aFormData['object_session_ext'] 	= json_encode($_aFormData['object_session_ext']);
+
+											if(!empty($_aFormData['object_session_ext']))
+												$_aFormData['object_session_ext'] 	= json_encode($_aFormData['object_session_ext']);
 
 											$_aFormData['update_by'] 	= CSession::instance() -> getValue('user_id');
 											$_aFormData['update_time'] 	= time();

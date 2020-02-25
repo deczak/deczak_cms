@@ -36,6 +36,16 @@
 							if($menuItem -> menu_group !== $menuGroup -> menu_group)
 								continue;
 
+							if(empty($menuItem -> objects) || !is_array($menuItem -> objects))
+								continue;
+
+							$moduleId = current($menuItem -> objects) -> module_id;
+						
+							if(!$modules -> existsRights($moduleId, 'index'))
+								continue;
+
+
+
 							echo '<a  class="menu-group-item" href="'. CMS_SERVER_URL_BACKEND . $menuItem -> page_path .'/">'. $menuItem -> page_name .'</a>';
 						}
 
@@ -60,26 +70,6 @@
 
 				</style>
 
-				<?php /*
-				if($session -> isAuthed(LOGIN_OBJECT_BACKEND) !== false)
-				{
-					echo '<a  class="yellow" href="'. CMS_SERVER_URL_BACKEND .'login-objects/">Login Objects</a>';
-					echo '&nbsp;&nbsp;&nbsp;';	
-					echo '<a  class="yellow" href="'. CMS_SERVER_URL_BACKEND .'right-groups/">Right Groups</a>';
-					echo '&nbsp;&nbsp;&nbsp;';	
-					echo '<a  class="yellow" href="'. CMS_SERVER_URL_BACKEND .'pages/">Pages</a>';
-					echo '&nbsp;&nbsp;&nbsp;';				
-					echo '<a  class="yellow" href="'. CMS_SERVER_URL_BACKEND .'backend-users/">Backend Users</a>';	
-					echo '&nbsp;&nbsp;&nbsp;';										
-					echo '<a  class="yellow" href="'. CMS_SERVER_URL_BACKEND .'denied-remote/">Denied Remote</a>';	
-					echo '&nbsp;&nbsp;&nbsp;';										
-					echo '<a  class="yellow" href="'. CMS_SERVER_URL_BACKEND .'useragents/">User Agents</a>';	
-					echo '&nbsp;&nbsp;&nbsp;';										
-					echo '<a  class="yellow" href="'. CMS_SERVER_URL_BACKEND .'sessions/">Sessions</a>';	
-					echo '&nbsp;&nbsp;&nbsp;';										
-					echo '<a  class="yellow" href="'. CMS_SERVER_URL_BACKEND .'modules/">Modules</a>';	
-				} */
-				?>
 			</div>
 		</div>
 	</div>

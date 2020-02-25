@@ -49,10 +49,10 @@ class	CUserRights
 	}
 
 	public function
-	existsRight(int $_moduleId, string $_rightId)
+	existsRight(int $_moduleId, string $_rightsId)
 	{
 		$moduleRight = $this -> getModuleRights($_moduleId);
-		return in_array($_rightId, $moduleRight, true);
+		return in_array($_rightsId, $moduleRight, true);
 	}
 
 	public function

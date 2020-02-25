@@ -116,10 +116,13 @@
 
 					<div class="input width-50">
 						<label><?php echo CLanguage::instance() -> getString('MOD_LOGINO_OBJECT_DESC'); ?></label>
-						<input type="text" name="object_description" maxlength="200" value="<?php echo $login_object -> object_description; ?>">
+						<input type="text" name="object_description" <?php if($login_object -> is_protected == 1) { echo 'disabled'; } ?> maxlength="200" value="<?php echo $login_object -> object_description; ?>">
+						<?php if($login_object -> is_protected == 1) { echo '<i class="fas fa-lock"></i>'; } ?>
 					</div>
+
 			
 					<div class="input width-25">
+						<?php if($login_object -> is_protected != 1) { ?>
 						<label><?php echo CLanguage::instance() -> getString('MOD_LOGINO_OBJECT_DISABLED'); ?></label>
 						<div class="select-wrapper">
 						<select name="is_disabled">
@@ -127,6 +130,7 @@
 							<option value="1" <?php echo ($login_object -> is_disabled == 1 ? 'selected' : ''); ?>><?php echo CLanguage::get() -> string('YES'); ?></option>
 						</select>	
 						</div>
+						<?php } ?>
 					</div>
 
 				</div>
@@ -150,6 +154,7 @@
 					</div>
 
 					<div class="input width-25">
+						<?php if($login_object -> is_protected != 1) { ?>
 						<label><?php echo CLanguage::instance() -> getString('MOD_LOGINO_OBJECT_TABLE'); ?></label>
 						<div class="select-wrapper">
 						<select name="object_table" id="input-object-table">
@@ -161,8 +166,11 @@
 							?>
 						</select>	
 						</div>
+						<?php } ?>
 					</div>
 				</div>
+
+				<?php if($login_object -> is_protected != 1) { ?>
 
 				<!-- group -->
 				<div class="group width-100">
@@ -190,9 +198,11 @@
 					</div>
 				</div>	
 
+				<?php } ?>
+
 			</div>
 
-			<?php if($enableEdit && $login_object -> is_protected != 1) { ?>
+			<?php if($enableEdit) { ?>
 
 				<div class="result-box" data-error=""></div>
 
@@ -256,7 +266,6 @@
 	function
 	onClickAddNewAuthField(fieldSet = null)
 	{
-//console.log(fieldSet);
 
 		var	oFieldsContainer = document.getElementById('container-authentication-fields');
 		var	existingField 	= oFieldsContainer.querySelector(' :last-child');
@@ -307,11 +316,12 @@
 	function
 	onClickAddNewExtendSessionField(fieldSet = null)
 	{
-//console.log(fieldSet);
-
 		var	oFieldsContainer = document.getElementById('container-extend-session-fields');
-		var	existingField 	= oFieldsContainer.querySelector(' :last-child');
+
+		var	existingField 	= oFieldsContainer.lastChild;
+
 		var	authTable 		= document.getElementById('input-object-table').value;
+
 
 		// get next row count
 		var	nextFieldCount = 1;
@@ -367,6 +377,7 @@
 	function
 	addAuthFieldSelectForName(oFieldWrapper, nextFieldCount, authTable, fieldname, preset = null)
 	{
+
 		// create field wrapping container
 		var oAuthFieldContainer = createAuthFieldWrapper('calc(25% - 35px)');
 

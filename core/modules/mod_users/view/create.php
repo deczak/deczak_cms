@@ -77,6 +77,7 @@
 					</div>
 
 					<div class="input width-25">
+						<?php if(CFG::GET() -> USER_SYSTEM -> REMOTE_USER -> ENABLED) { ?>
 						<label><?= $language -> string('MOD_BEUSER_FM_REMOTEAUTH'); ?></label>
 						<div class="select-wrapper">
 						<select name="allow_remote">
@@ -84,6 +85,7 @@
 							<option value="1"><?= $language -> string('MOD_BEUSER_FM_REMOTEAUTH_1_ALLOWED'); ?></option>
 						</select>	
 						</div>
+						<?php } ?>
 					</div>
 
 					<div class="input width-25">

@@ -141,6 +141,7 @@ class	CFG extends CSingleton
 	
 	##	configuration file
 	protected	$ERROR_PAGES;
+	protected	$USER_SYSTEM;
 
 	public function
 	initialize()
@@ -158,6 +159,7 @@ class	CFG extends CSingleton
 		$configuration = json_decode($configuration);
 
 		$this -> ERROR_PAGES	= $configuration -> ERROR_PAGES;
+		$this -> USER_SYSTEM	= $configuration -> USER_SYSTEM;
 	}
 
 	public function

@@ -83,6 +83,7 @@ $data = &$modulesList[0];
 						case 10: 
 						case 11: 
 						case 12: 
+						case 18: 
 						case 1: $disableSelect = true;
 					}
 					?>
