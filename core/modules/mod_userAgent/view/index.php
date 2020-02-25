@@ -1,10 +1,3 @@
-<?php
-
-	#tk::dbug($deniedList);
-
-	
-?>
-
 <div class="be-module-container">
 
 	<table class="table-overview">
@@ -76,4 +69,8 @@
 
 
 
+<?php
 
+#tk::dbug($agentsList);
+
+?>

@@ -3,6 +3,10 @@
 include_once CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CHTAccess.php';	
 include_once CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CXMLSitemap.php';	
 
+
+require_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelUserGroups.php';	
+require_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelUsersRegister.php';	
+
 class	controllerEnvironment extends CController
 {
 
@@ -15,7 +19,7 @@ class	controllerEnvironment extends CController
 	}
 	
 	public function
-	logic(&$_sqlConnection, array $_rcaTarget, array $_userRights, $_isXHRequest)
+	logic(&$_sqlConnection, array $_rcaTarget, $_isXHRequest)
 	{
 		##	Set default target if not exists
 
@@ -23,8 +27,8 @@ class	controllerEnvironment extends CController
 
 		##	Check user rights for this target
 
-		if(!$this -> hasRights($_userRights, $_controllerAction))
-		{ 
+		if(!$this -> detectRights($_controllerAction))
+		{
 			if($_isXHRequest !== false)
 			{
 				$_bValidationErr =	true;
@@ -40,8 +44,8 @@ class	controllerEnvironment extends CController
 
 		##	Call sub-logic function by target, if there results are false, we make a fall back to default view
 
-		$enableEdit 	= $this -> hasRights($_userRights, 'edit');
-		$enableDelete	= $this -> hasRights($_userRights, 'delete');
+		$enableEdit 	= $this -> existsUserRight('edit');
+		$enableDelete	= $enableEdit;
 
 		$_logicResults = false;
 		switch($_controllerAction)
@@ -89,7 +93,43 @@ class	controllerEnvironment extends CController
 
 			switch($_isXHRequest)
 			{
+				case 'set-remoteuser':	// Set remote User settings
 
+										$_pFormVariables	 =	new CURLVariables();
+										$_request		 =	[];
+										$_request[] 	 = 	[	"input" => "remote_enable",   	"validate" => "strip_tags|strip_whitespaces|cast_bool|!empty",	 "use_default" => true, "default_value" => false  ];
+										$_request[] 	 = 	[	"input" => "remote_timeout",   	"validate" => "strip_tags|strip_whitespaces|cast_int|!empty",	 "use_default" => true, "default_value" => '30'  ];
+										$_request[] 	 = 	[	"input" => "remote_report",   	"validate" => "strip_tags|strip_whitespaces|cast_bool|!empty",	 "use_default" => true, "default_value" => false  ];
+										$_pFormVariables -> retrieve($_request, false, true);
+										$_aFormData		 = $_pFormVariables ->getArray();
+
+										$configuration = file_get_contents(CMS_SERVER_ROOT.DIR_DATA.'configuration.json');
+										$configuration = json_decode($configuration);
+
+										$configuration -> USER_SYSTEM -> REMOTE_USER -> ENABLED			= $_aFormData['remote_enable'];
+										$configuration -> USER_SYSTEM -> REMOTE_USER -> REVOKE_RIGHTS	= $_aFormData['remote_timeout'];
+										$configuration -> USER_SYSTEM -> REMOTE_USER -> REPORT_REVOKE	= $_aFormData['remote_report'];
+
+										$configuration = json_encode($configuration, JSON_FORCE_OBJECT);
+										file_put_contents(CMS_SERVER_ROOT.DIR_DATA.'configuration.json', $configuration);
+
+										if(!$_aFormData['remote_enable'])
+										{
+											$registerCondition	 = new CModelCondition();
+											$registerCondition 	-> whereNotNull('user_hash');
+											$registerCondition 	-> whereNot('user_hash','');
+											$modelUsersRegister	 = new modelUsersRegister();
+											$modelUsersRegister -> delete($_sqlConnection, $registerCondition);
+
+											$usergroupCondition	 = new CModelCondition();
+											$usergroupCondition -> whereNotNull('user_hash');
+											$usergroupCondition -> whereNot('user_hash','');
+											$modelUserGroups	 = new modelUserGroups();
+											$modelUserGroups	-> delete($_sqlConnection, $usergroupCondition);
+										}
+
+										break;
+				
 				case 'update-htaccess':	// Update htaccess
 
 										$_pHTAccess  = new CHTAccess();

@@ -2,7 +2,7 @@
 
 ##	process session and access data
 
-	$sessionTimeout = time() - CONFIG::GET() -> SESSION -> TIMEOUT;
+	$sessionTimeout = time() - CFG::GET() -> SESSION -> TIMEOUT;
 
 	$sqlString		=	"	SELECT 		tb_sessions.*
 							FROM		tb_sessions

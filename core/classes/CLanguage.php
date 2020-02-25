@@ -284,7 +284,7 @@ class	CLanguage extends CSingleton
 		}
 		else
 		{
-			if(!isset(CONFIG::GET() -> LANGUAGE -> BACKEND[$_activeLanguage]))
+			if(!isset(CFG::GET() -> LANGUAGE -> BACKEND[$_activeLanguage]))
 
 				$this -> m_activeLanguage = 'en';	
 

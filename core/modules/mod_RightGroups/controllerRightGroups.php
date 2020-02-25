@@ -20,7 +20,7 @@ class	controllerRightGroups extends CController
 	}
 	
 	public function
-	logic(&$_sqlConnection, array $_rcaTarget, array $_userRights, $_isXHRequest)
+	logic(&$_sqlConnection, array $_rcaTarget, $_isXHRequest)
 	{
 		##	Set default target if not exists
 
@@ -28,8 +28,8 @@ class	controllerRightGroups extends CController
 
 		##	Check user rights for this target
 
-		if(!$this -> hasRights($_userRights, $_controllerAction))
-		{ 
+		if(!$this -> detectRights($_controllerAction))
+		{
 			if($_isXHRequest !== false)
 			{
 				$_bValidationErr =	true;
@@ -45,8 +45,8 @@ class	controllerRightGroups extends CController
 
 		##	Call sub-logic function by target, if there results are false, we make a fall back to default view
 
-		$enableEdit 	= $this -> hasRights($_userRights, 'edit');
-		$enableDelete	= $this -> hasRights($_userRights, 'delete');
+		$enableEdit 	= $this -> existsUserRight('edit');
+		$enableDelete	= $enableEdit;
 
 		$_logicResults = false;
 		switch($_controllerAction)
@@ -108,7 +108,7 @@ class	controllerRightGroups extends CController
 			}
 			else	// Validation Failed
 			{
-				$_bValidationMsg .= CLanguage::get() -> string('ERR_VALIDATIONFAIL') .' - '. CLanguage::get() -> string('MOD_RGROUP_ERR_NOTCREATED');
+				$_bValidationMsg .= CLanguage::get() -> string('ERR_VALIDATIONFAIL');
 			}
 
 			if(!$_bValidationErr)	// Validation OK
@@ -116,6 +116,10 @@ class	controllerRightGroups extends CController
 
 				$_aFormData['create_by'] 	= CSession::instance() -> getValue('user_id');
 				$_aFormData['create_time'] 	= time();
+
+
+				if(isset($_aFormData['group_rights'])) $_aFormData['group_rights'] = json_encode($_aFormData['group_rights']);
+	
 
 				$groupId = '0';
 				if($this -> modelRightGroups -> insert($_sqlConnection, $_aFormData, $groupId))
@@ -125,7 +129,7 @@ class	controllerRightGroups extends CController
 					$_pPageRequest 	= CPageRequest::instance();
 
 
-					$_bValidationMsg = CLanguage::get() -> string('MOD_RGROUP_OK_CREATED'). ' - '. CLanguage::get() -> string('WAIT_FOR_REDIRECT');
+					$_bValidationMsg = CLanguage::get() -> string('MOD_RGROUPS_GROUP_RIGHTS') .' '. CLanguage::get() -> string('WAS_CREATED'). ' - '. CLanguage::get() -> string('WAIT_FOR_REDIRECT');
 					$_bValidationDta['redirect'] = CMS_SERVER_URL_BACKEND . $_pPageRequest -> urlPath .'group/'.$groupId;
 				}
 				else
@@ -229,7 +233,7 @@ class	controllerRightGroups extends CController
 
 										if($this -> modelRightGroups -> update($_sqlConnection, $_aFormData, $modelCondition))
 										{
-											$_bValidationMsg = CLanguage::get() -> string('MOD_RGROUP_OK_UPDATED');
+											$_bValidationMsg = CLanguage::get() -> string('MOD_RGROUPS_GROUP_RIGHTS') .' '. CLanguage::get() -> string('WAS_UPDATED');
 										}
 										else
 										{
@@ -239,7 +243,7 @@ class	controllerRightGroups extends CController
 									}
 									else	// Validation Failed
 									{
-										$_bValidationMsg .= CLanguage::get() -> string('ERR_VALIDATIONFAIL') .' - '. CLanguage::get() -> string('MOD_RGROUP_ERR_NOTUPDATED');
+										$_bValidationMsg .= CLanguage::get() -> string('ERR_VALIDATIONFAIL');
 										$_bValidationErr = true;
 									}
 
@@ -267,9 +271,12 @@ class	controllerRightGroups extends CController
 										$modelCondition = new CModelCondition();
 										$modelCondition -> where('group_id', $_pURLVariables -> getValue("cms-system-id"));
 
+
+										if(isset($_aFormData['group_rights'])) $_aFormData['group_rights'] = json_encode($_aFormData['group_rights']);
+
 										if($this -> modelRightGroups -> update($_sqlConnection, $_aFormData, $modelCondition))
 										{
-											$_bValidationMsg = CLanguage::get() -> string('MOD_RGROUP_OK_UPDATED');
+											$_bValidationMsg = CLanguage::get() -> string('MOD_RGROUPS_GROUP_RIGHTS') .' '. CLanguage::get() -> string('WAS_UPDATED');
 										}
 										else
 										{
@@ -279,7 +286,7 @@ class	controllerRightGroups extends CController
 									}
 									else	// Validation Failed
 									{
-										$_bValidationMsg .= CLanguage::get() -> string('ERR_VALIDATIONFAIL') .' - '. CLanguage::get() -> string('MOD_RGROUP_ERR_NOTUPDATED');
+										$_bValidationMsg .= CLanguage::get() -> string('ERR_VALIDATIONFAIL');
 										$_bValidationErr = true;
 									}
 
@@ -321,7 +328,7 @@ class	controllerRightGroups extends CController
 
 										if($this -> modelRightGroups -> delete($_sqlConnection, $modelCondition))
 										{
-											$_bValidationMsg = CLanguage::get() -> string('MOD_RGROUP_OK_DELETED'). ' - '. CLanguage::get() -> string('WAIT_FOR_REDIRECT');
+											$_bValidationMsg = CLanguage::get() -> string('MOD_RGROUPS_GROUP_RIGHTS') .' '. CLanguage::get() -> string('WAS_DELETED'). ' - '. CLanguage::get() -> string('WAIT_FOR_REDIRECT');
 											$_bValidationDta['redirect'] = CMS_SERVER_URL_BACKEND . CPageRequest::instance() -> urlPath;
 										}
 										else

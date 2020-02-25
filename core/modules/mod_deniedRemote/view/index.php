@@ -1,10 +1,3 @@
-<?php
-
-	#tk::dbug($deniedList);
-
-	
-?>
-
 <div class="be-module-container">
 
 	<table class="table-overview">
@@ -62,7 +55,6 @@
 </div>
 
 <style>
-
 	div.be-module-container table.table-overview td.assignments { text-align:center; }
 </style>
 

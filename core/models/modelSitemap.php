@@ -42,7 +42,7 @@ class 	modelSitemap extends CModel
 										o.page_id,
 										o.page_language,
 										COUNT(p.node_id)-1 AS level,
-										ROUND ((n.node_rgt - n.node_lft - 1) / 2) AS offspring,
+										ROUND ((o.node_rgt - o.node_lft - 1) / 2) AS offspring,
 										tb_page_header.page_title,
 										tb_page_header.page_name,
 										tb_page_header.page_version,

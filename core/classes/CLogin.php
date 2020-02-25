@@ -1,10 +1,8 @@
 <?php
 
-require_once 'CBasic.php';
-
 require_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelLoginObjects.php';
 
-class	CLogin extends CBasic
+class	CLogin
 {
 
 	public 	function
@@ -15,21 +13,17 @@ class	CLogin extends CBasic
 	public	function
 	login(&$_sqlConnection, string $_loginObjectName)
 	{
-
-
-			$modelCondition = new CModelCondition();
-			$modelCondition -> where('object_id', $_loginObjectName);
-			
-
+		$modelCondition = new CModelCondition();
+		$modelCondition -> where('object_id', $_loginObjectName);
+		
 		## get login objects
+
 		$_pModelLoginObjects	 =	new modelLoginObjects();
 		$_pModelLoginObjects	->	load($_sqlConnection, $modelCondition);	
 
 		$_loginObjects			 = 	$_pModelLoginObjects -> getDataInstance();
 
 		## check if requested login object exists 
-
-		// TODO :: just count it and if 1 then = *[0]
 
 		$_foundObject = false;
 		foreach($_loginObjects as $_objectIndex => $_object)
@@ -49,15 +43,18 @@ class	CLogin extends CBasic
 		}
 
 		## get Session instance and check login fails count
+
 		$_pSession		 	= CSession::instance();
 		$_loginFailCount	= $_pSession -> getValue('login_fail_count');
 
 
-		if($_loginFailCount > CONFIG::GET() -> LOGIN -> FAIL_LIMIT)
+		if($_loginFailCount > CFG::GET() -> LOGIN -> FAIL_LIMIT)
 		{	##	Login limit reached
 			$this -> setError('ERR_CR_LOGIN_5');
 			return false;
 		}
+
+		##
 
 		$_bLoginResult	= false;
 		$_columnsValue	= [];
@@ -89,6 +86,8 @@ class	CLogin extends CBasic
 				return $_bLoginResult;
 			}
 
+			// on login field processing, crypt and hash are both one way hash types
+
 			switch($_field -> data_prc)
 			{
 				case 'plain':	##	No kind of processing
@@ -101,13 +100,15 @@ class	CLogin extends CBasic
 
 				case 'hash':	##	Hash form data for validation
 				default:
-								$_generatedValue = CRYPT::LOGIN_CRYPT($_formData[ $_field -> name ], CONFIG::GET() -> ENCRYPTION -> BASEKEY);					
+								$_generatedValue = CRYPT::LOGIN_CRYPT($_formData[ $_field -> name ], CFG::GET() -> ENCRYPTION -> BASEKEY);					
 				
 			}
 
 			$_columnsValue[] = $_loginObject -> object_table .'.'. $_field -> name ." = '". $_generatedValue."'";
 			if(isset($_field -> is_username) && $_field -> is_username === '1') $_cryptUsername[] = $_loginObject -> object_table .'.'. $_field -> name ." = '". $_generatedValue."'";	
 		}		
+
+
 	
 		##	Looping through the databases
 
@@ -115,8 +116,16 @@ class	CLogin extends CBasic
 
 		foreach($_loginObject -> object_databases as $_dbName)
 		{
+			if(		CFG::GET() -> MYSQL -> PRIMARY_DATABASE !== $_dbName 
+				&& !CFG::GET() -> USER_SYSTEM -> REMOTE_USER -> ENABLED
+			  )	continue;
+
+
 			$_db 	= CSQLConnect::instance() -> getConnection($_dbName);
 
+			if(CFG::GET() -> MYSQL -> PRIMARY_DATABASE !== $_dbName)
+				$_columnsValue[] = $_loginObject -> object_table .".allow_remote = '1' ";
+				
 			$_sqlString			=	"	SELECT		". $_loginObject -> object_table .".is_locked,
 													". $_loginObject -> object_table .".login_count,
 													". $_loginObject -> object_table .".data_id,
@@ -125,6 +134,8 @@ class	CLogin extends CBasic
 										WHERE		". implode(' AND ',$_columnsValue) ."
 										LIMIT		1
 									";
+
+
 
 			$_sqlLoginChkRes		=	$_db -> query($_sqlString);	
 
@@ -188,7 +199,7 @@ class	CLogin extends CBasic
 		{
 			$_db 	= CSQLConnect::instance() -> getConnection($_dbName);
 
-			if($_loginFailCount > CONFIG::GET() -> LOGIN -> FAIL_LIMIT)
+			if($_loginFailCount > CFG::GET() -> LOGIN -> FAIL_LIMIT)
 			{	##	Login limit reached -> lock account, update session for login kill
 				
 				$_sqlString			=	"	SELECT		". $_loginObject -> object_table .".user_mail,

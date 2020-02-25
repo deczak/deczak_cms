@@ -50,7 +50,7 @@ class CShemeColumn
 	}
 
 	public function
-	setDefault(string $_default)
+	setDefault($_default)
 	{
 		if($_default === 'NULL')
 		{
@@ -130,9 +130,9 @@ class CSheme
 	setTable(string $_tableName, bool $_isVirtual = false)
 	{
 		$this -> m_tableName 		= $_tableName;
-		$this -> m_collate 			= CONFIG::GET() -> MYSQL -> TABLE_COLLATE;
-		$this -> m_charset 			= CONFIG::GET() -> MYSQL -> TABLE_CHARSET;
-		$this -> m_tableEngine 		= CONFIG::GET() -> MYSQL -> TABLE_ENGINE;
+		$this -> m_collate 			= CFG::GET() -> MYSQL -> TABLE_COLLATE;
+		$this -> m_charset 			= CFG::GET() -> MYSQL -> TABLE_CHARSET;
+		$this -> m_tableEngine 		= CFG::GET() -> MYSQL -> TABLE_ENGINE;
 		$this -> m_sheme['virtual']	= $_isVirtual;
 		return $this;
 	}
@@ -184,7 +184,7 @@ class CSheme
 	dropTable(&$_sqlConnection)
 	{
 		if(empty($_sqlConnection) || !property_exists($_sqlConnection, 'errno') || $_sqlConnection -> errno != 0)
-			trigger_error("CImperator::__construct -- Invalid SQL connection", E_USER_ERROR);
+			return false;
 
 		$_sqlConnection -> query("DROP TABLE IF EXISTS `". $this -> m_tableName ."`");	
 	}
@@ -196,7 +196,7 @@ class CSheme
 			return true;
 
 		if(empty($_sqlConnection) || !property_exists($_sqlConnection, 'errno') || $_sqlConnection -> errno != 0)
-			trigger_error("CSheme::__construct -- Invalid SQL connection", E_USER_ERROR);
+			trigger_error("CSheme::createTable -- Invalid SQL connection", E_USER_ERROR);
 
 		if($_sqlConnection -> query("DESCRIBE `". $this -> m_tableName ."`"))
 		{
@@ -234,6 +234,15 @@ class CSheme
 
 			elseif($columnData -> isNull && $columnData -> defaultValue === NULL)
 				$sqlString[] 	= "DEFAULT NULL";
+
+			elseif(!$columnData -> isNull && $columnData -> defaultValue === false)
+
+				$sqlString[] 	= "DEFAULT '0'";
+
+			elseif(!$columnData -> isNull && $columnData -> defaultValue === true)
+
+				$sqlString[] 	= "DEFAULT '1'";
+
 			else
 				$sqlString[] 	= "DEFAULT '". $columnData -> defaultValue ."'";
 
@@ -335,7 +344,7 @@ class CSheme
 	truncateTable(&$_sqlConnection)
 	{		
 		if(empty($_sqlConnection) || !property_exists($_sqlConnection, 'errno') || $_sqlConnection -> errno != 0)
-			trigger_error("CImperator::__construct -- Invalid SQL connection", E_USER_ERROR);
+			trigger_error("CSheme::truncateTable -- Invalid SQL connection", E_USER_ERROR);
 
 		$_sqlConnection -> query("TRUNCATE TABLE `". $this -> m_tableName ."`");	
 	}

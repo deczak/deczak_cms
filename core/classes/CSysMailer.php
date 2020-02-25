@@ -28,18 +28,18 @@ class	CSysMailer extends CSingleton
 	initialize()
 	{		
 		if(	   
-				strlen(CONFIG::GET() -> SYSTEM_MAILER -> RECEIVER_ADDRESS) == 0
-			||	strlen(CONFIG::GET() -> SYSTEM_MAILER -> RECEIVER_NAME) == 0
+				strlen(CFG::GET() -> SYSTEM_MAILER -> RECEIVER_ADDRESS) == 0
+			||	strlen(CFG::GET() -> SYSTEM_MAILER -> RECEIVER_NAME) == 0
 		  )	
 		{
 			$this -> initialized			= false;
 			return false;
 		}
 
-		$this -> receiverAddress			= CONFIG::GET() -> SYSTEM_MAILER -> RECEIVER_ADDRESS;
-		$this -> receiverName				= CONFIG::GET() -> SYSTEM_MAILER -> RECEIVER_NAME;
-		$this -> mailSubjectPrefix			= CONFIG::GET() -> SYSTEM_MAILER -> SUBJECT_PREFIX;
-		$this -> timeoutSpamProtection		= CONFIG::GET() -> SYSTEM_MAILER -> LOCK_TIMEOUT;
+		$this -> receiverAddress			= CFG::GET() -> SYSTEM_MAILER -> RECEIVER_ADDRESS;
+		$this -> receiverName				= CFG::GET() -> SYSTEM_MAILER -> RECEIVER_NAME;
+		$this -> mailSubjectPrefix			= CFG::GET() -> SYSTEM_MAILER -> SUBJECT_PREFIX;
+		$this -> timeoutSpamProtection		= CFG::GET() -> SYSTEM_MAILER -> LOCK_TIMEOUT;
 		$this -> initialized				= true;
 
 		##	Mail signation
@@ -47,16 +47,16 @@ class	CSysMailer extends CSingleton
 		$this -> signingEnabled = false;
 
 		if(	   
-				strlen(CONFIG::GET() -> SYSTEM_MAILER -> SMIME_CERT_SIGN_FILE) != 0
-			&&	strlen(CONFIG::GET() -> SYSTEM_MAILER -> SMIME_PRIVKEY_FILE)   != 0
-			&&	strlen(CONFIG::GET() -> SYSTEM_MAILER -> SMIME_PRIVKEY_PASS)   != 0
-			&&	file_exists(CMS_SERVER_ROOT.DIR_CERT.CONFIG::GET() -> SYSTEM_MAILER -> SMIME_CERT_SIGN_FILE)
-			&&	file_exists(CMS_SERVER_ROOT.DIR_CERT.CONFIG::GET() -> SYSTEM_MAILER -> SMIME_PRIVKEY_FILE)
+				strlen(CFG::GET() -> SYSTEM_MAILER -> SMIME_CERT_SIGN_FILE) != 0
+			&&	strlen(CFG::GET() -> SYSTEM_MAILER -> SMIME_PRIVKEY_FILE)   != 0
+			&&	strlen(CFG::GET() -> SYSTEM_MAILER -> SMIME_PRIVKEY_PASS)   != 0
+			&&	file_exists(CMS_SERVER_ROOT.DIR_CERT.CFG::GET() -> SYSTEM_MAILER -> SMIME_CERT_SIGN_FILE)
+			&&	file_exists(CMS_SERVER_ROOT.DIR_CERT.CFG::GET() -> SYSTEM_MAILER -> SMIME_PRIVKEY_FILE)
 		  )	
 		{
-			$this -> signingCertFilename 	= CONFIG::GET() -> SYSTEM_MAILER -> SMIME_CERT_SIGN_FILE;
-			$this -> signingKeyFilename 	= CONFIG::GET() -> SYSTEM_MAILER -> SMIME_PRIVKEY_FILE;
-			$this -> signingCertPass 		= CONFIG::GET() -> SYSTEM_MAILER -> SMIME_PRIVKEY_PASS;
+			$this -> signingCertFilename 	= CFG::GET() -> SYSTEM_MAILER -> SMIME_CERT_SIGN_FILE;
+			$this -> signingKeyFilename 	= CFG::GET() -> SYSTEM_MAILER -> SMIME_PRIVKEY_FILE;
+			$this -> signingCertPass 		= CFG::GET() -> SYSTEM_MAILER -> SMIME_PRIVKEY_PASS;
 			$this -> signingEnabled 		= true;
 		}	
 
@@ -65,11 +65,11 @@ class	CSysMailer extends CSingleton
 		$this -> encryptEnabled = false;
 		
 		if(	   
-				strlen(CONFIG::GET() -> SYSTEM_MAILER -> SMIME_CERT_CRYPT_FILE) != 0
-			&&	file_exists(CMS_SERVER_ROOT.DIR_CERT.CONFIG::GET() -> SYSTEM_MAILER -> SMIME_CERT_CRYPT_FILE)
+				strlen(CFG::GET() -> SYSTEM_MAILER -> SMIME_CERT_CRYPT_FILE) != 0
+			&&	file_exists(CMS_SERVER_ROOT.DIR_CERT.CFG::GET() -> SYSTEM_MAILER -> SMIME_CERT_CRYPT_FILE)
 		  )	
 		{
-			$this -> encryptCertFilename 	= CONFIG::GET() -> SYSTEM_MAILER -> SMIME_CERT_CRYPT_FILE;
+			$this -> encryptCertFilename 	= CFG::GET() -> SYSTEM_MAILER -> SMIME_CERT_CRYPT_FILE;
 			$this -> encryptEnabled 		= true;
 		}
 

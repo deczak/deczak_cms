@@ -7,7 +7,7 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 	require_once    'config/directories.php';
 	require_once    'config/standard.php';
 
-##	B E N C H M A R K
+##	B E N C H M A R K ( possible outdated )
 
 	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CBenchmark.php';
 	CBenchmark::instance() -> initialize(CMS_BENCHMARK);
@@ -45,6 +45,7 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CHTML.php';
 	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CTemplate.php';
 	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CPageRequest.php';
+	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CUserRights.php';
 
 	CBenchmark::instance() -> measurementPoint('initialize and execute system classes');	
 
@@ -81,7 +82,7 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 	// 	Loads and manage language files
 
 	$_pLanguage		 = 	CLanguage::instance();		
-	$_pLanguage		-> 	initialize($_pSQLObject -> getConnection(CONFIG::GET() -> MYSQL -> PRIMARY_DATABASE));	
+	$_pLanguage		-> 	initialize($_pSQLObject -> getConnection(CFG::GET() -> MYSQL -> PRIMARY_DATABASE));	
 	$_pLanguage		->	loadLanguageFile(CMS_SERVER_ROOT.DIR_CORE.DIR_LANGUAGES.CLanguage::instance() -> getDefault() .'/');
 
 ##	C O O K I E   M A N A G E R
@@ -113,13 +114,18 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 
 	$_rcaTarget		 =	$_pURLVariables -> getValue("cms-ctrl-action");
 
+##	R I G H T S   S Y S T E M
+
+	$pUserRights	 = 	new CUserRights();
+
 ##	S E S S I O N   S Y S T E M
 
 	//	CSession is a singleton class
 	// 	Session System without session cookies at the beginning
 
 	$_pSession		 = 	CSession::instance();		
-	$_pSession		->	updateSession(intval($_pURLVariables -> getValue("cms-node")), $_pURLVariables -> getValue("cms-lang"));	
+	$_pSession		->	updateSession(intval($_pURLVariables -> getValue("cms-node")), $_pURLVariables -> getValue("cms-lang"), $pUserRights);	
+
 
 ##	Requested initial script action
 
@@ -128,7 +134,7 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 		case 'login':	## User login #################################################################################################################
 
 						$_pLogin		 =	new CLogin();
-						if( $_pLogin ->	login($_pSQLObject -> getConnection(CONFIG::GET() -> MYSQL -> PRIMARY_DATABASE), $_pURLVariables -> getValue("cms-tlon")) )
+						if( $_pLogin ->	login($_pSQLObject -> getConnection(CFG::GET() -> MYSQL -> PRIMARY_DATABASE), $_pURLVariables -> getValue("cms-tlon")) )
 						{
 							$_rcaTarget[$_pURLVariables -> getValue("cms-oid")] = 'loginSuccess';				
 						}
@@ -142,7 +148,7 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 		case 'logout':	## User logout ################################################################################################################
 
 						$_pLogin	 =	new CLogin();
-						$_pLogin 	->	logout($_pSQLObject -> getConnection(CONFIG::GET() -> MYSQL -> PRIMARY_DATABASE), $_pURLVariables -> getValue("cms-tlon"));
+						$_pLogin 	->	logout($_pSQLObject -> getConnection(CFG::GET() -> MYSQL -> PRIMARY_DATABASE), $_pURLVariables -> getValue("cms-tlon"));
 						break;
 	}
 
@@ -164,7 +170,7 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 	CBenchmark::instance() -> measurementPoint('module loader');	
 
 	$_pModules		 =	CModules::instance();
-	$_pModules		->	init($_pSQLObject -> getConnection(CONFIG::GET() -> MYSQL -> PRIMARY_DATABASE));
+	$_pModules		->	init($_pSQLObject -> getConnection(CFG::GET() -> MYSQL -> PRIMARY_DATABASE), $pUserRights);
 
 ##	I M P E R A T O R
 
@@ -172,7 +178,7 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 
 	$_pPageRequest 	 = 	CPageRequest::instance();
 	$_pPageRequest 	-> 	init(
-							$_pSQLObject 		-> getConnection(CONFIG::GET() -> MYSQL -> PRIMARY_DATABASE),
+							$_pSQLObject 		-> getConnection(CFG::GET() -> MYSQL -> PRIMARY_DATABASE),
 							$_pURLVariables 	-> getValue("cms-node"),
 							$_pLanguage			-> getActiveLanguage(),
 							$_pURLVariables 	-> getValue("version"),
@@ -182,8 +188,8 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 	if($_pURLVariables -> getValue("cms-error") !== false)
 		CPageRequest::instance() -> setResponseCode($_pURLVariables -> getValue("cms-error"));
 			
-	$_pImperator	 =	new CImperator( $_pSQLObject -> getConnection(CONFIG::GET() -> MYSQL -> PRIMARY_DATABASE) );
-	$_pImperator	->	logic($_pSQLObject -> getConnection(CONFIG::GET() -> MYSQL -> PRIMARY_DATABASE), $_pPageRequest , $_pModules, $_rcaTarget, CMS_BACKEND);
+	$_pImperator	 =	new CImperator( $_pSQLObject -> getConnection(CFG::GET() -> MYSQL -> PRIMARY_DATABASE) );
+	$_pImperator	->	logic($_pSQLObject -> getConnection(CFG::GET() -> MYSQL -> PRIMARY_DATABASE), $_pPageRequest , $_pModules, $_rcaTarget, CMS_BACKEND, $pUserRights);
 
 ##	H T M L   D O C U M E N T
 

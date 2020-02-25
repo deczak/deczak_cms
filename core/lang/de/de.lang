@@ -13,7 +13,7 @@
 	TIME_CREATE_AT		=	Erstellt am
 	TIME_UPDATE_AT		=	Bearbeitet am
 	CREATE_BY			=	Erstellt von
-	UPDATE_By			=	Bearbeitet von
+	UPDATE_BY			=	Bearbeitet von
 	
 	BUTTON_SAVE			=	Speichern
 	BUTTON_DELETE		=	Löschen
@@ -62,6 +62,10 @@
 	WAS_DELETED			=	wurde gelöscht
 	WAS_UPDATED			=	wurde aktualisiert
 	WAS_CREATED			=	wurde erstellt
+
+	WAS_NOT_DELETED		=	wurde nicht gelöscht
+	WAS_NOT_UPDATED		=	wurde nicht aktualisiert
+	WAS_NOT_CREATED		=	wurde nicht erstellt
 	
 	IS_UNKNOWN			=	ist unbekannt
 	

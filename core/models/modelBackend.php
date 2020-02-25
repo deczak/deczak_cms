@@ -26,7 +26,7 @@ class 	modelBackend extends CModel
 
 		##	Read backend file
 
-		$_backendSites = file_get_contents( CMS_SERVER_ROOT.DIR_DATA .'backend.json');
+		$_backendSites = file_get_contents( CMS_SERVER_ROOT.DIR_DATA .'backend/backend.json');
 		$_backendSites = ($_backendSites !== false ? json_decode($_backendSites, true) : [] );	
 
 

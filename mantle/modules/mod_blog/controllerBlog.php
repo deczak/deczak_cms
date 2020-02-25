@@ -11,39 +11,35 @@ include_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelSitemap.php';
 class	controllerBlog extends CController
 {
 
-	#private	$m_modelSimple;
 		
 	public function
 	__construct($_module, &$_object)
 	{
 		parent::__construct($_module, $_object);
 
-		#$this -> m_modelSimple = new modelSimple();
+
+		$this -> m_aModule -> user_rights[] = 'view';	// add view right as default for everyone
 	}
 	
 	public function
-	logic(&$_sqlConnection, array $_rcaTarget, array $_userRights, $_isXHRequest, &$_logicResult, bool $_bEditMode)
+	logic(&$_sqlConnection, array $_rcaTarget, $_isXHRequest, &$_logicResult, bool $_bEditMode)
 	{
 		##	Set default target if not exists
 
 		$_controllerAction = $this -> getControllerAction($_rcaTarget, 'view');
 
-		##	Check user rights for this target
-
-		$_userRights[] = 'view';		// Default Right for everyone
-
-		if(!$this -> hasRights($_userRights, $_controllerAction))	
-		{ 
+		if(!$this -> detectRights($_controllerAction))
+		{
 			if($_isXHRequest !== false)
 			{
 				$_bValidationErr =	true;
-				$_bValidationMsg =	CLanguage::instance() -> getString('ERR_PERMISSON');
+				$_bValidationMsg =	CLanguage::get() -> string('ERR_PERMISSON');
 				$_bValidationDta = 	[];
 
 				tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $_bValidationDta);	// contains exit call
 			}
 
-			CMessages::instance() -> addMessage(CLanguage::instance() -> getString('ERR_PERMISSON') , MSG_WARNING);
+			CMessages::instance() -> addMessage(CLanguage::get() -> string('ERR_PERMISSON') , MSG_WARNING);
 			return;
 		}
 
@@ -52,8 +48,8 @@ class	controllerBlog extends CController
 
 		##	Call sub-logic function by target, if there results are false, we make a fall back to default view
 
-		$enableEdit 	= $this -> hasRights($_userRights, 'edit');
-		$enableDelete	= $this -> hasRights($_userRights, 'delete');
+		$enableEdit 	= $this -> existsUserRight('edit');
+		$enableDelete	= $enableEdit;
 
 		$_logicResults = false;
 		switch($_controllerAction)
@@ -77,7 +73,6 @@ class	controllerBlog extends CController
 		$modelCondition = new CModelCondition();
 		$modelCondition -> where('object_id', $this -> m_aObject -> object_id);
 
-		#$this -> m_modelSimple -> load($_sqlConnection, $modelCondition);
 
  
 		$sitemapCondition = new CModelCondition();
@@ -118,7 +113,7 @@ class	controllerBlog extends CController
 			$sitemap[$nodeIndex] -> text = (count($modelPageObject -> getDataInstance()) != 0 ? $modelPageObject -> getDataInstance()[0] : NULL);
 
 
-##
+			##
 
 
 
@@ -242,12 +237,11 @@ class	controllerBlog extends CController
 
 										$this -> m_modelPageObject = new modelPageObject();
 
-										$_objectUpdate['object_id']		=	$objectId;
-										$_objectUpdate['time_update']		=	time();
+										$_objectUpdate['update_time']		=	time();
 										$_objectUpdate['update_by']			=	0;
 										$_objectUpdate['update_reason']		=	'';
 
-										$this -> m_modelPageObject -> updateOld($_sqlConnection, $_objectUpdate);
+										$this -> m_modelPageObject -> update($_sqlConnection, $_objectUpdate, $modelCondition);
 									
 									}
 									else
@@ -270,10 +264,6 @@ class	controllerBlog extends CController
 			tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $_bValidationDta);	// contains exit call
 		}	
 
-	#	$modelCondition = new CModelCondition();
-	#	$modelCondition -> where('object_id', $this -> m_aObject -> object_id);
-
-	#	$this -> m_modelSimple -> load($_sqlConnection, $modelCondition);
  
 		$sitemapCondition = new CModelCondition();
 		$sitemapCondition -> where('node_id', $this -> m_aObject -> node_id);
@@ -423,11 +413,126 @@ class	controllerBlog extends CController
 			}
 			else
 			{
+				$sitemapCondition = new CModelCondition();
+				$sitemapCondition -> where('node_id', $this -> m_aObject -> node_id);
+
+				$modelSitemap = new modelSitemap();
+				$modelSitemap -> load($_sqlConnection, $sitemapCondition);
+
+
+		$sitemap = $modelSitemap -> getDataInstance();
+
+		foreach($sitemap as $nodeIndex => $node)
+		{
+			$nodeCondition = new CModelCondition();
+			$nodeCondition -> where('node_id', $node -> node_id);
+			$nodeCondition -> where('module_controller', 'controllerSimpleText');
+			$nodeCondition -> orderBy('object_order_by');
+			$nodeCondition -> limit(1);
+
+			$modelPageObject  = new modelPageObject();
+
+
+			$modelPageObject -> addSelectColumns('tb_page_object.*','tb_page_object_simple.body','tb_page_object_simple.params');
+
+			$conditionPages = new CModelCondition();
+			$conditionPages -> where('tb_page_object_simple.object_id', 'tb_page_object.object_id');
+
+
+			$modelPageObject -> addRelation('join', 'tb_page_object_simple', $conditionPages);
+
+
+			$conditionPages = new CModelCondition();
+			$conditionPages -> where('tb_modules.module_id', 'tb_page_object.module_id');
+			$modelPageObject -> addRelation('join', 'tb_modules', $conditionPages);
+
+
+			$modelPageObject -> load($_sqlConnection, $nodeCondition);
+
+
+			$sitemap[$nodeIndex] -> text = (count($modelPageObject -> getDataInstance()) != 0 ? $modelPageObject -> getDataInstance()[0] : NULL);
+
+
+##
+
+
+
+			$nodeCondition = new CModelCondition();
+			$nodeCondition -> where('node_id', $node -> node_id);
+			$nodeCondition -> where('module_controller', 'controllerSimpleHeadline');
+			$nodeCondition -> orderBy('object_order_by');
+			$nodeCondition -> limit(1);
+
+			$modelPageObject  = new modelPageObject();
+
+
+			$modelPageObject -> addSelectColumns('tb_page_object.*','tb_page_object_simple.body','tb_page_object_simple.params');
+
+			$conditionPages = new CModelCondition();
+			$conditionPages -> where('tb_page_object_simple.object_id', 'tb_page_object.object_id');
+
+
+			$modelPageObject -> addRelation('join', 'tb_page_object_simple', $conditionPages);
+
+
+			$conditionPages = new CModelCondition();
+			$conditionPages -> where('tb_modules.module_id', 'tb_page_object.module_id');
+			$modelPageObject -> addRelation('join', 'tb_modules', $conditionPages);
+
+
+			$modelPageObject -> load($_sqlConnection, $nodeCondition);
+
+
+			$sitemap[$nodeIndex] -> headline = (count($modelPageObject -> getDataInstance()) != 0 ? $modelPageObject -> getDataInstance()[0] : NULL);
+
+##
+
+
+
+
+
+
+			$categorieAllocCondition 	 = new CModelCondition();
+			$categorieAllocCondition 	-> where('node_id', $node -> node_id);	
+			
+			$conditionPages = new CModelCondition();
+			$conditionPages -> where('tb_categories_allocation.category_id', 'tb_categories.category_id');	
+
+			$modelCategoriesAllocation	 = new modelCategoriesAllocation();
+			$modelCategoriesAllocation -> addSelectColumns('tb_categories.*');
+			$modelCategoriesAllocation -> addRelation('join', 'tb_categories', $conditionPages);
+			$modelCategoriesAllocation	-> load($_sqlConnection, $categorieAllocCondition);
+
+			$sitemap[$nodeIndex] -> categories = $modelCategoriesAllocation -> getDataInstance();
+		
+
+
+
+
+			$tagAllocCondition 	 = new CModelCondition();
+			$tagAllocCondition 	-> where('node_id', $node -> node_id);		
+
+			$conditionPages = new CModelCondition();
+			$conditionPages -> where('tb_tags_allocation.tag_id', 'tb_tags.tag_id');	
+
+			$modelTagsAllocation	 = new modelTagsAllocation();
+			$modelTagsAllocation -> addSelectColumns('tb_tags.*');
+			$modelTagsAllocation -> addRelation('join', 'tb_tags', $conditionPages);
+			$modelTagsAllocation	-> load($_sqlConnection, $tagAllocCondition);
+
+			
+			$sitemap[$nodeIndex] -> tags = &$modelTagsAllocation -> getDataInstance();
+
+
+		}
+
+
 				$this -> setView(	
 								'edit',	
 								'',
 								[
-									'object' 	=> $this -> m_aObject
+									'object' 	=> $this -> m_aObject,
+									'sitemap'	=> $modelSitemap -> getDataInstance()
 								]
 								);
 
@@ -474,7 +579,7 @@ class	controllerBlog extends CController
 										{
 											
 											$_objectModel  	 = new modelPageObject();
-											$_objectModel	-> deleteOld($_sqlConnection, $_aFormData);
+											$_objectModel	-> delete($_sqlConnection, $modelCondition);
 
 											$_bValidationMsg = 'Object deleted';
 										

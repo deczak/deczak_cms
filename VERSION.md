@@ -8,9 +8,59 @@ The version number is the release date. A letter as suffix indicates fixes on sa
 
 (the versions handling may get changed later)
 
-## Version history	   
+## Version history	  
 
-### 20200207 Dev version (alpha)
+
+### 20200225
+
+**Changes**
+- Changed backend module for login-objects to add additional databases to the backend login-object
+- Added cron job file for remote users
+- Added settings to environment module to set remote users configuration
+
+
+### 20200219
+
+**Modules**
+- Added backend module for remote users to assign them rights
+
+**Changes**
+- Changed various table columns types
+
+**Notes**
+- Remote users for backend requires to edit the login-object, but this is atm not possible. After I got some additional stuff done with this, I will create a documentation for it.
+
+
+### 20200219
+
+**Changes**
+- bugfix on adding module on page edit
+- New sub page set with locked for all as default value
+- Various changes and bug fixes in modules after audit
+
+### 20200216
+
+**Modules**
+- Added frontend/mantle Blog Post Headline Modul, creates a headline similar to blog-module
+- Various changes and bug fixes in modules
+
+**Changes**
+- Rework of user-rights system, the part for remote users is still on todo
+
+
+### 20200209
+
+**Changes**
+- Added page edit toolbar option for internal redirect, loads content from other node-id and sets canonical to this
+- Changes page content that comes with the fresh install, also added missing german root page
+- Various bug fixes (page edit toolbar)
+
+**Notes**
+- Removed previous project name as is was already in use by an other project
+- Installing Blog Module requires the rights, see right groups after install
+
+
+### 20200207
 
 **Modules**
 - Added backend module for frontent user management
@@ -25,20 +75,20 @@ The version number is the release date. A letter as suffix indicates fixes on sa
 - Various bugs fixed, maybe added new bugs
 
 
-### 20200126 Dev version (alpha)
+### 20200126
 
 **Changes**
 - Add two new fields in page edit toolbar for publish from / until
 - Add constraints support to Shemes handling
 
 
-### 20200120 Release version (alpha)
+### 20200120
 
 **Modules**
 - Added backend module for manually update of htaccess and sitemap.xml if needed
 
 
-### 20200118 Release version (alpha)
+### 20200118
 
 **Notes**
 - Early version
@@ -55,14 +105,14 @@ The version number is the release date. A letter as suffix indicates fixes on sa
 - Fixed wrong column name when calling moduleSitemap, which led to wrong URLs in sitemap.xml and .htaccess
 		
 
-### 20200112  Release version (alpha)
+### 20200112
   
 **Notes**
 - Early version
 - Mantle module mod_blogBackend unfinished (maybe will be dropped)
 
 
-### 20190922  Release version (alpha)
+### 20190922
 
 **Notes**
 - Early version

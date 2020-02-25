@@ -3,20 +3,15 @@ class	cmsUiSelect
 {
 	constructor()
 	{
-
 	}
-
 
 	init()
 	{
-
 	}
-
 
 	create()
 	{
-
-	// TODO .. testen ob das mit querySelectorAll funktioniert  .ui div.input > select	
+		// TODO .. testen ob das mit querySelectorAll funktioniert  .ui div.input > select	
  		var targetElements = Array.prototype.slice.call(document.getElementsByClassName('dropdown'), 0);
 
 		for(var nItem = 0; nItem < targetElements.length; nItem++)
@@ -24,7 +19,6 @@ class	cmsUiSelect
 			this.replace(targetElements[nItem]);
 		}
 	}
-
 
 	replace(srcElement)
 	{
@@ -86,6 +80,9 @@ class	cmsUiSelect
 		var	option		= this.querySelector('option[value="'+this.value+'"]'); 
 		var optionValue = (option != null ? option.value : this.value);
 		var	optionText 	= (option != null ? option.innerText : this.value);
+
+		if(optionValue == '')
+			return false;
 
 		// create element for text
 		var selectedText = document.createElement('span');
@@ -154,10 +151,5 @@ class	cmsUiSelect
 			selectedOption.hidden = true;
 
 		this.value = '';
-	}
-
-	onClickSelectedItem()
-	{
-
 	}
 }

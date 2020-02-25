@@ -55,9 +55,16 @@
 		{
 			switch(xhr.status)
 			{
-				case 200:	// OK					
-							var jsonObject = JSON.parse(xhr.response); 
-					
+				case 200:	// OK		
+
+							try	{
+								var jsonObject = JSON.parse(xhr.response);
+							} catch(e) {
+								resultBox.innerHTML = 'Invalid json string - parsing failed';
+								resultBox.setAttribute('data-error',1);
+								break;
+							}
+						
 							if(typeof jsonObject.data.redirect != "undefined")
 							{
 								setTimeout(function(){ window.location.replace(jsonObject.data.redirect); }, 2000);

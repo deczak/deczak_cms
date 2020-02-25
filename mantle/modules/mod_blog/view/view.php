@@ -16,7 +16,9 @@ foreach($sitemap as $node)
 	}
 
 	if(
-			($node -> hidden_state == 0)
+			(		$node -> hidden_state == 0
+			    || 	$node -> hidden_state == 2
+			)
 		&&	(empty($node -> page_auth) || (!empty($node -> page_auth) && CSession::instance() -> isAuthed($node -> page_auth) === true))
 		||	(	($node -> hidden_state == 5 && $node -> publish_from  < $timestamp)
 			&&	($node -> hidden_state == 5 && $node -> publish_until > $timestamp && $node -> publish_until != 0)

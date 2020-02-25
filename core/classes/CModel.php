@@ -18,8 +18,6 @@ class	CModelRelations
 class	CModel
 {
 	protected	$m_storage;
-	protected	$m_additionalProperties;		// deprecated
-	protected	$m_tableRelations;				// deprecated
 
 	protected	$m_relationsList;
 	protected	$m_selectList;
@@ -32,15 +30,10 @@ class	CModel
 	{
 		$this -> m_storage 				= [];
 
-		$this -> m_additionalProperties = [];			// deprecated
-		$this -> m_tableRelations		= [];			// deprecated
-
 		$this -> m_relationsList		= [];
 		$this -> m_selectList			= [];
 		$this -> m_className			= $_className;
 	}
-
-
 
 	public function
 	addRelation(string $_joinType, string $_tableName, CModelCondition $_condition)
@@ -71,7 +64,7 @@ class	CModel
 	 * @return bool	Returns true if succeeded, otherwise false
 	 */
 	public function
-	load(&$_sqlConnection, CModelCondition $_condition = NULL)
+	load(&$_sqlConnection, CModelCondition $_condition = NULL, CModelComplementary $_complementary = NULL)
 	{
 		// Adding select columns to Sheme instance
 
@@ -94,7 +87,7 @@ class	CModel
 
 		// Create class prototpe
 
-		$className	=	$this -> createClass($this -> m_sheme, $this -> m_className, '', $this -> m_additionalProperties);
+		$className	=	$this -> createClass($this -> m_sheme, $this -> m_className, '');
 
 		// Generate sql string
 
@@ -117,6 +110,30 @@ class	CModel
 		while($sqlResult !== false && $sqlRow = $sqlResult -> fetch_assoc())
 		{	
 			$this -> m_storage[] = new $className($sqlRow, $this -> m_sheme -> getColumns());
+
+			//	Add complementary data from another model result into array if property compares
+
+			if($_complementary !== NULL)
+			{
+				$index = count($this -> m_storage) - 1;
+
+				foreach($_complementary -> complementaryList as $complementarySet)
+				{
+					$propertyName 		= $complementarySet -> propertyName;
+					$propertyCompare 	= $complementarySet -> propertyCompare;
+
+					$this -> m_storage[$index] -> $propertyName = [];
+
+					foreach($complementarySet -> storageInstance as $subDataset)
+					{
+						if($this -> m_storage[$index] -> $propertyCompare === $subDataset -> $propertyCompare)
+						{
+							$this -> m_storage[$index] -> $propertyName[] = $subDataset; 
+						}
+					}
+				}
+			}
+
 		}
 		
 		return true;
@@ -130,16 +147,16 @@ class	CModel
 	 * @return bool	Returns true if succeeded, otherwise false
 	 */
 	public function
-	insert(&$_sqlConnection, &$_dataset, &$_insertID)
+	insert(&$_sqlConnection, &$_dataset, &$_insertedId)
 	{
-		$className		 =	$this -> createClass($this -> m_sheme, $this -> m_className);
-		$tableName		 =	$this -> m_sheme -> getTableName();
+		$className		=	$this -> createClass($this -> m_sheme, $this -> m_className);
+		$tableName		=	$this -> m_sheme -> getTableName();
 
-		$model 			 = 	new $className($_dataset, $this -> m_sheme -> getColumns());
+		$model			= 	new $className($_dataset, $this -> m_sheme -> getColumns());
 
-		$sqlString		 =	"INSERT INTO $tableName	SET ";
+		$sqlString		=	"INSERT INTO $tableName	SET ";
 
-		$loopCounter 	 = 0;
+		$loopCounter 	= 0;
 		foreach($this -> m_sheme -> getColumns() as $column)
 		{
 			if($column -> isVirtual) continue;
@@ -149,10 +166,10 @@ class	CModel
 			$sqlString 	.= "`".$column -> name ."` = '". $model -> $tmp ."'";
 			$loopCounter++;
 		}
-		
 		if($_sqlConnection -> query($sqlString) !== false) 
 		{
-			$_insertID = $_sqlConnection -> insert_id;
+			$_insertedId = $_sqlConnection -> insert_id;
+			$this -> m_storage[] = $model;
 			return true;
 		}
 		return false;
@@ -182,7 +199,7 @@ class	CModel
 	}
 	
 	public function
-	delete( &$_sqlConnection, CModelCondition $_condition = NULL)
+	delete(&$_sqlConnection, CModelCondition $_condition = NULL)
 	{
 		if($_condition === NULL || !$_condition -> isSet()) return false;
 	
@@ -197,19 +214,19 @@ class	CModel
 
 	#protected function ( temporär wegen backend handling)
 	public function
-	createClass(&$_targetSheme, string $_nameAppendix = '', string $_parentClass = '', array $_additionalProperties = [])
+	createClass(&$_targetSheme, string $_nameAppendix = '', string $_parentClass = '')
 	{
 		$_className = __CLASS__.'_data'.(!empty($_nameAppendix) ? '_'.$_nameAppendix : '');
 
 		if(!class_exists($_className))
 		{
-			$this -> _createClass( $_className , $_targetSheme -> getColumns(), $_parentClass, $_additionalProperties);
+			$this -> _createClass( $_className , $_targetSheme -> getColumns(), $_parentClass);
 		}
 		return $_className;
 	}
 
 	private function
-	_createClass(string $_objectName , array $_columns , string $_extends = '', array $_additionalProperties = [] )
+	_createClass(string $_objectName , array $_columns , string $_extends = '')
 	{
 		$_objectString  = "class $_objectName ". (!empty($_extends) ? "extends $_extends " : "") ." {";
 
@@ -240,12 +257,6 @@ class	CModel
 								case 'bool'     : $_objectString .= " case '". $_column -> name ."': \$this->". $_column -> name ." = boolval(\$_initialValue); break;"; break;				
 								default         : $_objectString .= " case '". $_column -> name ."': \$this->". $_column -> name ." = \$_initialValue; break;"; break;				
 							}
-						}
-						
-						##	Adding additional properties 
-						foreach($_additionalProperties as $_column)
-						{
-							$_objectString .= " case '". $_column."': \$this->". $_column ." = \$_initialValue; break;";				
 						}
 
 					$_objectString .= " }";
@@ -278,12 +289,12 @@ class	CModel
 	}
 
 	protected function
-	decryptRawSQLDataset(array &$_sqlDataset, string $_key, array $_columns)
+	decryptRawSQLDataset(&$_sqlDataset, string $_key, array $_columns)
 	{		
 		foreach($_columns as $_column)
 		{
-			if(!empty($_sqlDataset[$_column]))	
-				$_sqlDataset[$_column] = CRYPT::DECRYPT($_sqlDataset[$_column], $_key, true);
+			if(!empty($_sqlDataset -> $_column))	
+				$_sqlDataset -> $_column = CRYPT::DECRYPT($_sqlDataset -> $_column, $_key, true);
 		}	
 	}
 
@@ -328,24 +339,6 @@ class	CModel
 
 		if($_sqlResult -> num_rows > 0) return true;
 		return false;
-	}
-
-	public function
-	setAdditionalProperties(array $_additionalProperties)
-	{
-		$this -> m_additionalProperties = array_merge($this -> m_additionalProperties, $_additionalProperties);
-	}
-
-	public function
-	setReleation($_modelInstance, string $_joinType, array $_joinOn)
-	{
-		#deprecated
-		$this -> m_tableRelations[] = 	[
-											'shemeInstance'	=> $_modelInstance -> m_sheme,
-											'join'			=> $_joinType .' join',
-											'on'			=> $_joinOn
-
-										];
 	}
 
 	public function

@@ -28,7 +28,7 @@
 		exit;
 	}	
 
-	$sqlInstance = $pSQLObject -> getConnection(CONFIG::GET() -> MYSQL -> PRIMARY_DATABASE);
+	$sqlInstance = $pSQLObject -> getConnection(CFG::GET() -> MYSQL -> PRIMARY_DATABASE);
 
 ##  Other
 

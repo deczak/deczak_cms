@@ -5,6 +5,7 @@ include_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelBackend.php';
 include_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelPage.php';	
 include_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelPageObject.php';	
 include_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelSitemap.php';	
+include_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelRedirect.php';	
 
 class CPageRequest extends CSingleton
 {
@@ -61,6 +62,42 @@ class CPageRequest extends CSingleton
 		{
 			$_nodeId = 2;
 		}
+
+		## Checking internal redirect settings
+
+		$redirectCondition = new CModelCondition();
+		$redirectCondition -> where('node_id', $_nodeId);			
+
+		$modelRedirect	= new modelRedirect();
+		$modelRedirect -> load($_sqlConnection, $redirectCondition);
+
+		$redirectList	= &$modelRedirect -> getDataInstance();
+
+		$this -> canonical = false;
+		$this -> page_redirect = '';
+
+		if(!empty($redirectList) && !CMS_BACKEND)
+		{
+			$redirectTarget = $redirectList[0] -> redirect_target;
+		
+			if(ctype_digit($redirectTarget)) {
+				$_nodeId = $redirectTarget;
+				$this -> canonical = true;
+			}
+			else
+			{
+				// TODO :: Redirect to this string 
+			}
+		}
+		elseif(!empty($redirectList) && CMS_BACKEND)
+		{
+			$redirectTarget = $redirectList[0] -> redirect_target;
+		
+			$this -> page_redirect = $redirectTarget;
+
+		}
+
+		##	
 
 		$this -> node_id 			= $_nodeId;
 		$this -> page_language 		= $_language;
@@ -150,12 +187,20 @@ class CPageRequest extends CSingleton
 			}
 
 			// fällt später weg beim umbau vom backend
-			$sqlWhere['node_id']		= $this -> node_id;
-			$sqlWhere['page_version']	= $this -> page_version;
+			#$sqlWhere['node_id']		= $this -> node_id;
+			#$sqlWhere['page_version']	= $this -> page_version;
+
+
+
+			$modelCondition = new CModelCondition();
+			$modelCondition -> where('node_id', $this -> node_id);
+			$modelCondition -> where('page_version', $this -> page_version);
+			$modelCondition -> orderBy('object_order_by');
+
 
 
 			$modelPageObject = new modelPageObject();
-			$modelPageObject -> loadOld($_sqlConnection, $sqlWhere);
+			$modelPageObject -> load($_sqlConnection, $modelCondition);
 			$this -> objectsList = &$modelPageObject -> getDataInstance();
 		
 
@@ -185,7 +230,7 @@ class CPageRequest extends CSingleton
 					$this 	-> addCrumb($this -> sitemap[$i] -> page_name, $this -> sitemap[$i] -> page_path, $this -> sitemap[$i] -> node_id, $this -> sitemap[$i] -> page_language, $this -> sitemap[$i] -> level)
 							-> setTitle($this -> sitemap[$i] -> page_title);
 
-	#					$this -> m_page -> crumb_path[] = $this -> sitemap[$i];
+					#$this -> m_page -> crumb_path[] = $this -> sitemap[$i];
 						$_level--;
 					}
 				}
@@ -194,6 +239,14 @@ class CPageRequest extends CSingleton
 
 				$this -> crumbsList = array_reverse($this -> crumbsList);
 			}
+
+			##	Add detailed Language information
+
+			$languagesList = CLanguage::instance() -> getLanguages();
+			if(isset($languagesList[$_language]))
+				$this -> languageInfo = $languagesList[$_language];
+			else
+				$this -> languageInfo = NULL;
 
 
 

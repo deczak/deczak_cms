@@ -4,7 +4,7 @@
 
 	$statistic = [];
 
-	$sessionTimeout = time() - CONFIG::GET() -> SESSION -> TIMEOUT;
+	$sessionTimeout = time() - CFG::GET() -> SESSION -> TIMEOUT;
 
 
 
@@ -186,7 +186,7 @@
 	#tk::dbug($statistic);
 
 
-	if(CONFIG::GET() -> CRONJOB -> REPORT_WEEKLYACCESS)
+	if(CFG::GET() -> CRONJOB -> REPORT_WEEKLYACCESS)
 	{
 
 

@@ -1,63 +1,67 @@
 {
 	"module_controller" : "controllerPages",
-	"rights"	:[
-					{"name":"index",	"desc":"OVERVIEW"},
-					{"name":"view",		"desc":"VIEW"},
-					{"name":"create",	"desc":"CREATE"},
-					{"name":"edit",		"desc":"EDIT"},
-					{"name":"delete",	"desc":"DELETE"}
-				 ],
-	"sub"		:[
-					{
-						"url_name"	:"",
-						"ctl_target":"",
-						"menu_name"	:"MOD_SITES_SEC_INDEX_NAME",
-						"menu_order":"0"
-					},
-					{
-						"url_name"	:"create",
-						"ctl_target":"create",
-						"menu_name"	:"",
-						"menu_order":"0"
-					},
-					{
-						"url_name"	:"view",
-						"ctl_target":"view",
-						"menu_name"	:"",
-						"menu_order":"0"
-					},
-					{
-						"url_name"	:"edit",
-						"ctl_target":"edit",
-						"menu_name"	:"",
-						"menu_order":"0"
-					},
-					{
-						"url_name"	:"delete",
-						"ctl_target":"delete",
-						"menu_name"	:"",
-						"menu_order":"0"
-					},
-					{
-						"url_name"	:"deletetree",
-						"ctl_target":"deletetree",
-						"menu_name"	:"",
-						"menu_order":"0"
-					}
-				 ],
-	"htaccess"	:{
-					"variables"		:[
-										{
-											"key" 		: "cms-edit-page-lang",
-											"wildcard"	:"([a-zA-Z]+)"
-										},
-										{
-											"key" 		: "cms-edit-page-node",
-											"wildcard"	:"(.*)"
-										}
-									 ]
-				 },
-	"include"	:[
-					{"type":"script",	"file":"script.js"}
-				 ]
+	"module_rights"		:[
+							{"name":"index",	"desc":"OVERVIEW"},
+							{"name":"view",		"desc":"VIEW"},
+							{"name":"edit",		"desc":"EDIT"}
+						],
+	"module_subs"		:[
+							{
+								"url_name"	:"",
+								"ctl_target":"index",
+								"menu_name"	:"MOD_SITES_SEC_INDEX_NAME",
+								"menu_order":"0",
+								"use_right" :"index"
+							},
+							{
+								"url_name"	:"create",
+								"ctl_target":"create",
+								"menu_name"	:"",
+								"menu_order":"0",
+								"use_right" :"edit"
+							},
+							{
+								"url_name"	:"view",
+								"ctl_target":"view",
+								"menu_name"	:"",
+								"menu_order":"0",
+								"use_right" :"view"
+							},
+							{
+								"url_name"	:"edit",
+								"ctl_target":"edit",
+								"menu_name"	:"",
+								"menu_order":"0",
+								"use_right" :"edit"
+							},
+							{
+								"url_name"	:"delete",
+								"ctl_target":"delete",
+								"menu_name"	:"",
+								"menu_order":"0",
+								"use_right" :"edit"
+							},
+							{
+								"url_name"	:"deletetree",
+								"ctl_target":"deletetree",
+								"menu_name"	:"",
+								"menu_order":"0",
+								"use_right" :"edit"
+							}
+						],
+	"htaccess"			:{
+							"variables"		:[
+												{
+													"key" 		: "cms-edit-page-lang",
+													"wildcard"	:"([a-zA-Z]+)"
+												},
+												{
+													"key" 		: "cms-edit-page-node",
+													"wildcard"	:"(.*)"
+												}
+											]
+						},
+	"include"			:[
+							{"type":"script",	"file":"script.js"}
+						]
 }

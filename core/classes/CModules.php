@@ -10,8 +10,10 @@ class	CModules extends CSingleton
 	public	$modulesList;
 	public	$loadedList;
 
+	private $m_pUserRights;
+
 	public function
-	init(&$_sqlConnection)
+	init(&$_sqlConnection, CUserRights &$_pUserRights)
 	{
 		if($_sqlConnection === false)
 			return; 
@@ -20,6 +22,8 @@ class	CModules extends CSingleton
 		$this -> modulesList 	 =	$this -> modelModules -> getDataInstance();
 
 		$this -> loadedList		 =	[];
+
+		$this -> m_pUserRights	 = $_pUserRights;
 	}
 
 	/**
@@ -29,11 +33,13 @@ class	CModules extends CSingleton
 	loadModule(int $_moduleId)
 	{
 		$moduleInstance = NULL;
+		$moduleIndex = false;
 
-		if(!$this -> getModule($_moduleId, $moduleInstance))
+		if(!$this -> getModule($_moduleId, $moduleInstance, $moduleIndex))
 		{
 			return false;
 		}
+
 
 		if($moduleInstance -> is_active === 0)
 		{
@@ -51,24 +57,33 @@ class	CModules extends CSingleton
 
 							$moduleConfig 	= file_get_contents( CMS_SERVER_ROOT.DIR_CORE.DIR_MODULES. $moduleInstance -> module_location .'/module.json');
 							$moduleConfig 	= ($moduleConfig !== false ? json_decode($moduleConfig) : [] );	
-							$moduleInstance = (object)array_merge((array)$moduleInstance, (array)$moduleConfig);
-							$this -> loadedList[] = $moduleInstance;
-							return $moduleInstance;
+							$this -> modulesList[$moduleIndex] = (object)array_merge((array)$moduleInstance, (array)$moduleConfig);
+							$this -> modulesList[$moduleIndex] -> user_rights = $this -> m_pUserRights -> getModuleRights($_moduleId);
+
+
+							$this -> loadedList[] = $this -> modulesList[$moduleIndex];
+							return $this -> modulesList[$moduleIndex];
 							
 			case 'mantle' : include CMS_SERVER_ROOT.DIR_MANTLE.DIR_MODULES. $moduleInstance -> module_location .'/'. $moduleInstance -> module_controller .'.php';
 
 							$moduleConfig 	= file_get_contents( CMS_SERVER_ROOT.DIR_MANTLE.DIR_MODULES. $moduleInstance -> module_location .'/module.json');
 							$moduleConfig 	= ($moduleConfig !== false ? json_decode($moduleConfig) : [] );	
-							$moduleInstance = (object)array_merge((array)$moduleInstance, (array)$moduleConfig);
-							$this -> loadedList[] = $moduleInstance;
-							return $moduleInstance;
+
+
+							$this -> modulesList[$moduleIndex] = (object)array_merge((array)$moduleInstance, (array)$moduleConfig);
+
+							$this -> modulesList[$moduleIndex] -> user_rights = $this -> m_pUserRights -> getModuleRights($_moduleId);
+
+
+							$this -> loadedList[] = $this -> modulesList[$moduleIndex];
+							return $this -> modulesList[$moduleIndex];
 		}
 
 		return false;
 	}
 
 	public function
-	getModule(int $_moduleId, &$_moduleIinstance)
+	getModule(int $_moduleId, &$_moduleIinstance, int &$_moduleIndex)
 	{
 		$modulesCount = count($this -> modulesList);
 
@@ -76,6 +91,9 @@ class	CModules extends CSingleton
 		{
 			if($this -> modulesList[$i] -> module_id === $_moduleId)
 			{
+
+				$_moduleIndex = $i;
+
 				$_moduleIinstance = $this -> modulesList[$i];
 				return true;
 			}
@@ -85,8 +103,36 @@ class	CModules extends CSingleton
 	}
 
 	public function
-	&getModules()
+	&getModules(bool $_onlyFrontend = false)
 	{
+		if($_onlyFrontend)
+		{
+			$modulesList = [];
+
+			foreach($this -> modulesList as $module)
+			{
+
+				if(!$module -> is_frontend)
+					continue;
+
+
+				if(!property_exists($module, 'user_rights'))
+					$module -> user_rights = $this -> m_pUserRights -> getModuleRights($module -> module_id);
+
+
+
+				if(!$this -> m_pUserRights -> existsRight($module -> module_id, 'create'))
+					continue;
+
+				$modulesList[] = $module;
+
+			}
+
+
+
+			return $modulesList;
+		}
+
 		return $this -> modulesList;
 	}
 	
@@ -129,6 +175,7 @@ class	CModules extends CSingleton
 			$_dirIterator 	= new DirectoryIterator($procPath);
 			foreach($_dirIterator as $_dirItem)
 			{
+
 				if($_dirItem -> isDot() || $_dirItem -> getType() !== 'dir')
 					continue;
 
@@ -170,7 +217,6 @@ class	CModules extends CSingleton
 
 			$availableList[] = $dirModuleItem;
 		}
-
 		foreach($moduleList_mantle as $dirModuleKey => $dirModuleItem)
 		{
 			$moduleInstalled = false;
@@ -183,9 +229,8 @@ class	CModules extends CSingleton
 					break;
 				}
 			}
-
 			if($moduleInstalled)
-				break;
+				continue;
 
 			$dirModuleItem -> module_type 		= "mantle";
 
@@ -251,11 +296,11 @@ class	CModules extends CSingleton
 
 		if($moduleConfig -> module_frontend == 0)
 		{
-			$backendObjFilepath = CMS_SERVER_ROOT . DIR_DATA .'/backend-id.json';
+			$backendObjFilepath = CMS_SERVER_ROOT . DIR_DATA .'/backend/backend-id.json';
 			$backendObjectId	= file_get_contents($backendObjFilepath);
 			$backendObjectId	= json_decode($backendObjectId);
 
-			$backendFilepath 	= CMS_SERVER_ROOT . DIR_DATA .'/backend.json';
+			$backendFilepath 	= CMS_SERVER_ROOT . DIR_DATA .'/backend/backend.json';
 			$backendPages		= file_get_contents($backendFilepath);
 			$backendPages		= json_decode($backendPages, true);
 
@@ -320,7 +365,7 @@ class	CModules extends CSingleton
 		if($moduleData -> is_frontend === 0)
 		{
 
-			$backendFilepath 	= CMS_SERVER_ROOT . DIR_DATA .'/backend.json';
+			$backendFilepath 	= CMS_SERVER_ROOT . DIR_DATA .'/backend/backend.json';
 			$backendPages		= file_get_contents($backendFilepath);
 			$backendPages		= json_decode($backendPages);
 
@@ -363,6 +408,12 @@ class	CModules extends CSingleton
 		}
 
 		$modelModules -> delete($_sqlConnection, $modelCondition);	
+	}
+
+	public function
+	existsRights(int $_moduleId, string $_rightsId)
+	{
+		return $this -> m_pUserRights -> existsRight($_moduleId, $_rightsId);
 	}
 
 

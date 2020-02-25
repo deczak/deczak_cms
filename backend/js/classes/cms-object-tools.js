@@ -35,10 +35,20 @@
 			}
 			return false;
 		}
-
+// in dieser funktion data-rights abrufen und anhand der rechte die tools anzeigen oder nicht, zur zeit sind für frontend module die delete auf edit gelinkt
+// andere custom rechte existieren derzeit nicht .. hier todo für js überholung wenn module ihre eigenen funktionen die mit eigenen rechten gedongelt sein könnten
 		replace(objectElement)
 		{			
 			var that 		= this;
+
+
+			var	objRights 	= objectElement.getAttribute('data-rights');
+				objRights	= objRights.split(',');
+
+			if(!objRights.includes('edit'))
+				return false;
+
+
 
 			var fontColor = cmstk.getVisibleBackgroundColor(objectElement);
 				fontColor = cmstk.invertRGBA(fontColor);

@@ -1,14 +1,3 @@
-<?php
-
-#	tk::dbug($modulesList);
-
-	
-
-#	$modulesList -> module_location
-
-
-?>
-
 
 <div class="be-module-container">
 
@@ -46,6 +35,15 @@
 	<div class="ui">
 		<div id="result-box-install" class="ui result-box"></div>
 	</div>
+
+	<br>
+
+
+	<div class="ui"><div class="result-box big" data-error="2">
+		<b><?= $language -> string('NOTE'); ?>:</b> &nbsp;<?= $language -> string('M_BEMOULE_MSG_INSTALLNOTICE'); ?>		
+	</div></div>
+
+	<br><br>
 
 </div>
 

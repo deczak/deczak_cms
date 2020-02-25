@@ -56,16 +56,43 @@ class	TK
 	}
 
 	public static function
-	getBackendUserName(&$_sqlConnection, int $_userId)
+	getBackendUserName(&$_sqlConnection,string $_userId)
 	{
 		require_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelUsersBackend.php';
-		$modelCondition = new CModelCondition();
-		$modelCondition -> where('user_id', strval($_userId));
-		$pModel = new modelUsersBackend();
-		if(!$pModel -> load($_sqlConnection, $modelCondition))	
+		require_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelUsersRegister.php';	
+
+		$registerCondition	 = new CModelCondition();
+		$registerCondition 	-> where('user_id', $_userId);
+		$registerCondition 	-> groupBy('user_id');
+		$modelUsersRegister	 = new modelUsersRegister();
+		$modelUsersRegister -> load($_sqlConnection, $registerCondition);
+
+		if(empty($modelUsersRegister -> getDataInstance()))
 			return '';
-		$user = $pModel -> getDataInstance()[0];
-		return $user -> user_name_first .' '. $user -> user_name_last;
+
+		$registerData = $modelUsersRegister -> getDataInstance()[0];
+
+		switch($registerData -> user_type)
+		{
+			case 0:	// Backend user
+
+					$backendCondition	 = new CModelCondition();
+					$backendCondition 	-> where('user_id', strval($_userId));
+					$modelUsersBackend 	 = new modelUsersBackend();
+					$modelUsersBackend 	-> load($_sqlConnection, $modelCondition);
+
+					if(empty($modelUsersBackend -> getDataInstance()))
+						return '';
+
+					$user = $modelUsersBackend -> getDataInstance()[0];
+					return $user -> user_name_first .' '. $user -> user_name_last;
+
+			case 3: // Remote user
+
+					return $registerData -> user_name;
+		}
+
+		return '';
 	}
 
 	public static function
@@ -91,7 +118,7 @@ class	CRYPT
 	private static function
 	CRYPTKEY(string $_key, bool $_appendKey )
 	{
-		$_CryptKey	=	CONFIG::GET() -> ENCRYPTION -> BASEKEY;
+		$_CryptKey	=	CFG::GET() -> ENCRYPTION -> BASEKEY;
 		if( !empty($_key) AND !$_appendKey)
 		{
 			$_CryptKey	=	$_key;
@@ -107,7 +134,7 @@ class	CRYPT
 	private static function
 	CRYPTVECTOR(string $_key, bool $_appendKey )
 	{
-		$_CryptKey		=	CONFIG::GET() -> ENCRYPTION -> BASEKEY;
+		$_CryptKey		=	CFG::GET() -> ENCRYPTION -> BASEKEY;
 		if( !empty($_key) AND !$_appendKey)
 		{
 			$_CryptKey	=	$_key;
@@ -122,13 +149,13 @@ class	CRYPT
 	public static function
 	ENCRYPT(string $_string, string $_key = '', bool $_appendKey = false )
 	{	
-		return	base64_encode( openssl_encrypt( $_string, CONFIG::GET() -> ENCRYPTION -> METHOD, CRYPT::CRYPTKEY($_key,$_appendKey), 0, CRYPT::CRYPTVECTOR($_key,$_appendKey) ) );	
+		return	base64_encode( openssl_encrypt( $_string, CFG::GET() -> ENCRYPTION -> METHOD, CRYPT::CRYPTKEY($_key,$_appendKey), 0, CRYPT::CRYPTVECTOR($_key,$_appendKey) ) );	
 	}
 
 	public static function
 	DECRYPT(string $_string, string $_key = '', bool $_appendKey = false )
 	{
-		return	openssl_decrypt( base64_decode( $_string ), CONFIG::GET() -> ENCRYPTION -> METHOD, CRYPT::CRYPTKEY($_key,$_appendKey), 0, CRYPT::CRYPTVECTOR($_key,$_appendKey) );		
+		return	openssl_decrypt( base64_decode( $_string ), CFG::GET() -> ENCRYPTION -> METHOD, CRYPT::CRYPTKEY($_key,$_appendKey), 0, CRYPT::CRYPTVECTOR($_key,$_appendKey) );		
 	}	
 
 	public static function

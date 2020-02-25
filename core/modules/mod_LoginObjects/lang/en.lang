@@ -1,25 +1,13 @@
 
-##	Sub Sections
 
-	MOD_LOGINO_SUB_VIEW_NAME			=	Overview
 	MOD_LOGINO_SUB_CREATE_NAME			=	Create object
 
 
 	M_BERMADDR_MSG_OBJEXIST		=	This login object exists already
 
-##	Error
 
 	MOD_LOGINO_ERR_OBJECT_ID_UK			=	Object does not exists
-	MOD_LOGINO_ERR_NOTUPDATED			=	Object not updated
-	MOD_LOGINO_ERR_NOTCREATED			=	Object not created
-
-##	Positive returns
 		
-	MOD_LOGINO_OK_UPDATED				=	Object updated
-	MOD_LOGINO_OK_DELETED				=	Object deleted
-	MOD_LOGINO_OK_CREATED				=	Object created
-	
-##		
 
 	MOD_LOGINO_OBJECT_NAME				=	Object Name (ID)
 	MOD_LOGINO_OBJECT_DESC				=	Object Description

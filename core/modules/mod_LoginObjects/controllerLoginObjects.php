@@ -17,7 +17,7 @@ class	controllerLoginObjects extends CController
 	}
 	
 	public function
-	logic(&$_sqlConnection, array $_rcaTarget, array $_userRights, $_isXHRequest)
+	logic(&$_sqlConnection, array $_rcaTarget, $_isXHRequest)
 	{
 		##	Set default target if not exists
 
@@ -25,8 +25,8 @@ class	controllerLoginObjects extends CController
 
 		##	Check user rights for this target
 
-		if(!$this -> hasRights($_userRights, $_controllerAction))
-		{ 
+		if(!$this -> detectRights($_controllerAction))
+		{
 			if($_isXHRequest !== false)
 			{
 				$_bValidationErr =	true;
@@ -42,8 +42,8 @@ class	controllerLoginObjects extends CController
 
 		##	Call sub-logic function by target, if there results are false, we make a fall back to default view
 
-		$enableEdit 	= $this -> hasRights($_userRights, 'edit');
-		$enableDelete	= $this -> hasRights($_userRights, 'delete');
+		$enableEdit 	= $this -> existsUserRight('edit');
+		$enableDelete	= $enableEdit;
 
 		$_logicResults = false;
 		switch($_controllerAction)
@@ -117,7 +117,7 @@ class	controllerLoginObjects extends CController
 			}
 			else	// Validation Failed
 			{
-				$_bValidationMsg .= CLanguage::get() -> string('ERR_VALIDATIONFAIL') .' - '. CLanguage::get() -> string('MOD_LOGINO_ERR_NOTCREATED');
+				$_bValidationMsg .= CLanguage::get() -> string('ERR_VALIDATIONFAIL');
 			}
 
 			if(!$_bValidationErr)	// Validation OK
@@ -152,7 +152,7 @@ class	controllerLoginObjects extends CController
 					$_pPageRequest 	= CPageRequest::instance();
 
 
-					$_bValidationMsg = CLanguage::get() -> string('MOD_LOGINO_OK_CREATED'). ' - '. CLanguage::get() -> string('WAIT_FOR_REDIRECT');
+					$_bValidationMsg = CLanguage::get() -> string('MOD_LOGINO_OBJECT WAS_CREATED'). ' - '. CLanguage::get() -> string('WAIT_FOR_REDIRECT');
 					$_bValidationDta['redirect'] = CMS_SERVER_URL_BACKEND . $_pPageRequest -> urlPath .'object/'. $_pURLVariables -> getValue("object_id");
 				}
 				else
@@ -213,7 +213,6 @@ class	controllerLoginObjects extends CController
 		return false;
 	}
 
-
 	private function
 	logicEdit(&$_sqlConnection, $_isXHRequest = false)
 	{	
@@ -240,14 +239,14 @@ class	controllerLoginObjects extends CController
 										$_request[] 	 = 	[	"input" => "object_databases",  	 	"validate" => "strip_tags|!empty" ]; 	
 										$_request[] 	 = 	[	"input" => "object_table",   			"validate" => "strip_tags|!empty" ]; 	
 										$_request[] 	 = 	[	"input" => "object_fields",   			"validate" => "strip_tags|!empty" ]; 	
-										$_request[] 	 = 	[	"input" => "object_session_ext",   		"validate" => "strip_tags|!empty",	 "use_default" => true, "default_value" => '[]'  ]; 	
+										$_request[] 	 = 	[	"input" => "object_session_ext",   		"validate" => "strip_tags|!empty" ]; 	
 										$_request[] 	 = 	[	"input" => "object_field_is_username",  "validate" => "strip_tags|!empty" ]; 	
 										$_pFormVariables -> retrieve($_request, false, true);
 										$_aFormData		 = $_pFormVariables ->getArray();
 
 										if(empty($_aFormData['object_databases'])) { 	$_bValidationErr = true; 	$_bValidationDta[] = 'object_databases'; 	}
-										if(empty($_aFormData['object_table'])) { 	$_bValidationErr = true; 	$_bValidationDta[] = 'object_table'; 	}
-										if(empty($_aFormData['object_fields'])) { 	$_bValidationErr = true; 	$_bValidationDta[] = 'object_fields'; 	}
+									#	if(empty($_aFormData['object_table'])) { 	$_bValidationErr = true; 	$_bValidationDta[] = 'object_table'; 	}
+									#	if(empty($_aFormData['object_fields'])) { 	$_bValidationErr = true; 	$_bValidationDta[] = 'object_fields'; 	}
 
 
 										if(!$_bValidationErr)	// Validation OK (by pre check)
@@ -255,28 +254,34 @@ class	controllerLoginObjects extends CController
 										}
 										else	// Validation Failed
 										{
-											$_bValidationMsg .= CLanguage::get() -> string('ERR_VALIDATIONFAIL') .' - '. CLanguage::get() -> string('MOD_LOGINO_ERR_NOTCREATED');
+											$_bValidationMsg .= CLanguage::get() -> string('ERR_VALIDATIONFAIL');
 										}
 
 										if(!$_bValidationErr)	// Validation OK
 										{
-											foreach($_aFormData['object_fields'] as $key => $fields)
+											if(!empty($_aFormData['object_fields']))
 											{
-												if($key == intval($_aFormData['object_field_is_username'])) 
-													$_aFormData['object_fields'][ $key ]['is_username'] = '1';
-												else
-													$_aFormData['object_fields'][ $key ]['is_username'] = '0';
+												foreach($_aFormData['object_fields'] as $key => $fields)
+												{
+													if($key == intval($_aFormData['object_field_is_username'])) 
+														$_aFormData['object_fields'][ $key ]['is_username'] = '1';
+													else
+														$_aFormData['object_fields'][ $key ]['is_username'] = '0';
+												}
+
+												// Re-Index Array for Javascript
+												$tempArray = $_aFormData['object_fields'];
+												$_aFormData['object_fields'] = [];
+												foreach($tempArray as $key => $fields)
+													$_aFormData['object_fields'][] = $fields;
+
+												$_aFormData['object_fields'] 		= json_encode($_aFormData['object_fields']);
 											}
 
-											// Re-Index Array for Javascript
-											$tempArray = $_aFormData['object_fields'];
-											$_aFormData['object_fields'] = [];
-											foreach($tempArray as $key => $fields)
-												$_aFormData['object_fields'][] = $fields;
-
 											$_aFormData['object_databases'] 	= json_encode($_aFormData['object_databases']);
-											$_aFormData['object_fields'] 		= json_encode($_aFormData['object_fields']);
-											$_aFormData['object_session_ext'] 	= json_encode($_aFormData['object_session_ext']);
+
+											if(!empty($_aFormData['object_session_ext']))
+												$_aFormData['object_session_ext'] 	= json_encode($_aFormData['object_session_ext']);
 
 											$_aFormData['update_by'] 	= CSession::instance() -> getValue('user_id');
 											$_aFormData['update_time'] 	= time();
@@ -286,7 +291,7 @@ class	controllerLoginObjects extends CController
 
 											if($this -> m_pModel -> update($_sqlConnection, $_aFormData, $modelCondition))
 											{
-												$_bValidationMsg = CLanguage::get() -> string('MOD_LOGINO_OK_UPDATED');
+												$_bValidationMsg = CLanguage::get() -> string('MOD_LOGINO_OBJECT WAS_UPDATED');
 											}
 											else
 											{
@@ -296,7 +301,7 @@ class	controllerLoginObjects extends CController
 										}
 										else	// Validation Failed
 										{
-											$_bValidationMsg .= CLanguage::get() -> string('ERR_VALIDATIONFAIL') .' - '. CLanguage::get() -> string('MOD_LOGINO_ERR_NOTUPDATED');
+											$_bValidationMsg .= CLanguage::get() -> string('ERR_VALIDATIONFAIL');
 											$_bValidationErr = true;
 										}
 
@@ -336,7 +341,7 @@ class	controllerLoginObjects extends CController
 
 										if($this -> m_pModel -> delete($_sqlConnection, $modelCondition))
 										{
-											$_bValidationMsg = CLanguage::get() -> string('MOD_LOGINO_OK_DELETED'). ' - '. CLanguage::get() -> string('WAIT_FOR_REDIRECT');
+											$_bValidationMsg = CLanguage::get() -> string('MOD_LOGINO_OBJECT WAS_DELETED'). ' - '. CLanguage::get() -> string('WAIT_FOR_REDIRECT');
 											$_bValidationDta['redirect'] = CMS_SERVER_URL_BACKEND . CPageRequest::instance() -> urlPath;
 										}
 										else

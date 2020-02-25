@@ -9,11 +9,13 @@ class	cmsModuleManager
 		this.className 			= contentContainerClassName;
 		this.activeModules		= activeModules;
 		this.parentInstances	= parentInstances;
-		this.parentInstances	= parentInstances;
 	}
 	
 	create()
 	{
+		if(Object.keys(this.activeModules).length == 0)
+			return false;
+
 		var targetElements = Array.prototype.slice.call(document.getElementsByClassName(this.className), 0);
 
 		for(var nItem = 0; nItem < targetElements.length; nItem++)
@@ -78,6 +80,7 @@ class	cmsModuleManager
 					oModuleItem.setAttribute('data-module-id', this.activeModules[module].module_id);
 					oModuleItem.innerHTML = '<span>'+ this.activeModules[module].module_icon +'</span>'+ this.activeModules[module].module_name;
 					oModuleItem.onclick = this.onInsertModule.bind(oModuleItem, this.parentInstances);
+					oModuleItem.instance = this;
 				
 				oModulesList.appendChild(oModuleItem)
 			}
@@ -126,6 +129,8 @@ class	cmsModuleManager
 			formData.append('cms-insert-node-id', nodeID);
 	
 		var	requestTarget	= CMS.SERVER_URL_BACKEND + CMS.PAGE_PATH + CMS.MODULE_TARGET;
+
+		var	that = this;
 		
 		var xhr = new XMLHttpRequest();
 		xhr.open('POST', requestTarget, true);
@@ -149,9 +154,25 @@ class	cmsModuleManager
 
 							if(jsonObject.state == 0)
 							{
+
+								// some rights are multiple times in activeModules
+								var	userRights = '';
+								for (var module = 0; module < Object.keys(that.instance.activeModules).length; module++)
+								{	
+									if(parseInt(moduleID) === that.instance.activeModules[module].module_id)
+									{
+										userRights = that.instance.activeModules[module].user_rights.join(',');
+										break;
+									}
+								}
+
+
+
+
 								var newObject;								
 									newObject = document.createElement( 'div' );
 									newObject.classList.add('cms-content-object');
+									newObject.setAttribute('data-rights',userRights);
 									newObject.innerHTML = jsonObject.data.html;
 
 								var contentObjects = contentContainer.querySelectorAll('.cms-content-object');

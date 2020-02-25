@@ -19,7 +19,7 @@ class	controllerLanguages extends CController
 	}
 	
 	public function
-	logic(&$_sqlConnection, array $_rcaTarget, array $_userRights, $_isXHRequest)
+	logic(&$_sqlConnection, array $_rcaTarget, $_isXHRequest)
 	{
 		##	Set default target if not exists
 
@@ -27,8 +27,8 @@ class	controllerLanguages extends CController
 
 		##	Check user rights for this target
 
-		if(!$this -> hasRights($_userRights, $_controllerAction))
-		{ 
+		if(!$this -> detectRights($_controllerAction))
+		{
 			if($_isXHRequest !== false)
 			{
 				$_bValidationErr =	true;
@@ -44,8 +44,8 @@ class	controllerLanguages extends CController
 
 		##	Call sub-logic function by target, if there results are false, we make a fall back to default view
 
-		$enableEdit 	= $this -> hasRights($_userRights, 'edit');
-		$enableDelete	= $this -> hasRights($_userRights, 'delete');
+		$enableEdit 	= $this -> existsUserRight('edit');
+		$enableDelete	= $this -> existsUserRight('delete');
 
 		$_logicResults = false;
 		switch($_controllerAction)
@@ -133,7 +133,7 @@ class	controllerLanguages extends CController
 
 			$_pURLVariables	 =	new CURLVariables();
 			$_request		 =	[];
-			$_request[] 	 = 	[	"input" => "lang_key",  		"validate" => "strip_tags|strip_whitespaces|!empty" ]; 	
+			$_request[] 	 = 	[	"input" => "lang_key",  		"validate" => "strip_tags|strip_whitespaces|lowercase|!empty" ]; 	
 			$_request[] 	 = 	[	"input" => "lang_name",  		"validate" => "strip_tags|strip_whitespaces|!empty" ]; 	
 			$_request[] 	 = 	[	"input" => "lang_name_native", 	"validate" => "strip_tags|strip_whitespaces|!empty" ]; 	
 			$_request[] 	 = 	[	"input" => "lang_default",  	"validate" => "strip_tags|strip_whitespaces|!empty", "use_default" => true, "default_value" => 0  ]; 	

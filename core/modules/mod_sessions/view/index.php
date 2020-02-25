@@ -23,8 +23,6 @@
 		{
 			$_dataSet -> time_create 	= ($_dataSet -> time_create == 0 ? '-' : date(TIME_FORMAT_BACKENDVIEW, $_dataSet -> time_create) );
 
-
-
 			?>
 
 			<tr class="trigger-batch-item">

@@ -16,7 +16,7 @@ class	controllerUserAgent extends CController
 	}
 	
 	public function
-	logic(&$_sqlConnection, array $_rcaTarget, array $_userRights, $_isXHRequest)
+	logic(&$_sqlConnection, array $_rcaTarget, $_isXHRequest)
 	{
 		##	Set default target if not exists
 
@@ -24,8 +24,8 @@ class	controllerUserAgent extends CController
 
 		##	Check user rights for this target
 
-		if(!$this -> hasRights($_userRights, $_controllerAction))
-		{ 
+		if(!$this -> detectRights($_controllerAction))
+		{
 			if($_isXHRequest !== false)
 			{
 				$_bValidationErr =	true;
@@ -38,11 +38,11 @@ class	controllerUserAgent extends CController
 			CMessages::instance() -> addMessage(CLanguage::get() -> string('ERR_PERMISSON') , MSG_WARNING);
 			return;
 		}
-
+		
 		##	Call sub-logic function by target, if there results are false, we make a fall back to default view
 
-		$enableEdit 	= $this -> hasRights($_userRights, 'edit');
-		$enableDelete	= $this -> hasRights($_userRights, 'delete');
+		$enableEdit 	= $this -> existsUserRight('edit');
+		$enableDelete	= $enableEdit;
 
 		$_logicResults = false;
 		switch($_controllerAction)
@@ -98,7 +98,6 @@ class	controllerUserAgent extends CController
 
 			if(empty($_aFormData['agent_name'])) 	{ 	$_bValidationErr = true; 	$_bValidationDta[] = 'agent_name'; 	}
 			if(empty($_aFormData['agent_suffix'])) 	{ 	$_bValidationErr = true; 	$_bValidationDta[] = 'agent_suffix'; 	}
-			if(!isset($_aFormData['agent_allowed'])) { 	$_bValidationErr = true; 	$_bValidationDta[] = 'agent_allowed'; 	}
 
 			if(!$_bValidationErr)	// Validation OK (by pre check)
 			{		
@@ -114,11 +113,13 @@ class	controllerUserAgent extends CController
 				$_aFormData['create_by'] 	= CSession::instance() -> getValue('user_id');
 				$_aFormData['create_time'] 	= time();
 
+
+
 				$dataId = 0;
 
 				if($this -> m_pModel -> insert($_sqlConnection, $_aFormData, $dataId))
 				{
-					$_bValidationMsg = CLanguage::get() -> string('M_BEUSERAG_MSG_ISCREATED') .' - '. CLanguage::get() -> string('WAIT_FOR_REDIRECT');
+					$_bValidationMsg = CLanguage::get() -> string('M_BEUSERAG_USERAGENT') .' '. CLanguage::get() -> string('WAS_CREATED') .' - '. CLanguage::get() -> string('WAIT_FOR_REDIRECT');
 					$_bValidationDta['redirect'] = CMS_SERVER_URL_BACKEND . CPageRequest::instance() -> urlPath .'agent/'.$dataId;
 				}
 				else
@@ -173,7 +174,6 @@ class	controllerUserAgent extends CController
 			}
 		}
 		
-		CMessages::instance() -> addMessage(CLanguage::get() -> string('MOD_BEUSER_ERR_USERID_UK') .'xx22x', MSG_WARNING);
 		return false;
 	}
 
@@ -206,7 +206,6 @@ class	controllerUserAgent extends CController
 
 										if(empty($_aFormData['agent_name'])) 	{ 	$_bValidationErr = true; 	$_bValidationDta[] = 'agent_name'; 	}
 										if(empty($_aFormData['agent_suffix'])) 	{ 	$_bValidationErr = true; 	$_bValidationDta[] = 'agent_suffix'; 	}
-										if(empty($_aFormData['agent_allowed'])) { 	$_bValidationErr = true; 	$_bValidationDta[] = 'agent_allowed'; 	}
 
 										// On edit, we ignore the unique check for the ip 
 
@@ -215,12 +214,15 @@ class	controllerUserAgent extends CController
 											$_aFormData['update_by'] 	= CSession::instance() -> getValue('user_id');
 											$_aFormData['update_time'] 	= time();
 
+											print_r($_aFormData);
+									
+
 											$modelCondition = new CModelCondition();
 											$modelCondition -> where('data_id', $_pURLVariables -> getValue("cms-system-id"));
 
 											if($this -> m_pModel -> update($_sqlConnection, $_aFormData, $modelCondition))
 											{
-												$_bValidationMsg = CLanguage::get() -> string('M_BEUSERAG_MSG_ISUPDATED');
+												$_bValidationMsg = CLanguage::get() -> string('M_BEUSERAG_USERAGENT') .' '. CLanguage::get() -> string('WAS_UPDATED');
 											}
 											else
 											{
@@ -266,7 +268,7 @@ class	controllerUserAgent extends CController
 
 									if($this -> m_pModel -> delete($_sqlConnection, $modelCondition))
 									{
-										$_bValidationMsg = CLanguage::get() -> string('M_BEUSERAG_MSG_ISDELETED') .' - '. CLanguage::get() -> string('WAIT_FOR_REDIRECT');
+										$_bValidationMsg = CLanguage::get() -> string('M_BEUSERAG_USERAGENT') .' '. CLanguage::get() -> string('WAS_DELETED') .' - '. CLanguage::get() -> string('WAIT_FOR_REDIRECT');
 										$_bValidationDta['redirect'] = CMS_SERVER_URL_BACKEND . CPageRequest::instance() -> urlPath;
 									}
 									else

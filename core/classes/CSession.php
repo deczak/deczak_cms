@@ -5,6 +5,7 @@ require_once 'CSingleton.php';
 require_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelLoginObjects.php';
 require_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelDeniedRemote.php';
 require_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelUserAgent.php';
+require_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelUsersRegister.php';
 
 class	CSession extends CSingleton
 {
@@ -23,30 +24,32 @@ class	CSession extends CSingleton
 										"session_id"		=>	'',
 										"is_auth"			=>	false,
 										"is_auth_objects"	=>	[],
-										"login_fail_count"	=>	0
+										"login_fail_count"	=>	0,
+										"is_remote"			=>	false
 									];
 		$this -> m_bInitialized	= 	true;
 	}
 
 	public function
-	updateSession(int $_nodeId, string $_language)
+	updateSession(int $_nodeId, string $_language, CUserRights &$_pUserRights)
 	{
 		## Check if class got initialized 
-		if($this -> m_bInitialized === NULL || $this -> m_bInitialized === false) $this -> initialize();
+		if($this -> m_bInitialized === NULL || $this -> m_bInitialized === false) 
+			$this -> initialize();
 
 		## Required data
-		$this -> m_aSessionData['session_id'] = $this -> createSessionID();
+		$this -> m_aSessionData['session_id'] = $this -> _createSessionID();
 
 		$_timestamp			= 	time();
 		$_sessionTimeout 	= 	$_timestamp + $this -> m_iTimeout;
 		$_bIsNewSession 	= 	false;
 
-		$spamAccessTimeout	= 	$_timestamp - CONFIG::GET() -> SESSION -> SPAM_ACCESS_TIMEOUT;
-		$spamAccessLimit	= 	CONFIG::GET() -> SESSION -> SPAM_ACCESS_LIMIT;
+		$spamAccessTimeout	= 	$_timestamp - CFG::GET() -> SESSION -> SPAM_ACCESS_TIMEOUT;
+		$spamAccessLimit	= 	CFG::GET() -> SESSION -> SPAM_ACCESS_LIMIT;
 
 		##	Check if session already exists
 
-		$_db = CSQLConnect::instance() -> getConnection(CONFIG::GET() -> MYSQL -> PRIMARY_DATABASE);
+		$_db = CSQLConnect::instance() -> getConnection(CFG::GET() -> MYSQL -> PRIMARY_DATABASE);
 
 		if($_db === false)
 			return false;
@@ -202,25 +205,32 @@ class	CSession extends CSingleton
 
 						foreach($_loginObject -> object_databases as $_dbName)
 						{
+							if(		CFG::GET() -> MYSQL -> PRIMARY_DATABASE !== $_dbName 
+								&& !CFG::GET() -> USER_SYSTEM -> REMOTE_USER -> ENABLED
+							)	continue;
+
 							$_dbLogin 	=	CSQLConnect::instance() -> getConnection($_dbName);
 							$_cookieID	=	CCookie::instance() -> getCookieID($_cookieKey);
 				
 							$_sqlString			=	"	SELECT		". $_loginObject -> object_table .".data_id,
 																	". $_loginObject -> object_table .".time_login,
 																	". $_loginObject -> object_table .".cookie_id,
-																	". $_loginObject -> object_table .".user_id
+																	". $_loginObject -> object_table .".user_id,
+																	". $_loginObject -> object_table .".login_name
 														FROM		". $_loginObject -> object_table ."
 														WHERE 		". $_loginObject -> object_table .".cookie_id LIKE '%\"". $_dbLogin -> real_escape_string($_cookieKey) ."\":{\"id\":\"". $_dbLogin -> real_escape_string($_cookieID) ."\"}%'
 															AND		". $_loginObject -> object_table .".is_locked = '0'
-														LIMIT		1
+											
 													";
 
+							if(CFG::GET() -> MYSQL -> PRIMARY_DATABASE !== $_dbName)
+								$_sqlString		.=	"		AND		". $_loginObject -> object_table .".allow_remote = '1' ";
+
+							$_sqlString			.=	"	LIMIT		1 ";
+
+
 							$_sqlLoginChkRes		=	$_dbLogin -> query($_sqlString);	
-
 		
-
-
-
 							if($_sqlLoginChkRes !== false && $_sqlLoginChkRes -> num_rows > 0)
 							{
 
@@ -281,33 +291,53 @@ class	CSession extends CSingleton
 										}
 									}
 
-									##	Gathering user group rights
+									$userHash = NULL;
 
-									$_sqlString			=	"	SELECT		tb_users_groups.*,
-																			tb_right_groups.*
-																FROM		tb_users_groups
-																LEFT JOIN	tb_right_groups ON tb_right_groups.group_id = tb_users_groups.group_id
-																WHERE		tb_users_groups.user_id	= '". $_sqlLoginChk['user_id'] ."'
-															";
+									/*
+										Temporary Solution for remote users
 
-									$_sqlUserRightsRes	= 	$_db -> query($_sqlString);		
+										if dbname unequal to primary db, this is a remote user
+									*/
 
-									while($_sqlUserRightsRes !== false && $_sqlUserRights = $_sqlUserRightsRes -> fetch_assoc())
+									if(CFG::GET() -> MYSQL -> PRIMARY_DATABASE !== $_dbName)
 									{
-						
-										$_sqlUserRights['group_rights'] = json_decode($_sqlUserRights['group_rights'], true);
-										if(!empty($_sqlUserRights['group_rights']))
-										foreach($_sqlUserRights['group_rights'] as $_moduleRights  => $_rightsSet)
+										foreach(CFG::GET() -> MYSQL -> DATABASE as $database)
 										{
-											$this -> m_aSessionData['user_rights'][$_moduleRights] = $_rightsSet;
-										}										
+											if($database['name'] !== $_dbName)
+												continue;
+											$userHash = hash('sha256', $database['name'] . $database['server'] . $_sqlLoginChk['user_id'] . $_sqlLoginChk['login_name']);
+										}
+
+										$modelUsersRegister	 	= new modelUsersRegister();
+
+										$registerCondition = new CModelCondition();
+										$registerCondition -> where('user_hash', $userHash);
+
+										$modelUsersRegister -> load($_db, $registerCondition);
+
+										if(!empty($modelUsersRegister -> getDataInstance())) {
+
+											$_sqlLoginChk['user_id'] = $modelUsersRegister -> getDataInstance()[0] -> user_id;
+
+
+											$this -> m_aSessionData['user_id'] = $_sqlLoginChk['user_id'];
+											$this -> m_aSessionData['is_remote'] = true;
+
+
+										}
+										else
+										{
+											$_sqlLoginChk['user_id'] = 0;
+										}
+
+
 									}
-								}
-								
+
+									$_pUserRights -> loadUserRights($_db, $_sqlLoginChk['user_id']);
+								}								
 							}
 						}
-					}	
-			
+					}				
 				}
 				
 				return false;	
@@ -351,7 +381,6 @@ class	CSession extends CSingleton
 										LIMIT		1
 									";
 
-
 			$accessRes 	= $_db -> query($_sqlString);	
 			$accessData	=	$accessRes -> fetch_array();
 
@@ -359,6 +388,9 @@ class	CSession extends CSingleton
 			{
 				if(empty($_SERVER['HTTP_REFERER']))
 					$_SERVER['HTTP_REFERER'] = '';
+
+
+
 
 				$_sqlString		=	"	INSERT INTO	tb_sessions_access
 													(
@@ -375,6 +407,7 @@ class	CSession extends CSingleton
 														'". $_db -> real_escape_string(substr(trim(strip_tags($_SERVER['HTTP_REFERER'])),0,250)) ."'
 													)
 									";
+
 
 					$_db -> query($_sqlString);	
 			}
@@ -398,32 +431,20 @@ class	CSession extends CSingleton
 			return false;
 	}
 
-	/*
-	public function
-	setSessionValue(string $_valueName, $_value, bool $_bUpdateDatabase = false)
-	{
-		switch($_valueName)
-		{
-			case   'LOGIN_FAIL_COUNT':		$this -> m_aSessionData['login_fail_count']		= $_value; if($_bUpdateDatabase) $this -> updateDatabaseTable('login_fail_count', $_value); break;
-		}
-		return $_value;
-	}
-	*/
-
 	public function
 	setValue(string $_valueKey, $_value, bool $_bUpdateDatabase = false)
 	{
 		switch($_valueKey)
 		{
-			case   'login_fail_count':		$this -> m_aSessionData['login_fail_count']		= $_value; if($_bUpdateDatabase) $this -> updateDatabaseTable('login_fail_count', $_value); break;
+			case   'login_fail_count':		$this -> m_aSessionData['login_fail_count']		= $_value; if($_bUpdateDatabase) $this -> _updateValue('login_fail_count', $_value); break;
 		}
 		return $_value;
 	}
 
 	private function
-	updateDatabaseTable(string $_columnName, $_value)
+	_updateValue(string $_columnName, $_value)
 	{
-		$_db = CSQLConnect::instance() -> getConnection(CONFIG::GET() -> MYSQL -> PRIMARY_DATABASE);
+		$_db = CSQLConnect::instance() -> getConnection(CFG::GET() -> MYSQL -> PRIMARY_DATABASE);
 
 		$_sqlString			=	"	UPDATE		tb_sessions
 									SET			tb_sessions.". $_columnName ." = '". $_db -> real_escape_string($_value) ."'
@@ -434,16 +455,9 @@ class	CSession extends CSingleton
 	}
 
 	private function
-	createSessionID()
+	_createSessionID()
 	{
 		return md5($this -> m_aSessionData['user_agent']) . md5($this -> m_aSessionData['user_ip']);
-	}
-
-	public function
-	getUserRights(string $_moduleID)
-	{
-		if(isset($this -> m_aSessionData['user_rights'][$_moduleID])) return $this -> m_aSessionData['user_rights'][$_moduleID];
-		return [];
 	}
 }
 

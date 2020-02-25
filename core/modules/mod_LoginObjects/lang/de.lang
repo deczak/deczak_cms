@@ -12,11 +12,6 @@
 	MOD_LOGINO_ERR_NOTUPDATED			=	Objekt wurde nicht aktualisiert
 	MOD_LOGINO_ERR_NOTCREATED			=	Objekt wurde nicht erstellt
 
-##	Positive returns
-		
-	MOD_LOGINO_OK_UPDATED				=	Objekt wurde aktualsiert
-	MOD_LOGINO_OK_DELETED				=	Objekt wurde gelöscht
-	MOD_LOGINO_OK_CREATED				=	Objekt wurde erstellt
 	
 ##		
 

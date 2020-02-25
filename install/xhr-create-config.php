@@ -14,6 +14,7 @@
 	if($_POST['server-root'][ strlen($_POST['server-root']) - 1] !== '/') $_POST['server-root'] .= '/';
 	if($_POST['server-url'][ strlen($_POST['server-url']) - 1] !== '/') $_POST['server-url'] .= '/';
 
+	##	standard.php
 	$configFile = file_get_contents('template-config.php');
 
 	$configFile = str_replace('%SERVER_ROOT%',$_POST['server-root'], $configFile);
@@ -32,6 +33,11 @@
 	$configFile = str_replace('%COOKIE_HTTPS%', (TK::isSSL() ? 'true' : 'false'), $configFile);
 
 	file_put_contents('../config/standard.php', $configFile);
+
+
+	##	configuration.json
+	copy('configuration.json', '../data/configuration.json');
+
 
 	tk::xhrResult(0, 'OK');
 ?>

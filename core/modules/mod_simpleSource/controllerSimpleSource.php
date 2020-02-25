@@ -13,31 +13,29 @@ class	controllerSimpleSource extends CController
 		parent::__construct($_module, $_object);
 
 		$this -> m_modelSimple = new modelSimple();
+
+		$this -> m_aModule -> user_rights[] = 'view';	// add view right as default for everyone
 	}
 	
 	public function
-	logic(&$_sqlConnection, array $_rcaTarget, array $_userRights, $_isXHRequest, &$_logicResult, bool $_bEditMode)
+	logic(&$_sqlConnection, array $_rcaTarget, $_isXHRequest, &$_logicResult, bool $_bEditMode)
 	{
 		##	Set default target if not exists
 
 		$_controllerAction = $this -> getControllerAction($_rcaTarget, 'view');
 
-		##	Check user rights for this target
-
-		$_userRights[] = 'view';		// Default Right for everyone
-
-		if(!$this -> hasRights($_userRights, $_controllerAction))	
-		{ 
+		if(!$this -> detectRights($_controllerAction))
+		{
 			if($_isXHRequest !== false)
 			{
 				$_bValidationErr =	true;
-				$_bValidationMsg =	CLanguage::instance() -> getString('ERR_PERMISSON');
+				$_bValidationMsg =	CLanguage::get() -> string('ERR_PERMISSON');
 				$_bValidationDta = 	[];
 
 				tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $_bValidationDta);	// contains exit call
 			}
 
-			CMessages::instance() -> addMessage(CLanguage::instance() -> getString('ERR_PERMISSON') , MSG_WARNING);
+			CMessages::instance() -> addMessage(CLanguage::get() -> string('ERR_PERMISSON') , MSG_WARNING);
 			return;
 		}
 
@@ -46,8 +44,8 @@ class	controllerSimpleSource extends CController
 
 		##	Call sub-logic function by target, if there results are false, we make a fall back to default view
 
-		$enableEdit 	= $this -> hasRights($_userRights, 'edit');
-		$enableDelete	= $this -> hasRights($_userRights, 'delete');
+		$enableEdit 	= $this -> existsUserRight('edit');
+		$enableDelete	= $enableEdit;
 
 		$_logicResults = false;
 		switch($_controllerAction)
@@ -80,7 +78,7 @@ class	controllerSimpleSource extends CController
 						'view',	
 						'',
 						[
-							'object' 	=> $this -> m_modelSimple -> getDataInstance()
+							'object' 	=> $this -> m_modelSimple -> getDataInstance()[0]
 						]
 						);
 
@@ -129,12 +127,11 @@ class	controllerSimpleSource extends CController
 
 										$this -> m_modelPageObject = new modelPageObject();
 
-										$_objectUpdate['object_id']			=	$objectId;
-										$_objectUpdate['time_update']		=	time();
+										$_objectUpdate['update_time']		=	time();
 										$_objectUpdate['update_by']			=	0;
 										$_objectUpdate['update_reason']		=	'';
 
-										$this -> m_modelPageObject -> updateOld($_sqlConnection, $_objectUpdate);
+										$this -> m_modelPageObject -> update($_sqlConnection, $_objectUpdate, $modelCondition);
 									
 									}
 									else
@@ -165,7 +162,7 @@ class	controllerSimpleSource extends CController
 						'edit',	
 						'',
 						[
-							'object' 	=> $this -> m_modelSimple -> getDataInstance()
+							'object' 	=> $this -> m_modelSimple -> getDataInstance()[0]
 						]
 						);
 
@@ -187,8 +184,11 @@ class	controllerSimpleSource extends CController
 			$_dataset['object_id'] 	= $this -> m_aObject -> object_id;
 			$_dataset['body'] 		= '';
 			$_dataset['params'] 	= '';
+
+
+			$insertedId = 0;
 			
-			if(!$this -> m_modelSimple -> create($_sqlConnection, $_dataset))
+			if(!$this -> m_modelSimple -> insert($_sqlConnection, $_dataset, $insertedId))
 			{
 				$_bValidationErr =	true;
 				$_bValidationMsg =	'sql insert failed';
@@ -199,7 +199,7 @@ class	controllerSimpleSource extends CController
 								'edit',	
 								'',
 								[
-									'object' 	=> $this -> m_modelSimple -> getDataInstance()
+									'object' 	=> $this -> m_modelSimple -> getDataInstance()[0]
 								]
 								);
 
@@ -243,7 +243,7 @@ class	controllerSimpleSource extends CController
 										if($this -> m_modelSimple -> delete($_sqlConnection, $modelCondition))
 										{
 											$_objectModel  	 = new modelPageObject();
-											$_objectModel	-> deleteOld($_sqlConnection, $_aFormData);
+											$_objectModel	-> delete($_sqlConnection, $modelCondition);
 
 											$_bValidationMsg = 'Object deleted';
 										

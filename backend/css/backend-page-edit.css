@@ -176,7 +176,6 @@
 	div.editor-simple { padding:3px; box-sizing:border-box; width:100%; position:relative; padding-top:25px; }
 
 	div.rte-editbox {  min-height:32px; padding:6px; width:100%; box-sizing:border-box; outline:0px; }
-	div.rte-editbox p {	margin: 0; }
 	div.rte-editbox[contentEditable=true] { cursor:text; }
 	div.rte-editbox[contentEditable=true]:empty:not(:focus):before { content:attr(placeholder); color:lightgrey; }
 

@@ -22,7 +22,7 @@ class	CSQLConnect extends CSingleton
 	public function
 	createConnection()
 	{
-		foreach(CONFIG::GET() -> MYSQL -> DATABASE as $_accessData)
+		foreach(CFG::GET() -> MYSQL -> DATABASE as $_accessData)
 		{
 			if(		!is_array($_accessData)
 				||	!isset($_accessData['server'])

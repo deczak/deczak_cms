@@ -7,6 +7,7 @@
 
 	M_BEMOULE_MSG_WARNINGNOTICE		=	When uninstalling a module, all data in the database belonging to this module are deleted.
 
+	M_BEMOULE_MSG_INSTALLNOTICE		=	After installing a new module, it is usually necessary to adjust the rights groups so that you can use the module.
 ##	
 
 	M_BEMOULE_NAME					=	Module name

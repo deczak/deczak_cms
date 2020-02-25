@@ -22,9 +22,10 @@ class shemeModules extends CSheme
 		$this -> addColumn('is_active', 'tinyint') -> setAttribute('UNSIGNED');
 
 		$this -> addColumn('create_time', 'bigint') -> setAttribute('UNSIGNED');
-		$this -> addColumn('create_by', 'smallint') -> setAttribute('UNSIGNED');
+		$this -> addColumn('create_by', 'string') -> setLength(25);
 		$this -> addColumn('update_time', 'bigint') -> setAttribute('UNSIGNED') -> setDefault('0');
-		$this -> addColumn('update_by', 'smallint') -> setAttribute('UNSIGNED') -> setDefault('0');
+		$this -> addColumn('update_by', 'string') -> setLength(25) -> setDefault('NULL');
+
 	}
 }
 

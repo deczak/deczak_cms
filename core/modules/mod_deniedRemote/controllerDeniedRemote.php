@@ -14,7 +14,7 @@ class	controllerDeniedRemote extends CController
 	}
 	
 	public function
-	logic(&$_sqlConnection, array $_rcaTarget, array $_userRights, $_isXHRequest)
+	logic(&$_sqlConnection, array $_rcaTarget, $_isXHRequest)
 	{
 		##	Set default target if not exists
 
@@ -22,8 +22,8 @@ class	controllerDeniedRemote extends CController
 
 		##	Check user rights for this target
 
-		if(!$this -> hasRights($_userRights, $_controllerAction))
-		{ 
+		if(!$this -> detectRights($_controllerAction))
+		{
 			if($_isXHRequest !== false)
 			{
 				$_bValidationErr =	true;
@@ -39,8 +39,8 @@ class	controllerDeniedRemote extends CController
 
 		##	Call sub-logic function by target, if there results are false, we make a fall back to default view
 
-		$enableEdit 	= $this -> hasRights($_userRights, 'edit');
-		$enableDelete	= $this -> hasRights($_userRights, 'delete');
+		$enableEdit 	= $this -> existsUserRight('edit');
+		$enableDelete	= $enableEdit;
 
 		$_logicResults = false;
 		switch($_controllerAction)
@@ -101,6 +101,53 @@ class	controllerDeniedRemote extends CController
 					$_bValidationMsg .= CLanguage::get() -> string('M_BERMADDR_MSG_DENIEDEXIST');
 					$_bValidationErr = true;
 				}
+
+
+				if(strpos($_aFormData['denied_ip'], ':') === false && strpos($_aFormData['denied_ip'], '.') === false)
+				{
+					$_bValidationMsg .= CLanguage::get() -> string('ERR_VALIDATIONFAIL');
+					$_bValidationErr = true;
+				}
+				else
+				{
+					if(strpos($_aFormData['denied_ip'], ':') !== false)
+					{
+						##	IPv6
+
+						// TODO :: Add custom error messages to describe the problem and change elseif to standalone if
+						
+						if(filter_var($_aFormData['denied_ip'], FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) === false)
+						{
+							$_bValidationMsg .= CLanguage::get() -> string('ERR_VALIDATIONFAIL');
+							$_bValidationDta[] = 'denied_ip'; 
+							$_bValidationErr = true;
+						}
+
+					} elseif(strpos($_aFormData['denied_ip'], '.') !== false)
+					{
+						##	IPv4
+
+						$ipBuffer 		= explode('/', $_aFormData['denied_ip']);
+
+						// TODO :: Add custom error messages to describe the problem and change elseif to standalone if
+		
+						$ipSegements = explode('.', $ipBuffer[0]);
+
+						if(count($ipSegements) !== 4)
+						{
+							$_bValidationMsg .= CLanguage::get() -> string('ERR_VALIDATIONFAIL');
+							$_bValidationDta[] = 'denied_ip'; 
+							$_bValidationErr = true;
+						}			
+						elseif(filter_var($ipBuffer[0],FILTER_VALIDATE_IP) === false)
+						{
+							$_bValidationMsg .= CLanguage::get() -> string('ERR_VALIDATIONFAIL');
+							$_bValidationDta[] = 'denied_ip'; 
+							$_bValidationErr = true;
+						}
+					}
+				}
+
 			}
 			else	// Validation Failed 
 			{
@@ -117,7 +164,7 @@ class	controllerDeniedRemote extends CController
 
 				if($this -> m_pModel -> insert($_sqlConnection, $_aFormData, $dataId))
 				{
-					$_bValidationMsg = CLanguage::get() -> string('M_BERMADDR_MSG_ISCREATED') .' - '. CLanguage::get() -> string('WAIT_FOR_REDIRECT');
+					$_bValidationMsg = CLanguage::get() -> string('MOD_BE_RMADDR_DENIEDADDR WAS_CREATED') .' - '. CLanguage::get() -> string('WAIT_FOR_REDIRECT');
 					$_bValidationDta['redirect'] = CMS_SERVER_URL_BACKEND . CPageRequest::instance() -> urlPath .'address/'.$dataId;
 
 					$_pHTAccess  = new CHTAccess();
@@ -217,6 +264,55 @@ class	controllerDeniedRemote extends CController
 													$_bValidationMsg .= CLanguage::get() -> string('M_BERMADDR_MSG_DENIEDEXIST');
 													$_bValidationErr = true;
 												}
+
+
+
+												if(strpos($_aFormData['denied_ip'], ':') === false && strpos($_aFormData['denied_ip'], '.') === false)
+												{
+													$_bValidationMsg .= CLanguage::get() -> string('ERR_VALIDATIONFAIL');
+													$_bValidationErr = true;
+												}
+												else
+												{
+													if(strpos($_aFormData['denied_ip'], ':') !== false)
+													{
+														##	IPv6
+
+														// TODO :: Add custom error messages to describe the problem and change elseif to standalone if
+														
+														if(filter_var($_aFormData['denied_ip'], FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) === false)
+														{
+															$_bValidationMsg .= CLanguage::get() -> string('ERR_VALIDATIONFAIL');
+															$_bValidationDta[] = 'denied_ip'; 
+															$_bValidationErr = true;
+														}
+
+													} elseif(strpos($_aFormData['denied_ip'], '.') !== false)
+													{
+														##	IPv4
+
+														$ipBuffer 		= explode('/', $_aFormData['denied_ip']);
+
+														// TODO :: Add custom error messages to describe the problem and change elseif to standalone if
+										
+														$ipSegements = explode('.', $ipBuffer[0]);
+
+														if(count($ipSegements) !== 4)
+														{
+														#	$_bValidationMsg .= CLanguage::get() -> string('ERR_VALIDATIONFAIL');
+															$_bValidationDta[] = 'denied_ip'; 
+															$_bValidationErr = true;
+														}			
+														elseif(filter_var($ipBuffer[0],FILTER_VALIDATE_IP) === false)
+														{
+														#	$_bValidationMsg .= CLanguage::get() -> string('ERR_VALIDATIONFAIL');
+															$_bValidationDta[] = 'denied_ip'; 
+															$_bValidationErr = true;
+														}
+													}
+												}
+
+
 											}
 											else	// Validation Failed 
 											{
@@ -233,7 +329,7 @@ class	controllerDeniedRemote extends CController
 
 												if($this -> m_pModel -> update($_sqlConnection, $_aFormData, $modelCondition))
 												{
-													$_bValidationMsg = CLanguage::get() -> string('M_BERMADDR_MSG_ISUPDATED');
+													$_bValidationMsg = CLanguage::get() -> string('MOD_BE_RMADDR_DENIEDADDR WAS_UPDATED');
 
 													$_pHTAccess  = new CHTAccess();
 													$_pHTAccess -> generatePart4DeniedAddress($_sqlConnection);
@@ -284,7 +380,7 @@ class	controllerDeniedRemote extends CController
 
 									if($this -> m_pModel -> delete($_sqlConnection, $modelCondition))
 									{
-										$_bValidationMsg = CLanguage::get() -> string('M_BERMADDR_MSG_ISDELETED') .' - '. CLanguage::get() -> string('WAIT_FOR_REDIRECT');
+										$_bValidationMsg = CLanguage::get() -> string('MOD_BE_RMADDR_DENIEDADDR WAS_DELETED') .' - '. CLanguage::get() -> string('WAIT_FOR_REDIRECT');
 										$_bValidationDta['redirect'] = CMS_SERVER_URL_BACKEND . CPageRequest::instance() -> urlPath;
 
 										$_pHTAccess  = new CHTAccess();

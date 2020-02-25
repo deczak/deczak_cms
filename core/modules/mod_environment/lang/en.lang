@@ -1,8 +1,10 @@
+M_BEENV_GENERATE			= Update
+M_BEENV_GENERATE_NOTE		= The htaccess and sitemap files are automatically updated when editing pages and changing languages.
+M_BEENV_GEN_HTACCESS		= Manually update the htaccess file
+M_BEENV_GEN_SITEMAP			= Manually update the sitemap file
+M_BEENV_UPDATE				= Update
 
-	M_BEENV_GENERATE			= Update
-	M_BEENV_GENERATE_NOTE		= The htaccess and sitemap files are automatically updated when editing pages and changing languages.
-
-	M_BEENV_GEN_HTACCESS		= Manually update the htaccess file
-	M_BEENV_GEN_SITEMAP			= Manually update the sitemap file
-	
-	M_BEENV_UPDATE				= Update
+M_BEENV_REMOTEUSER			= Remote user system
+M_BEENV_REMOTEUSER_ENABLE	= Enable remote user system to allow users from other instances to log in.
+M_BEENV_REMOTEUSER_TIMEOUT	= Term of validity of the assigned rights in days, 0 days indefinitely.
+M_BEENV_REMOTEUSER_REPORT	= Send system notification when the term of a right for a remote user has expired.

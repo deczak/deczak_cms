@@ -35,8 +35,8 @@ foreach($sitemap as $node)
 		$categories[] = $nodeCategory -> category_name;
 	}
 
-	$headline = trim(strip_tags($node -> headline -> body));
-	$headline = (empty($headline) ? $node -> page_title : $headline);
+	$headline = (empty($node -> headline -> body) ? '' : $node -> headline -> body);
+	$headline = trim(strip_tags($headline));
 	$headline = (empty($headline) ? $node -> page_title : $headline);
 
 	?>

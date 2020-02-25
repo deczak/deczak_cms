@@ -7,9 +7,11 @@ class	cmsIndexList
 	{
 	}
 	
-	init()
+	init(languagesList)
 	{
 		this.requestData(null);
+
+		this.languagesList = languagesList;
 	}
 
 	onXHRSuccess(response, callInstance)
@@ -31,6 +33,17 @@ class	cmsIndexList
 			let tableRow = document.createElement('tr');
 				tableRow.classList.add('trigger-batch-item');
 				tableRow.innerHTML = template;
+				
+			if(callInstance.languagesList[response.data[i].page_language].lang_locked)
+			{
+				tableRow.querySelectorAll('.bach-item-menu .dropdown-content a[data-right="edit"]').forEach(function(element){
+					element.remove();
+				});
+			}
+			else
+			{
+				tableRow.querySelector('.bach-item-menu .dropdown-content a[data-right="view"]').remove();
+			}
 
 			tableBody.append(tableRow);
 		}
@@ -46,13 +59,10 @@ class	cmsIndexList
 			object.is_frontend = 'Backend';
 
 		let	spacer = (object.page_path !== '/' ? object.level * 20 : 0);
-		
-		console.log(object.update_time);
-		
+				
 		if(object.create_time == '0') object.create_time = ''; else object.create_time = cmstk.formatDate(object.create_time, 'Y-m-d @ H:i:s');
 		if(object.update_time == '0') object.update_time = ''; else object.update_time = cmstk.formatDate(object.update_time, 'Y-m-d @ H:i:s');
 			
-		console.log(object.update_time);
 		let	template = document.getElementById('template-table-row-page').innerHTML;
 			template = template.replace(/%NODE_ID%/g, object.node_id);
 			template = template.replace(/%PAGE_NAME%/g, object.page_name);

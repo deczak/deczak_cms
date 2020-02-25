@@ -9,7 +9,7 @@ class	CCookie extends CSingleton
 	public function
 	initialize()
 	{
-		$this -> m_bRequestHTTPSCookie = CONFIG::GET() -> SESSION -> COOKIE_HTTPS;
+		$this -> m_bRequestHTTPSCookie = CFG::GET() -> SESSION -> COOKIE_HTTPS;
 	}
 
 	public function

@@ -17,7 +17,7 @@
 
 
 	$_POST['user-user']			= CRYPT::LOGIN_HASH($_POST['user-user']);
-	$_POST['user-pass']			= CRYPT::LOGIN_CRYPT($_POST['user-pass'], CONFIG::GET() -> ENCRYPTION -> BASEKEY);
+	$_POST['user-pass']			= CRYPT::LOGIN_CRYPT($_POST['user-pass'], CFG::GET() -> ENCRYPTION -> BASEKEY);
 	$_POST['user-first-name']	= CRYPT::ENCRYPT($_POST['user-first-name'], '1', true);
 	$_POST['user-last-name']	= CRYPT::ENCRYPT($_POST['user-last-name'], '1', true);
 	$_POST['user-mail']			= CRYPT::ENCRYPT($_POST['user-mail'], '1', true);

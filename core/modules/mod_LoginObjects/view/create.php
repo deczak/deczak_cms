@@ -5,7 +5,7 @@
 	$authenticationTables[] = 'tb_users_backend';
 
 	// get primary sql connection
-	$_sqlInstance = CSQLConnect::instance() -> getConnection( CONFIG::GET() -> MYSQL -> PRIMARY_DATABASE );
+	$_sqlInstance = CSQLConnect::instance() -> getConnection( CFG::GET() -> MYSQL -> PRIMARY_DATABASE );
 
 	// get columns from authentication tables
 	foreach($authenticationTables as $table)
@@ -77,7 +77,7 @@
 						<select name="object_databases[]" class="dropdown">
 							<option></option>
 							<?php
-							foreach(CONFIG::GET() -> MYSQL -> DATABASE as $_database)
+							foreach(CFG::GET() -> MYSQL -> DATABASE as $_database)
 								echo '<option>'. $_database['name'] .'</option>';
 							?>
 						</select>		

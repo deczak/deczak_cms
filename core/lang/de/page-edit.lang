@@ -15,9 +15,10 @@
 	BEPE_PANEL_GROUP_TEMPLATE		=	Template
 	BEPE_PANEL_GROUP_VISIBILTY		=	Sichbarkeit & Zugriff
 	BEPE_PANEL_GROUP_EXTSETTINGS	= 	Extended Settings
-	BEPE_PANEL_GROUP_TAGSCATS		= 	Kategorien & Tags
+	BEPE_PANEL_GROUP_TAGSCATS		= 	Erweiterte Einstellungen
 	BEPE_PANEL_GROUP_SEARCHMACHINE	= 	Suchmaschinen Einstellungen
 	BEPE_PANEL_GROUP_ALTLANG		= 	Alternative Sprachen
+	BEPE_PANEL_GROUP_REDIRECT		= 	Weiterleitung
 
 	BEPE_PANEL_NODEID				=	Node-ID
 	BEPE_PANEL_PAGEID				=	Page-ID
@@ -63,5 +64,7 @@
 	BEPE_PANEL_AUTHOBJECT			=	Authentifizierungsobjekt
 	BEPE_PANEL_AUTHOBJECT_0_NONE	=	Keine Authentifizierung
 	BEPE_PANEL_AUTHAPPLYCHILDS		= 	Auth auf Unterseiten anwenden
+
+	BEPE_PANEL_REDIRECTNODEID		=	Interne Weiterleitung (Node-ID)
 
 

@@ -42,7 +42,7 @@ $data = &$languagesList[0];
 					<div class="group-head width-100"><?php echo $language -> string('M_BELANG_SETTINGS'); ?> </div>
 
 					<div class="input width-25">
-						<label><?php echo $language -> string('LANGUAGE'); ?></label>
+						<label><?php echo $language -> string('M_BELANG_NAMENKEY'); ?></label>
 						<input type="text" name="" disabled value="<?php echo strtoupper($data -> lang_key); ?>">
 						<i class="fas fa-lock"></i>
 					</div>

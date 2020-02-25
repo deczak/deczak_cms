@@ -88,7 +88,7 @@
 										<td>
 											<div style="display:flex;">
 											<?php
-											foreach($_moduleData -> rights as $_right)
+											foreach($_moduleData -> module_rights as $_right)
 											{
 												?>
 												<div class="ui pick-item">

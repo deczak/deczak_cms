@@ -4,7 +4,7 @@ include_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelModules.php';
 
 class	controllerModules extends CController
 {
-	private		$m_modelRightGroups;
+	#private		$m_modelRightGroups;
 
 	public function
 	__construct($_module, &$_object)
@@ -16,7 +16,7 @@ class	controllerModules extends CController
 	}
 	
 	public function
-	logic(&$_sqlConnection, array $_rcaTarget, array $_userRights, $_isXHRequest)
+	logic(&$_sqlConnection, array $_rcaTarget, $_isXHRequest)
 	{
 		##	Set default target if not exists
 
@@ -24,8 +24,8 @@ class	controllerModules extends CController
 
 		##	Check user rights for this target
 
-		if(!$this -> hasRights($_userRights, $_controllerAction))
-		{ 
+		if(!$this -> detectRights($_controllerAction))
+		{
 			if($_isXHRequest !== false)
 			{
 				$_bValidationErr =	true;
@@ -41,8 +41,8 @@ class	controllerModules extends CController
 
 		##	Call sub-logic function by target, if there results are false, we make a fall back to default view
 
-		$enableEdit 	= $this -> hasRights($_userRights, 'edit');
-		$enableDelete	= $this -> hasRights($_userRights, 'delete');
+		$enableEdit 	= $this -> existsUserRight('edit');
+		$enableDelete	= $this -> existsUserRight('delete');
 
 		$_logicResults = false;
 		switch($_controllerAction)

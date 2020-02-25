@@ -24,11 +24,12 @@ class shemeUsersBackend extends CSheme
 		$this -> addColumn('recover_timeout', 'bigint') 	-> setAttribute('UNSIGNED') -> setDefault('0');
 		$this -> addColumn('is_locked'		, 'tinyint') 	-> setAttribute('UNSIGNED');
 		$this -> addColumn('language'		, 'string') 	-> setLength(3);
+		$this -> addColumn('allow_remote'	, 'bool') 		-> setDefault(false);
 
-		$this -> addColumn('create_time'	, 'bigint') 	-> setAttribute('UNSIGNED');
-		$this -> addColumn('create_by'		, 'smallint')	-> setAttribute('UNSIGNED');
-		$this -> addColumn('update_time'	, 'bigint') 	-> setAttribute('UNSIGNED') -> setDefault('0');
-		$this -> addColumn('update_by'		, 'smallint') 	-> setAttribute('UNSIGNED') -> setDefault('0');		
+		$this -> addColumn('create_time', 'bigint') -> setAttribute('UNSIGNED');
+		$this -> addColumn('create_by', 'string') -> setLength(25);
+		$this -> addColumn('update_time', 'bigint') -> setAttribute('UNSIGNED') -> setDefault('0');
+		$this -> addColumn('update_by', 'string') -> setLength(25) -> setDefault('NULL');
 		
 		$this -> addColumn('user_rights'	, 'text') -> isVirtual();
 	}

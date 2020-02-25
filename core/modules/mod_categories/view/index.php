@@ -25,7 +25,7 @@
 			?>
 
 			<tr class="trigger-batch-item">
-				<td class="batch-selection-item"><input type="checkbox" class="trigger-batch-item-checkbox" name="group-id[]" value="<?= $dataSet -> category_id; ?>" id="item-<?= $_dataKey; ?>"><label for="item-<?= $_dataKey; ?>"></label></td>
+				<td class="batch-selection-item"><input type="checkbox" class="trigger-batch-item-checkbox" name="group-id[]" value="<?= $dataSet -> category_id; ?>" id="item-<?= $dataKey; ?>"><label for="item-<?= $dataKey; ?>"></label></td>
 				<td><?= $dataSet -> category_name; ?></td>
 				<td>/<?= $dataSet -> category_url; ?>/</td>
 				<td><div class="color-indicator negative" data-state="<?= $dataSet -> category_hidden; ?>"></div></td>

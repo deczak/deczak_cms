@@ -18,7 +18,7 @@ class	CHTAccess
 		$this -> m_dataLocation  	= CMS_SERVER_ROOT.DIR_DATA.'htaccess/';
 		$this -> m_rootLocation 	= CMS_SERVER_ROOT;
 
-		$this -> m_backendFilepath	= CMS_SERVER_ROOT.DIR_DATA.'backend.json';
+		$this -> m_backendFilepath	= CMS_SERVER_ROOT.DIR_DATA.'backend/backend.json';
 
 		$this -> m_publicFolder  	= 'public';
 		$this -> m_backendFolder 	= CMS_BACKEND_PUBLIC;
@@ -69,10 +69,9 @@ class	CHTAccess
 					$_moduleParams	= file_get_contents($_moduleJSON);
 					$_moduleParams	= json_decode($_moduleParams);	
 	
-
 					##	looping sub section of module thats used by object		
 
-					foreach($_moduleParams -> sub as $_moduleSub)
+					foreach($_moduleParams -> module_subs as $_moduleSub)
 					{	
 
 						if(empty($_moduleSub -> url_name))
@@ -130,7 +129,7 @@ class	CHTAccess
 			fwrite($_hFile, "\r\n");	
 
 
-			if(CONFIG::GET() -> CRONJOB -> CRON_DIRECTORY_PUBLIC)
+			if(CFG::GET() -> CRONJOB -> CRON_DIRECTORY_PUBLIC)
 			{	
 				$_string = "RewriteRule ^cron/(.*)/?$ cron/$1 [NC,L]" . "\r\n";
 				fwrite($_hFile, $_string);	
@@ -169,32 +168,25 @@ class	CHTAccess
 
 		$_hFile 	 = fopen($this -> m_dataLocation . $_targetFile, "w");
 
-		##	get environment data
-		$environment = file_get_contents(CMS_SERVER_ROOT.DIR_DATA.'environment.json');
-		$environment = json_decode($environment);
-
 		if (flock($_hFile, LOCK_EX))
 		{
 			ftruncate($_hFile, 0);
+		
+			if(CFG::GET() -> ERROR_PAGES -> ERROR403)
+			{
+				fwrite($_hFile, 'RewriteRule ^403/?$ index.php?cms-error=403 [NC,L]');
+				fwrite($_hFile, "\r\n");
+			}
 
-
-				## Adding Env Data
-				if($environment !== NULL)
-				{
-					if($environment -> enable_custom_403)
-					{
-						fwrite($_hFile, 'RewriteRule ^403/?$ index.php?cms-error=403 [NC,L]');
-						fwrite($_hFile, "\r\n");
-					}
-
-					if($environment -> enable_custom_404)
-					{
-						fwrite($_hFile, 'RewriteRule ^404/?$ index.php?cms-error=404 [NC,L]');
-						fwrite($_hFile, "\r\n");
-					}
-				}
+			if(CFG::GET() -> ERROR_PAGES -> ERROR404)
+			{
+				fwrite($_hFile, 'RewriteRule ^404/?$ index.php?cms-error=404 [NC,L]');
+				fwrite($_hFile, "\r\n");
+			}
 
 			##	Read pages from sql and write it to file
+
+			CLanguage::instance() -> initialize($_sqlConnection);
 
 			$supportedLanguages = CLanguage::instance() -> getLanguages();
 			
@@ -206,7 +198,7 @@ class	CHTAccess
 				$_procLanguage++;
 
 				$_langSuffix = $_lang -> lang_key .'/';
-				$_langSuffix = (!CONFIG::GET() -> LANGUAGE -> DEFAULT_IN_URL && CLanguage::instance() -> getDefault() === $_lang -> lang_key ? '' : $_langSuffix);
+				$_langSuffix = (!CFG::GET() -> LANGUAGE -> DEFAULT_IN_URL && CLanguage::instance() -> getDefault() === $_lang -> lang_key ? '' : $_langSuffix);
 
 				$modelCondition = new CModelCondition();
 				$modelCondition -> where('page_language', $_lang -> lang_key);	
@@ -313,12 +305,6 @@ class	CHTAccess
 	public function
 	writeHTAccess()
 	{
-		##	get environment data
-
-		$environment = file_get_contents(CMS_SERVER_ROOT.DIR_DATA.'environment.json');
-		$environment = json_decode($environment);
-
-
 		##	get source files and order by name
 
 		$_filenames 	= [];
@@ -343,23 +329,18 @@ class	CHTAccess
 
 			foreach($_filenames as $_file)
 			{		
-				## Adding Env Data
-
-				if($_file === '1-base' && $environment !== NULL)
+				if(CFG::GET() -> ERROR_PAGES -> ERROR403)
 				{
-					if($environment -> enable_custom_403)
-					{
-						fwrite($_hDstFile, 'ErrorDocument 403 '. CMS_SERVER_URL .'404');
-						fwrite($_hDstFile, "\r\n");
-					}
-
-					if($environment -> enable_custom_404)
-					{
-						fwrite($_hDstFile, 'ErrorDocument 404 '. CMS_SERVER_URL .'404 ');
-						fwrite($_hDstFile, "\r\n");
-					}
+					fwrite($_hDstFile, 'ErrorDocument 403 '. CMS_SERVER_URL .'404');
+					fwrite($_hDstFile, "\r\n");
 				}
-		
+
+				if(CFG::GET() -> ERROR_PAGES -> ERROR404)
+				{
+					fwrite($_hDstFile, 'ErrorDocument 404 '. CMS_SERVER_URL .'404 ');
+					fwrite($_hDstFile, "\r\n");
+				}
+						
 				##	Read Source File
 
 				$_hSrcFile 	 = fopen($this -> m_dataLocation . $_file, "r");

@@ -6,6 +6,7 @@ include_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelPage.php';
 
 include_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelCategoriesAllocation.php';	
 include_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelTagsAllocation.php';	
+include_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelRedirect.php';	
 
 include_once CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CHTAccess.php';	
 
@@ -24,33 +25,33 @@ class	controllerPages extends CController
 	}
 	
 	public function
-	logic(&$_sqlConnection, array $_rcaTarget, array $_userRights, $_isXHRequest, &$_logicResult)
+	logic(&$_sqlConnection, array $_rcaTarget, $_isXHRequest, &$_logicResult)
 	{
 		##	Set default target if not exists
-
+	
 		$_controllerAction = $this -> getControllerAction($_rcaTarget,'view');
 
 		##	Check user rights for this target
 
-		if(!$this -> hasRights($_userRights, $_controllerAction))	
-		{ 
+		if(!$this -> detectRights($_controllerAction))
+		{
 			if($_isXHRequest !== false && $_isXHRequest === 'update-site') // update-site check benötigt weil im bearbeitungs modus zwei controller actions erzeugt werden wenn ein modul bearbeitet wird.
 			{
 				$_bValidationErr =	true;
-				$_bValidationMsg =	CLanguage::instance() -> getString('ERR_PERMISSON');
+				$_bValidationMsg =	CLanguage::get() -> string('ERR_PERMISSON');
 				$_bValidationDta = 	[];
-
+		
 				tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $_bValidationDta);	// contains exit call
 			}
 
-			CMessages::instance() -> addMessage(CLanguage::instance() -> getString('ERR_PERMISSON') , MSG_WARNING);
+			CMessages::instance() -> addMessage(CLanguage::get() -> string('ERR_PERMISSON') , MSG_WARNING);
 			return;
 		}
 
 		##	Call sub-logic function by target, if there results are false, we make a fall back to default view
 
-		$enableEdit 	= $this -> hasRights($_userRights, 'edit');
-		$enableDelete	= $this -> hasRights($_userRights, 'delete');
+		$enableEdit 	= $this -> existsUserRight('edit');
+		$enableDelete	= $enableEdit;
 
 		switch($_controllerAction)
 		{
@@ -138,16 +139,10 @@ class	controllerPages extends CController
 		$_pURLVariables -> retrieve($_request, true, false); 
 		$_aFormData		 = $_pURLVariables ->getArray();
 
-	#	$modelCondition = new CModelCondition();
-	#	$modelCondition -> where('page_language', $_aFormData['language']);		
-
-	#	$this -> m_modelSitemap  = new modelSitemap();
-	#	$this -> m_modelSitemap -> load($_sqlConnection, $modelCondition);
 		$this -> setView(	
 						'index',	
 						'',
 						[
-						#	'pages' 	=> $this -> m_modelSitemap -> getDataInstance(),
 							'language'	=>	$_aFormData['language'],
 							'enableEdit'	=> $_enableEdit,
 							'enableDelete'	=> $_enableDelete
@@ -183,6 +178,7 @@ class	controllerPages extends CController
 			$_logicResult['node_id']		=	$this -> m_modelPage -> getDataInstance()[0] -> node_id;
 			$_logicResult['page_version']	=	$this -> m_modelPage -> getDataInstance()[0] -> page_version;
 			$_logicResult['page_language']	=	$this -> m_modelPage -> getDataInstance()[0] -> page_language;
+			$_logicResult['enablePageEdit']	=	$_enableEdit;
 
 			return true;
 		}
@@ -246,6 +242,7 @@ class	controllerPages extends CController
 										$_request[] 	 = 	[	"input" => "apply_childs_auth", "validate" => "strip_tags|trim|!empty" , 	"use_default" => true, "default_value" => 0 ]; 	
 										$_request[] 	 = 	[	"input" => "page_categories", 	"validate" => "strip_tags|trim|!empty" , 	"use_default" => true, "default_value" => [] ]; 	
 										$_request[] 	 = 	[	"input" => "page_tags", 		"validate" => "strip_tags|trim|!empty" , 	"use_default" => true, "default_value" => [] ]; 	
+										$_request[] 	 = 	[	"input" => "page_redirect", 	"validate" => "strip_tags|trim|!empty" , 	"use_default" => true, "default_value" => '' ]; 	
 										$_pFormVariables-> retrieve($_request, false, true); // POST 
 										$_aFormData		 = $_pFormVariables ->getArray();
 
@@ -367,6 +364,24 @@ class	controllerPages extends CController
 													$modelTagsAllocation	-> insert($_sqlConnection, $newAlloc, $alloc_id);
 												}
 
+												## update redirection
+
+												$redirectCondition 	 = new CModelCondition();
+												$redirectCondition 	-> where('node_id', $nodeId);	
+
+												$modelRedirect	 = new modelRedirect();
+												$modelRedirect	-> delete($_sqlConnection, $redirectCondition);
+
+												if(!empty($_aFormData['page_redirect']))
+												{
+													$redirect_id = 0;
+													$newRedirect["node_id"] 		= $nodeId;
+													$newRedirect["redirect_target"]	= $_aFormData['page_redirect'];
+													$newRedirect["create_time"] 	= time();
+													$newRedirect["create_by"]	 	= CSession::instance() -> getValue('user_id');
+													$modelRedirect				   -> insert($_sqlConnection, $newRedirect, $redirect_id);
+												}
+
 												## update htaccess and sitemap
 
 												$_pHTAccess  = new CHTAccess();
@@ -410,6 +425,8 @@ class	controllerPages extends CController
 
 		$_aFormData['page_name'] = CLanguage::instance() -> getString('MOD_SITES_NEWPAGE_NAME');
 		$_aFormData['page_template'] = 'default';
+
+		$_aFormData['hidden_state']	=	4;
 
 		$_aFormData['create_time']	=	time();
 		$_aFormData['create_by']		= CSession::instance() -> getValue('user_id');
