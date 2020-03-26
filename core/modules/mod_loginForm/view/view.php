@@ -1,15 +1,6 @@
 
 <?php
 
-if(is_array($login_objects) && count($login_objects) != 0)
-{
-	$login_object = $login_objects[0];
-}
-else
-{
-	echo '-- Login Object failure';
-	return;
-}
 
 $login_object -> object_fields = json_decode($login_object -> object_fields);
 
@@ -28,16 +19,49 @@ $login_object -> object_fields = json_decode($login_object -> object_fields);
 				<?php 
 				foreach($login_object -> object_fields as $fieldIndex => $field)
 				{
-					echo '<div class="input width-100">';
-					echo '<label>'. (isset($object -> params -> labels[$fieldIndex]) ? $object -> params -> labels[$fieldIndex] : '') .'</label>';
-					echo '<input type="'. $field -> type .'" name="'. $field -> name .'"  value="">';
-					echo '</div>';
+
+											
+			switch($field -> query_type)
+			{
+				case 'compare'	:
+									echo '<div class="input width-100">';
+									echo '<label>'. (isset($object -> params -> labels[$fieldIndex]) ? $object -> params -> labels[$fieldIndex] : '') .'</label>';
+									echo '<input type="'. $field -> type .'" name="'. $field -> name .'"  value="">';
+									echo '</div>';
+				
+									break;
+
+				case 'assign'	:
+
+									?>
+									<div class="input width-100">
+										<label><?= (isset($object -> params -> labels[$fieldIndex]) ? $object -> params -> labels[$fieldIndex] : ''); ?></label>
+										<div class="select-wrapper">
+											<select name="<?= $field -> formValue; ?>" class="dropdown">
+												<option></option>
+												<?php
+												foreach($field -> optionsList as $option)
+												{
+													echo '<option value="'. $option -> value .'" '. ($option -> isDefault ? 'selected' : '') .'>'. $option -> text .'</option>';
+												}
+												?>
+											</select>	
+										</div>
+									</div>
+									<?php
+
+									break;
+
+			}
+
+
+
 				}
 				?>
 
 				<div class="input width-100">
 					<br>
-					<button>Login</button>
+					<button><?= CLanguage::GET() -> string('LOGIN'); ?></button>
 				</div>
 
 			</div>

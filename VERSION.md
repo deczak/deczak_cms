@@ -10,6 +10,13 @@ The version number is the release date. A letter as suffix indicates fixes on sa
 
 ## Version history	  
 
+### 20200326
+
+**Changes**
+- Removed print_r in user-agent module that leads in non valid xhr result
+- Various changes on module handling for module overloading
+- Various changes on Login-Objects and handling
+
 
 ### 20200225
 
@@ -17,6 +24,12 @@ The version number is the release date. A letter as suffix indicates fixes on sa
 - Changed backend module for login-objects to add additional databases to the backend login-object
 - Added cron job file for remote users
 - Added settings to environment module to set remote users configuration
+
+
+### 20200223
+
+**Changes**
+- Fixed reading of nested set structure thats returned in wrong order and resulted in wrong urls
 
 
 ### 20200219

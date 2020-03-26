@@ -48,7 +48,7 @@ foreach($login_objects as $objecKey => $objectSet )
 
 				<div class="input width-100">
 					<br>
-					<button>Login</button>
+					<button><?= CLanguage::GET() -> string('LOGIN'); ?></button>
 				</div>
 
 			</div>
@@ -58,6 +58,10 @@ foreach($login_objects as $objecKey => $objectSet )
 	</form>
 
 </div>
+
+<?php
+#tk::dbug($object -> params);
+?>
 
 <script>
 (function() {
@@ -91,7 +95,7 @@ foreach($login_objects as $objecKey => $objectSet )
 					var oInput = document.createElement('input');
 						oInput.setAttribute('type', 'text');
 						oInput.setAttribute('name', 'field_label[]');
-						oInput.setAttribute('value', (typeof fieldLabels.labels[f] !== 'undefined' ? fieldLabels.labels[f] : ''));
+						oInput.setAttribute('value', ((fieldLabels.labels != null && typeof fieldLabels.labels[f] !== 'undefined') ? fieldLabels.labels[f] : ''));
 						oInput.setAttribute('placeholder', 'Field label (for '+ fieldList[i].object_fields[f].name +')');
 
 					oFieldBox.appendChild(oLabel);

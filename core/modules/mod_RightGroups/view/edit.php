@@ -101,6 +101,8 @@
 								<?php
 								foreach($_aActiveModules as $_module)
 								{
+
+
 									switch($_module -> module_type)
 									{
 										case 'core'  :	$_modLocation	= CMS_SERVER_ROOT . DIR_CORE . DIR_MODULES . $_module -> module_location .'/';									
@@ -188,4 +190,5 @@
 
 	</div>
 </div>
+<?php tk::dbug($_aActiveModules); ?>
 

@@ -41,7 +41,7 @@
 	$_pLanguage	-> 	initialize($db);	
 
 	$_pHTAccess  = new CHTAccess();
-	$_pHTAccess -> generatePart4Backend();
+	$_pHTAccess -> generatePart4Backend($_sqlConnection);
 	$_pHTAccess -> generatePart4Frontend($db);
 	$_pHTAccess -> writeHTAccess();
 

@@ -1,17 +1,20 @@
 <div class="blog-container">
 
 <?php
+
 $rootLevel = false;
-foreach($sitemap as $node)
+foreach($sitemap as $sitemapIndex => $node)
 {
 	if($rootLevel === false)
 	{
 		$rootLevel = $node -> level + 1;
+		unset($sitemap[$sitemapIndex]);
 		continue;
 	}
 	
 	if($rootLevel != $node -> level)
 	{
+		unset($sitemap[$sitemapIndex]);
 		continue;
 	}
 
@@ -24,10 +27,44 @@ foreach($sitemap as $node)
 			&&	($node -> hidden_state == 5 && $node -> publish_until > $timestamp && $node -> publish_until != 0)
 			)
 		||  CMS_BACKEND
-		); else continue;
+		); else unset($sitemap[$sitemapIndex]);
 
 	if(empty($node -> text))
-		continue;
+		unset($sitemap[$sitemapIndex]);
+}
+
+foreach ($sitemap as $key => $node)
+    $createTime[$key] = $node -> create_time;
+
+array_multisort($createTime, SORT_DESC, $sitemap);
+
+#$rootLevel = false;
+foreach($sitemap as $node)
+{
+#	if($rootLevel === false)
+#	{
+#		$rootLevel = $node -> level + 1;
+#		continue;
+#	}
+#	
+#	if($rootLevel != $node -> level)
+#	{
+#		continue;
+#	}
+#
+#	if(
+#			(		$node -> hidden_state == 0
+#			    || 	$node -> hidden_state == 2
+#			)
+#		&&	(empty($node -> page_auth) || (!empty($node -> page_auth) && CSession::instance() -> isAuthed($node -> page_auth) === true))
+#		||	(	($node -> hidden_state == 5 && $node -> publish_from  < $timestamp)
+#			&&	($node -> hidden_state == 5 && $node -> publish_until > $timestamp && $node -> publish_until != 0)
+#			)
+#		||  CMS_BACKEND
+#		); else continue;
+#
+#	if(empty($node -> text))
+#		continue;
 
 	$categories = [];
 	foreach($node -> categories as $nodeCategory)

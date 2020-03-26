@@ -11,7 +11,6 @@
 
 ##	L O G I N   O B J E C T   N A M E S
 
-	define('LOGIN_OBJECT_USERS','0000');
 	define('LOGIN_OBJECT_BACKEND','ABKND');
 
 ##	T I M E   F O R M A T S   F O R   D A T E   F U N C T I O N
@@ -169,7 +168,6 @@ class	CFG extends CSingleton
 	}
 }
 
-$config 	= CFG::instance();
-$config    -> initialize();	
+CFG::instance() -> initialize();	
 
 ?>

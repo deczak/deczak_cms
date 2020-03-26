@@ -2,9 +2,9 @@
 
 require_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelRightGroups.php';	
 require_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelUserGroups.php';	
-require_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelUsers.php';	
-
 require_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelUsersRegister.php';	
+
+require_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelUsers.php';	
 
 class	controllerUsers extends CController
 {
@@ -64,7 +64,7 @@ class	controllerUsers extends CController
 		}
 	}
 
-	private function
+	protected function
 	logicIndex(&$_sqlConnection, $_enableEdit = false, $_enableDelete = false)
 	{
 		#$modelCondition = new CModelCondition();
@@ -82,7 +82,7 @@ class	controllerUsers extends CController
 						);
 	}
 
-	private function
+	protected function
 	logicCreate(&$_sqlConnection, $_isXHRequest)
 	{
 		if($_isXHRequest !== false)
@@ -183,7 +183,7 @@ class	controllerUsers extends CController
 		return true;
 	}
 
-	private function
+	protected function
 	logicView(&$_sqlConnection, $_isXHRequest = false, $_enableEdit = false, $_enableDelete = false)
 	{	
 		$_pURLVariables	 =	new CURLVariables();
@@ -229,8 +229,8 @@ class	controllerUsers extends CController
 		return false;
 	}
 
-	private function
-	logicEdit(&$_sqlConnection, $_isXHRequest = false)
+	protected function
+	logicEdit(&$_sqlConnection, $_isXHRequest = false, bool $_preventXHRRequestResultOnError = false, bool $_forcePreventXHRRequestResult = false)
 	{	
 		$_pURLVariables	 =	new CURLVariables();
 		$_request		 =	[];
@@ -407,16 +407,23 @@ class	controllerUsers extends CController
 									}	
 
 									break;
+
+				default: 			//	Default if XHR Target has not been found
+								
+									$_bValidationErr =	true;
+									$_bValidationMsg =	'Unknown XHR Target';
+
 			}
 
-			tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $_bValidationDta);	// contains exit call	
+			if((!$_preventXHRRequestResultOnError && $_bValidationErr) || (!$_forcePreventXHRRequestResult && !$_bValidationErr))
+				tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $_bValidationDta);	// contains exit call	
 		}
 
 		return false;
 	}
 
-	private function
-	logicDelete(&$_sqlConnection, $_isXHRequest = false)
+	protected function
+	logicDelete(&$_sqlConnection, $_isXHRequest = false, bool $_preventXHRRequestResultOnError = false, bool $_forcePreventXHRRequestResult = false)
 	{	
 		$_pURLVariables	 =	new CURLVariables();
 		$_request		 =	[];
@@ -448,7 +455,9 @@ class	controllerUsers extends CController
 											$modelUsersRegister  = new modelUsersRegister();
 											$modelUsersRegister -> removeUserId($_sqlConnection, $_pURLVariables -> getValue("cms-system-id"));
 
-											$_sqlConnection -> query("DELETE FROM tb_users_groups WHERE tb_users_groups.user_id = '". $_pURLVariables -> getValue("cms-system-id") ."'");
+										$modelUserGroups = new modelUserGroups();
+										$modelUserGroups -> delete($_sqlConnection, $modelCondition);
+
 										}
 										else
 										{
@@ -458,7 +467,8 @@ class	controllerUsers extends CController
 										break;
 				}
 
-				tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $_bValidationDta);	// contains exit call
+				if((!$_preventXHRRequestResultOnError && $_bValidationErr) || (!$_forcePreventXHRRequestResult && !$_bValidationErr))
+					tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $_bValidationDta);	// contains exit call
 			}		
 		
 		}

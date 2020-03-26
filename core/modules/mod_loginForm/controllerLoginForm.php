@@ -48,7 +48,7 @@ class	controllerLoginForm extends CController
 		$_logicResults = false;
 		switch($_controllerAction)
 		{
-			case 'loginSuccess'	: $_logicResults = $this -> logicSuccess();	break;
+			case 'loginSuccess'	: $_logicResults = $this -> logicSuccess($_sqlConnection);	break;
 			case 'view'			: $_logicResults = $this -> logicView(	$_sqlConnection, $_isXHRequest, $_logicResult);	break;
 			case 'edit'			: $_logicResults = $this -> logicEdit(	$_sqlConnection, $_isXHRequest, $_logicResult);	break;	
 			case 'create'		: $_logicResults = $this -> logicCreate($_sqlConnection, $_isXHRequest, $_logicResult);	break;
@@ -76,13 +76,13 @@ class	controllerLoginForm extends CController
 
 			$this -> m_modelSimple -> getDataInstance()[0] -> params = json_decode($this -> m_modelSimple -> getDataInstance()[0] -> params);
 
-$this -> m_aObject -> params = $this -> m_modelSimple -> getDataInstance()[0] -> params;
-$this -> m_aObject -> body = $this -> m_modelSimple -> getDataInstance()[0] -> body;
+			$this -> m_aObject -> params = $this -> m_modelSimple -> getDataInstance()[0] -> params;
+			$this -> m_aObject -> body = $this -> m_modelSimple -> getDataInstance()[0] -> body;
 
 			if(CSession::instance() -> isAuthed($this -> m_modelSimple -> getDataInstance()[0] -> params -> object_id) !== false)
 			{
 		
-				$this -> logicSuccess();
+				$this -> logicSuccess($_sqlConnection);
 			}
 
 
@@ -98,7 +98,7 @@ $this -> m_aObject -> body = $this -> m_modelSimple -> getDataInstance()[0] -> b
 							'',
 							[
 								'object' 	=> $this -> m_modelSimple -> getDataInstance()[0],
-								'login_objects' => $_pModelLoginObjects -> getDataInstance()
+								'login_object' => $_pModelLoginObjects -> getDataInstance()[0]
 							]
 							);
 
@@ -116,7 +116,7 @@ $this -> m_aObject -> body = $this -> m_modelSimple -> getDataInstance()[0] -> b
 			// authed check
 			if(CSession::instance() -> isAuthed($this -> m_aObject -> params -> object_id) !== false)
 			{
-				$this -> logicSuccess();
+				$this -> logicSuccess($_sqlConnection);
 			}
 
 
@@ -133,7 +133,7 @@ $this -> m_aObject -> body = $this -> m_modelSimple -> getDataInstance()[0] -> b
 							'', 
 							[ 
 								'object' => $this -> m_aObject,
-								'login_objects' => $_pModelLoginObjects -> getDataInstance()
+								'login_object' => $_pModelLoginObjects -> getDataInstance()[0]
 							]
 							);
 		}
@@ -352,7 +352,7 @@ $this -> m_aObject -> body = $this -> m_modelSimple -> getDataInstance()[0] -> b
 	}
 
 	public function
-	logicSuccess()
+	logicSuccess(&$_sqlConnection)
 	{
 	
 		$_redirectTarget = (empty($this -> m_aObject -> body) ? $_SERVER['REQUEST_URI'] : CMS_SERVER_URL . $this -> m_aObject -> body );

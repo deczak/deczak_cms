@@ -13,7 +13,6 @@ class shemeLoginObjects extends CSheme
 
 		$this -> addColumn('object_id', 'string') -> setKey('UNIQUE') -> setLength(25);
 		$this -> addColumn('object_databases', 'text');
-		$this -> addColumn('object_table', 'string') -> setLength(100);
 		$this -> addColumn('object_fields', 'text');
 		$this -> addColumn('object_session_ext', 'text');
 		$this -> addColumn('object_description', 'string') -> setLength(200);

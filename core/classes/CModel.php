@@ -166,6 +166,7 @@ class	CModel
 			$sqlString 	.= "`".$column -> name ."` = '". $model -> $tmp ."'";
 			$loopCounter++;
 		}
+		
 		if($_sqlConnection -> query($sqlString) !== false) 
 		{
 			$_insertedId = $_sqlConnection -> insert_id;

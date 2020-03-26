@@ -1,18 +1,15 @@
 <?php
 
+require_once 'CSingleton.php';
 require_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelLoginObjects.php';
 
-class	CLogin
+class	CLogin extends CSingleton
 {
-
-	public 	function
-	__construct()
-	{
-	}
-
 	public	function
 	login(&$_sqlConnection, string $_loginObjectName)
 	{
+
+		
 		$modelCondition = new CModelCondition();
 		$modelCondition -> where('object_id', $_loginObjectName);
 		
@@ -47,7 +44,6 @@ class	CLogin
 		$_pSession		 	= CSession::instance();
 		$_loginFailCount	= $_pSession -> getValue('login_fail_count');
 
-
 		if($_loginFailCount > CFG::GET() -> LOGIN -> FAIL_LIMIT)
 		{	##	Login limit reached
 			$this -> setError('ERR_CR_LOGIN_5');
@@ -57,17 +53,24 @@ class	CLogin
 		##
 
 		$_bLoginResult	= false;
-		$_columnsValue	= [];
+		#$_columnsValue	= [];
 		$_cryptUsername	= [];
 		
-		$_loginObject -> object_fields = json_decode($_loginObject -> object_fields);
+		$_loginObject -> object_fields 		= json_decode($_loginObject -> object_fields);
+		$_loginObject -> object_databases 	= json_decode($_loginObject -> object_databases);
 
 		## retrieve form data
 		$_pLoginVariables	 =	new CURLVariables();
 
 		foreach($_loginObject -> object_fields as $_field)
 		{
-			$_aLoginReqStruct[]  = 	[	"input" => $_field -> name, "validate" => "strip_tags|!empty" ];
+			switch($_field -> query_type)
+			{
+				case 'compare': $_aLoginReqStruct[]  = 	[	"input" => $_field -> name, "validate" => "strip_tags|!empty" ]; break;
+
+				case 'assign' : $_aLoginReqStruct[]  = 	[	"input" => $_field -> formValue, "validate" => "strip_tags|!empty" ]; break;
+			}
+			
 		}
 
 		if(!$_pLoginVariables -> retrieve($_aLoginReqStruct, false, true, true))
@@ -76,6 +79,244 @@ class	CLogin
 		}
 
 		$_formData		 = $_pLoginVariables ->getArray();
+		
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+		##	processing field value
+
+		$whereColumns 		= []; 
+		$iValidationFields 	= 0;
+		$iValidationSuccess	= 0;
+		$userTables			= ['tb_users','tb_users_backend'];
+		$userTable			= NULL;
+		$userTableResult	= NULL;
+
+		foreach($_loginObject -> object_fields as $field)
+		{
+
+
+			switch($field -> query_type)
+			{
+				case 'compare'	:
+
+								if(empty($_formData[ $field -> name ]))
+								{
+									$this -> setError('ERR_CR_LOGIN_3');
+									return $_bLoginResult;
+								}
+
+								switch($field -> data_prc)
+								{
+									case 'plain':	##	No kind of processing
+													#$procValue = $_formData[ $field -> name ];						
+													break;
+
+									case 'crypt':	##	Encrypt form data for validation
+													$_formData[ $field -> name ] = CRYPT::LOGIN_HASH($_formData[ $field -> name ]);						
+													break;
+
+									case 'hash':	##	Hash form data for validation
+													$_formData[ $field -> name ] = CRYPT::LOGIN_CRYPT($_formData[ $field -> name ], CFG::GET() -> ENCRYPTION -> BASEKEY);	
+													break;
+								}
+								
+								break;
+
+			}
+		}
+
+		##	auth check
+
+
+		$whereBuffer = $whereColumns;
+
+		foreach($_loginObject -> object_databases as $_dbName)
+		{
+
+			##	check if db is not primary but remote system is disabled
+			if(		CFG::GET() -> MYSQL -> PRIMARY_DATABASE !== $_dbName 
+				&& !CFG::GET() -> USER_SYSTEM -> REMOTE_USER -> ENABLED
+			  )	continue;
+	
+			$_db 	= CSQLConnect::instance() -> getConnection($_dbName);
+
+			if(CFG::GET() -> MYSQL -> PRIMARY_DATABASE !== $_dbName)
+				$whereColumns[] = $_loginObject -> object_table .".allow_remote = '1' ";
+
+			foreach($_loginObject -> object_fields as $field)
+			{
+
+				$iValidationFields++;
+
+				switch($field -> query_type)
+				{
+					case 	'compare':	
+				
+
+							$whereColumns = [];
+							$whereColumns[] = $field -> name ." = '". $_db -> real_escape_string($_formData[ $field -> name ]) ."'";
+
+							if(isset($field -> is_username) && $field -> is_username === '1') 
+								$_cryptUsername[] = $field -> name ." = '". $_formData[ $field -> name ] ."'";	
+
+							$_sqlString			=	"	SELECT		". $field -> table .".is_locked,
+																	". $field -> table .".login_count,
+																	". $field -> table .".user_id,
+																	". $field -> table .".data_id,
+																	". $field -> table .".cookie_id
+														FROM		". $field -> table ."
+														WHERE		". implode(' AND ', $whereColumns) ."
+														LIMIT		1
+													";
+
+							$_sqlLoginChkRes		=	$_db -> query($_sqlString);	
+
+
+							if($_sqlLoginChkRes !== false && $_sqlLoginChkRes -> num_rows === 1)
+							{	
+
+								if(in_array($field -> table, $userTables, true) && $userTable === NULL)
+								{
+									$userTable 			= $field -> table;
+									$userTableResult 	= $_sqlLoginChkRes -> fetch_assoc();
+								}
+
+								$iValidationSuccess++;
+							}
+
+							break;
+				}
+			}
+		}
+
+		##	Auth validation for assign check, we need the user_id, this is why we do this in a separated run
+
+		foreach($_loginObject -> object_databases as $_dbName)
+		{
+			##	check if db is not primary but remote system is disabled
+			if(		CFG::GET() -> MYSQL -> PRIMARY_DATABASE !== $_dbName 
+				&& !CFG::GET() -> USER_SYSTEM -> REMOTE_USER -> ENABLED
+			  )	continue;
+	
+			$_db 	= CSQLConnect::instance() -> getConnection($_dbName);
+
+			if(CFG::GET() -> MYSQL -> PRIMARY_DATABASE !== $_dbName)
+				$whereColumns[] = $_loginObject -> object_table .".allow_remote = '1' ";
+
+			foreach($_loginObject -> object_fields as $field)
+			{
+
+				switch($field -> query_type)
+				{
+					case 	'assign':
+
+							if(!empty($userTableResult['user_id']))
+							{
+								$sqlString		=	"	SELECT		". $field -> assignTable .".". $field -> assignColumn ."
+														FROM		". $field -> assignTable ."
+														WHERE		". $field -> assignTable .".". $field -> assignColumn ." = '". $_db -> real_escape_string($_formData[ $field -> formValue ]) ."'
+															AND 	". $field -> assignTable .".user_id	= '". $userTableResult['user_id'] ."'
+													";
+
+								$_sqlAssignRes	=	$_db -> query($sqlString);	
+
+								if($_sqlAssignRes !== false && $_sqlAssignRes -> num_rows == 1)
+								{
+									$iValidationSuccess++;
+								}
+							}
+
+							break;
+				}
+			}
+		}
+
+		if($iValidationFields === $iValidationSuccess)
+		{
+			switch($userTableResult['is_locked'])
+			{
+				case '0':	## OK
+
+							$_timeStamp 	=	time();
+							$_cookieID		=	CCookie::instance() -> createCookieIdinator( $_loginObjectName , $_timeStamp , $_pSession -> getValue('session_id') );
+							$_existsCookies =	json_decode($userTableResult['cookie_id'],true);
+							$_existsCookies[$_loginObjectName]['id'] = $_cookieID;
+							$_existsCookies	=	json_encode($_existsCookies, JSON_FORCE_OBJECT);
+
+							$_sqlString		=	"	UPDATE		$userTable
+													SET			$userTable.login_count	= '". ($userTableResult['login_count'] + 1) ."',
+																$userTable.time_login	= '". $_timeStamp ."',
+																$userTable.cookie_id	= '". $_db -> real_escape_string($_existsCookies) ."'
+													WHERE		$userTable.data_id		= '". $userTableResult['data_id'] ."'
+												";
+
+							$_db -> query($_sqlString);	
+							$_pSession -> setValue('login_fail_count', 0, true);
+
+
+							return true;
+
+				case '1':	## Account mail not verified
+
+							$this -> setError('ERR_CR_LOGIN_6');
+							return false;
+
+				case '2':	## Account locked (fail login limit reached)
+
+							$this -> setError('ERR_CR_LOGIN_5');
+							return false;
+
+				case '3':	## Account locked by administrator
+
+							$this -> setError('ERR_CR_LOGIN_8');
+							return false;
+
+				default:	## Unclear account state
+
+							$this -> setError('ERR_CR_LOGIN_7');
+							return false;
+			}
+		}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+		/*
 
 		## data proc for field data
 		foreach($_loginObject -> object_fields as $_field)
@@ -190,6 +431,40 @@ class	CLogin
 
 		}
 
+		*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 		##	If the login of the user account is valid, the function returns a result before we reach that part of the code.
 		##	Because we are here now, that means the login failed
 
@@ -202,9 +477,9 @@ class	CLogin
 			if($_loginFailCount > CFG::GET() -> LOGIN -> FAIL_LIMIT)
 			{	##	Login limit reached -> lock account, update session for login kill
 				
-				$_sqlString			=	"	SELECT		". $_loginObject -> object_table .".user_mail,
-														". $_loginObject -> object_table .".data_id
-											FROM		". $_loginObject -> object_table ."
+				$_sqlString			=	"	SELECT		$userTable.user_mail,
+														$userTable.data_id
+											FROM		$userTable
 											WHERE		". implode(' AND ',$_cryptUsername) ."
 										";
 
@@ -219,9 +494,9 @@ class	CLogin
 
 					while($_sqlLoginFail = $_sqlLoginFailRes -> fetch_assoc())
 					{
-						$_sqlString			=	"	UPDATE		". $_loginObject -> object_table ."
-													SET			". $_loginObject -> object_table .".is_locked	= '2'
-													WHERE		". $_loginObject -> object_table .".data_id	= ". $_sqlLoginFail['data_id'] ."
+						$_sqlString			=	"	UPDATE		$userTable
+													SET			$userTable.is_locked	= '2'
+													WHERE		$userTable.data_id	= ". $_sqlLoginFail['data_id'] ."
 												";
 
 						$_db -> query($_sqlString);	
@@ -293,9 +568,7 @@ class	CLogin
 	public	function
 	setError($_errorCode)
 	{	
-		$_pLanguage	 = CLanguage::instance();
-		$_pMessages  = CMessages::instance();
-		$_pMessages -> addMessage( $_pLanguage -> getString($_errorCode) , MSG_LOG , '' , true );
+		CMessages::instance()-> addMessage( CLanguage::get() -> string($_errorCode) , MSG_LOG , '' , true );
 	}
 
 }

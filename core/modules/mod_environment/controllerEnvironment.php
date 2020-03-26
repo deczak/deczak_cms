@@ -133,7 +133,7 @@ class	controllerEnvironment extends CController
 				case 'update-htaccess':	// Update htaccess
 
 										$_pHTAccess  = new CHTAccess();
-										$_pHTAccess -> generatePart4Backend();
+										$_pHTAccess -> generatePart4Backend($_sqlConnection);
 										$_pHTAccess -> generatePart4Frontend($_sqlConnection);
 										$_pHTAccess -> generatePart4DeniedAddress($_sqlConnection);
 										$_pHTAccess -> writeHTAccess();

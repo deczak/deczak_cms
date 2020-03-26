@@ -1,5 +1,6 @@
 {
 	"module_name"		: "Blog",
+	"module_desc"		: "xox",
 	"module_controller" : "controllerBlog",
 	"module_path" 		: "",
 	"module_group"		: "Other",

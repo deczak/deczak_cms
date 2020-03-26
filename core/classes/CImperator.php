@@ -56,7 +56,7 @@ class	CImperator extends CBasic
 		if(!empty($_pPageRequest -> objectsList))
 		foreach($_pPageRequest -> objectsList as $_objectIndex =>  $_object)
 		{	
-			$module = $_modules -> loadModule((int)$_object -> module_id);
+			$module = $_modules -> loadModule((int)$_object -> module_id, $_pPageRequest -> page_language);
 
 			if( $module === false) continue;
 
@@ -115,7 +115,7 @@ class	CImperator extends CBasic
 
 
 
-				$module = $_modules -> loadModule((int)$_pURLVariables -> getValue("cms-insert-module"));
+				$module = $_modules -> loadModule((int)$_pURLVariables -> getValue("cms-insert-module"), $_pPageRequest -> page_language);
 
 				if( $module === false)
 				{
@@ -201,22 +201,10 @@ class	CImperator extends CBasic
 			
 		#	$_iModuleIndex = $_modules -> isLoaded( $_object -> module_id );
 
-			$module = $_modules -> loadModule((int)$_object -> module_id);
+			$module = $_modules -> loadModule((int)$_object -> module_id, $_pPageRequest -> page_language);
 
 			if( $module === false) continue;
 
-			##	Read additional module files (module.json and *.lang)
-
-			switch($module -> module_type)
-			{
-				case 'core'  :	$_modLocation	= CMS_SERVER_ROOT . DIR_CORE . DIR_MODULES . $module -> module_location .'/';									
-								break;
-
-				case 'mantle':	$_modLocation	= CMS_SERVER_ROOT . DIR_MANTLE . DIR_MODULES . $module -> module_location .'/';
-								break;
-			}
-
-			CLanguage::instance() -> loadLanguageFile($_modLocation.'lang/', $_pPageRequest -> page_language);
 
 			##	Create object and call logic
 

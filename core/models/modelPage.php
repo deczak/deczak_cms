@@ -493,7 +493,7 @@ class 	modelPage extends CModel
 									BETWEEN p.node_lft 
 										AND	p.node_rgt 
 									AND 	n.node_id = '". $_sqlConnection -> real_escape_string($_sqlPages['node_id']) ."'
-								ORDER BY 	n.node_lft
+								ORDER BY 	p.node_lft
 							";
 
 			$_sqlPgHeadRes	=	 $_sqlConnection -> query($_sqlString);

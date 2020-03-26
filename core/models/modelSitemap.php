@@ -92,6 +92,7 @@ class 	modelSitemap extends CModel
 		foreach($_pages as $_pageIndex => $_page)
 		{
 			$_page['alternate_path'] = $this -> getAlternatePaths($_sqlConnection, $_page['page_id']);
+
 			$this -> m_storage[] = new $_className($_page, $this -> m_shemeSitemap -> getColumns());
 		}	
 
@@ -122,13 +123,15 @@ class 	modelSitemap extends CModel
 									BETWEEN p.node_lft 
 										AND	p.node_rgt 
 									AND 	n.node_id = '". $_sqlConnection -> real_escape_string($_sqlPages['node_id']) ."'
-								ORDER BY 	n.node_lft
+								ORDER BY 	p.node_lft ASC
 							";
+
 
 			$_sqlPgHeadRes	=	 $_sqlConnection -> query($_sqlString);
 
 			while($_sqlPgHeadRes !== false && $_sqlPgHead = $_sqlPgHeadRes -> fetch_assoc())
 			{
+
 				if($_sqlPgHead['page_language'] == '0') continue;
 
 				if(!isset($_returnArray[$_sqlPgHead['page_language']]))

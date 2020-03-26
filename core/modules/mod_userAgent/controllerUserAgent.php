@@ -214,9 +214,6 @@ class	controllerUserAgent extends CController
 											$_aFormData['update_by'] 	= CSession::instance() -> getValue('user_id');
 											$_aFormData['update_time'] 	= time();
 
-											print_r($_aFormData);
-									
-
 											$modelCondition = new CModelCondition();
 											$modelCondition -> where('data_id', $_pURLVariables -> getValue("cms-system-id"));
 

@@ -2,6 +2,7 @@
 
 include_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelSitemap.php';	
 include_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelDeniedRemote.php';	
+include_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelModules.php';	
 
 class	CHTAccess
 {
@@ -25,7 +26,7 @@ class	CHTAccess
 	}
 
 	public function
-	generatePart4Backend()
+	generatePart4Backend(&$_sqlConnection)
 	{
 		$_targetFile = '2-backend';
 
@@ -59,12 +60,23 @@ class	CHTAccess
 
 					if($_moduleData === false)
 						continue;
+
+					## check if this module is reloaded by another one, if yes, skip this
+					
+					if(!empty($_moduleData -> module_extends_by))
+					{	
+						$_createEndNullSub = false;
+						continue;
+					}
+
+					
+
+					##
 						
 					$_moduleJSON = CMS_SERVER_ROOT.$_moduleData -> module_type.'/'.DIR_MODULES.$_moduleData -> module_location.'/module.json';
 
 					if(!file_exists($_moduleJSON))
 						continue;
-
 		
 					$_moduleParams	= file_get_contents($_moduleJSON);
 					$_moduleParams	= json_decode($_moduleParams);	
@@ -103,6 +115,8 @@ class	CHTAccess
 						}
 					}
 				}
+
+
 
 				if($_createEndNullSub)
 				{
@@ -331,7 +345,7 @@ class	CHTAccess
 			{		
 				if(CFG::GET() -> ERROR_PAGES -> ERROR403)
 				{
-					fwrite($_hDstFile, 'ErrorDocument 403 '. CMS_SERVER_URL .'404');
+					fwrite($_hDstFile, 'ErrorDocument 403 '. CMS_SERVER_URL .'403');
 					fwrite($_hDstFile, "\r\n");
 				}
 

@@ -29,3 +29,16 @@
 	MOD_LOGINO_OBJECT_DATABASE			=	Authentifiziererungs Datenbank
 	MOD_LOGINO_OBJECT_SESS_EXTENT		=	Erweiterte Session Daten
 	MOD_LOGINO_OBJECT_DISABLED			=	Objekt Disabled
+
+
+	MODULE_LOGOBJ_LFORMTABLE			=	Formular Auswahl Tabelle
+	MODULE_LOGOBJ_LFORMTEXT				=	Formular Auswahl Text
+	MODULE_LOGOBJ_LFORMVALUE			=	Formular Auswahl Wert
+	MODULE_LOGOBJ_LASSIGNTABLE			=	Zuweisungs Tabelle
+	MODULE_LOGOBJ_LASSIGNCOLUMN			=	Zuweisungs Spalte
+
+
+	MODULE_LOGOBJ_ASSIGNCOLUMN			=	Zuweisungs Spalte
+	MODULE_LOGOBJ_SOURCETABLE			=	Daten Tabelle
+	MODULE_LOGOBJ_SOURCECOLUMN			=	Daten Spalte
+	MODULE_LOGOBJ_SOURCECOLUMN2			=	Daten Zuweisungs Spalte

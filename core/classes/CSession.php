@@ -168,20 +168,13 @@ class	CSession extends CSingleton
 
 			if(!empty($_COOKIE))
 			{
-
-
-
-
 				foreach($_COOKIE as $_cookieKey => $_cookieValue)
 				{
+					$modelCondition = new CModelCondition();
+					$modelCondition -> where('object_id', $_cookieKey);
 
-
-
-			$modelCondition = new CModelCondition();
-			$modelCondition -> where('object_id', $_cookieKey);
-
-				// get login objects
-				$_pModelLoginObjects	 =	new modelLoginObjects();
+					// get login objects
+					$_pModelLoginObjects	 =	new modelLoginObjects();
 
 					$_pModelLoginObjects	->	load($_db, $modelCondition);	
 
@@ -192,16 +185,19 @@ class	CSession extends CSingleton
 					{
 						$_loginObject			 =	&$_loginObjects[0];
 				
+						$_loginObject -> object_databases 	= json_decode($_loginObject -> object_databases);
+						$_loginObject -> object_session_ext = json_decode($_loginObject -> object_session_ext);
+						$_loginObject -> object_fields 		= json_decode($_loginObject -> object_fields);
 
-
-					$_loginObject -> object_databases = json_decode($_loginObject -> object_databases);
-					$_loginObject -> object_session_ext = json_decode($_loginObject -> object_session_ext);
 					}
-					
-			
+								
 
 					if(isset($_loginObject))
 					{	##	Login object for this cookies exists
+
+						$userTables			= ['tb_users','tb_users_backend'];
+						$userTable			= NULL;
+						$userTableResult	= NULL;
 
 						foreach($_loginObject -> object_databases as $_dbName)
 						{
@@ -209,87 +205,167 @@ class	CSession extends CSingleton
 								&& !CFG::GET() -> USER_SYSTEM -> REMOTE_USER -> ENABLED
 							)	continue;
 
+
+							// find user table
+							foreach($_loginObject -> object_fields as $field)
+							{
+								switch($field -> query_type)
+								{
+									case 	'compare':	
+
+											if(in_array($field -> table, $userTables, true) && $userTable === NULL)
+											{
+												$userTable 			= $field -> table;
+												break;
+											}
+
+											break;
+								}
+							}
+
 							$_dbLogin 	=	CSQLConnect::instance() -> getConnection($_dbName);
 							$_cookieID	=	CCookie::instance() -> getCookieID($_cookieKey);
 				
-							$_sqlString			=	"	SELECT		". $_loginObject -> object_table .".data_id,
-																	". $_loginObject -> object_table .".time_login,
-																	". $_loginObject -> object_table .".cookie_id,
-																	". $_loginObject -> object_table .".user_id,
-																	". $_loginObject -> object_table .".login_name
-														FROM		". $_loginObject -> object_table ."
-														WHERE 		". $_loginObject -> object_table .".cookie_id LIKE '%\"". $_dbLogin -> real_escape_string($_cookieKey) ."\":{\"id\":\"". $_dbLogin -> real_escape_string($_cookieID) ."\"}%'
-															AND		". $_loginObject -> object_table .".is_locked = '0'
+							$_sqlString			=	"	SELECT		$userTable.data_id,
+																	$userTable.time_login,
+																	$userTable.cookie_id,
+																	$userTable.user_id,
+																	$userTable.login_name
+														FROM		$userTable
+														WHERE 		$userTable.cookie_id LIKE '%\"". $_dbLogin -> real_escape_string($_cookieKey) ."\":{\"id\":\"". $_dbLogin -> real_escape_string($_cookieID) ."\"}%'
+															AND		$userTable.is_locked = '0'
 											
 													";
 
 							if(CFG::GET() -> MYSQL -> PRIMARY_DATABASE !== $_dbName)
-								$_sqlString		.=	"		AND		". $_loginObject -> object_table .".allow_remote = '1' ";
+								$_sqlString		.=	"		AND		$userTable.allow_remote = '1' ";
 
 							$_sqlString			.=	"	LIMIT		1 ";
-
 
 							$_sqlLoginChkRes		=	$_dbLogin -> query($_sqlString);	
 		
 							if($_sqlLoginChkRes !== false && $_sqlLoginChkRes -> num_rows > 0)
 							{
-
 								$_sqlLoginChk = $_sqlLoginChkRes -> fetch_assoc();
-
 
 								if(CCookie::instance() -> isCookieIdinatorValid($_cookieKey, $_sqlLoginChk['time_login'], $this -> m_aSessionData['session_id']))
 								{	##	User auth positiv
-
-
-
 			
 									$this -> m_aSessionData['is_auth']						=	true;
 									$this -> m_aSessionData['is_auth_objects'][$_cookieKey]	=	[	##	For additional data access
 																								'db'		=>	&$_dbLogin,
-																								'table'		=>	$_loginObject -> object_table,
+																								'table'		=>	$userTable,
 																								'data_id'	=>	$_sqlLoginChk['data_id']
 																								];			
-																								
-																							
+
 									## Gathering additional columns
 									
 									if(!empty($_loginObject -> object_session_ext))
 									{
-										$_selectColumns 	= [];
-										$_selectColumns[] 	= $_loginObject -> object_table .'.user_id';
+										$gatheredUserId = false;
+
+										$userId = NULL;
+										foreach($_loginObject -> object_session_ext as $_extColumn)
+										{
+											switch($_extColumn -> query_type)
+											{
+												case 	'compare':	
+
+														$_selectColumns 	= [];
+
+														if(in_array($_extColumn -> table, $userTables, true) && !$gatheredUserId)
+														{
+															$_selectColumns[] 	= $_extColumn -> table .'.user_id';
+															$gatheredUserId 	= true;
+														}
+
+															$_selectColumns[] = $_extColumn -> table .'.'. $_extColumn -> name;
+
+														$_sqlString		=	"	SELECT		". implode(', ',$_selectColumns) ."
+																				FROM		". $_extColumn -> table ."
+																				WHERE		". $_extColumn -> table .".user_id		= '". $_sqlLoginChk['user_id'] ."'
+																			";
+
+														$_extDataRes 	= 	$_dbLogin -> query($_sqlString);	
+														$_extData		= 	$_extDataRes -> fetch_assoc();
+
+														foreach($_extData as $_datKey => $_dataValue)
+														{
+															if(!empty($_extData['user_id']))
+																$userId = $_extData['user_id'];
+
+
+															foreach($_loginObject -> object_session_ext as $_extColumn)
+															{
+
+																switch($_extColumn -> query_type)
+																{
+																	case 	'compare':	
+																
+																			if($_extColumn -> name === $_datKey)
+																			{
+																				switch($_extColumn -> data_prc)
+																				{
+																					case 'crypt':	$_dataValue = CRYPT::DECRYPT($_dataValue, $userId, true); break;
+																				}
+																			}
+
+																			break;
+																}
+
+															}
+
+															$this -> m_aSessionData[$_datKey] = $_dataValue;
+
+														}
+
+														break;
+											}
+										}
 
 										foreach($_loginObject -> object_session_ext as $_extColumn)
 										{
-											$_selectColumns[] = $_loginObject -> object_table .'.'. $_extColumn -> name;
-										}
-
-										$_sqlString		=	"	SELECT		". implode(', ',$_selectColumns) ."
-																FROM		". $_loginObject -> object_table ."
-																WHERE		". $_loginObject -> object_table .".data_id		= '". $_sqlLoginChk['data_id'] ."'
-															";
-
-										$_extDataRes 	= 	$_dbLogin -> query($_sqlString);	
-										$_extData		= 	$_extDataRes -> fetch_assoc();
-
-										foreach($_extData as $_datKey => $_dataValue)
-										{
-											##
-											##	looping for data_proc if the field crypted
-
-											foreach($_loginObject -> object_session_ext as $_extColumn)
+											switch($_extColumn -> query_type)
 											{
-												if($_extColumn -> name === $_datKey)
-												{
-													switch($_extColumn -> data_prc)
-													{
-														case 'crypt':	$_dataValue = CRYPT::DECRYPT($_dataValue, $_extData['user_id'], true); break;
-													}
-												}
-											}
+												case 	'assign':	
 
-											$this -> m_aSessionData[$_datKey] = $_dataValue;
+														/*			$sqlString		=	"	SELECT		". $field -> checkTable .".*
+																	FROM		". $field -> checkTable ."
+																	JOIN		". $field -> infoTable ."
+																		ON		". $field -> infoTable .".data_id = ". $field -> checkTable .".". $field -> checkColumn ."
+																	WHERE		". $field -> checkTable .".". $field -> checkColumn ." = '". $userId ."'
+																		AND 	". $field -> checkTable .".user_id	= '". $userId ."'
+																";
+
+														*/
+
+														$sqlString		=	"	SELECT		". $_extColumn -> infoTable .".". $_extColumn -> infoColumn ."
+																				FROM		". $_extColumn -> checkTable ."
+																				JOIN		". $_extColumn -> infoTable ."
+																					ON		". $_extColumn -> infoTable .".". $_extColumn -> infoAssignCol ." 	= ". $_extColumn -> checkTable .".". $_extColumn -> checkColumn ."
+																				WHERE		". $_extColumn -> checkTable .".user_id	= '". $userId ."'
+																			";
+
+
+
+														$_sqlAssignRes	=	$_db -> query($sqlString);	
+
+
+														if($_sqlAssignRes !== false && $_sqlAssignRes -> num_rows == 1)
+														{
+															$_sqlAssignItm = $_sqlAssignRes -> fetch_assoc();
+
+															
+
+															$this -> m_aSessionData[$_extColumn -> infoColumn] = $_sqlAssignItm[$_extColumn -> infoColumn];
+
+
+																	break;
+														}
+											}
 										}
-									}
+										}
+										
 
 									$userHash = NULL;
 
@@ -319,18 +395,13 @@ class	CSession extends CSingleton
 
 											$_sqlLoginChk['user_id'] = $modelUsersRegister -> getDataInstance()[0] -> user_id;
 
-
 											$this -> m_aSessionData['user_id'] = $_sqlLoginChk['user_id'];
 											$this -> m_aSessionData['is_remote'] = true;
-
-
 										}
 										else
 										{
 											$_sqlLoginChk['user_id'] = 0;
 										}
-
-
 									}
 
 									$_pUserRights -> loadUserRights($_db, $_sqlLoginChk['user_id']);

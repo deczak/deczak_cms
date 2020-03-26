@@ -7,6 +7,7 @@
 				<td class="batch-selection-item"></td>
 				<td class="column-icon"></td>
 				<td><?php echo $language -> string('M_BEMOULE_NAME'); ?></td>
+				<td><?php echo $language -> string('M_BEMOULE_DESC'); ?></td>
 				<td><?php echo $language -> string('M_BEMOULE_SECTION'); ?></td>
 				<td class="column-state"><?php echo $language -> string('M_BEMOULE_STATE'); ?></td>
 				<td class="column-button"></td>
@@ -60,6 +61,7 @@
 	<td class="batch-selection-item"><input type="checkbox" class="trigger-batch-item-checkbox" name="group-id[]" value="%MODULE_ID%" id="item-%MODULE_ID%"><label for="item-%MODULE_ID%"></label></td>
 	<td class=""><span style="font-family:icons-solid;">%MODULE_ICON%</span></td>
 	<td class="">%MODULE_NAME%</td>
+	<td class="">%MODULE_DESC%</td>
 	<td class="">%IS_FRONTEND% / %MODULE_TYPE%</td>
 	<td><div class="color-indicator positive" data-state="%IS_ACTIVE%"></div></td>
 	<td class="column-button"></td>

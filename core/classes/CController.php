@@ -130,13 +130,29 @@ class	CController
 	protected function
 	setView(string $_view, string $_moduleTarget,  array $_dataInstances = [])
 	{
-		switch($this -> m_aModule -> module_type)
+		$moduleType 	= $this -> m_aModule -> module_type;
+		$moduleLocation = $this -> m_aModule -> module_location;
+
+		switch($moduleType)
 		{
 			case 'mantle': $moduleTypeLocation = DIR_MANTLE; break;
 			default		 : $moduleTypeLocation = DIR_CORE;
 		}
 
-		$this -> m_pView = new CView( CMS_SERVER_ROOT . $moduleTypeLocation . DIR_MODULES . $this -> m_aModule -> module_location .'/view/'. $_view, $_moduleTarget , $_dataInstances );	
+		if(		!file_exists(CMS_SERVER_ROOT . $moduleTypeLocation . DIR_MODULES . $moduleLocation .'/view/'. $_view.'.php')
+			&&	$this -> m_aModule -> parentModule !== NULL)
+		{
+			$moduleType 	= $this -> m_aModule -> parentModule -> module_type;
+			$moduleLocation = $this -> m_aModule -> parentModule -> module_location;
+		}
+
+		switch($moduleType)
+		{
+			case 'mantle': $moduleTypeLocation = DIR_MANTLE; break;
+			default		 : $moduleTypeLocation = DIR_CORE;
+		}
+
+		$this -> m_pView = new CView( CMS_SERVER_ROOT . $moduleTypeLocation . DIR_MODULES . $moduleLocation .'/view/'. $_view, $_moduleTarget , $_dataInstances );	
 	}	
 }
 

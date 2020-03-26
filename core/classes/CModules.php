@@ -30,7 +30,7 @@ class	CModules extends CSingleton
 	 *	Loads the Module by given moduleID if not already loaded 
 	 */
 	public function
-	loadModule(int $_moduleId)
+	loadModule(int $_moduleId, string $_pageLanguage)
 	{
 		$moduleInstance = NULL;
 		$moduleIndex = false;
@@ -39,7 +39,6 @@ class	CModules extends CSingleton
 		{
 			return false;
 		}
-
 
 		if($moduleInstance -> is_active === 0)
 		{
@@ -51,6 +50,19 @@ class	CModules extends CSingleton
 			return $moduleInstance;
 		}
 
+		##	Check if this moduel extends another module, if yes, call loadModule for required includes
+
+		$this -> modulesList[$moduleIndex] -> parentModule = NULL;
+
+		if(!empty($moduleInstance -> module_extends))
+		{
+			$parentModule = NULL;
+			$this -> getModuleByController($moduleInstance -> module_extends, $parentModule);
+			$this -> modulesList[$moduleIndex] -> parentModule = $this -> loadModule($parentModule -> module_id, $_pageLanguage);		
+		}
+
+		##
+
 		switch($moduleInstance -> module_type) 
 		{
 			case 'core'   :	include CMS_SERVER_ROOT.DIR_CORE.DIR_MODULES. $moduleInstance -> module_location .'/'. $moduleInstance -> module_controller .'.php';
@@ -59,6 +71,9 @@ class	CModules extends CSingleton
 							$moduleConfig 	= ($moduleConfig !== false ? json_decode($moduleConfig) : [] );	
 							$this -> modulesList[$moduleIndex] = (object)array_merge((array)$moduleInstance, (array)$moduleConfig);
 							$this -> modulesList[$moduleIndex] -> user_rights = $this -> m_pUserRights -> getModuleRights($_moduleId);
+
+							$_modLocation	= CMS_SERVER_ROOT . DIR_CORE . DIR_MODULES . $moduleInstance -> module_location .'/';	
+							CLanguage::instance() -> loadLanguageFile($_modLocation.'lang/', $_pageLanguage);
 
 
 							$this -> loadedList[] = $this -> modulesList[$moduleIndex];
@@ -69,6 +84,8 @@ class	CModules extends CSingleton
 							$moduleConfig 	= file_get_contents( CMS_SERVER_ROOT.DIR_MANTLE.DIR_MODULES. $moduleInstance -> module_location .'/module.json');
 							$moduleConfig 	= ($moduleConfig !== false ? json_decode($moduleConfig) : [] );	
 
+							$_modLocation	= CMS_SERVER_ROOT . DIR_MANTLE . DIR_MODULES . $moduleInstance -> module_location .'/';
+							CLanguage::instance() -> loadLanguageFile($_modLocation.'lang/', $_pageLanguage);
 
 							$this -> modulesList[$moduleIndex] = (object)array_merge((array)$moduleInstance, (array)$moduleConfig);
 
@@ -78,6 +95,10 @@ class	CModules extends CSingleton
 							$this -> loadedList[] = $this -> modulesList[$moduleIndex];
 							return $this -> modulesList[$moduleIndex];
 		}
+
+
+
+
 
 		return false;
 	}
@@ -92,6 +113,25 @@ class	CModules extends CSingleton
 			if($this -> modulesList[$i] -> module_id === $_moduleId)
 			{
 
+				$_moduleIndex = $i;
+
+				$_moduleIinstance = $this -> modulesList[$i];
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	public function
+	getModuleByController(string $_moduleController, &$_moduleIinstance)
+	{
+		$modulesCount = count($this -> modulesList);
+
+		for($i = 0; $i < $modulesCount; $i++)
+		{
+			if($this -> modulesList[$i] -> module_controller === $_moduleController)
+			{
 				$_moduleIndex = $i;
 
 				$_moduleIinstance = $this -> modulesList[$i];
@@ -154,6 +194,9 @@ class	CModules extends CSingleton
 
 				$directory = $_dirItem -> getFilename();
 
+				if($directory[0] === '.')
+					continue;
+
 				$moduleFilepath = $procPath . $directory .'/module.json'; 
 
 				$moduleConfig	= file_get_contents($moduleFilepath);
@@ -180,6 +223,9 @@ class	CModules extends CSingleton
 					continue;
 
 				$directory = $_dirItem -> getFilename();
+
+				if($directory[0] === '.')
+					continue;
 
 				$moduleFilepath = $procPath . $directory .'/module.json'; 
 
@@ -254,7 +300,11 @@ class	CModules extends CSingleton
 
 		$moduleConfig = json_decode($moduleConfig);
 
+
+
 		// Insert module into db
+
+		$modelModules	= new modelModules();
 
 		$moduleData	= [];
 		$moduleData['module_location'] 		= $moduleLocation;
@@ -262,6 +312,7 @@ class	CModules extends CSingleton
 
 		$moduleData['module_controller'] 	= $moduleConfig -> module_controller;
 		$moduleData['module_name'] 			= $moduleConfig -> module_name;
+		$moduleData['module_desc'] 			= $moduleConfig -> module_desc;
 		$moduleData['module_icon'] 			= $moduleConfig -> module_icon;
 		$moduleData['module_group'] 		= $moduleConfig -> module_group;
 		$moduleData['is_frontend'] 			= strval($moduleConfig -> module_frontend);
@@ -270,9 +321,28 @@ class	CModules extends CSingleton
 		$moduleData['create_time'] 			= time();
 		$moduleData['create_by'] 			= CSession::instance() -> getValue('user_id');
 
+
+		if(property_exists($moduleConfig, 'module_extends') && !empty($moduleConfig -> module_extends))
+		{
+			$moduleData['module_extends'] 		= $moduleConfig -> module_extends;
+
+			##	Update Parent
+
+			$parentCondition  = new CModelCondition();
+			$parentCondition -> where('module_controller', $moduleConfig -> module_extends);
+
+			$updateParent = [
+							'module_extends_by' => $moduleConfig -> module_controller
+							];
+
+			$modelModules -> update($_sqlConnection, $updateParent, $parentCondition);
+
+		}
+
+
+
 		$moduleId		= 0;
 
-		$modelModules	= new modelModules();
 		$modelModules -> insert($_sqlConnection, $moduleData, $moduleId);
 
 		$moduleData['module_id'] = $moduleId;
@@ -283,7 +353,14 @@ class	CModules extends CSingleton
 		{
 			foreach($moduleConfig -> module_sheme as $shemeItem)
 			{
-				include CMS_SERVER_ROOT . $moduleType .'/'. DIR_MODULES . $moduleLocation .'/'. $shemeItem -> filename .'.php';
+				$shemeFilepath = CMS_SERVER_ROOT . $moduleType .'/'. DIR_MODULES . $moduleLocation .'/'. $shemeItem -> filename .'.php';
+
+				if(!file_exists($shemeFilepath))
+				{
+					$shemeFilepath = CMS_SERVER_ROOT . $moduleType .'/'. DIR_SHEME . $shemeItem -> filename .'.php';
+				}
+
+				include $shemeFilepath;
 				
 				$sheme  = new $shemeItem -> filename();
 
@@ -337,7 +414,7 @@ class	CModules extends CSingleton
 			$this -> modulesList 	 =	$this -> modelModules -> getDataInstance();
 
 			$_pHTAccess  = new CHTAccess();
-			$_pHTAccess -> generatePart4Backend();
+			$_pHTAccess -> generatePart4Backend($_sqlConnection);
 			$_pHTAccess -> writeHTAccess();
 		}
 
@@ -399,8 +476,15 @@ class	CModules extends CSingleton
 		{
 			foreach($moduleConfig -> module_sheme as $shemeItem)
 			{
-				include CMS_SERVER_ROOT . $moduleData -> module_type .'/'. DIR_MODULES . $moduleData -> module_location .'/'. $shemeItem -> filename .'.php';
+				$shemeFilepath = CMS_SERVER_ROOT . $moduleData -> module_type .'/'. DIR_MODULES . $moduleData -> module_location .'/'. $shemeItem -> filename .'.php';
 
+				if(!file_exists($shemeFilepath))
+				{
+					$shemeFilepath = CMS_SERVER_ROOT . $moduleData -> module_type .'/'. DIR_SHEME . $shemeItem -> filename .'.php';
+				}
+
+				include $shemeFilepath;
+				
 				$sheme  = new $shemeItem -> filename();
 
 				$sheme -> dropTable($_sqlConnection);
@@ -408,6 +492,23 @@ class	CModules extends CSingleton
 		}
 
 		$modelModules -> delete($_sqlConnection, $modelCondition);	
+
+
+		//	Remote extends_by if set
+
+
+		if(property_exists($moduleConfig, 'module_extends') && !empty($moduleConfig -> module_extends))
+		{
+
+			$parentCondition  = new CModelCondition();
+			$parentCondition -> where('module_controller', $moduleConfig -> module_extends);
+
+			$updateParent = [
+							'module_extends_by' => ''
+							];
+
+			$modelModules -> update($_sqlConnection, $updateParent, $parentCondition);
+		}		
 	}
 
 	public function

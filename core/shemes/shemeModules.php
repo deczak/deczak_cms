@@ -17,6 +17,9 @@ class shemeModules extends CSheme
 		$this -> addColumn('module_group', 'string') -> setLength(25);
 		$this -> addColumn('module_icon', 'string') -> setLength(10);
 		$this -> addColumn('module_name', 'string') -> setLength(35);
+		$this -> addColumn('module_desc', 'string') -> setLength(200);
+		$this -> addColumn('module_extends', 'string') -> setLength(50) -> setDefault('NULL');
+		$this -> addColumn('module_extends_by', 'string') -> setLength(50) -> setDefault('NULL');
 
 		$this -> addColumn('is_frontend', 'tinyint') -> setAttribute('UNSIGNED');
 		$this -> addColumn('is_active', 'tinyint') -> setAttribute('UNSIGNED');

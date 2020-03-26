@@ -14,6 +14,13 @@ class	controllerLoginObjects extends CController
 		parent::__construct($_module, $_object);
 
 		CPageRequest::instance() -> subs = $this -> getSubSection();
+
+		$this -> tablesList['users']		= [];
+		$this -> tablesList['users'][] 		= 'tb_users_backend';
+		$this -> tablesList['users'][] 		= 'tb_users';
+
+		$this -> tablesList['assignment'] 	= [];
+		$this -> tablesList['various'] 		= [];
 	}
 	
 	public function
@@ -94,8 +101,7 @@ class	controllerLoginObjects extends CController
 			$_request[] 	 = 	[	"input" => "object_id",  				"validate" => "strip_tags|!empty" ]; 	
 			$_request[] 	 = 	[	"input" => "object_description",	   	"validate" => "strip_tags|!empty" ]; 	
 			$_request[] 	 = 	[	"input" => "is_disabled",   			"validate" => "strip_tags|!empty" ]; 	
-			$_request[] 	 = 	[	"input" => "object_databases",  	 	"validate" => "strip_tags|!empty" ]; 	
-			$_request[] 	 = 	[	"input" => "object_table",   			"validate" => "strip_tags|!empty" ]; 	
+			$_request[] 	 = 	[	"input" => "object_databases",  	 	"validate" => "strip_tags|!empty" ]; 		
 			$_request[] 	 = 	[	"input" => "object_fields",   			"validate" => "strip_tags|!empty" ]; 	
 			$_request[] 	 = 	[	"input" => "object_session_ext",   		"validate" => "strip_tags|!empty",	 "use_default" => true, "default_value" => '[]'  ]; 	
 			$_request[] 	 = 	[	"input" => "object_field_is_username",  "validate" => "strip_tags|!empty" ]; 	
@@ -104,7 +110,6 @@ class	controllerLoginObjects extends CController
 
 			if(empty($_aFormData['object_id'])) { 			$_bValidationErr = true; 	$_bValidationDta[] = 'object_id'; 	}
 			if(empty($_aFormData['object_databases'])) { 	$_bValidationErr = true; 	$_bValidationDta[] = 'object_databases'; 	}
-			if(empty($_aFormData['object_table'])) { 		$_bValidationErr = true; 	$_bValidationDta[] = 'object_table'; 	}
 			if(empty($_aFormData['object_fields'])) { 		$_bValidationErr = true; 	$_bValidationDta[] = 'object_fields'; 	}
 
 			if(!$_bValidationErr)	// Validation OK (by pre check)
@@ -122,6 +127,8 @@ class	controllerLoginObjects extends CController
 
 			if(!$_bValidationErr)	// Validation OK
 			{
+
+										
 
 				foreach($_aFormData['object_fields'] as $key => $fields)
 				{
@@ -168,7 +175,10 @@ class	controllerLoginObjects extends CController
 		$this -> setCrumbData('create');
 		$this -> setView(
 						'create',
-						'create/'
+						'create/',
+						[
+							'tablesList'	=>	$this -> tablesList
+						]
 						);
 
 		return true;
@@ -200,7 +210,8 @@ class	controllerLoginObjects extends CController
 								'edit',
 								'object/'. $_pURLVariables -> getValue("cms-system-id"),								
 								[
-									'login_objects' 	=> $this -> m_pModel -> getDataInstance(),
+									'login_objects'	=> $this -> m_pModel -> getDataInstance(),
+									'tablesList'	=>	$this -> tablesList,
 									'enableEdit'	=> $_enableEdit,
 									'enableDelete'	=> $_enableDelete
 								]								
@@ -240,12 +251,13 @@ class	controllerLoginObjects extends CController
 										$_request[] 	 = 	[	"input" => "object_table",   			"validate" => "strip_tags|!empty" ]; 	
 										$_request[] 	 = 	[	"input" => "object_fields",   			"validate" => "strip_tags|!empty" ]; 	
 										$_request[] 	 = 	[	"input" => "object_session_ext",   		"validate" => "strip_tags|!empty" ]; 	
+										#$_request[] 	 = 	[	"input" => "object_auth_assign",   		"validate" => "strip_tags|!empty" ]; 	
+										#$_request[] 	 = 	[	"input" => "object_session_assign",   		"validate" => "strip_tags|!empty" ]; 	
 										$_request[] 	 = 	[	"input" => "object_field_is_username",  "validate" => "strip_tags|!empty" ]; 	
 										$_pFormVariables -> retrieve($_request, false, true);
 										$_aFormData		 = $_pFormVariables ->getArray();
 
 										if(empty($_aFormData['object_databases'])) { 	$_bValidationErr = true; 	$_bValidationDta[] = 'object_databases'; 	}
-									#	if(empty($_aFormData['object_table'])) { 	$_bValidationErr = true; 	$_bValidationDta[] = 'object_table'; 	}
 									#	if(empty($_aFormData['object_fields'])) { 	$_bValidationErr = true; 	$_bValidationDta[] = 'object_fields'; 	}
 
 
@@ -283,11 +295,19 @@ class	controllerLoginObjects extends CController
 											if(!empty($_aFormData['object_session_ext']))
 												$_aFormData['object_session_ext'] 	= json_encode($_aFormData['object_session_ext']);
 
+									#		if(!empty($_aFormData['object_auth_assign']))
+									#			$_aFormData['object_auth_assign'] 	= json_encode($_aFormData['object_auth_assign']);
+
+									#		if(!empty($_aFormData['object_session_assign']))
+									#			$_aFormData['object_session_assign'] = json_encode($_aFormData['object_session_assign']);
+
 											$_aFormData['update_by'] 	= CSession::instance() -> getValue('user_id');
 											$_aFormData['update_time'] 	= time();
 
 											$modelCondition = new CModelCondition();
-											$modelCondition -> where('object_id', $_pURLVariables -> getValue("cms-system-id"));											
+											$modelCondition -> where('object_id', $_pURLVariables -> getValue("cms-system-id"));	
+
+
 
 											if($this -> m_pModel -> update($_sqlConnection, $_aFormData, $modelCondition))
 											{

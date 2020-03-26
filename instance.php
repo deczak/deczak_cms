@@ -133,7 +133,7 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 	{
 		case 'login':	## User login #################################################################################################################
 
-						$_pLogin		 =	new CLogin();
+						$_pLogin		 = CLogin::instance();
 						if( $_pLogin ->	login($_pSQLObject -> getConnection(CFG::GET() -> MYSQL -> PRIMARY_DATABASE), $_pURLVariables -> getValue("cms-tlon")) )
 						{
 							$_rcaTarget[$_pURLVariables -> getValue("cms-oid")] = 'loginSuccess';				
@@ -147,7 +147,7 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 
 		case 'logout':	## User logout ################################################################################################################
 
-						$_pLogin	 =	new CLogin();
+						$_pLogin	 =	CLogin::instance();
 						$_pLogin 	->	logout($_pSQLObject -> getConnection(CFG::GET() -> MYSQL -> PRIMARY_DATABASE), $_pURLVariables -> getValue("cms-tlon"));
 						break;
 	}
@@ -200,6 +200,5 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 ##	V I E W 
 
 	$_pHTML -> openDocument($_pImperator -> m_page, $_pImperator, $_pPageRequest);
-
 
 ?>

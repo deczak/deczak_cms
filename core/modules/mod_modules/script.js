@@ -77,6 +77,7 @@ class	cmsIndexList
 		let	template = document.getElementById('template-table-row-modules').innerHTML;
 			template = template.replace(/%MODULE_ICON%/g, object.module_icon);
 			template = template.replace(/%MODULE_NAME%/g, object.module_name);
+			template = template.replace(/%MODULE_DESC%/g, object.module_desc);
 			template = template.replace(/%MODULE_ID%/g, object.module_id);
 			template = template.replace(/%IS_FRONTEND%/g, object.is_frontend);
 			template = template.replace(/%IS_ACTIVE%/g, object.is_active);
@@ -95,6 +96,7 @@ class	cmsIndexList
 		let	template = document.getElementById('template-table-row-modules').innerHTML;
 			template = template.replace(/%MODULE_ICON%/g, object.module_icon);
 			template = template.replace(/%MODULE_NAME%/g, object.module_name);
+			template = template.replace(/%MODULE_DESC%/g, object.module_desc);
 			template = template.replace(/%MODULE_ID%/g, "");
 			template = template.replace(/%IS_FRONTEND%/g, object.module_frontend);
 			template = template.replace(/%IS_ACTIVE%/g, "");
