@@ -210,6 +210,11 @@ class	CURLVariables extends CBasic
 
                         $_temporaryOutput = trim($_temporaryOutput);
                         $_temporaryOutput = str_replace(" ","", $_temporaryOutput);
+                        break;  
+
+                case    'strip_quote':
+
+                        $_temporaryOutput = str_replace('"','', $_temporaryOutput);
                         break;        
 
                 case    'trim':

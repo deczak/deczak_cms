@@ -8,7 +8,18 @@ The version number is the release date. A letter as suffix indicates fixes on sa
 
 (the versions handling may get changed later)
 
-## Version history	  
+## Version history	 
+
+### 20200414
+
+**Modules**
+- Added frontend sitemap module for child pages, early version, templates are stored in data/modules
+
+**Changes**
+- Added test of edit lock to modules user-agent and denied-remote
+- Moved some settings from static config to dynamic config, some of them are no in environment module
+- Added prototyp (first step) of multiple content sections per page page
+
 
 ### 20200326
 

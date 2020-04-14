@@ -43,8 +43,8 @@ class	CSQLConnect extends CSingleton
 			{
 			#	CMessages::instance() 	-> addMessage(CLanguage::instance() -> getStringExt( 'ERR_CR_DBFAILED' , ['[DBERROR]' => $this -> m_aSQLConnections[$_accessData['name']] -> connect_error] ), MSG_LOG, '', true);
 				CMessages::instance() 	-> addMessage('Database connection error: '. $this -> m_aSQLConnections[$_accessData['name']] -> connect_error, MSG_LOG, '', true);
-			#	CSysMailer::instance() 	-> sendMail(CLanguage::instance() -> getString('SYSMAIL_DB_FAILED_SUBJ'), CLanguage::instance() -> getStringExt('SYSMAIL_DB_FAILED_SUBJ',['[TIMESTAMP]' => date(TIME_FORMAT_SYSMAIL,time())]), true, 'sql-connection');
-				CSysMailer::instance() 	-> sendMail('Database connection error', 'Error while attempting to connect to the database on '. date(TIME_FORMAT_SYSMAIL,time()), true, 'sql-connection');
+			#	CSysMailer::instance() 	-> sendMail(CLanguage::instance() -> getString('SYSMAIL_DB_FAILED_SUBJ'), CLanguage::instance() -> getStringExt('SYSMAIL_DB_FAILED_SUBJ',['[TIMESTAMP]' => date(CFG::GET() -> SYSTEM_MAILER -> MAIL_TIME_FORMAT,time())]), true, 'sql-connection');
+				CSysMailer::instance() 	-> sendMail('Database connection error', 'Error while attempting to connect to the database on '. date(CFG::GET() -> SYSTEM_MAILER -> MAIL_TIME_FORMAT,time()), true, 'sql-connection');
 
 				$this -> m_aSQLConnections[$_accessData['name']] = false;
 				return false;

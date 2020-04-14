@@ -14,6 +14,7 @@ class shemePageObject extends CSheme
 		
 		$this -> addColumn('page_version', 'mediumint') -> setAttribute('UNSIGNED') -> setDefault('1');
 		$this -> addColumn('module_id', 'int') -> setAttribute('UNSIGNED');
+		$this -> addColumn('content_id', 'string') -> setLength(25) -> setDefault('1');
 		$this -> addColumn('object_order_by', 'mediumint') -> setAttribute('UNSIGNED');	
 			
 		$this -> addColumn('update_reason', 'string') -> setLength(250) -> setDefault('NULL');

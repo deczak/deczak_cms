@@ -21,8 +21,8 @@
 		<?php
 		foreach($usersList as $_dataKey => $_dataSet)
 		{
-			$_dataSet -> time_login 	= ($_dataSet -> time_login == 0 ? '-' : date(TIME_FORMAT_BACKENDVIEW, $_dataSet -> time_login) );
-			$_dataSet -> create_time 	= ($_dataSet -> create_time == 0 ? '-' : date(TIME_FORMAT_BACKENDVIEW, $_dataSet -> create_time) );
+			$_dataSet -> time_login 	= ($_dataSet -> time_login == 0 ? '-' : date(CFG::GET() -> BACKEND -> TIME_FORMAT, $_dataSet -> time_login) );
+			$_dataSet -> create_time 	= ($_dataSet -> create_time == 0 ? '-' : date(CFG::GET() -> BACKEND -> TIME_FORMAT, $_dataSet -> create_time) );
 
 			?>
 

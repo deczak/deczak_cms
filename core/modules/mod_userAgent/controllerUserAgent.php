@@ -44,16 +44,17 @@ class	controllerUserAgent extends CController
 		$enableEdit 	= $this -> existsUserRight('edit');
 		$enableDelete	= $enableEdit;
 
-		$_logicResults = false;
+		$logicResults = false;
 		switch($_controllerAction)
 		{
-			case 'view'		: $_logicResults = $this -> logicView(	$_sqlConnection, $_isXHRequest, $enableEdit, $enableDelete);	break;
-			case 'edit'		: $_logicResults = $this -> logicEdit(	$_sqlConnection, $_isXHRequest);	break;	
-			case 'create'	: $_logicResults = $this -> logicCreate($_sqlConnection, $_isXHRequest);	break;
-			case 'delete'	: $_logicResults = $this -> logicDelete($_sqlConnection, $_isXHRequest);	break;	
+			case 'view'		: $logicResults = $this -> logicView(	$_sqlConnection, $_isXHRequest, $enableEdit, $enableDelete);	break;
+			case 'edit'		: $logicResults = $this -> logicEdit(	$_sqlConnection, $_isXHRequest);	break;	
+			case 'create'	: $logicResults = $this -> logicCreate($_sqlConnection, $_isXHRequest);	break;
+			case 'delete'	: $_loglogicResultsicResults = $this -> logicDelete($_sqlConnection, $_isXHRequest);	break;	
+			case 'ping'		: $logicResults = $this -> logicPing($_sqlConnection, $_isXHRequest, $enableEdit, $enableDelete);	break;	
 		}
 
-		if(!$_logicResults)
+		if(!$logicResults)
 		{
 			##	Default View
 			$this -> logicIndex($_sqlConnection, $enableEdit, $enableDelete);	
@@ -63,9 +64,6 @@ class	controllerUserAgent extends CController
 	private function
 	logicIndex(&$_sqlConnection, $_enableEdit = false, $_enableDelete = false)
 	{
-		#$modelCondition = new CModelCondition();
-		#$modelCondition -> orderBy('data_id', 'DESC');
-
 		$this -> m_pModel -> load($_sqlConnection);	
 		$this -> setView(	
 						'index',	
@@ -113,8 +111,6 @@ class	controllerUserAgent extends CController
 				$_aFormData['create_by'] 	= CSession::instance() -> getValue('user_id');
 				$_aFormData['create_time'] 	= time();
 
-
-
 				$dataId = 0;
 
 				if($this -> m_pModel -> insert($_sqlConnection, $_aFormData, $dataId))
@@ -143,27 +139,24 @@ class	controllerUserAgent extends CController
 
 	private function
 	logicView(&$_sqlConnection, $_isXHRequest = false, $_enableEdit = false, $_enableDelete = false)
-	{	
-		$_pURLVariables	 =	new CURLVariables();
-		$_request		 =	[];
-		$_request[] 	 = 	[	"input" => "cms-system-id",  	"validate" => "strip_tags|!empty" ,	"use_default" => true, "default_value" => false ]; 		
-		$_pURLVariables -> retrieve($_request, true, false); // POST 
+	{
+		$systemId = $this -> querySystemId();
 
-		if($_pURLVariables -> getValue("cms-system-id") !== false )
+		if($systemId !== false )
 		{	
 			$modelCondition = new CModelCondition();
-			$modelCondition -> where('data_id', $_pURLVariables -> getValue("cms-system-id"));
+			$modelCondition -> where('data_id', $systemId);
 
 			if($this -> m_pModel -> load($_sqlConnection, $modelCondition))
 			{
 				##	Gathering additional data
 
-				$_crumbName	 = $this -> m_pModel -> searchValue(intval($_pURLVariables -> getValue("cms-system-id")),'data_id','agent_name');
+				$_crumbName	 = $this -> m_pModel -> searchValue(intval($systemId),'data_id','agent_name');
 
 				$this -> setCrumbData('edit', $_crumbName, true);
 				$this -> setView(
 								'edit',
-								'agent/'. $_pURLVariables -> getValue("cms-system-id"),								
+								'agent/'. $systemId,								
 								[
 									'agentsList' 	=> $this -> m_pModel -> getDataInstance(),
 									'enableEdit'	=> $_enableEdit,
@@ -180,16 +173,16 @@ class	controllerUserAgent extends CController
 	private function
 	logicEdit(&$_sqlConnection, $_isXHRequest = false)
 	{	
-		$_pURLVariables	 =	new CURLVariables();
-		$_request		 =	[];
-		$_request[] 	 = 	[	"input" => "cms-system-id",  	"validate" => "strip_tags|!empty" ,	"use_default" => true, "default_value" => false ]; 		
-		$_pURLVariables -> retrieve($_request, true, false); // POST 
+		$systemId = $this -> querySystemId();
 
-		if($_pURLVariables -> getValue("cms-system-id") !== false && $_isXHRequest !== false)
+		if($systemId !== false && $_isXHRequest !== false)
 		{	
 			$_bValidationErr =	false;
 			$_bValidationMsg =	'';
 			$_bValidationDta = 	[];
+
+			// check if dataset is locked, call his own xhrResult() 
+			$this -> detectLock($_sqlConnection, $systemId);
 
 			switch($_isXHRequest)
 			{
@@ -215,7 +208,7 @@ class	controllerUserAgent extends CController
 											$_aFormData['update_time'] 	= time();
 
 											$modelCondition = new CModelCondition();
-											$modelCondition -> where('data_id', $_pURLVariables -> getValue("cms-system-id"));
+											$modelCondition -> where('data_id', $systemId);
 
 											if($this -> m_pModel -> update($_sqlConnection, $_aFormData, $modelCondition))
 											{
@@ -245,23 +238,23 @@ class	controllerUserAgent extends CController
 	private function
 	logicDelete(&$_sqlConnection, $_isXHRequest = false)
 	{	
-		$_pURLVariables	 =	new CURLVariables();
-		$_request		 =	[];
-		$_request[] 	 = 	[	"input" => "cms-system-id",  	"validate" => "strip_tags|!empty" ,	"use_default" => true, "default_value" => false ]; 		
-		$_pURLVariables -> retrieve($_request, true, false); // POST 
+		$systemId = $this -> querySystemId();
 
-		if($_pURLVariables -> getValue("cms-system-id") !== false && $_isXHRequest !== false)
+		if($systemId !== false && $_isXHRequest !== false)
 		{	
 			$_bValidationErr =	false;
 			$_bValidationMsg =	'';
 			$_bValidationDta = 	[];
+
+			// check if dataset is locked, call his own xhrResult() 
+			$this -> detectLock($_sqlConnection, $systemId);
 
 			switch($_isXHRequest)
 			{
 				case 'agent-delete':
 
 									$modelCondition = new CModelCondition();
-									$modelCondition -> where('data_id', $_pURLVariables -> getValue("cms-system-id"));
+									$modelCondition -> where('data_id', $systemId);
 
 									if($this -> m_pModel -> delete($_sqlConnection, $modelCondition))
 									{
@@ -281,6 +274,32 @@ class	controllerUserAgent extends CController
 
 		return false;
 	}
+
+	public function
+	logicPing(&$_sqlConnection, $_isXHRequest = false, $_enableEdit = false, $_enableDelete = false)
+	{
+		$systemId = $this -> querySystemId();
+
+		if($systemId !== false && $_isXHRequest !== false)
+		{	
+			$_bValidationErr =	false;
+			$_bValidationMsg =	'';
+			$_bValidationDta = 	[];
+
+			switch($_isXHRequest)
+			{
+				case 'lockState':	
+				
+					$locked	= $this -> m_pModel -> lock($_sqlConnection, CSession::instance() -> getValue('user_id'), $systemId, LOCK_UPDATE);
+					tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $locked);
+					break;
+			}
+
+			tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $_bValidationDta);
+		}
+	}
+
+
 }
 
 ?>

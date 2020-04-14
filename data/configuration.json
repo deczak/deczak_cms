@@ -1,1 +1,39 @@
-{"ERROR_PAGES":{"ERROR404":true,"ERROR403":true},"USER_SYSTEM":{"REMOTE_USER":{"ENABLED":true,"REVOKE_RIGHTS":30,"REPORT_REVOKE":true}}}
+{
+	"ERROR_PAGES"	:	{
+							"ERROR404"	: true,
+							"ERROR403"	: true
+						},
+	"USER_SYSTEM"	:	{
+							"REMOTE_USER"	:	{
+													"ENABLED"		: false,
+													"REVOKE_RIGHTS"	: 30,
+													"REPORT_REVOKE"	: true
+												},
+							"MODULE_LOCKING":	{
+													"LOCK_TIMEOUT"	: 45,
+													"PING_TIMEOUT"	: 15
+												}
+						},
+	"BACKEND"		:	{
+							"TIME_FORMAT"	: "Y-m-d @ H:i:s"
+						},
+	"SESSION"		:	{
+							"SPAM_ACCESS_TIMEOUT"	: 60,
+							"SPAM_ACCESS_LIMIT"		: 5,
+							"TIMEOUT"				: 14400,
+							"REPORT_WEEKLYACCESS"	: true,
+							"FAIL_LIMIT"			: 5
+						},
+	"SYSTEM_MAILER"	:	{
+							"RECEIVER_NAME"			: "%SYSMAIL_NAME%",
+							"RECEIVER_ADDRESS"		: "%SYSMAIL_MAIL%",
+							"SUBJECT_PREFIX"		: "",
+							"LOCK_TIMEOUT"			: 3600,
+							"MAIL_TIME_FORMAT"		: "Y-m-d @ H:i:s",
+							
+							"SMIME_CERT_CRYPT_FILE"	: "",
+							"SMIME_CERT_SIGN_FILE"	: "",
+							"SMIME_PRIVKEY_FILE"	: "",
+							"SMIME_PRIVKEY_PASS"	: ""
+						}
+}

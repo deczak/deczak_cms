@@ -6,6 +6,7 @@ class CShemeColumn
 	public	$name;
 	public	$type;
 	public	$isVirtual;
+	public	$isSystemId;
 	public	$isAutoIncrement;
 	public	$attribute;
 	public	$defaultValue;
@@ -32,6 +33,13 @@ class CShemeColumn
 	isVirtual(bool $isVirtual = true)
 	{
 		$this -> isVirtual = $isVirtual;
+		return $this;
+	}
+
+	public function
+	isSystemId(bool $isSystemId = true)
+	{
+		$this -> isSystemId = $isSystemId;
 		return $this;
 	}
 
@@ -167,6 +175,17 @@ class CSheme
 	getTableName()
 	{
 		return $this -> m_tableName;
+	}
+
+	public function
+	getSystemIdColumnName()
+	{
+		foreach($this -> m_sheme['columns'] as $column)
+		{
+			if($column -> isSystemId === true)
+				return $column -> name;
+		}
+		return NULL;
 	}
 
 	public function

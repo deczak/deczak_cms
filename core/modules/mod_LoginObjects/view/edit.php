@@ -6,8 +6,8 @@
 	$login_object -> object_session_ext	= json_decode($login_object -> object_session_ext, true);
 	$login_object -> object_databases	= json_decode($login_object -> object_databases, true);
  
-	$login_object -> time_create 	= ($login_object -> time_create == 0 ? '-' : date(TIME_FORMAT_BACKENDVIEW, $login_object -> time_create) );
-	$login_object -> time_update 	= ($login_object -> time_update == 0 ? '-' : date(TIME_FORMAT_BACKENDVIEW, $login_object -> time_update) );
+	$login_object -> time_create 	= ($login_object -> time_create == 0 ? '-' : date(CFG::GET() -> BACKEND -> TIME_FORMAT, $login_object -> time_create) );
+	$login_object -> time_update 	= ($login_object -> time_update == 0 ? '-' : date(CFG::GET() -> BACKEND -> TIME_FORMAT, $login_object -> time_update) );
 
 	$login_object -> create_by 	= ($login_object -> create_by == 0 ? '-' : $login_object -> create_by );
 	$login_object -> update_by 	= ($login_object -> update_by == 0 ? '-' : $login_object -> update_by );

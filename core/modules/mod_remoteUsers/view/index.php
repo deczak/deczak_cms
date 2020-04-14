@@ -69,7 +69,7 @@ getUpdateTime($_groupsList, $_userHash)
 				<td><?= $user -> user_name_first; ?> <?= $user -> user_name_last; ?></td>
 				<td><?= $dataSet['db_name']; ?> (<?= $dataSet['db_server']; ?>)</td>
 				<td class="center"><?= getAllocations($groupsList, $dataSet['id']); ?></td>
-				<td><?= ($updateTime != 0 ? date(TIME_FORMAT_BACKENDVIEW, $updateTime) : ''); ?></td>
+				<td><?= ($updateTime != 0 ? date(CFG::GET() -> BACKEND -> TIME_FORMAT, $updateTime) : ''); ?></td>
 				<td><?php echo tk::getBackendUserName($sqlConnection, $updateBy); ?></td>
 				<td class="bach-item-menu"><span>&equiv;</span><div class="dropdown-content"><div></div><a href="<?= CMS_SERVER_URL_BACKEND . $pageRequest -> urlPath; ?>user/<?= $dataSet['id']; ?>"><?= $language -> string('BUTTON_EDIT'); ?></a></div></td>
 			</tr>

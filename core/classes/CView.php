@@ -24,10 +24,10 @@ class	CView
 
 		##	Required for XHR Functions
 
-		if(!empty($this -> m_object['object_target'])) echo ' <script> var MODULE = { "TARGET" : "'. $this -> m_object['object_target'] .'" };</script>';
+		if(!empty($this -> m_object['object_target'])) echo ' <script> CMS.MODULE_TARGET = "'. $this -> m_object['object_target']  .'";</script>';
 
 		##	
-
+		
 		foreach($this -> m_dataInstances as $_dataKey => $_dataInst)
 		{
 			$$_dataKey = $_dataInst;

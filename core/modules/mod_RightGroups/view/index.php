@@ -35,7 +35,7 @@ getAssignmentCount($rightGroup, $userGroups)
 		<?php
 		foreach($right_groups as $_dataKey => $_dataSet)
 		{
-			$_dataSet -> create_time 	= ($_dataSet -> create_time == 0 ? '-' : date(TIME_FORMAT_BACKENDVIEW, $_dataSet -> create_time) );
+			$_dataSet -> create_time 	= ($_dataSet -> create_time == 0 ? '-' : date(CFG::GET() -> BACKEND -> TIME_FORMAT, $_dataSet -> create_time) );
 
 			$_numOfAssignments = getAssignmentCount($_dataSet, $user_groups);
 

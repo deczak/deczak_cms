@@ -2,8 +2,8 @@
 
 	$users = &$usersList[0];
  
-	$users -> time_login 	= ($users -> time_login == 0 ? '-' : date(TIME_FORMAT_BACKENDVIEW, $users -> time_login) );
-	$users -> time_create 	= ($users -> time_create == 0 ? '-' : date(TIME_FORMAT_BACKENDVIEW, $users -> time_create) );
+	$users -> time_login 	= ($users -> time_login == 0 ? '-' : date(CFG::GET() -> BACKEND -> TIME_FORMAT, $users -> time_login) );
+	$users -> time_create 	= ($users -> time_create == 0 ? '-' : date(CFG::GET() -> BACKEND -> TIME_FORMAT, $users -> time_create) );
 
 	function
 	isActiveGroup($group_id, &$groups)

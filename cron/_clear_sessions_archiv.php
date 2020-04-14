@@ -186,7 +186,7 @@
 	#tk::dbug($statistic);
 
 
-	if(CFG::GET() -> CRONJOB -> REPORT_WEEKLYACCESS)
+	if(CFG::GET() -> SESSION -> REPORT_WEEKLYACCESS)
 	{
 
 

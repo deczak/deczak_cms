@@ -121,12 +121,14 @@ class	cmsModuleManager
 		var orderBy 		= cmstk.getNodeIndex(moduleContainer); 
 		var nodeID			= document.querySelector('body').getAttribute('data-node-id');
 		var contentContainer= this.closest('.cms-edit-content-container'); 
+		var	contentId		= contentContainer.getAttribute('data-view');
 
 		var	formData 		= new FormData();
 			formData.append('cms-xhrequest','cms-insert-module');
 			formData.append('cms-insert-module', moduleID);
 			formData.append('cms-insert-after', orderBy);
 			formData.append('cms-insert-node-id', nodeID);
+			formData.append('cms-insert-content-id', contentId);
 	
 		var	requestTarget	= CMS.SERVER_URL_BACKEND + CMS.PAGE_PATH + CMS.MODULE_TARGET;
 

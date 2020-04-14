@@ -1,5 +1,7 @@
 <?php
 
+define('LOCK_UPDATE',0x1);
+
 class	CModelRelations
 {
 	public	$joinType;
@@ -386,6 +388,103 @@ class	CModel
 		return false;
 	}	
 
+	public function
+	lock(&$_sqlConnection, string $_userId, $_systemId, $_flags = NULL)
+	{
+		$tableName		=	$this -> m_sheme -> getTableName();
+		$systemIdColumn	= 	$this -> m_sheme -> getSystemIdColumnName();
+
+		$timeStamp 		   = time();
+		$timeOut		   = $timeStamp - CFG::GET() -> USER_SYSTEM -> MODULE_LOCKING -> LOCK_TIMEOUT;
+
+		$responseData	   = [
+								'lockedById' 	=> 0,
+								'lockedState' 	=> 0
+							];
+
+		if($systemIdColumn === NULL)
+			return $responseData;
+		
+		$sqlString	= 	"	SELECT 		$tableName.lock_by,
+										$tableName.lock_time
+							FROM		$tableName
+							WHERE		$tableName.$systemIdColumn = '". $_sqlConnection -> real_escape_string($_systemId) ."'
+						";
+
+		$sqlLockRes =	$_sqlConnection -> query($sqlString);
+
+		if($sqlLockRes !== false && $sqlLockRes -> num_rows == 1)
+		{
+			$sqlLockItm = $sqlLockRes -> fetch_assoc();
+
+			if	(
+						$sqlLockItm['lock_by'] !== $_userId
+					&&	$timeOut <= $sqlLockItm['lock_time']
+				)	
+			{
+				##	dataset locked by other user
+
+				$responseData['lockedById'] 	= $sqlLockItm['lock_by'];
+				$responseData['lockedState']	= 1;
+
+				$username = TK::getBackendUserName($_sqlConnection, $sqlLockItm['lock_by']);
+				$responseData['lockedByName'] = (!empty($username) ? $username : CLanguage::get() -> string('UNKNOWN'));
+
+				$responseData['lockedMessage']	= CLanguage::get() -> string('LOCK_IS_LOCKED') .' <b>'. $responseData['lockedByName'] .'</b>';
+			}
+			else
+			{
+				$lockedTime = date('Y-m-d', $sqlLockItm['lock_time']);
+				$lockedTime = strtotime($lockedTime .' 01:00:00');
+
+				$currentTime = date('Y-m-d');
+				$currentTime = strtotime($currentTime .' 01:00:00');
+
+				$responseData['lockedById'] 	= $_userId;
+
+				if($lockedTime < $currentTime || $sqlLockItm['lock_by'] == '0')
+				{
+					##	lock dataset 
+
+					$responseData['lockedState']	= 0;	
+					$responseData['lockedMessage']	= '';
+
+					$sqlString	= 	"	UPDATE 		$tableName
+										SET			$tableName.lock_time 		= '". $timeStamp ."',
+													$tableName.lock_by			= '". $_userId ."'
+										WHERE		$tableName.$systemIdColumn	= '". $_sqlConnection -> real_escape_string($_systemId) ."'
+									";
+
+
+ 					if($_flags & LOCK_UPDATE)
+						$_sqlConnection -> query($sqlString);
+				}
+				elseif($sqlLockItm['lock_by'] != '0' && $sqlLockItm['lock_by'] !== $_userId)
+				{
+					##	not locked
+
+					##	this state gets removed later, we need this to force the user to reload the current page
+
+					$responseData['lockedState']	= 2;	
+					$responseData['lockedMessage']	= CLanguage::get() -> string('LOCK_IS_NOT_LOCKED') .'
+					
+														<a class="" href=""><div class="submit-container button-only refresh-button"><button type="button" class="ui button icon labeled" style="width:100%;"><span><i class="fas fa-sync-alt" data-icon="fa-sync-alt"></i></span> '. CLanguage::get() -> string('BUTTON_REFRESH') .'</button></div></a>
+														';
+
+					$sqlString	= 	"	UPDATE 		$tableName
+										SET			$tableName.lock_time 		= '0',
+													$tableName.lock_by			= '0'
+										WHERE		$tableName.$systemIdColumn	= '". $_sqlConnection -> real_escape_string($_systemId) ."'
+									";
+				
+ 					if($_flags & LOCK_UPDATE)
+						$_sqlConnection -> query($sqlString);
+				}
+			}
+		}
+
+		return $responseData;
+	}
 
 }
 

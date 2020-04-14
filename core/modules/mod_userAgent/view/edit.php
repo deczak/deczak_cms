@@ -6,7 +6,7 @@ $agent = &$agentsList[0];
 
 <div class="be-module-container forms-view">
 	<div>
-		<div class="inter-menu">
+		<div class="ui inter-menu">
 			<h2><?php echo $language -> string('MENU'); ?></h2>
 			<hr>
 			<ul>
@@ -24,6 +24,9 @@ $agent = &$agentsList[0];
 					</fieldset>
 				<?php } ?>
 			</div>
+
+			<div class="result-box ping-result lower-font-size" id="ping-lock-result" data-error=""></div>
+						
 		</div>
 	</div>
 	<div>
@@ -92,5 +95,13 @@ $agent = &$agentsList[0];
 		<br><br>
 
 	</div>
+	
 </div>
 
+<script>
+
+	let	requestURL	= CMS.SERVER_URL_BACKEND + CMS.PAGE_PATH +'ping/<?= $agent -> data_id; ?>';
+	
+	cmstk.ping(requestURL, <?= CFG::GET() -> USER_SYSTEM -> MODULE_LOCKING -> PING_TIMEOUT; ?>000);
+	
+</script>

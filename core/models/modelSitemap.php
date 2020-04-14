@@ -1,5 +1,7 @@
 <?php
 
+define('SITEMAP_OWN_CHILDS_ONLY',0x1);
+
 include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SHEME.'shemeSitemap.php';	
 
 class 	modelSitemap extends CModel
@@ -15,7 +17,7 @@ class 	modelSitemap extends CModel
 	}	
 				
 	public function
-	load(&$_sqlConnection, CModelCondition $_condition = NULL, CModelComplementary $_complementary = NULL)
+	load(&$_sqlConnection, CModelCondition $_condition = NULL, CModelComplementary $_complementary = NULL, $_flags = NULL)
 	{
 		$_mainpageNodeID = 1;
 
@@ -77,10 +79,25 @@ class 	modelSitemap extends CModel
 		}
 
 		##	Loop node result and add page path by parents
-
+		$childsLevel = NULL;
 		$_pages = [];
 		while($_sqlNode = $_sqlNodeRes -> fetch_assoc())
 		{
+			if($_flags & SITEMAP_OWN_CHILDS_ONLY)
+			{
+				if($childsLevel === NULL)
+				{
+					$childsLevel = intval($_sqlNode['level']);
+					$childsLevel++;
+					continue;
+				}
+
+				if($childsLevel !== intval($_sqlNode['level']))
+				{
+					continue;
+				}
+			}
+
 			$_sqlNode['page_path'] = $this -> getPagePath($_sqlConnection, $_sqlNode['node_id'], $_sqlNode['page_language']);
 			$_pages[]  = $_sqlNode;
 		}

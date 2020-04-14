@@ -14,20 +14,6 @@ class	CController
 		$this -> m_aModule	= $_module;
 		$this -> m_aObject	= $_object;		
 	}	
-	
-	public function
-	view()
-	{
-		if($this -> m_pView == null) return;
-		$this -> m_pView -> view();
-	}
-	
-	protected function
-	hasRights(array $_userRights, string $_requestedAction)
-	{
-		if(in_array($_requestedAction, $_userRights, true)) return true;
-		return false;
-	}
 
 	protected function
 	detectRights(string $_controllerAction)
@@ -35,8 +21,6 @@ class	CController
 		##	get requested inner module path by controller action
 
 		$modulePath = $this -> _getModulePath($_controllerAction);
-
-
 
 		if($modulePath === false)
 			return false;
@@ -54,7 +38,6 @@ class	CController
 
 		return true;
 	}
-
 	protected function
 	existsUserRight(string $_rightId)
 	{
@@ -82,6 +65,22 @@ class	CController
 				return true;
 		}
 		return false;
+	}
+
+	protected function
+	detectLock(&$_sqlConnection, $_systemId)
+	{
+		$locked	= $this -> m_pModel -> lock($_sqlConnection, CSession::instance() -> getValue('user_id'), $_systemId);
+
+		if($locked['lockedState'] !== 0)
+		{
+			switch($locked['lockedState'])
+			{
+				default: $_bValidationMsg = CLanguage::get() -> string('LOCK_IS_LOCKED');
+			}
+
+			tk::xhrResult(1, $_bValidationMsg, []);
+		}
 	}
 
 	protected function
@@ -126,6 +125,17 @@ class	CController
 												);
 		}
 	}
+	
+	protected function
+	querySystemId(string $variableName = 'cms-system-id')
+	{
+		$_pURLVariables	 =	new CURLVariables();
+		$_request		 =	[];
+		$_request[] 	 = 	[	"input" => $variableName,  	"validate" => "strip_tags|!empty" ,	"use_default" => true, "default_value" => false ]; 		
+		$_pURLVariables -> retrieve($_request, true, false);	
+
+		return $_pURLVariables -> getValue("cms-system-id");
+	}
 
 	protected function
 	setView(string $_view, string $_moduleTarget,  array $_dataInstances = [])
@@ -154,6 +164,13 @@ class	CController
 
 		$this -> m_pView = new CView( CMS_SERVER_ROOT . $moduleTypeLocation . DIR_MODULES . $moduleLocation .'/view/'. $_view, $_moduleTarget , $_dataInstances );	
 	}	
+	
+	public function
+	view()
+	{
+		if($this -> m_pView == null) return;
+		$this -> m_pView -> view();
+	}
 }
 
 ?>

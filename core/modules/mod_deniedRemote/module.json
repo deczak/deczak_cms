@@ -40,6 +40,13 @@
 								"menu_name"	:"",
 								"menu_order":"0",
 								"use_right" :"edit"
+							},
+							{
+								"url_name"	:"ping",
+								"ctl_target":"ping",
+								"menu_name"	:"",
+								"menu_order":"0",
+								"use_right" :"edit"
 							}
 						],
 	"htaccess"			:{

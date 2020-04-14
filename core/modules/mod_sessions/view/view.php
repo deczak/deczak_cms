@@ -1,6 +1,6 @@
 <?php
 $_dataSet = &$sessionList[0];
-$_dataSet -> time_create 	= ($_dataSet -> time_create == 0 ? '-' : date(TIME_FORMAT_BACKENDVIEW, $_dataSet -> time_create) );
+$_dataSet -> time_create 	= ($_dataSet -> time_create == 0 ? '-' : date(CFG::GET() -> BACKEND -> TIME_FORMAT, $_dataSet -> time_create) );
 
 #tk::dbug($_dataSet);
 

@@ -24,6 +24,9 @@ $denied = &$deniedList[0];
 					</fieldset>
 				<?php } ?>
 			</div>
+
+			<div class="result-box ping-result lower-font-size" id="ping-lock-result" data-error=""></div>
+			
 		</div>
 	</div>
 	<div>
@@ -75,3 +78,12 @@ $denied = &$deniedList[0];
 	</div>
 </div>
 
+
+
+<script>
+
+	let	requestURL	= CMS.SERVER_URL_BACKEND + CMS.PAGE_PATH +'ping/<?= $denied -> data_id; ?>';
+	
+	cmstk.ping(requestURL, <?= CFG::GET() -> USER_SYSTEM -> MODULE_LOCKING -> PING_TIMEOUT; ?>000);
+	
+</script>

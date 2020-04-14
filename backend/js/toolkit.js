@@ -118,5 +118,91 @@ class cmstk
 		return result;
 	}
 
+	static 
+	ping(requestURL, iTimeout)
+	{
+		
+		let	formData = new FormData();
+			formData.append('cms-xhrequest', 'lockState');
+
+		let xhRequest = new XMLHttpRequest();
+			xhRequest.open('POST', requestURL);
+			xhRequest.responseType = 'json';
+			xhRequest.onloadend = function() {
+
+				if(this.status === 200)
+				{
+					
+					cmstk.pingSuccess(xhRequest.response);
+
+					if(xhRequest.response.data.lockedState == 2)
+						return;
+					
+					setTimeout(function() {
+
+						cmstk.ping(requestURL, iTimeout);
+
+					}, iTimeout);
+
+				}
+				else
+				{
+					console.log('ping error');
+				}
+			};
+			xhRequest.send(formData);
+	}	
+
+	static
+	pingLock()
+	{
+		let	submitContainers = document.querySelectorAll('.submit-container');
+
+		for(let i = 0; i < submitContainers.length; i++)		
+			submitContainers[i].querySelector('.trigger-submit-protector').disabled = true;
+	}
+
+	static
+	pingSuccess(response)
+	{
+		let	resultBox 	= document.getElementById('ping-lock-result');
+
+		let	template 	= '<div style="display:flex;"><div style="width:25px;font-size:1.4em;flex-shrink:0;"><i class="fas fa-shield-alt"></i></div><div>'+ response.data.lockedMessage +'</div></div>';
+
+		switch(response.data.lockedState)
+		{
+			case 0:	// Freigabe
+
+					resultBox.innerHTML = '';
+					resultBox.setAttribute('data-error','-1');
+
+					break;
+
+			case 1: // Gesperrt
+
+					cmstk.pingLock();
+					resultBox.innerHTML = template;
+					resultBox.setAttribute('data-error', 1);
+					
+					break;		
+
+			case 2: // Freigabe, aber nicht reserviert zur Bearbeitung
+
+					cmstk.pingLock();
+					resultBox.innerHTML = template;
+					resultBox.setAttribute('data-error', 2);
+					
+					break;
+
+			case 9: // Gesperrt, kein Bearbeitungsrecht
+			
+					cmstk.pingLock();
+					resultBox.innerHTML = template;
+					resultBox.setAttribute('data-error', 1);
+										
+					break;
+		}
+	}
+
 
 }

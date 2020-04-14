@@ -8,12 +8,16 @@ class	CImperator extends CBasic
 
 	private $m_pUserRights;
 
+	private $m_pDirector;
+
 	public function
 	__construct(&$_sqlConnection)
 	{
 		parent::__construct();
 
 		$this -> m_sqlConnection 	= &$_sqlConnection;
+
+		$this -> m_pDirector		= new CDirector;
 	}
 
 
@@ -107,6 +111,7 @@ class	CImperator extends CBasic
 
 				$_request[] 	 = 	[	"input" => "cms-insert-after",  	"validate" => "strip_tags|!empty" ,	"use_default" => true, "default_value" => 0 ]; 		
 				$_request[] 	 = 	[	"input" => "cms-insert-node-id",  	"validate" => "strip_tags|!empty" ,	"use_default" => true, "default_value" => 0 ]; 		
+				$_request[] 	 = 	[	"input" => "cms-insert-content-id", "validate" => "strip_tags|!empty" ,	"use_default" => true, "default_value" => 0 ]; 		
 				$_pURLVariables -> retrieve($_request, false, true); // POST 
 
 				$_bValidationErr =	false;
@@ -130,6 +135,7 @@ class	CImperator extends CBasic
 					$_initObj	 =	[
 										'page_version'		=>	'1',
 										'module_id'			=>	$_pURLVariables -> getValue("cms-insert-module"),
+										'content_id'		=>	$_pURLVariables -> getValue("cms-insert-content-id"),
 										'object_order_by'	=>	$_pURLVariables -> getValue("cms-insert-after"),
 										'node_id'			=>	$_pURLVariables -> getValue("cms-insert-node-id"),
 										'create_time'		=>	time(),
@@ -236,41 +242,12 @@ class	CImperator extends CBasic
 	}
 
 	public function
-	view()
+	view(string $_viewId = '')
 	{
-		if($this -> pageRequest -> isEditMode)
-		{
-			echo '<div class="cms-edit-content-container">';
 
-			foreach($this -> pageRequest -> objectsList as $_objectIndex =>  &$_object)
-			{
-				if($_object -> instance === NULL)
-					continue; 
+		$_viewId = $this -> m_pDirector -> register($_viewId);
+		$this -> m_pDirector -> view($_viewId, $this -> pageRequest, $this -> m_pUserRights);
 
-				$rightsString = json_encode($this -> m_pUserRights -> getModuleRights($_object -> module_id));
-				$rightsString = str_replace('"', "", $rightsString);
-				$rightsString = str_replace('[', "", $rightsString);
-				$rightsString = str_replace(']', "", $rightsString);
-
-				echo '<div class="cms-content-object" data-rights="'. $rightsString .'">';
-				$_object -> instance -> view();
-				echo '</div>';
-			}
-
-			echo '</div>';
-		}
-		else
-		{
-			if($this -> pageRequest  -> objectsList === NULL) return;
-
-			foreach($this -> pageRequest  -> objectsList as $_objectIndex =>  &$_object)
-			{
-				if($_object -> instance === NULL)
-					continue; 
-
-				$_object -> instance -> view();
-			}
-		}
 	}
 }
 

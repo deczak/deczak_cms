@@ -19,6 +19,7 @@
 	BUTTON_DELETE		=	Löschen
 	BUTTON_EDIT			=	Bearbeiten
 	BUTTON_CREATE		=	Erstellen
+	BUTTON_REFRESH		=	Aktualisieren
 	
 	YES					=	Ja
 	NO					=	Nein
@@ -52,6 +53,7 @@
 	LOCKED				=	Gesperrt
 	DEFAULT				=	Standard
 	NOTE				=	Hinweis
+	UNKNOWN				=	unbekannt
 
 	USERNAME			=	Benutzername
 	LOGIN				= 	Anmelden
@@ -69,5 +71,9 @@
 	WAS_NOT_CREATED		=	wurde nicht erstellt
 	
 	IS_UNKNOWN			=	ist unbekannt
+
+	LOCK_IS_LOCKED		=	Dieser Datensatz ist gesperrt durch Benutzer
+	LOCK_IS_NOT_LOCKED	=	Dieser Datensatz kann bearbeitet werden
+	LOCK_NO_RIGHTS		=	Sie haben kein Recht zur Bearbeitung
 	
 	

@@ -129,6 +129,24 @@ class	controllerEnvironment extends CController
 										}
 
 										break;
+
+				case 'set-backend':		// Set backend settings
+
+										$_pFormVariables	 =	new CURLVariables();
+										$_request		 =	[];
+										$_request[] 	 = 	[	"input" => "backend_timeformat",   	"validate" => "strip_tags|strip_quote|trim|!empty",	 "use_default" => true, "default_value" => ''  ];
+										$_pFormVariables -> retrieve($_request, false, true);
+										$_aFormData		 = $_pFormVariables ->getArray();
+
+										$configuration = file_get_contents(CMS_SERVER_ROOT.DIR_DATA.'configuration.json');
+										$configuration = json_decode($configuration);
+
+										$configuration -> BACKEND -> TIME_FORMAT	= $_aFormData['backend_timeformat'];
+
+										$configuration = json_encode($configuration, JSON_FORCE_OBJECT | JSON_UNESCAPED_UNICODE | JSON_HEX_QUOT);
+										file_put_contents(CMS_SERVER_ROOT.DIR_DATA.'configuration.json', $configuration);
+
+										break;
 				
 				case 'update-htaccess':	// Update htaccess
 

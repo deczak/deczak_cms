@@ -25,9 +25,6 @@
 	$configFile = str_replace('%DATABASE_PASSWORD%',$_POST['database-pass'], $configFile);
 	$configFile = str_replace('%DATABASE_DATABASE%',$_POST['database-database'], $configFile);
 
-	$configFile = str_replace('%SYSMAIL_NAME%',$_POST['mail-name'], $configFile);
-	$configFile = str_replace('%SYSMAIL_MAIL%',$_POST['mail-mail'], $configFile);
-
 	$configFile = str_replace('%BASEKEY%',$_POST['crypt-basekey'], $configFile);
 
 	$configFile = str_replace('%COOKIE_HTTPS%', (TK::isSSL() ? 'true' : 'false'), $configFile);
@@ -36,7 +33,13 @@
 
 
 	##	configuration.json
-	copy('configuration.json', '../data/configuration.json');
+
+	$configFile = file_get_contents('configuration.json');
+
+	$configFile = str_replace('%SYSMAIL_NAME%',$_POST['mail-name'], $configFile);
+	$configFile = str_replace('%SYSMAIL_MAIL%',$_POST['mail-mail'], $configFile);
+
+	file_put_contents('../data/configuration.json', $configFile);
 
 
 	tk::xhrResult(0, 'OK');

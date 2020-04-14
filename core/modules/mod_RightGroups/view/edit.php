@@ -5,8 +5,8 @@
 
 	$right_group = &$right_groups[0];
  
-#	$right_group -> time_login 	= ($right_group -> time_login == 0 ? '-' : date(TIME_FORMAT_BACKENDVIEW, $right_group -> time_login) );
-#	$right_group -> time_create 	= ($right_group -> time_create == 0 ? '-' : date(TIME_FORMAT_BACKENDVIEW, $right_group -> time_create) );
+#	$right_group -> time_login 	= ($right_group -> time_login == 0 ? '-' : date(CFG::GET() -> BACKEND -> TIME_FORMAT, $right_group -> time_login) );
+#	$right_group -> time_create 	= ($right_group -> time_create == 0 ? '-' : date(CFG::GET() -> BACKEND -> TIME_FORMAT, $right_group -> time_create) );
 
 	$_pModules		 =	CModules::instance();
 	$_aActiveModules = $_pModules -> getModules();	

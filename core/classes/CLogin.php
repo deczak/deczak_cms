@@ -44,7 +44,7 @@ class	CLogin extends CSingleton
 		$_pSession		 	= CSession::instance();
 		$_loginFailCount	= $_pSession -> getValue('login_fail_count');
 
-		if($_loginFailCount > CFG::GET() -> LOGIN -> FAIL_LIMIT)
+		if($_loginFailCount > CFG::GET() -> SESSION -> FAIL_LIMIT)
 		{	##	Login limit reached
 			$this -> setError('ERR_CR_LOGIN_5');
 			return false;
@@ -474,7 +474,7 @@ class	CLogin extends CSingleton
 		{
 			$_db 	= CSQLConnect::instance() -> getConnection($_dbName);
 
-			if($_loginFailCount > CFG::GET() -> LOGIN -> FAIL_LIMIT)
+			if($_loginFailCount > CFG::GET() -> SESSION -> FAIL_LIMIT)
 			{	##	Login limit reached -> lock account, update session for login kill
 				
 				$_sqlString			=	"	SELECT		$userTable.user_mail,
@@ -501,7 +501,7 @@ class	CLogin extends CSingleton
 
 						$_db -> query($_sqlString);	
 
-						CSysMailer::instance() -> sendMail( CLanguage::instance() -> getString('SYSMAIL_ACCLOCKED_SUBJ') , CLanguage::instance() -> getStringExt('SYSMAIL_ACCLOCKED_TEXT', ['[TIMESTAMP]' => date(TIME_FORMAT_SYSMAIL), '[DATABASE]' => $_dbName, '[DATAID]' => $_sqlLoginFail['data_id'], '[REMOTE]' => $_SERVER['REMOTE_ADDR']]) , true , 'loginfail-userid-'. $_sqlLoginFail['data_id'] );
+						CSysMailer::instance() -> sendMail( CLanguage::instance() -> getString('SYSMAIL_ACCLOCKED_SUBJ') , CLanguage::instance() -> getStringExt('SYSMAIL_ACCLOCKED_TEXT', ['[TIMESTAMP]' => date(CFG::GET() -> SYSTEM_MAILER -> MAIL_TIME_FORMAT), '[DATABASE]' => $_dbName, '[DATAID]' => $_sqlLoginFail['data_id'], '[REMOTE]' => $_SERVER['REMOTE_ADDR']]) , true , 'loginfail-userid-'. $_sqlLoginFail['data_id'] );
 					}
 				}
 

@@ -39,6 +39,7 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CCookie.php';
 	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CLogin.php';
 	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CLanguage.php';
+	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CDirector.php';
 	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CImperator.php';
 	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CBasic.php';
 	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CModules.php';

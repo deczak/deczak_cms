@@ -26,10 +26,14 @@
 	div.be-module-container .inter-menu  ul { margin:7px 0px 7px 24px; }
 	div.be-module-container .inter-menu  h2 { font-size:1.2em; font-weight:300; }
 	div.be-module-container .delete-box { padding-top:10px; }
+
 	div.be-module-container .delete-box .ui.fieldset { padding:0px; border:none; background:unset; }
 	div.be-module-container .delete-box .ui.fieldset .submit-container { left:0px; flex-wrap:nowrap; width:100%; position:initial; }
 	div.be-module-container .delete-box .ui.fieldset .submit-container button { width:100%; min-width:initial; text-align:left; }
 	div.be-module-container .delete-box .ui.fieldset .result-box { margin:10px 0px; }
+
+
+
 
 	/* right content */
 	div.be-module-container table.table-overview { width:100%; border-collapse:collapse; border-spacing:0; }
@@ -109,12 +113,17 @@ button.ui,
 .ui .input > i.far,
 .ui .input > i.fas { position:absolute; bottom:10px; right:15px; opacity:0.5; }
 
-.ui .result-box { padding:10px 20px; font-size:0.9em; margin:15px 8px; border-radius:3px; color:white; font-weight:500; }
+.ui .result-box { padding:10px 10px; font-size:0.9em; margin:15px 8px; border-radius:3px; color:white; font-weight:500; }
 .ui .result-box[data-error="0"] { background:rgba(0,153,51,0.6); }
 .ui .result-box[data-error="1"] { background:rgba(255,0,0,0.6); }
 .ui .result-box[data-error="2"] { background:rgba(40, 83, 131, 0.877); }
 .ui .result-box:empty { display:none; }
 .ui .result-box.big {font-size:1em; }
+
+.ui .result-box.lower-font-size { font-size:0.8em; } 
+.ui .result-box.ping-result  { margin:10px 0px; position:relative;} 
+.ui .result-box.ping-result .refresh-button { font-size:1.47em; position:absolute; top:89%; left:0px; width:100%; } 
+.ui .result-box.ping-result .refresh-button button { border-top-left-radius:0px; border-top-right-radius:0px; text-align:left; }
 
 .ui div.input > div.select-wrapper { position:relative; width:100%; }
 .ui div.input > div.select-wrapper > select { -webkit-appearance:none; -moz-appearance:none; appearance:none; width:100%; cursor:pointer; height:34px; }
