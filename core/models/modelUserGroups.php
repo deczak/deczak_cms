@@ -7,8 +7,7 @@ class 	modelUserGroups extends CModel
 	public function
 	__construct()
 	{		
-		parent::__construct('userGroup');		
-		$this -> m_sheme = new shemeUserGroups();
+		parent::__construct('shemeUserGroups', 'userGroup');	
 	}	
 }
 

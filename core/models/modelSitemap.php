@@ -6,41 +6,51 @@ include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SHEME.'shemeSitemap.php';
 
 class 	modelSitemap extends CModel
 {
-	private	$m_shemeSitemap;
-
 	public function
 	__construct()
 	{		
-		parent::__construct();		
-
-		$this -> m_shemeSitemap = new shemeSitemap();
+        parent::__construct('shemeSitemap', 'sitemap');
 	}	
 				
 	public function
-	load(&$_sqlConnection, CModelCondition $_condition = NULL, CModelComplementary $_complementary = NULL, $_flags = NULL)
+	load(CDatabaseConnection &$_pDatabase, CModelCondition &$_pCondition = NULL, $_execFlags = NULL) : bool
 	{
 		$_mainpageNodeID = 1;
 
-		#$_condition -> where('page_path', $_sqlConnection -> real_escape_string('/'));
+		#$_pCondition -> where('page_path', $_sqlConnection -> real_escape_string('/'));
 
 		##
+/*
 
-#		$_sqlString =	"	SELECT 		tb_page_path.node_id
+		#$_sqlString =	"	SELECT 		tb_page_path.node_id
 		$_sqlString =	"	SELECT 		*
 							FROM 		tb_page_path
-						".	($_condition != NULL ? $_condition -> getConditions($_sqlConnection, $_condition) : '');
+						".	($_pCondition != NULL ? $_pCondition -> getConditions($_sqlConnection, $_pCondition) : '');
 
 		$_sqlNodeRes = $_sqlConnection -> query($_sqlString);
+*/
 
-		if($_sqlNodeRes !== false && $_sqlNodeRes -> num_rows == 1)
-		{
-			$_sqlNode 			= $_sqlNodeRes -> fetch_assoc();
-			$_mainpageNodeID 	= $_sqlNode['node_id'];
-		}
+
+
+
+
+		$dbQuery 	= $_pDatabase		-> query(DB_SELECT) 
+										-> table('tb_page_path') 
+										-> selectColumns(['*'])
+										-> condition($_pCondition);
+
+		$nodeResult = $dbQuery -> exec($_execFlags);
+
+
+
+		
+			$_sqlNode 			= $nodeResult[0];
+			$_mainpageNodeID 	= $_sqlNode -> node_id;
+		
 
 		##	Get node and children
 
-		$_sqlString =	"	SELECT 		o.node_id,
+		$sqlString 	=	"	SELECT 		o.node_id,
 										o.page_id,
 										o.page_language,
 										COUNT(p.node_id)-1 AS level,
@@ -65,73 +75,91 @@ class 	modelSitemap extends CModel
 								ON		tb_page.node_id 				= o.node_id
 							WHERE 		o.node_lft BETWEEN p.node_lft AND p.node_rgt
 							AND 		o.node_lft BETWEEN n.node_lft AND n.node_rgt
-							AND 		n.node_id = '". $_sqlConnection -> real_escape_string($_mainpageNodeID) ."'
+							AND 		n.node_id = '$_mainpageNodeID'
 							GROUP BY	o.node_lft
 							ORDER BY 	o.node_lft
 						";
-			
-		$_sqlNodeRes = $_sqlConnection -> query($_sqlString) or die($_sqlConnection -> error);
 
-		if($_sqlNodeRes === false || !$_sqlNodeRes -> num_rows)
+		try
+		{
+			$sqlNodeRes = $_pDatabase -> getConnection() -> query($sqlString, PDO::FETCH_CLASS, 'stdClass') -> fetchAll();
+		}
+		catch(PDOException $exception)
+		{
+			CMessages::instance() -> addMessage('modelSitemap::load - Query node and childrens failed', MSG_LOG, '', true);				  
+			return false;
+		}
+
+		if($sqlNodeRes === false || !count($sqlNodeRes))
 		{
 			trigger_error('modelSitemap::load() - Node does not exists');
 			return false;
 		}
 
+
 		##	Loop node result and add page path by parents
 		$childsLevel = NULL;
 		$_pages = [];
-		while($_sqlNode = $_sqlNodeRes -> fetch_assoc())
+		foreach($sqlNodeRes as $_sqlNode)
 		{
-			if($_flags & SITEMAP_OWN_CHILDS_ONLY)
+			if($_execFlags & SITEMAP_OWN_CHILDS_ONLY)
 			{
 				if($childsLevel === NULL)
 				{
-					$childsLevel = intval($_sqlNode['level']);
+					$childsLevel = intval($_sqlNode -> level);
 					$childsLevel++;
 					continue;
 				}
 
-				if($childsLevel !== intval($_sqlNode['level']))
+				if($childsLevel !== intval($_sqlNode -> level))
 				{
 					continue;
 				}
 			}
 
-			$_sqlNode['page_path'] = $this -> getPagePath($_sqlConnection, $_sqlNode['node_id'], $_sqlNode['page_language']);
+			$_sqlNode -> page_path = $this -> getPagePath($_pDatabase, $_sqlNode -> node_id, $_sqlNode -> page_language);
 			$_pages[]  = $_sqlNode;
 		}
 
+
 		##	Create data objects and get alternate pages
 
-		$_className		=	$this -> createClass($this -> m_shemeSitemap);
+		$_className		=	$this -> createPrototype();
 
 		foreach($_pages as $_pageIndex => $_page)
 		{
-			$_page['alternate_path'] = $this -> getAlternatePaths($_sqlConnection, $_page['page_id']);
+			$_page -> alternate_path = $this -> getAlternatePaths($_pDatabase, $_page -> page_id);
 
-			$this -> m_storage[] = new $_className($_page, $this -> m_shemeSitemap -> getColumns());
+			$this -> m_resultList[] = new $_className($_page, $this -> m_pSheme -> getColumns());
 		}	
 
 		return true;
 	}
 
 	private function
-	getAlternatePaths(&$_sqlConnection, $_pageID)
+	getAlternatePaths(CDatabaseConnection &$_pDatabase, $_pageID) : array
 	{
 		$_returnArray	=	[];
 
-		$_sqlString 	=	"	SELECT 		tb_page_path.node_id,
-											tb_page_path.page_language
-								FROM 		tb_page_path
-								WHERE 		tb_page_path.page_id 		= '". $_pageID ."'
-							";
+		$sqlString 	=	"	SELECT 		tb_page_path.node_id,
+										tb_page_path.page_language
+							FROM 		tb_page_path
+							WHERE 		tb_page_path.page_id 		= '". $_pageID ."'
+						";
 
-		$_sqlPagesRes 	= $_sqlConnection -> query($_sqlString);
-
-		while($_sqlPagesRes !== false && $_sqlPages = $_sqlPagesRes -> fetch_assoc())
+		try
 		{
-			$_sqlString =	"	SELECT 		p.node_id, 
+			$sqlPagesRes = $_pDatabase -> getConnection() -> query($sqlString, PDO::FETCH_CLASS, 'stdClass') -> fetchAll();
+		}
+		catch(PDOException $exception)
+		{
+			CMessages::instance() -> addMessage('modelSitemap::getAlternatePaths - Query src node failed', MSG_LOG, '', true);				  
+			return $_returnArray;
+		}
+
+		foreach($sqlPagesRes as $_sqlPages)
+		{
+			$sqlString =	"	SELECT 		p.node_id, 
 											p.page_path,
 											p.page_language
 								FROM 		tb_page_path AS n,
@@ -139,23 +167,30 @@ class 	modelSitemap extends CModel
 								WHERE 		n.node_lft
 									BETWEEN p.node_lft 
 										AND	p.node_rgt 
-									AND 	n.node_id = '". $_sqlConnection -> real_escape_string($_sqlPages['node_id']) ."'
+									AND 	n.node_id = '". $_sqlPages -> node_id ."'
 								ORDER BY 	p.node_lft ASC
 							";
 
+			try
+			{
+				$sqlPgHeadRes = $_pDatabase -> getConnection() -> query($sqlString, PDO::FETCH_CLASS, 'stdClass') -> fetchAll();
+			}
+			catch(PDOException $exception)
+			{
+				CMessages::instance() -> addMessage('modelSitemap::getPagePath - Query alternate node failed', MSG_LOG, '', true);				  
+				break;
+			}
 
-			$_sqlPgHeadRes	=	 $_sqlConnection -> query($_sqlString);
-
-			while($_sqlPgHeadRes !== false && $_sqlPgHead = $_sqlPgHeadRes -> fetch_assoc())
+			foreach($sqlPgHeadRes as $_sqlPgHead)
 			{
 
-				if($_sqlPgHead['page_language'] == '0') continue;
+				if($_sqlPgHead -> page_language == '0') continue;
 
-				if(!isset($_returnArray[$_sqlPgHead['page_language']]))
-					$_returnArray[$_sqlPgHead['page_language']]['path'] = '';
+				if(!isset($_returnArray[$_sqlPgHead -> page_language]))
+					$_returnArray[$_sqlPgHead -> page_language]['path'] = '';
 
-				$_returnArray[$_sqlPgHead['page_language']]['path'] 	.= $_sqlPgHead['page_path'];
-				$_returnArray[$_sqlPgHead['page_language']]['node_id']   = $_sqlPgHead['node_id'];
+				$_returnArray[$_sqlPgHead -> page_language]['path'] 	.= $_sqlPgHead -> page_path;
+				$_returnArray[$_sqlPgHead -> page_language]['node_id']   = $_sqlPgHead -> node_id;
 			}	
 		}
 
@@ -163,32 +198,40 @@ class 	modelSitemap extends CModel
 	}
 	
 	private function
-	getPagePath(&$_sqlConnection, int $_nodeID, string $_language)
+	getPagePath(CDatabaseConnection &$_pDatabase, int $_nodeID, string $_language) : string
 	{
-		$_sqlString =	"	SELECT 		p.node_id, 
+		$sqlString =	"	SELECT 		p.node_id, 
 										p.page_path
 							FROM 		tb_page_path n,
 										tb_page_path p
 							WHERE 		n.node_lft
 								BETWEEN p.node_lft 
 									AND	p.node_rgt 
-								AND 	n.node_id 		= '". $_sqlConnection -> real_escape_string($_nodeID) ."'
-								AND 	p.page_language = '". $_sqlConnection -> real_escape_string($_language) ."'
+								AND 	n.node_id 		= '$_nodeID'
+								AND 	p.page_language = '$_language'
 							ORDER BY 	p.node_lft ASC
 						";
+	
+		try
+		{
+			$sqlNodeRes = $_pDatabase -> getConnection() -> query($sqlString, PDO::FETCH_CLASS, 'stdClass') -> fetchAll();
+		}
+		catch(PDOException $exception)
+		{
+			CMessages::instance() -> addMessage('modelSitemap::getPagePath - Query node failed', MSG_LOG, '', true);				  
+			return '/';
+		}
 
-		$_sqlNodeRes = $_sqlConnection -> query($_sqlString);
-
-		if($_sqlNodeRes === false || !$_sqlNodeRes -> num_rows)
+		if($sqlNodeRes === false || !count($sqlNodeRes))
 		{
 			return '/';
 		}
 
 		$_pagePath = '';
 		
-		while($_sqlNode = $_sqlNodeRes -> fetch_assoc())
+		foreach($sqlNodeRes as $_sqlNode)
 		{
-			$_pagePath .= $_sqlNode['page_path'];
+			$_pagePath .= $_sqlNode -> page_path;
 		}
 		return $_pagePath;
 	}

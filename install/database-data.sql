@@ -1,6 +1,3 @@
-SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
-SET time_zone = "+00:00";
-
 INSERT INTO `tb_modules` (`module_id`, `module_location`, `module_controller`, `module_type`, `module_group`, `is_frontend`, `is_active`, `module_icon`, `module_name`, `module_desc`, `module_extends`, `module_extends_by`, `create_time`, `create_by`, `update_time`, `update_by`) VALUES
 (1, 'mod_loginForm', 'controllerLoginForm', 'core', 'Simple Modules', 1, 1, '&#xf2f6;', 'Login', NULL, NULL, NULL, %TIMESTAMP%, 1, 0, 0),
 (2, 'mod_usersBackend', 'controllerUsersBackend', 'core', 'backend', 0, 1, '', 'Backend Users', NULL, NULL, NULL, %TIMESTAMP%, 1, 0, 0),

@@ -47,7 +47,7 @@ getAssignmentCount($rightGroup, $userGroups)
 				<td class=""><?= $_dataSet -> group_name; ?></td>
 				<td class="assignments"><?= $_numOfAssignments; ?></td>
 				<td class=""><?= $_dataSet -> create_time; ?></td>
-				<td class=""><?= tk::getBackendUserName($sqlConnection, $_dataSet -> create_by); ?></td>
+				<td class=""><?= tk::getBackendUserName($pDatabase, $_dataSet -> create_by); ?></td>
 				<td class="bach-item-menu"><span>&equiv;</span><div class="dropdown-content"><div></div><a href="<?= CMS_SERVER_URL_BACKEND . $_pPageRequest -> urlPath; ?>group/<?= $_dataSet -> group_id; ?>"><?= CLanguage::get() -> string('BUTTON_EDIT'); ?></a></div></td>
 			</tr>
 

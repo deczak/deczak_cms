@@ -4,11 +4,22 @@
 	foreach($tablesList as $tableGroup)
 	foreach($tableGroup as $table)
 	{
+		/*
 		$sqlTableRes 	= $sqlConnection -> query("SELECT DISTINCT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '$table'");
 		while($sqlTableItm = $sqlTableRes -> fetch_assoc())
 		{
 			$tablesColumns[$table][] = $sqlTableItm['COLUMN_NAME'];
 		}
+		*/
+		$tableInfoRes 	= $connection -> query("SELECT DISTINCT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '$table'", PDO::FETCH_CLASS, 'stdClass');
+		$tableInfoList	= $tableInfoRes -> fetchAll();
+
+		foreach($tableInfoList as $tableInfoItm)
+		{
+			$tablesColumns[$table][] = $tableInfoItm -> COLUMN_NAME;
+		}
+	
+
 	}	
 
 ?>

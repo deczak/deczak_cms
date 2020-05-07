@@ -14,7 +14,7 @@ class	controllerDeniedRemote extends CController
 	}
 	
 	public function
-	logic(&$_sqlConnection, array $_rcaTarget, $_isXHRequest)
+	logic(CDatabaseConnection &$_pDatabase, array $_rcaTarget, $_isXHRequest)
 	{
 		##	Set default target if not exists
 
@@ -45,32 +45,32 @@ class	controllerDeniedRemote extends CController
 		$_logicResults = false;
 		switch($_controllerAction)
 		{
-			case 'view'		: $_logicResults = $this -> logicView(	$_sqlConnection, $_isXHRequest, $enableEdit, $enableDelete);	break;
-			case 'edit'		: $_logicResults = $this -> logicEdit(	$_sqlConnection, $_isXHRequest);	break;	
-			case 'create'	: $_logicResults = $this -> logicCreate($_sqlConnection, $_isXHRequest);	break;
-			case 'delete'	: $_logicResults = $this -> logicDelete($_sqlConnection, $_isXHRequest);	break;	
-			case 'ping'		: $_logicResults = $this -> logicPing($_sqlConnection, $_isXHRequest, $enableEdit, $enableDelete);	break;	
+			case 'view'		: $_logicResults = $this -> logicView(	$_pDatabase, $_isXHRequest, $enableEdit, $enableDelete);	break;
+			case 'edit'		: $_logicResults = $this -> logicEdit(	$_pDatabase, $_isXHRequest);	break;	
+			case 'create'	: $_logicResults = $this -> logicCreate($_pDatabase, $_isXHRequest);	break;
+			case 'delete'	: $_logicResults = $this -> logicDelete($_pDatabase, $_isXHRequest);	break;	
+			case 'ping'		: $_logicResults = $this -> logicPing($_pDatabase, $_isXHRequest, $enableEdit, $enableDelete);	break;	
 		}
 
 		if(!$_logicResults)
 		{
 			##	Default View
-			$this -> logicIndex($_sqlConnection, $enableEdit, $enableDelete);	
+			$this -> logicIndex($_pDatabase, $enableEdit, $enableDelete);	
 		}
 	}
 
 	private function
-	logicIndex(&$_sqlConnection, $_enableEdit = false, $_enableDelete = false)
+	logicIndex(CDatabaseConnection &$_pDatabase, $_enableEdit = false, $_enableDelete = false)
 	{
 		#$modelCondition = new CModelCondition();
 		#$modelCondition -> orderBy('data_id', 'DESC');
 		
-		$this -> m_pModel -> load($_sqlConnection);	
+		$this -> m_pModel -> load($_pDatabase);	
 		$this -> setView(	
 						'index',	
 						'',
 						[
-							'deniedList' 	=> $this -> m_pModel -> getDataInstance(),
+							'deniedList' 	=> $this -> m_pModel -> getResult(),
 							'enableEdit'	=> $_enableEdit,
 							'enableDelete'	=> $_enableDelete
 						]
@@ -78,7 +78,7 @@ class	controllerDeniedRemote extends CController
 	}
 
 	private function
-	logicCreate(&$_sqlConnection, $_isXHRequest)
+	logicCreate(CDatabaseConnection &$_pDatabase, $_isXHRequest)
 	{
 		if($_isXHRequest !== false)
 		{
@@ -97,7 +97,13 @@ class	controllerDeniedRemote extends CController
 
 			if(!$_bValidationErr)	// Validation OK (by pre check)
 			{		
-				if(!$this -> m_pModel -> isUnique($_sqlConnection, ['denied_ip' => $_aFormData['denied_ip']]))
+
+
+				$uniqueCondition = new CModelCondition();
+				$uniqueCondition -> where('denied_ip', $_aFormData['denied_ip']);
+
+
+				if(!$this -> m_pModel -> unique($_pDatabase, $uniqueCondition))
 				{
 					$_bValidationMsg .= CLanguage::get() -> string('M_BERMADDR_MSG_DENIEDEXIST');
 					$_bValidationErr = true;
@@ -163,13 +169,13 @@ class	controllerDeniedRemote extends CController
 
 				$dataId = 0;
 
-				if($this -> m_pModel -> insert($_sqlConnection, $_aFormData, $dataId))
+				if($this -> m_pModel -> insert($_pDatabase, $_aFormData, $dataId))
 				{
 					$_bValidationMsg = CLanguage::get() -> string('MOD_BE_RMADDR_DENIEDADDR WAS_CREATED') .' - '. CLanguage::get() -> string('WAIT_FOR_REDIRECT');
 					$_bValidationDta['redirect'] = CMS_SERVER_URL_BACKEND . CPageRequest::instance() -> urlPath .'address/'.$dataId;
 
 					$_pHTAccess  = new CHTAccess();
-					$_pHTAccess -> generatePart4DeniedAddress($_sqlConnection);
+					$_pHTAccess -> generatePart4DeniedAddress($_pDatabase);
 					$_pHTAccess -> writeHTAccess();
 				}
 				else
@@ -192,7 +198,7 @@ class	controllerDeniedRemote extends CController
 	}
 
 	private function
-	logicView(&$_sqlConnection, $_isXHRequest = false, $_enableEdit = false, $_enableDelete = false)
+	logicView(CDatabaseConnection &$_pDatabase, $_isXHRequest = false, $_enableEdit = false, $_enableDelete = false)
 	{
 		$systemId = $this -> querySystemId();
 
@@ -201,18 +207,18 @@ class	controllerDeniedRemote extends CController
 			$modelCondition = new CModelCondition();
 			$modelCondition -> where('data_id', $systemId);
 
-			if($this -> m_pModel -> load($_sqlConnection, $modelCondition))
+			if($this -> m_pModel -> load($_pDatabase, $modelCondition))
 			{
 				##	Gathering additional data
 
-				$_crumbName	 = $this -> m_pModel -> searchValue(intval($systemId),'data_id','denied_ip');
+				$_crumbName	 = $this -> m_pModel -> getResultItem('data_id', intval($systemId), 'denied_ip');
 
 				$this -> setCrumbData('edit', $_crumbName, true);
 				$this -> setView(
 								'edit',
 								'address/'. $systemId,								
 								[
-									'deniedList' 	=> $this -> m_pModel -> getDataInstance(),
+									'deniedList' 	=> $this -> m_pModel -> getResult(),
 									'enableEdit'	=> $_enableEdit,
 									'enableDelete'	=> $_enableDelete
 								]								
@@ -226,7 +232,7 @@ class	controllerDeniedRemote extends CController
 	}
 
 	private function
-	logicEdit(&$_sqlConnection, $_isXHRequest = false)
+	logicEdit(CDatabaseConnection &$_pDatabase, $_isXHRequest = false)
 	{
 		$systemId = $this -> querySystemId();
 
@@ -238,7 +244,7 @@ class	controllerDeniedRemote extends CController
 			$_bValidationDta = 	[];
 
 			// check if dataset is locked, call his own xhrResult() 
-			$this -> detectLock($_sqlConnection, $systemId);
+		#	$this -> detectLock($_pDatabase, $systemId);
 
 			switch($_isXHRequest)
 			{
@@ -257,7 +263,16 @@ class	controllerDeniedRemote extends CController
 
 											if(!$_bValidationErr)	// Validation OK (by pre check)
 											{		
-												if(!$this -> m_pModel -> isUnique($_sqlConnection, ['denied_ip' => $_aFormData['denied_ip']], ['data_id' => $_aFormData['data_id']]))
+
+
+
+
+										$uniqueCondition = new CModelCondition();
+										$uniqueCondition -> where('denied_ip', $_aFormData['denied_ip']);
+										$uniqueCondition -> whereNot('data_id', $_aFormData['data_id']);
+
+
+												if(!$this -> m_pModel -> unique($_pDatabase, $uniqueCondition))
 												{
 													$_bValidationMsg .= CLanguage::get() -> string('M_BERMADDR_MSG_DENIEDEXIST');
 													$_bValidationErr = true;
@@ -325,12 +340,12 @@ class	controllerDeniedRemote extends CController
 												$modelCondition = new CModelCondition();
 												$modelCondition -> where('data_id', $systemId);
 
-												if($this -> m_pModel -> update($_sqlConnection, $_aFormData, $modelCondition))
+												if($this -> m_pModel -> update($_pDatabase, $_aFormData, $modelCondition))
 												{
 													$_bValidationMsg = CLanguage::get() -> string('MOD_BE_RMADDR_DENIEDADDR WAS_UPDATED');
 
 													$_pHTAccess  = new CHTAccess();
-													$_pHTAccess -> generatePart4DeniedAddress($_sqlConnection);
+													$_pHTAccess -> generatePart4DeniedAddress($_pDatabase);
 													$_pHTAccess -> writeHTAccess();
 
 												}
@@ -356,7 +371,7 @@ class	controllerDeniedRemote extends CController
 	}
 
 	private function
-	logicDelete(&$_sqlConnection, $_isXHRequest = false)
+	logicDelete(CDatabaseConnection &$_pDatabase, $_isXHRequest = false)
 	{
 		$systemId = $this -> querySystemId();
 
@@ -367,7 +382,7 @@ class	controllerDeniedRemote extends CController
 			$_bValidationDta = 	[];
 
 			// check if dataset is locked, call his own xhrResult() 
-			$this -> detectLock($_sqlConnection, $systemId);
+		#	$this -> detectLock($_pDatabase, $systemId);
 
 			switch($_isXHRequest)
 			{
@@ -376,13 +391,13 @@ class	controllerDeniedRemote extends CController
 									$modelCondition = new CModelCondition();
 									$modelCondition -> where('data_id', $systemId);
 
-									if($this -> m_pModel -> delete($_sqlConnection, $modelCondition))
+									if($this -> m_pModel -> delete($_pDatabase, $modelCondition))
 									{
 										$_bValidationMsg = CLanguage::get() -> string('MOD_BE_RMADDR_DENIEDADDR WAS_DELETED') .' - '. CLanguage::get() -> string('WAIT_FOR_REDIRECT');
 										$_bValidationDta['redirect'] = CMS_SERVER_URL_BACKEND . CPageRequest::instance() -> urlPath;
 
 										$_pHTAccess  = new CHTAccess();
-										$_pHTAccess -> generatePart4DeniedAddress($_sqlConnection);
+										$_pHTAccess -> generatePart4DeniedAddress($_pDatabase);
 										$_pHTAccess -> writeHTAccess();
 									}
 									else
@@ -400,8 +415,9 @@ class	controllerDeniedRemote extends CController
 	}
 	
 	public function
-	logicPing(&$_sqlConnection, $_isXHRequest = false, $_enableEdit = false, $_enableDelete = false)
+	logicPing(CDatabaseConnection &$_pDatabase, $_isXHRequest = false, $_enableEdit = false, $_enableDelete = false)
 	{
+		/*
 		$systemId = $this -> querySystemId();
 
 		if($systemId !== false && $_isXHRequest !== false)
@@ -414,13 +430,14 @@ class	controllerDeniedRemote extends CController
 			{
 				case 'lockState':	
 				
-					$locked	= $this -> m_pModel -> lock($_sqlConnection, CSession::instance() -> getValue('user_id'), $systemId, LOCK_UPDATE);
+					$locked	= $this -> m_pModel -> lock($_pDatabase, CSession::instance() -> getValue('user_id'), $systemId, LOCK_UPDATE);
 					tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $locked);
 					break;
 			}
 
 			tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $_bValidationDta);
 		}
+		*/
 	}
 
 

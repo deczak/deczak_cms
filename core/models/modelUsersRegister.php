@@ -7,19 +7,22 @@ class 	modelUsersRegister extends CModel
 	public function
 	__construct()
 	{		
-		parent::__construct('UserRegister');		
-		$this -> m_sheme = new shemeUsersRegister();
+        parent::__construct('shemeUsersRegister', 'userRegister');
 	}	
 
 	public function
-	registerUserId(&$_sqlConnection, int $_userType, string $_userHash = NULL, string $_userName = NULL)
+	registerUserId(CDatabaseConnection &$_pDatabase, int $_userType, string $_userHash = NULL, string $_userName = NULL)
 	{
 		$freeUserId = date('yz').substr(rand(),0,5);
 
 		while(true)
 		{
 			$freeUserId  = date('yz').substr(rand(),0,5);
-			if($this -> isUnique($_sqlConnection, ['user_id' => $freeUserId]))
+
+			$modelCondition = new CModelCondition();
+			$modelCondition -> where('user_id', $freeUserId);
+
+			if($this -> unique($_pDatabase, $modelCondition))
 				break;
 		}
 
@@ -33,34 +36,34 @@ class 	modelUsersRegister extends CModel
 			$insertData['user_name'] = $_userName;
 		}
 
-		$registerId = 0;
-		$this -> insert($_sqlConnection, $insertData, $registerId);
+		$this -> insert($_pDatabase, $insertData);
 
 		return $freeUserId;
 	}
 
 	public function
-	removeUserId(&$_sqlConnection, string $_userId)
+	removeUserId(CDatabaseConnection &$_pDatabase, string $_userId)
 	{
 		$modelCondition = new CModelCondition();
 		$modelCondition -> where('user_id', $_userId);
-		$this -> delete($_sqlConnection, $modelCondition);
+		$this -> delete($_pDatabase, $modelCondition);
 	}
 
 	public function
-	insert(&$_sqlConnection, &$_dataset, &$_insertID)
+	insert(CDatabaseConnection &$_pDatabase, array $_dataset, $_execFlags = NULL)
 	{
 		$this -> encryptRawSQLDataset($_dataset, $_dataset['user_id'], ['user_name']);		
-		return parent::insert($_sqlConnection, $_dataset, $_insertID);
+		return parent::insert($_pDatabase, $_dataset);
 	}
 
 	public function
-	load(&$_sqlConnection, CModelCondition $_condition = NULL, CModelComplementary $_complementary = NULL)
+	load(CDatabaseConnection &$_pDatabase, CModelCondition &$_pCondition = NULL, $_execFlags = NULL)
 	{
-		if(!parent::load($_sqlConnection, $_condition))
+		if(parent::load($_pDatabase, $_pCondition, $_execFlags) === false)
 			return false;
 
-		foreach($this -> m_storage as $dataset)
+
+		foreach($this -> m_resultList as $dataset)
 			$this -> decryptRawSQLDataset($dataset, $dataset -> user_id, ['user_name']);
 
 		return true;

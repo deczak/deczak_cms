@@ -9,9 +9,9 @@ require_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelUsersRegister.php';
 
 class	CSession extends CSingleton
 {
-	private		$m_aSessionData;
-	private		$m_iTimeout;
-	private		$m_bInitialized;
+	private	array	$m_aSessionData;
+	private	int		$m_iTimeout;
+	private	bool	$m_bInitialized = false;
 
 	public function
 	initialize()
@@ -31,7 +31,7 @@ class	CSession extends CSingleton
 	}
 
 	public function
-	updateSession(int $_nodeId, string $_language, CUserRights &$_pUserRights)
+	updateSession(int $_nodeId, string $_language, CUserRights &$_pUserRights) : bool
 	{
 		## Check if class got initialized 
 		if($this -> m_bInitialized === NULL || $this -> m_bInitialized === false) 
@@ -49,11 +49,13 @@ class	CSession extends CSingleton
 
 		##	Check if session already exists
 
-		$_db = CSQLConnect::instance() -> getConnection(CFG::GET() -> MYSQL -> PRIMARY_DATABASE);
 
-		if($_db === false)
+		$pDatabase = &CDatabase::instance() -> getConnection(CFG::GET() -> MYSQL -> PRIMARY_DATABASE);
+
+		if($pDatabase === null)
 			return false;
 
+/*
 		$_sqlString			=	"	SELECT		tb_sessions.data_id,
 												tb_sessions.login_fail_count						
 									FROM		tb_sessions
@@ -62,14 +64,26 @@ class	CSession extends CSingleton
 
 		$_sqlSessionRes		=	$_db -> query($_sqlString);	
 
-		if($_sqlSessionRes !== false && $_sqlSessionRes -> num_rows === 0)
+*/
+
+		$sessionCheckCond		 = new CModelCondition();
+		$sessionCheckCond		-> where('session_id', $this -> m_aSessionData['session_id']);
+
+		$dbQuery 	= $pDatabase		-> query(DB_SELECT) 
+										-> table('tb_sessions') 
+										-> selectColumns(['data_id', 'login_fail_count'])
+										-> condition($sessionCheckCond);
+
+		$sessionCheckRes = $dbQuery -> exec();
+
+		if($sessionCheckRes !== false && count($sessionCheckRes) == 0)
 		{	##	Create new session
 
 			##	User Agent check
 
 			$modelUserAgent	 =	new modelUserAgent();
-			$modelUserAgent	->	load($_db);
-			$agentsList	 	 =	$modelUserAgent -> getDataInstance();
+			$modelUserAgent	->	load($pDatabase);
+			$agentsList	 	 =	&$modelUserAgent -> getResult();
 
 			foreach( $agentsList as $agent)
 			{
@@ -81,16 +95,32 @@ class	CSession extends CSingleton
 			}
 
 			##	Spam access check
-		
+		/*
 			$_sqlString			=	"	SELECT		tb_sessions.user_ip						
 										FROM		tb_sessions
 										WHERE		tb_sessions.user_ip		= '". $_SERVER['REMOTE_ADDR'] ."'
 											AND		tb_sessions.time_create > $spamAccessTimeout
 									";
 
-			$_sqlSpamAccRes		=	$_db -> query($_sqlString);				
+			$_sqlSpamAccRes		=	$_db -> query($_sqlString);		
+*/
 
-			if($_sqlSpamAccRes -> num_rows >= $spamAccessLimit)
+
+			$sessionCondition		 = new CModelCondition();
+			$sessionCondition		-> where('user_ip', $_SERVER['REMOTE_ADDR'])
+									-> whereGreater('time_create', $spamAccessTimeout);
+
+
+			$dbQuery 	= $pDatabase		-> query(DB_SELECT) 
+											-> table('tb_sessions') 
+											-> selectColumns(['user_ip'])
+											-> condition($sessionCondition);
+
+			$_sqlSpamAccRes = $dbQuery -> exec();
+
+			
+
+			if(count($_sqlSpamAccRes) >= $spamAccessLimit)
 			{
 				$newDeniedAddress['denied_ip'] 		= $_SERVER['REMOTE_ADDR'];
 				$newDeniedAddress['denied_desc'] 	= 'Automatic added by mass access protection';
@@ -124,6 +154,7 @@ class	CSession extends CSingleton
 
 			##	Write session data
 		
+		/*
 			$_sqlString		=	"	INSERT INTO	tb_sessions
 												(
 													tb_sessions.session_id,
@@ -145,13 +176,32 @@ class	CSession extends CSingleton
 								";
 
 			$_db -> query($_sqlString);	
+*/
+			$dtaObject = new stdClass();
+			$dtaObject -> session_id 	= $this -> m_aSessionData['session_id'];
+			$dtaObject -> user_agent 	= $this -> m_aSessionData['user_agent'];
+			$dtaObject -> user_ip 		= $this -> m_aSessionData['user_ip'];
+			$dtaObject -> time_create 	= $_timestamp;
+			$dtaObject -> time_update 	= $_timestamp;
+			$dtaObject -> time_out 		= $_sessionTimeout;
+
+			$dbQuery = $pDatabase		-> query(DB_INSERT) 
+											-> table('tb_sessions') 
+											-> dtaObject($dtaObject);
+
+			$dbQuery -> exec();
+
+
+
 
 			$_bIsNewSession 	= 	true;
 		}
-		else if($_sqlSessionRes !== false)
+		elseif($sessionCheckRes !== false)
 		{
 			##	Update session
 		
+/*
+
 			$_sqlString			=	"	UPDATE		tb_sessions
 										SET			tb_sessions.time_out 		= '". $_db -> real_escape_string($_sessionTimeout) ."'	,
 													tb_sessions.time_update 	= '". $_db -> real_escape_string($_timestamp) ."'
@@ -159,10 +209,30 @@ class	CSession extends CSingleton
 									";
 
 			$_db -> query($_sqlString);	
+*/
 
-			$_sqlSessionData	=	$_sqlSessionRes -> fetch_assoc();
 
-			$this -> m_aSessionData['login_fail_count']		=	$_sqlSessionData['login_fail_count'];
+			$sessionUpdateCond		 = new CModelCondition();
+			$sessionUpdateCond		-> where('session_id', $this -> m_aSessionData['session_id']);
+
+			$dtaObject = new stdClass();
+			$dtaObject -> time_out 		= $_sessionTimeout;
+			$dtaObject -> time_update 	= $_timestamp;
+
+			$dbQuery 	= $pDatabase		-> query(DB_UPDATE) 
+											-> table('tb_sessions') 
+											-> dtaObject($dtaObject)
+											-> condition($sessionUpdateCond);
+
+			$dbQuery -> exec();
+
+
+
+
+
+			$_sqlSessionData	=	$sessionCheckRes[0];
+
+			$this -> m_aSessionData['login_fail_count']		=	$_sqlSessionData -> login_fail_count;
 
 			##	Check user auth by session cookie
 
@@ -176,9 +246,9 @@ class	CSession extends CSingleton
 					// get login objects
 					$_pModelLoginObjects	 =	new modelLoginObjects();
 
-					$_pModelLoginObjects	->	load($_db, $modelCondition);	
+					$_pModelLoginObjects	->	load($pDatabase, $modelCondition);	
 
-					$_loginObjects			 = 	$_pModelLoginObjects -> getDataInstance();
+					$_loginObjects			 = 	&$_pModelLoginObjects -> getResult();
 
 
 					if($_loginObjects !== NULL && count($_loginObjects) != 0)
@@ -223,8 +293,10 @@ class	CSession extends CSingleton
 								}
 							}
 
-							$_dbLogin 	=	CSQLConnect::instance() -> getConnection($_dbName);
+							$_dbLogin 	=	&CDatabase::instance() -> getConnection($_dbName);
 							$_cookieID	=	CCookie::instance() -> getCookieID($_cookieKey);
+
+							/*
 				
 							$_sqlString			=	"	SELECT		$userTable.data_id,
 																	$userTable.time_login,
@@ -243,19 +315,59 @@ class	CSession extends CSingleton
 							$_sqlString			.=	"	LIMIT		1 ";
 
 							$_sqlLoginChkRes		=	$_dbLogin -> query($_sqlString);	
-		
-							if($_sqlLoginChkRes !== false && $_sqlLoginChkRes -> num_rows > 0)
-							{
-								$_sqlLoginChk = $_sqlLoginChkRes -> fetch_assoc();
 
-								if(CCookie::instance() -> isCookieIdinatorValid($_cookieKey, $_sqlLoginChk['time_login'], $this -> m_aSessionData['session_id']))
+
+
+*/
+
+
+
+
+
+
+								$condition		 = new CModelCondition();
+								$condition		-> whereLike('cookie_id', "%\"". $_cookieKey ."\":{\"id\":\"". $_cookieID ."\"}%")
+												-> where('is_locked', '0')
+												-> limit(1);
+
+							if(CFG::GET() -> MYSQL -> PRIMARY_DATABASE !== $_dbName)
+								$condition -> where('allow_remote', '1');
+
+
+								$dbQuery 	= $_dbLogin			-> query(DB_SELECT) 
+																-> table($userTable) 
+																-> selectColumns(['data_id','time_login','cookie_id','user_id','login_name'])
+																-> condition($condition);
+
+								$_sqlLoginChkRes = $dbQuery -> exec();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+		
+							if($_sqlLoginChkRes !== false && count($_sqlLoginChkRes) > 0)
+							{
+								$_sqlLoginChk = $_sqlLoginChkRes[0];
+
+								if(CCookie::instance() -> isCookieIdinatorValid($_cookieKey, $_sqlLoginChk -> time_login, $this -> m_aSessionData['session_id']))
 								{	##	User auth positiv
 			
 									$this -> m_aSessionData['is_auth']						=	true;
 									$this -> m_aSessionData['is_auth_objects'][$_cookieKey]	=	[	##	For additional data access
 																								'db'		=>	&$_dbLogin,
 																								'table'		=>	$userTable,
-																								'data_id'	=>	$_sqlLoginChk['data_id']
+																								'data_id'	=>	$_sqlLoginChk -> data_id
 																								];			
 
 									## Gathering additional columns
@@ -275,12 +387,14 @@ class	CSession extends CSingleton
 
 														if(in_array($_extColumn -> table, $userTables, true) && !$gatheredUserId)
 														{
-															$_selectColumns[] 	= $_extColumn -> table .'.user_id';
+															$_selectColumns[] 	= 'user_id';
 															$gatheredUserId 	= true;
 														}
 
-															$_selectColumns[] = $_extColumn -> table .'.'. $_extColumn -> name;
+															$_selectColumns[] = $_extColumn -> name;
 
+
+														/*
 														$_sqlString		=	"	SELECT		". implode(', ',$_selectColumns) ."
 																				FROM		". $_extColumn -> table ."
 																				WHERE		". $_extColumn -> table .".user_id		= '". $_sqlLoginChk['user_id'] ."'
@@ -288,11 +402,36 @@ class	CSession extends CSingleton
 
 														$_extDataRes 	= 	$_dbLogin -> query($_sqlString);	
 														$_extData		= 	$_extDataRes -> fetch_assoc();
+														*/
+
+
+
+
+
+								$condition		 = new CModelCondition();
+								$condition		-> where('user_id', $_sqlLoginChk -> user_id);
+
+
+
+								$dbQuery 	= $_dbLogin			-> query(DB_SELECT) 
+																-> table($_extColumn -> table) 
+																-> selectColumns($_selectColumns)
+																-> condition($condition);
+
+								$_extData = $dbQuery -> exec()[0];
+
+
+
+
+
+
+
+
 
 														foreach($_extData as $_datKey => $_dataValue)
 														{
-															if(!empty($_extData['user_id']))
-																$userId = $_extData['user_id'];
+															if(!empty($_extData -> user_id))
+																$userId = $_extData -> user_id;
 
 
 															foreach($_loginObject -> object_session_ext as $_extColumn)
@@ -329,16 +468,9 @@ class	CSession extends CSingleton
 											{
 												case 	'assign':	
 
-														/*			$sqlString		=	"	SELECT		". $field -> checkTable .".*
-																	FROM		". $field -> checkTable ."
-																	JOIN		". $field -> infoTable ."
-																		ON		". $field -> infoTable .".data_id = ". $field -> checkTable .".". $field -> checkColumn ."
-																	WHERE		". $field -> checkTable .".". $field -> checkColumn ." = '". $userId ."'
-																		AND 	". $field -> checkTable .".user_id	= '". $userId ."'
-																";
+														/*		
 
-														*/
-
+														
 														$sqlString		=	"	SELECT		". $_extColumn -> infoTable .".". $_extColumn -> infoColumn ."
 																				FROM		". $_extColumn -> checkTable ."
 																				JOIN		". $_extColumn -> infoTable ."
@@ -349,11 +481,47 @@ class	CSession extends CSingleton
 
 
 														$_sqlAssignRes	=	$_db -> query($sqlString);	
+*/
 
 
-														if($_sqlAssignRes !== false && $_sqlAssignRes -> num_rows == 1)
+
+								$joinCondition		 = new CModelCondition();
+								$joinCondition		-> where($_extColumn -> infoTable .".". $_extColumn -> infoAssignCol, $_extColumn -> checkTable .".". $_extColumn -> checkColumn );
+
+
+
+		$relationsList[] = new CModelRelations('JOIN', $_extColumn -> infoTable, $joinCondition);
+
+
+#$condition	    = new CModelCondition();
+#$condition	   -> where('tb_test_rel.reference', 'tb_test_a.id');
+
+#$modelSession  -> addRelation('JOIN', 'tb_test_rel', $condition);
+#$modelSession  -> addSelectColumns('tb_test_a.*', 'tb_test_rel.wert', 'tb_test_rel.reference' );
+
+
+								$condition		 = new CModelCondition();
+								$condition		-> where($_extColumn -> checkTable.'.user_id', $userId);
+
+
+								$dbQuery 	= $_dbLogin			-> query(DB_SELECT) 
+																-> table($_extColumn -> checkTable) 
+																-> selectColumns([$_extColumn -> infoColumn])
+																-> condition($condition)
+																-> relations($relationsList);
+
+								$_sqlAssignRes = $dbQuery -> exec();
+
+
+
+
+
+
+
+
+														if($_sqlAssignRes !== false && count($_sqlAssignRes) == 1)
 														{
-															$_sqlAssignItm = $_sqlAssignRes -> fetch_assoc();
+															$_sqlAssignItm = $_sqlAssignRes[0];
 
 															
 
@@ -389,22 +557,22 @@ class	CSession extends CSingleton
 										$registerCondition = new CModelCondition();
 										$registerCondition -> where('user_hash', $userHash);
 
-										$modelUsersRegister -> load($_db, $registerCondition);
+										$modelUsersRegister -> load($pDatabase, $registerCondition);
 
-										if(!empty($modelUsersRegister -> getDataInstance())) {
+										if(!empty($modelUsersRegister -> getResult())) {
 
-											$_sqlLoginChk['user_id'] = $modelUsersRegister -> getDataInstance()[0] -> user_id;
+											$_sqlLoginChk -> user_id = $modelUsersRegister -> getResult()[0] -> user_id;
 
-											$this -> m_aSessionData['user_id'] = $_sqlLoginChk['user_id'];
+											$this -> m_aSessionData['user_id'] = $_sqlLoginChk -> user_id;
 											$this -> m_aSessionData['is_remote'] = true;
 										}
 										else
 										{
-											$_sqlLoginChk['user_id'] = 0;
+											$_sqlLoginChk -> user_id = 0;
 										}
 									}
 
-									$_pUserRights -> loadUserRights($_db, $_sqlLoginChk['user_id']);
+									$_pUserRights -> loadUserRights($pDatabase, $_sqlLoginChk -> user_id);
 								}								
 							}
 						}
@@ -431,8 +599,8 @@ class	CSession extends CSingleton
 				$modelCondition -> where('page_path', '/');	
 				
 				$modelSitemap = new modelSitemap();
-				$modelSitemap -> load($_db, $modelCondition);
-				$sitemap = &$modelSitemap -> getDataInstance();
+				$modelSitemap -> load($pDatabase, $modelCondition);
+				$sitemap = &$modelSitemap -> getResult();
 
 				foreach($sitemap as $sitemapItem)
 				{
@@ -443,8 +611,9 @@ class	CSession extends CSingleton
 					}
 				}
 			}
+	
 
-			$_sqlString			=	"	SELECT		tb_sessions_access.data_id,
+			$sqlString			=	"	SELECT		tb_sessions_access.data_id,
 													tb_sessions_access.node_id
 										FROM		tb_sessions_access
 										WHERE 		tb_sessions_access.session_id = '". $this -> m_aSessionData['session_id'] ."'
@@ -452,35 +621,30 @@ class	CSession extends CSingleton
 										LIMIT		1
 									";
 
-			$accessRes 	= $_db -> query($_sqlString);	
-			$accessData	=	$accessRes -> fetch_array();
 
-			if($accessData['node_id'] != $_nodeId)
+			$accessRes = $pDatabase -> getConnection() -> query($sqlString, PDO::FETCH_CLASS, 'stdClass');
+
+
+
+			$accessData	=	$accessRes -> fetchAll();
+
+
+			if(!count($accessData) ||  $accessData[0] -> node_id != $_nodeId)
 			{
 				if(empty($_SERVER['HTTP_REFERER']))
 					$_SERVER['HTTP_REFERER'] = '';
+		
+				$dtaObject = new stdClass();
+				$dtaObject -> session_id 	= $this -> m_aSessionData['session_id'];
+				$dtaObject -> node_id 		= $_nodeId;
+				$dtaObject -> time_access 	= $_timestamp;
+				$dtaObject -> referer 		= substr(trim(strip_tags($_SERVER['HTTP_REFERER'])),0,250);
 
+				$dbQuery = $pDatabase		-> query(DB_INSERT) 
+											-> table('tb_sessions_access') 
+											-> dtaObject($dtaObject);
 
-
-
-				$_sqlString		=	"	INSERT INTO	tb_sessions_access
-													(
-														tb_sessions_access.session_id,
-														tb_sessions_access.node_id,
-														tb_sessions_access.time_access,
-														tb_sessions_access.referer
-													)
-													VALUES
-													(
-														'". $_db -> real_escape_string($this -> m_aSessionData['session_id']) ."',
-														'". $_db -> real_escape_string($_nodeId) ."',
-														'". $_db -> real_escape_string($_timestamp) ."',
-														'". $_db -> real_escape_string(substr(trim(strip_tags($_SERVER['HTTP_REFERER'])),0,250)) ."'
-													)
-									";
-
-
-					$_db -> query($_sqlString);	
+				$dbQuery -> exec();
 			}
 		}
 
@@ -515,14 +679,20 @@ class	CSession extends CSingleton
 	private function
 	_updateValue(string $_columnName, $_value)
 	{
-		$_db = CSQLConnect::instance() -> getConnection(CFG::GET() -> MYSQL -> PRIMARY_DATABASE);
+		$pDatabase = &CDatabase::instance() -> getConnection(CFG::GET() -> MYSQL -> PRIMARY_DATABASE);
 
-		$_sqlString			=	"	UPDATE		tb_sessions
-									SET			tb_sessions.". $_columnName ." = '". $_db -> real_escape_string($_value) ."'
-									WHERE		tb_sessions.session_id		   = '". $_db -> real_escape_string($this -> m_aSessionData['session_id']) ."'
-								";
+		$updateCondition		 = new CModelCondition();
+		$updateCondition		-> where('session_id', $this -> m_aSessionData['session_id']);
 
-		$_db -> query($_sqlString);	
+		$dtaObject  = new stdClass();
+		$dtaObject -> $_columnName 		= $_value;
+
+		$dbQuery 	= $pDatabase		-> query(DB_UPDATE) 
+										-> table('tb_sessions') 
+										-> dtaObject($dtaObject)
+										-> condition($updateCondition);
+
+		$dbQuery -> exec();
 	}
 
 	private function

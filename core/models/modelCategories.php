@@ -6,9 +6,8 @@ class 	modelCategories extends CModel
 {
 	public function
 	__construct()
-	{		
-		parent::__construct('Categories');		
-		$this -> m_sheme = new shemeCategories();
+	{
+		parent::__construct('shemeCategories', 'categories');
 	}	
 }
 

@@ -21,7 +21,7 @@ class	controllerBlogPostHeadline extends CController
 	}
 	
 	public function
-	logic(&$_sqlConnection, array $_rcaTarget, $_isXHRequest, &$_logicResult, bool $_bEditMode)
+	logic(CDatabaseConnection &$_pDatabase, array $_rcaTarget, $_isXHRequest, &$_logicResult, bool $_bEditMode)
 	{
 		##	Set default target if not exists
 
@@ -53,21 +53,21 @@ class	controllerBlogPostHeadline extends CController
 		$_logicResults = false;
 		switch($_controllerAction)
 		{
-			case 'view'		: $_logicResults = $this -> logicView(	$_sqlConnection, $_isXHRequest, $_logicResult);	break;
-			case 'edit'		: $_logicResults = $this -> logicEdit(	$_sqlConnection, $_isXHRequest, $_logicResult);	break;	
-			case 'create'	: $_logicResults = $this -> logicCreate($_sqlConnection, $_isXHRequest, $_logicResult);	break;
-			case 'delete'	: $_logicResults = $this -> logicDelete($_sqlConnection, $_isXHRequest, $_logicResult);	break;	
+			case 'view'		: $_logicResults = $this -> logicView(	$_pDatabase, $_isXHRequest, $_logicResult);	break;
+			case 'edit'		: $_logicResults = $this -> logicEdit(	$_pDatabase, $_isXHRequest, $_logicResult);	break;	
+			case 'create'	: $_logicResults = $this -> logicCreate($_pDatabase, $_isXHRequest, $_logicResult);	break;
+			case 'delete'	: $_logicResults = $this -> logicDelete($_pDatabase, $_isXHRequest, $_logicResult);	break;	
 		}
 
 		if(!$_logicResults)
 		{
 			##	Default View
-			$_logicResults = $this -> logicView($_sqlConnection, $_isXHRequest, $_logicResult);	
+			$_logicResults = $this -> logicView($_pDatabase, $_isXHRequest, $_logicResult);	
 		}
 	}
 
 	private function
-	logicView(&$_sqlConnection, $_isXHRequest, &$_logicResult)
+	logicView(CDatabaseConnection &$_pDatabase, $_isXHRequest, &$_logicResult)
 	{
 		$modelCondition = new CModelCondition();
 		$modelCondition -> where('object_id', $this -> m_aObject -> object_id);
@@ -77,9 +77,9 @@ class	controllerBlogPostHeadline extends CController
 		$sitemapCondition -> limit(1);
 
 		$modelSitemap = new modelSitemap();
-		$modelSitemap -> load($_sqlConnection, $sitemapCondition);
+		$modelSitemap -> load($_pDatabase, $sitemapCondition);
 
-		$sitemap = $modelSitemap -> getDataInstance();
+		$sitemap = &$modelSitemap -> getResult();
 
 		foreach($sitemap as $nodeIndex => $node)
 		{
@@ -94,9 +94,9 @@ class	controllerBlogPostHeadline extends CController
 			$modelCategoriesAllocation	 = new modelCategoriesAllocation();
 			$modelCategoriesAllocation -> addSelectColumns('tb_categories.*');
 			$modelCategoriesAllocation -> addRelation('join', 'tb_categories', $conditionPages);
-			$modelCategoriesAllocation	-> load($_sqlConnection, $categorieAllocCondition);
+			$modelCategoriesAllocation	-> load($_pDatabase, $categorieAllocCondition);
 
-			$sitemap[$nodeIndex] -> categories = $modelCategoriesAllocation -> getDataInstance();
+			$sitemap[$nodeIndex] -> categories = &$modelCategoriesAllocation -> getResult();
 		
 			## Tags
 
@@ -109,9 +109,9 @@ class	controllerBlogPostHeadline extends CController
 			$modelTagsAllocation	 = new modelTagsAllocation();
 			$modelTagsAllocation -> addSelectColumns('tb_tags.*');
 			$modelTagsAllocation -> addRelation('join', 'tb_tags', $conditionPages);
-			$modelTagsAllocation	-> load($_sqlConnection, $tagAllocCondition);
+			$modelTagsAllocation	-> load($_pDatabase, $tagAllocCondition);
 			
-			$sitemap[$nodeIndex] -> tags = &$modelTagsAllocation -> getDataInstance();
+			$sitemap[$nodeIndex] -> tags = &$modelTagsAllocation -> getResult();
 		}
 
 		$this -> setView(	
@@ -119,7 +119,7 @@ class	controllerBlogPostHeadline extends CController
 						'',
 						[
 							'object' 	=> $this -> m_aObject,
-							'sitemap'	=> $modelSitemap -> getDataInstance()
+							'sitemap'	=> $modelSitemap -> getResult()
 						]
 						);
 
@@ -127,7 +127,7 @@ class	controllerBlogPostHeadline extends CController
 	}
 
 	private function
-	logicEdit(&$_sqlConnection, $_isXHRequest, &$_logicResult)
+	logicEdit(CDatabaseConnection &$_pDatabase, $_isXHRequest, &$_logicResult)
 	{
 		##	XHR Function call
 
@@ -161,7 +161,7 @@ class	controllerBlogPostHeadline extends CController
 
 
 									if(true)
-									#if($this -> m_modelSimple -> update($_sqlConnection, $_aFormData, $modelCondition))
+									#if($this -> m_modelSimple -> update($_pDatabase, $_aFormData, $modelCondition))
 									{
 										$_bValidationMsg = 'Object updated';
 
@@ -171,7 +171,7 @@ class	controllerBlogPostHeadline extends CController
 										$_objectUpdate['update_by']			=	0;
 										$_objectUpdate['update_reason']		=	'';
 
-										$this -> m_modelPageObject -> update($_sqlConnection, $_objectUpdate, $modelCondition);
+										$this -> m_modelPageObject -> update($_pDatabase, $_objectUpdate, $modelCondition);
 									
 									}
 									else
@@ -199,9 +199,9 @@ class	controllerBlogPostHeadline extends CController
 		$sitemapCondition -> limit(1);
 
 		$modelSitemap = new modelSitemap();
-		$modelSitemap -> load($_sqlConnection, $sitemapCondition);
+		$modelSitemap -> load($_pDatabase, $sitemapCondition);
 
-		$sitemap = $modelSitemap -> getDataInstance();
+		$sitemap = &$modelSitemap -> getResult();
 
 		foreach($sitemap as $nodeIndex => $node)
 		{
@@ -216,9 +216,9 @@ class	controllerBlogPostHeadline extends CController
 			$modelCategoriesAllocation	 = new modelCategoriesAllocation();
 			$modelCategoriesAllocation -> addSelectColumns('tb_categories.*');
 			$modelCategoriesAllocation -> addRelation('join', 'tb_categories', $conditionPages);
-			$modelCategoriesAllocation	-> load($_sqlConnection, $categorieAllocCondition);
+			$modelCategoriesAllocation	-> load($_pDatabase, $categorieAllocCondition);
 
-			$sitemap[$nodeIndex] -> categories = $modelCategoriesAllocation -> getDataInstance();
+			$sitemap[$nodeIndex] -> categories = &$modelCategoriesAllocation -> getResult();
 		
 			## Tags
 
@@ -231,9 +231,9 @@ class	controllerBlogPostHeadline extends CController
 			$modelTagsAllocation	 = new modelTagsAllocation();
 			$modelTagsAllocation -> addSelectColumns('tb_tags.*');
 			$modelTagsAllocation -> addRelation('join', 'tb_tags', $conditionPages);
-			$modelTagsAllocation	-> load($_sqlConnection, $tagAllocCondition);
+			$modelTagsAllocation	-> load($_pDatabase, $tagAllocCondition);
 			
-			$sitemap[$nodeIndex] -> tags = &$modelTagsAllocation -> getDataInstance();
+			$sitemap[$nodeIndex] -> tags = &$modelTagsAllocation -> getResult();
 
 		}
 
@@ -242,7 +242,7 @@ class	controllerBlogPostHeadline extends CController
 						'',
 						[
 							'object' 	=> $this -> m_aObject,
-							'sitemap'	=> $modelSitemap -> getDataInstance()
+							'sitemap'	=> $modelSitemap -> getResult()
 						]
 						);
 
@@ -250,7 +250,7 @@ class	controllerBlogPostHeadline extends CController
 	}
 
 	private function
-	logicCreate(&$_sqlConnection, $_isXHRequest, &$_logicResult)
+	logicCreate(CDatabaseConnection &$_pDatabase, $_isXHRequest, &$_logicResult)
 	{
 
 		##	XHR Function call
@@ -265,7 +265,7 @@ class	controllerBlogPostHeadline extends CController
 			$_dataset['body'] 		= '';
 			$_dataset['params'] 	= '';
 		
-			#if(!$this -> m_modelSimple -> create($_sqlConnection, $_dataset))
+			#if(!$this -> m_modelSimple -> create($_pDatabase, $_dataset))
 			if(false)
 			{
 				$_bValidationErr =	true;
@@ -279,9 +279,9 @@ class	controllerBlogPostHeadline extends CController
 				$sitemapCondition -> limit(1);
 
 				$modelSitemap = new modelSitemap();
-				$modelSitemap -> load($_sqlConnection, $sitemapCondition);
+				$modelSitemap -> load($_pDatabase, $sitemapCondition);
 
-				$sitemap = $modelSitemap -> getDataInstance();
+				$sitemap = &$modelSitemap -> getResult();
 
 				foreach($sitemap as $nodeIndex => $node)
 				{
@@ -296,9 +296,9 @@ class	controllerBlogPostHeadline extends CController
 					$modelCategoriesAllocation	 = new modelCategoriesAllocation();
 					$modelCategoriesAllocation -> addSelectColumns('tb_categories.*');
 					$modelCategoriesAllocation -> addRelation('join', 'tb_categories', $conditionPages);
-					$modelCategoriesAllocation	-> load($_sqlConnection, $categorieAllocCondition);
+					$modelCategoriesAllocation	-> load($_pDatabase, $categorieAllocCondition);
 
-					$sitemap[$nodeIndex] -> categories = $modelCategoriesAllocation -> getDataInstance();
+					$sitemap[$nodeIndex] -> categories = &$modelCategoriesAllocation -> getResult();
 				
 					## Tags
 
@@ -311,9 +311,9 @@ class	controllerBlogPostHeadline extends CController
 					$modelTagsAllocation	 = new modelTagsAllocation();
 					$modelTagsAllocation -> addSelectColumns('tb_tags.*');
 					$modelTagsAllocation -> addRelation('join', 'tb_tags', $conditionPages);
-					$modelTagsAllocation	-> load($_sqlConnection, $tagAllocCondition);
+					$modelTagsAllocation	-> load($_pDatabase, $tagAllocCondition);
 					
-					$sitemap[$nodeIndex] -> tags = &$modelTagsAllocation -> getDataInstance();
+					$sitemap[$nodeIndex] -> tags = &$modelTagsAllocation -> getResult();
 
 				}
 
@@ -326,7 +326,7 @@ class	controllerBlogPostHeadline extends CController
 								'',
 								[
 									'object' 	=> $this -> m_aObject,
-									'sitemap'	=> $modelSitemap -> getDataInstance()
+									'sitemap'	=> $modelSitemap -> getResult()
 								]
 								);
 
@@ -340,7 +340,7 @@ class	controllerBlogPostHeadline extends CController
 	}
 	
 	private function
-	logicDelete(&$_sqlConnection, $_isXHRequest, &$_logicResult)
+	logicDelete(CDatabaseConnection &$_pDatabase, $_isXHRequest, &$_logicResult)
 	{
 		##	XHR Function call
 
@@ -368,12 +368,12 @@ class	controllerBlogPostHeadline extends CController
 										$modelCondition = new CModelCondition();
 										$modelCondition -> where('object_id', $_aFormData['object_id']);
 
-										#if($this -> m_modelSimple -> delete($_sqlConnection, $modelCondition))
+										#if($this -> m_modelSimple -> delete($_pDatabase, $modelCondition))
 										if(true)
 										{
 											
 											$_objectModel  	 = new modelPageObject();
-											$_objectModel	-> delete($_sqlConnection, $modelCondition);
+											$_objectModel	-> delete($_pDatabase, $modelCondition);
 
 											$_bValidationMsg = 'Object deleted';
 										

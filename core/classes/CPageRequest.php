@@ -24,9 +24,11 @@ class CPageRequest extends CSingleton
 	public	$responseCode;
 
 	public function
-	init(&$_sqlConnection, $_nodeId, $_language, $_version, $_xhRequest)
+	init(CDatabaseConnection &$_pDatabase, $_nodeId, $_language, $_version, $_xhRequest)
 	{
-		if($_sqlConnection === false)
+
+
+		if($_pDatabase === null)
 			return false; 
 			
 		if($this -> isEditMode === NULL)
@@ -41,8 +43,9 @@ class CPageRequest extends CSingleton
 		$sitemapCondition -> where('page_path', '/');			
 
 		$modelSitemap = new modelSitemap();
-		$modelSitemap -> load($_sqlConnection, $sitemapCondition);
-		$this -> sitemap = &$modelSitemap -> getDataInstance();
+		$modelSitemap -> load($_pDatabase, $sitemapCondition);
+		$this -> sitemap = &$modelSitemap -> getResult();
+
 
 		if($_nodeId === false && (!CMS_BACKEND || (CMS_BACKEND && $this -> isEditMode)))
 		{	##	Node-ID not set, get start page node-id by language
@@ -69,9 +72,9 @@ class CPageRequest extends CSingleton
 		$redirectCondition -> where('node_id', $_nodeId);			
 
 		$modelRedirect	= new modelRedirect();
-		$modelRedirect -> load($_sqlConnection, $redirectCondition);
+		$modelRedirect -> load($_pDatabase, $redirectCondition);
 
-		$redirectList	= &$modelRedirect -> getDataInstance();
+		$redirectList	= &$modelRedirect -> getResult();
 
 		$this -> canonical = false;
 		$this -> page_redirect = '';
@@ -113,6 +116,7 @@ class CPageRequest extends CSingleton
 		$sqlWhere['page_version']	= $this -> page_version;
 
 
+
 		$pageCondition = new CModelCondition();
 		$pageCondition -> where('tb_page_path.node_id', $this -> node_id);				
 		#$pageCondition -> where('page_version', $this -> page_version);				
@@ -135,14 +139,14 @@ class CPageRequest extends CSingleton
 
 			$modelPage = new modelPage();
 
-			if(!$modelPage -> loadOld($_sqlConnection, $pageCondition))
+			if(!$modelPage -> load($_pDatabase, $pageCondition))
 			{	##	Page not found
 				$this -> node_id  		= false;
 				$this -> responseCode 	= 404;
 				return false;
 			}
 
-			$page = &$modelPage -> getDataInstance()[0];
+			$page = &$modelPage -> getResult()[0];
 
 			##	Check visibility settings
 
@@ -200,8 +204,8 @@ class CPageRequest extends CSingleton
 
 
 			$modelPageObject = new modelPageObject();
-			$modelPageObject -> load($_sqlConnection, $modelCondition);
-			$this -> objectsList = &$modelPageObject -> getDataInstance();
+			$modelPageObject -> load($_pDatabase, $modelCondition);
+			$this -> objectsList = &$modelPageObject -> getResult();
 		
 
 
@@ -256,14 +260,14 @@ class CPageRequest extends CSingleton
 
 
 		$modelPage = new modelBackend();
-		if(!$modelPage -> loadOld($this -> m_sqlConnection, $sqlWhere['node_id']))
+		if(!$modelPage -> loadOld($_pDatabase, $sqlWhere['node_id']))
 		{
 			$this -> setResponseCode(404);
 			return false;
 		}
 
 
-		$page = &$modelPage -> getDataInstance();
+		$page = &$modelPage -> getResult();
 
 
 		$page  -> page_language 	= $_language;
@@ -277,19 +281,24 @@ class CPageRequest extends CSingleton
 		$sqlWhere['node_id']		= $this -> node_id;
 		$sqlWhere['page_version']	= $this -> page_version;
 
+/*
+	page enthält einen object array, eventuell der das selben datenobject hat, eventuell braucht es den loop nicht .. checken wenn backend angepasst wird
 
+*/
 
 			$this -> addCrumb($page -> page_name, $page -> page_path .'/');
 
 			$shemePage		= new shemePage();
 
-			$_className		=	$modelPage -> createClass($shemePage,'object');
+
+			$modelPageObject = new modelPageObject();
+
+			$_className		=	$modelPageObject -> createClass();
 
 			foreach($page -> objects as $_objectKey =>  $_objectData)
 			{
 				$this -> objectsList[] = new $_className($_objectData, $shemePage -> getColumns());
 			}
-
 
 	}
 

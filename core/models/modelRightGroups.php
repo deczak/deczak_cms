@@ -7,21 +7,22 @@ class 	modelRightGroups extends CModel
 	public function
 	__construct()
 	{		
-		parent::__construct('rightGroup');		
-		$this -> m_sheme = new shemeRightGroups();
+		parent::__construct('shemeRightGroups', 'rightGroup');	
 	}	
 
+/*
 	public function
 	load(&$_sqlConnection, CModelCondition $_condition = NULL, CModelComplementary $_complementary = NULL)
 	{
 		$result = parent::load($_sqlConnection, $_condition);
 
-		if($result)
-		foreach($this -> m_storage as $dataset)
-			$dataset -> group_rights = json_decode($dataset -> group_rights);
+	//	if($result)
+	//	foreach($this -> m_storage as $dataset)
+	//		$dataset -> group_rights = json_decode($dataset -> group_rights);
 
 		return $result;
 	}
+	*/
 }
 
 /**

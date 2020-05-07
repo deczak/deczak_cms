@@ -6,6 +6,8 @@
 
 	$sessionTimeout = time() - CFG::GET() -> SESSION -> TIMEOUT;
 
+/*
+
 
 
 
@@ -23,40 +25,56 @@
 						";
 
 	$sqlSessionRes	=	$sqlInstance -> query($sqlString);
+	
 
-	while($sqlSessionRes !== false && $sqlSessionData = $sqlSessionRes -> fetch_assoc())
+*/
+
+
+
+
+	$dbAgentsRes 	 = $pDatabase	-> query(DB_SELECT) 
+									-> table('tb_useragents') 
+									-> selectColumns(['agent_name','agent_suffix'])
+									-> exec();
+
+
+
+
+
+	$dbSessionRes 	 = $pDatabase	-> query(DB_SELECT) 
+									-> table('tb_sessions_archiv') 
+									-> exec();
+
+
+
+
+
+
+
+
+
+
+
+	#while($sqlSessionRes !== false && $dbSessionItm = $sqlSessionRes -> fetch_assoc())
+	foreach($dbSessionRes as $dbSessionItm)
 	{
-
-
 		$isBotSession = false;
 
-
-
-		while($sqlAgents = $sqlAgentsRes -> fetch_assoc())
+		#while($sqlAgents = $sqlAgentsRes -> fetch_assoc())
+		foreach($dbAgentsRes as $dbAgentsItm)
 		{
-
-			if(strpos($sqlSessionData['user_agent'], $sqlAgents['agent_suffix']) !== false)
+			if(strpos($dbSessionItm -> user_agent, $dbAgentsItm -> agent_suffix) !== false)
 			{
-
 				$isBotSession = true;
 				break;
-
 			}
+		}	
 
 
 
 
 
-		}	$sqlAgentsRes -> data_seek(0);
-
-
-
-
-
-
-
-
-		$dateStamp = strval( date('dmY', $sqlSessionData['time_create']) );
+		$dateStamp = strval( date('dmY', $dbSessionItm -> time_create) );
 
 
 
@@ -65,34 +83,51 @@
 			$statistic[$dateStamp]['counter'] = 0;
 
 		$statistic[$dateStamp]['counter'] 	= 	$statistic[$dateStamp]['counter'] + 1;
-		$statistic[$dateStamp]['timestamp'] = 	$sqlSessionData['time_create'];
+		$statistic[$dateStamp]['timestamp'] = 	$dbSessionItm -> time_create;
 	
-
+		/*
 		$sqlString		=	"	SELECT 		tb_sessions_access_archiv.*
 								FROM		tb_sessions_access_archiv
-								WHERE		tb_sessions_access_archiv.session_id = '". $sqlSessionData['session_id'] ."'
+								WHERE		tb_sessions_access_archiv.session_id = '". $dbSessionItm -> session_id ."'
 							";
 
 		$sqlArchivRes	=	$sqlInstance -> query($sqlString);
+		*/
 
 
-		while($sqlArchivRes !== false && $sqlArchivData = $sqlArchivRes -> fetch_assoc())
+
+
+			$condSessAccArchiv		 = new CModelCondition();
+			$condSessAccArchiv		-> where('session_id', $dbSessionItm -> session_id);
+
+			$dbSessAccArchRes 		 = $pDatabase	-> query(DB_SELECT) 
+													-> table('tb_sessions_access_archiv') 
+													-> condition($condSessAccArchiv)
+													-> exec();
+
+
+
+
+
+
+
+		foreach($dbSessAccArchRes as $dbSessAccArchItm)
 		{
 
 
 			if($isBotSession)
 			{
-				if(!isset($statistic[$dateStamp]['pages']['all']['bot'][ $sqlArchivData['node_id'] ]['counter']))
-					$statistic[$dateStamp]['pages']['all']['bot'][ $sqlArchivData['node_id'] ]['counter'] = 0;
+				if(!isset($statistic[$dateStamp]['pages']['all']['bot'][ $dbSessAccArchItm -> node_id ]['counter']))
+					$statistic[$dateStamp]['pages']['all']['bot'][ $dbSessAccArchItm -> node_id ]['counter'] = 0;
 
-				$statistic[$dateStamp]['pages']['all']['bot'][ $sqlArchivData['node_id'] ]['counter'] = $statistic[$dateStamp]['pages']['all']['bot'][ $sqlArchivData['node_id'] ]['counter'] + 1;
+				$statistic[$dateStamp]['pages']['all']['bot'][ $dbSessAccArchItm -> node_id ]['counter'] = $statistic[$dateStamp]['pages']['all']['bot'][ $dbSessAccArchItm -> node_id ]['counter'] + 1;
 			} 
 			else
 			{
-				if(!isset($statistic[$dateStamp]['pages']['all']['user'][ $sqlArchivData['node_id'] ]['counter']))
-					$statistic[$dateStamp]['pages']['all']['user'][ $sqlArchivData['node_id'] ]['counter'] = 0;
+				if(!isset($statistic[$dateStamp]['pages']['all']['user'][ $dbSessAccArchItm -> node_id ]['counter']))
+					$statistic[$dateStamp]['pages']['all']['user'][ $dbSessAccArchItm -> node_id ]['counter'] = 0;
 
-				$statistic[$dateStamp]['pages']['all']['user'][ $sqlArchivData['node_id'] ]['counter'] = $statistic[$dateStamp]['pages']['all']['user'][ $sqlArchivData['node_id'] ]['counter'] + 1;
+				$statistic[$dateStamp]['pages']['all']['user'][ $dbSessAccArchItm -> node_id ]['counter'] = $statistic[$dateStamp]['pages']['all']['user'][ $dbSessAccArchItm -> node_id ]['counter'] + 1;
 			}
 
 
@@ -102,14 +137,14 @@
 			if($isBotSession)
 			{
 
-				$statistic[$dateStamp]['bot'][ $sqlSessionData['user_ip'] ][] = $sqlArchivData['node_id'];
+				$statistic[$dateStamp]['bot'][ $dbSessionItm -> user_ip ][] = $dbSessAccArchItm -> node_id;
 
 
 			} 
 			else
 			{
 
-				$statistic[$dateStamp]['user'][ $sqlSessionData['user_ip'] ][] = $sqlArchivData['node_id'];
+				$statistic[$dateStamp]['user'][ $dbSessionItm -> user_ip ][] = $dbSessAccArchItm -> node_id;
 
 
 			}
@@ -118,25 +153,40 @@
 
 
 
-			if(!empty($sqlArchivData['referer']) && strpos($sqlArchivData['referer'],CMS_SERVER_URL) === false)
-			$statistic[$dateStamp]['referer'][] = $sqlArchivData['referer'];
+			if(!empty($dbSessAccArchItm -> referer) && strpos($dbSessAccArchItm -> referer, CMS_SERVER_URL) === false)
+			$statistic[$dateStamp]['referer'][] = $dbSessAccArchItm -> referer;
 
 
 
 		}
 
 
-		$sqlInstance -> query("DELETE FROM tb_sessions_access_archiv WHERE session_id = '". $sqlSessionData['session_id'] ."'");
+
+
+
+			$delSessAccCond	 = new CModelCondition();
+			$delSessAccCond	-> where('session_id', $dbSessionItm -> session_id);
+
+			$pDatabase		-> query(DB_DELETE) 
+							-> table('tb_sessions_access_archiv') 
+							-> condition($delSessAccCond)
+							-> exec();
+
+
+
+
+
+		#$sqlInstance -> query("DELETE FROM tb_sessions_access_archiv WHERE session_id = '". $dbSessionItm -> session_id ."'");
 
 
 		// collect unique user requests
 
-		if(isset($statistic[$dateStamp]['user'][ $sqlSessionData['user_ip'] ]))
-			$statistic[$dateStamp]['user'][ $sqlSessionData['user_ip'] ] = array_unique($statistic[$dateStamp]['user'][ $sqlSessionData['user_ip'] ]);
+		if(isset($statistic[$dateStamp]['user'][ $dbSessionItm -> user_ip ]))
+			$statistic[$dateStamp]['user'][ $dbSessionItm -> user_ip ] = array_unique($statistic[$dateStamp]['user'][ $dbSessionItm -> user_ip ]);
 		else
-			$statistic[$dateStamp]['user'][ $sqlSessionData['user_ip'] ] = [];
+			$statistic[$dateStamp]['user'][ $dbSessionItm -> user_ip ] = [];
 
-		foreach($statistic[$dateStamp]['user'][ $sqlSessionData['user_ip'] ] as $nodeId)
+		foreach($statistic[$dateStamp]['user'][ $dbSessionItm -> user_ip ] as $nodeId)
 		{
 
 			if(!isset($statistic[$dateStamp]['pages']['unique']['user'][ $nodeId ]['counter']))
@@ -149,12 +199,12 @@
 
 		// collect unique bot requests
 
-		if(isset($statistic[$dateStamp]['bot'][ $sqlSessionData['user_ip'] ]))
-			$statistic[$dateStamp]['bot'][ $sqlSessionData['user_ip'] ] = array_unique($statistic[$dateStamp]['bot'][ $sqlSessionData['user_ip'] ]);
+		if(isset($statistic[$dateStamp]['bot'][ $dbSessionItm -> user_ip ]))
+			$statistic[$dateStamp]['bot'][ $dbSessionItm -> user_ip ] = array_unique($statistic[$dateStamp]['bot'][ $dbSessionItm -> user_ip ]);
 		else
-			$statistic[$dateStamp]['bot'][ $sqlSessionData['user_ip'] ] = [];
+			$statistic[$dateStamp]['bot'][ $dbSessionItm -> user_ip ] = [];
 			
-		foreach($statistic[$dateStamp]['bot'][ $sqlSessionData['user_ip'] ] as $nodeId)
+		foreach($statistic[$dateStamp]['bot'][ $dbSessionItm -> user_ip ] as $nodeId)
 		{
 
 			if(!isset($statistic[$dateStamp]['pages']['unique']['bot'][ $nodeId ]['counter']))
@@ -174,11 +224,25 @@
 
 
 
-		#tk::dbug($sqlSessionData);
+		#tk::dbug($dbSessionItm);
 
 
 
-		$sqlInstance -> query("DELETE FROM tb_sessions_archiv WHERE session_id = '". $sqlSessionData['session_id'] ."'");
+		#$sqlInstance -> query("DELETE FROM tb_sessions_archiv WHERE session_id = '". $dbSessionItm -> session_id ."'");
+
+
+
+			$delSessCond	 = new CModelCondition();
+			$delSessCond	-> where('session_id', $dbSessionItm -> session_id);
+
+			$pDatabase		-> query(DB_DELETE) 
+							-> table('tb_sessions_archiv') 
+							-> condition($delSessCond)
+							-> exec();
+
+
+
+
 
 
 	}

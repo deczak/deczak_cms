@@ -7,8 +7,7 @@ class 	modelTags extends CModel
 	public function
 	__construct()
 	{		
-		parent::__construct('Tags');		
-		$this -> m_sheme = new shemeTags();
+		parent::__construct('shemeTags', 'tags');
 	}	
 }
 

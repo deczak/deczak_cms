@@ -22,7 +22,7 @@ class	controllerSimpleSitemap extends CController
 	}
 	
 	public function
-	logic(&$_sqlConnection, array $_rcaTarget, $_isXHRequest, &$_logicResult, bool $_bEditMode)
+	logic(CDatabaseConnection &$_pDatabase, array $_rcaTarget, $_isXHRequest, &$_logicResult, bool $_bEditMode)
 	{
 		##	Set default target if not exists
 
@@ -56,28 +56,28 @@ class	controllerSimpleSitemap extends CController
 		$_logicResults = false;
 		switch($_controllerAction)
 		{
-			case 'view'		: $_logicResults = $this -> logicView(	$_sqlConnection, $_isXHRequest, $_logicResult);	break;
-			case 'edit'		: $_logicResults = $this -> logicEdit(	$_sqlConnection, $_isXHRequest, $_logicResult);	break;	
-			case 'create'	: $_logicResults = $this -> logicCreate($_sqlConnection, $_isXHRequest, $_logicResult);	break;
-			case 'delete'	: $_logicResults = $this -> logicDelete($_sqlConnection, $_isXHRequest, $_logicResult);	break;	
+			case 'view'		: $_logicResults = $this -> logicView(	$_pDatabase, $_isXHRequest, $_logicResult);	break;
+			case 'edit'		: $_logicResults = $this -> logicEdit(	$_pDatabase, $_isXHRequest, $_logicResult);	break;	
+			case 'create'	: $_logicResults = $this -> logicCreate($_pDatabase, $_isXHRequest, $_logicResult);	break;
+			case 'delete'	: $_logicResults = $this -> logicDelete($_pDatabase, $_isXHRequest, $_logicResult);	break;	
 		}
 
 		if(!$_logicResults)
 		{
 			##	Default View
-			$_logicResults = $this -> logicView($_sqlConnection, $_isXHRequest, $_logicResult);	
+			$_logicResults = $this -> logicView($_pDatabase, $_isXHRequest, $_logicResult);	
 		}
 	}
 
 	private function
-	logicView(&$_sqlConnection, $_isXHRequest, &$_logicResult)
+	logicView(CDatabaseConnection &$_pDatabase, $_isXHRequest, &$_logicResult)
 	{
 		$modelCondition = new CModelCondition();
 		$modelCondition -> where('object_id', $this -> m_aObject -> object_id);
 
-		$this -> m_modelSimple -> load($_sqlConnection, $modelCondition);
+		$this -> m_modelSimple -> load($_pDatabase, $modelCondition);
 
-		$this -> m_modelSimple -> getDataInstance()[0] -> params = json_decode($this -> m_modelSimple -> getDataInstance()[0] -> params);
+		$this -> m_modelSimple -> getResult()[0] -> params = json_decode($this -> m_modelSimple -> getResult()[0] -> params);
 
 		##	gathering child nodes
 
@@ -85,17 +85,17 @@ class	controllerSimpleSitemap extends CController
 		$modelCondition -> where('node_id', $this -> m_aObject -> node_id);		
 
 		$modelSitemap  = new modelSitemap();
-		$modelSitemap -> load($_sqlConnection, $modelCondition, NULL, SITEMAP_OWN_CHILDS_ONLY);	
+		$modelSitemap -> load($_pDatabase, $modelCondition, NULL, SITEMAP_OWN_CHILDS_ONLY);	
 
 		$moduleTemplate		 = new CModulesTemplates();
-		$moduleTemplate		->	load('simpleSitemap', $this -> m_modelSimple -> getDataInstance()[0] -> params -> template);
+		$moduleTemplate		->	load('simpleSitemap', $this -> m_modelSimple -> getResult()[0] -> params -> template);
 
 		$this -> setView(	
 						'view',	
 						'',
 						[
-							'object' 	=> $this -> m_modelSimple -> getDataInstance()[0],
-							'sitemap'	=> $modelSitemap -> getDataInstance(),
+							'object' 	=> $this -> m_modelSimple -> getResult()[0],
+							'sitemap'	=> $modelSitemap -> getResult(),
 							'currentTemplate'	=> $moduleTemplate -> templatesList
 						]
 						);
@@ -104,7 +104,7 @@ class	controllerSimpleSitemap extends CController
 	}
 
 	private function
-	logicEdit(&$_sqlConnection, $_isXHRequest, &$_logicResult)
+	logicEdit(CDatabaseConnection &$_pDatabase, $_isXHRequest, &$_logicResult)
 	{
 		##	XHR Function call
 
@@ -145,7 +145,7 @@ class	controllerSimpleSitemap extends CController
 									$objectId = $_aFormData['object_id'];
 									unset($_aFormData['object_id']);
 
-									if($this -> m_modelSimple -> update($_sqlConnection, $_aFormData, $modelCondition))
+									if($this -> m_modelSimple -> update($_pDatabase, $_aFormData, $modelCondition))
 									{
 										$_bValidationMsg = 'Object updated';
 
@@ -155,7 +155,7 @@ class	controllerSimpleSitemap extends CController
 										$_objectUpdate['update_by']			=	0;
 										$_objectUpdate['update_reason']		=	'';
 
-										$this -> m_modelPageObject -> update($_sqlConnection, $_objectUpdate, $modelCondition);
+										$this -> m_modelPageObject -> update($_pDatabase, $_objectUpdate, $modelCondition);
 									
 									}
 									else
@@ -179,10 +179,10 @@ class	controllerSimpleSitemap extends CController
 		$modelCondition = new CModelCondition();
 		$modelCondition -> where('object_id', $this -> m_aObject -> object_id);
 
-		$this -> m_modelSimple -> load($_sqlConnection, $modelCondition);
+		$this -> m_modelSimple -> load($_pDatabase, $modelCondition);
 
 
-		$this -> m_modelSimple -> getDataInstance()[0] -> params = json_decode($this -> m_modelSimple -> getDataInstance()[0] -> params);
+		$this -> m_modelSimple -> getResult()[0] -> params = json_decode($this -> m_modelSimple -> getResult()[0] -> params);
 
 		##	gathering child nodes
 
@@ -190,10 +190,10 @@ class	controllerSimpleSitemap extends CController
 		$modelCondition -> where('node_id', $this -> m_aObject -> node_id);		
 
 		$modelSitemap  = new modelSitemap();
-		$modelSitemap -> load($_sqlConnection, $modelCondition, NULL, SITEMAP_OWN_CHILDS_ONLY);	
+		$modelSitemap -> load($_pDatabase, $modelCondition, NULL, SITEMAP_OWN_CHILDS_ONLY);	
 
 		$moduleTemplate		 = new CModulesTemplates();
-		$moduleTemplate		->	load('simpleSitemap', $this -> m_modelSimple -> getDataInstance()[0] -> params -> template);
+		$moduleTemplate		->	load('simpleSitemap', $this -> m_modelSimple -> getResult()[0] -> params -> template);
 
 		$moduleTemplates	 = new CModulesTemplates();
 		$moduleTemplates		->	load('simpleSitemap');
@@ -203,8 +203,8 @@ class	controllerSimpleSitemap extends CController
 						'edit',	
 						'',
 						[
-							'object' 			=> $this -> m_modelSimple -> getDataInstance()[0],
-							'sitemap'			=> $modelSitemap -> getDataInstance(),
+							'object' 			=> $this -> m_modelSimple -> getResult()[0],
+							'sitemap'			=> $modelSitemap -> getResult(),
 							'currentTemplate'	=> $moduleTemplate -> templatesList,
 							'avaiableTemplates'	=> $moduleTemplates -> templatesList
 						]
@@ -214,7 +214,7 @@ class	controllerSimpleSitemap extends CController
 	}
 
 	private function
-	logicCreate(&$_sqlConnection, $_isXHRequest, &$_logicResult)
+	logicCreate(CDatabaseConnection &$_pDatabase, $_isXHRequest, &$_logicResult)
 	{
 
 		##	XHR Function call
@@ -236,9 +236,7 @@ class	controllerSimpleSitemap extends CController
 
 
 
-
-			$insertedId = 0;
-			if(!$this -> m_modelSimple -> insert($_sqlConnection, $_dataset, $insertedId))
+			if(!$this -> m_modelSimple -> insert($_pDatabase, $_dataset, MODEL_RESULT_APPEND_DTAOBJECT))
 			{
 				$_bValidationErr =	true;
 				$_bValidationMsg =	'sql insert failed';
@@ -247,7 +245,7 @@ class	controllerSimpleSitemap extends CController
 			{
 
 
-		$this -> m_modelSimple -> getDataInstance()[0] -> params = json_decode($this -> m_modelSimple -> getDataInstance()[0] -> params);
+		$this -> m_modelSimple -> getResult()[0] -> params = json_decode($this -> m_modelSimple -> getResult()[0] -> params);
 
 
 				##	gathering child nodes
@@ -256,11 +254,11 @@ class	controllerSimpleSitemap extends CController
 				$modelCondition -> where('node_id', $this -> m_aObject -> node_id);		
 
 				$modelSitemap  = new modelSitemap();
-				$modelSitemap -> load($_sqlConnection, $modelCondition, NULL, SITEMAP_OWN_CHILDS_ONLY);	
+				$modelSitemap -> load($_pDatabase, $modelCondition, NULL, SITEMAP_OWN_CHILDS_ONLY);	
 
 
 		$moduleTemplate		 = new CModulesTemplates();
-		$moduleTemplate		->	load('simpleSitemap', $this -> m_modelSimple -> getDataInstance()[0] -> params -> template);
+		$moduleTemplate		->	load('simpleSitemap', $this -> m_modelSimple -> getResult()[0] -> params -> template);
 
 		$moduleTemplates	 = new CModulesTemplates();
 		$moduleTemplates		->	load('simpleSitemap');
@@ -273,8 +271,8 @@ class	controllerSimpleSitemap extends CController
 								'edit',	
 								'',
 								[
-									'object' 	=> $this -> m_modelSimple -> getDataInstance()[0],
-									'sitemap'	=> $modelSitemap -> getDataInstance(),
+									'object' 	=> $this -> m_modelSimple -> getResult()[0],
+									'sitemap'	=> $modelSitemap -> getResult(),
 							'currentTemplate'	=> $moduleTemplate -> templatesList,
 							'avaiableTemplates'	=> $moduleTemplates -> templatesList
 								]
@@ -290,7 +288,7 @@ class	controllerSimpleSitemap extends CController
 	}
 	
 	private function
-	logicDelete(&$_sqlConnection, $_isXHRequest, &$_logicResult)
+	logicDelete(CDatabaseConnection &$_pDatabase, $_isXHRequest, &$_logicResult)
 	{
 		##	XHR Function call
 
@@ -318,10 +316,10 @@ class	controllerSimpleSitemap extends CController
 										$modelCondition = new CModelCondition();
 										$modelCondition -> where('object_id', $_aFormData['object_id']);
 
-										if($this -> m_modelSimple -> delete($_sqlConnection, $modelCondition))
+										if($this -> m_modelSimple -> delete($_pDatabase, $modelCondition))
 										{
 											$_objectModel  	 = new modelPageObject();
-											$_objectModel	-> delete($_sqlConnection, $modelCondition);
+											$_objectModel	-> delete($_pDatabase, $modelCondition);
 
 											$_bValidationMsg = 'Object deleted';
 										

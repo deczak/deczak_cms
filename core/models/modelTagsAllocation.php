@@ -7,8 +7,7 @@ class 	modelTagsAllocation extends CModel
 	public function
 	__construct()
 	{		
-		parent::__construct('TagsAllocation');		
-		$this -> m_sheme = new shemeTagsAllocation();
+		parent::__construct('shemeTagsAllocation', 'tagsAllocation');
 	}	
 }
 

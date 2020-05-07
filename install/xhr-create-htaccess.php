@@ -11,6 +11,8 @@
 	include '../core/shemes/shemeSitemap.php';
 	include '../core/classes/CHTAccess.php';
 	include '../core/classes/CUserRights.php';
+	include '../core/classes/CDatabase.php';
+	include '../core/classes/CMessages.php';
 
 
 	$pUserRights	 = 	new CUserRights();
@@ -23,12 +25,35 @@
 	if(empty($_POST['database-database'])) 	tk::xhrResult(1, 'Database name not set');				else $_POST['database-database'] = trim(strip_tags($_POST['database-database']));
 
 
-	$db = new mysqli($_POST['database-server'], $_POST['database-user'], $_POST['database-pass'], $_POST['database-database']);
 
-	if (mysqli_connect_errno())
-		tk::xhrResult(1, 'SQL error on connection - '. mysqli_connect_error());
+	$_pMessages		 =	CMessages::instance();
+	$_pMessages		->	initialize(CMS_PROTOCOL_REPORTING, CMS_DEBUG_REPORTING);
+	#$db = new mysqli($_POST['database-server'], $_POST['database-user'], $_POST['database-pass'], $_POST['database-database']);
 
-	CModules::instance() -> init($db, $pUserRights);
+
+	$databases 	 = 	[];
+	$databases[] = 	[
+						'server'	=> $_POST['database-server'],
+						'database'	=> $_POST['database-database'],
+						'user'		=> $_POST['database-user'],
+						'password'	=> $_POST['database-pass'],
+						'name'		=> 'primary'
+					];
+
+	$pDBInstance 	 = CDatabase::instance();
+	if(!$pDBInstance -> connect($databases))
+		tk::xhrResult(1, 'DB connect error');
+	
+	$db = $pDBInstance -> getConnection('primary');
+
+
+
+
+
+	#if (mysqli_connect_errno())
+	#	tk::xhrResult(1, 'SQL error on connection - '. mysqli_connect_error());
+
+	CModules::instance() -> initialize($db, $pUserRights);
 
 
 	$configFile = file_get_contents('0-base');
@@ -41,7 +66,7 @@
 	$_pLanguage	-> 	initialize($db);	
 
 	$_pHTAccess  = new CHTAccess();
-	$_pHTAccess -> generatePart4Backend($_sqlConnection);
+	$_pHTAccess -> generatePart4Backend($db);
 	$_pHTAccess -> generatePart4Frontend($db);
 	$_pHTAccess -> writeHTAccess();
 

@@ -16,7 +16,7 @@ class	controllerTags extends CController
 	}
 	
 	public function
-	logic(&$_sqlConnection, array $_rcaTarget, $_isXHRequest)
+	logic(CDatabaseConnection &$_pDatabase, array $_rcaTarget, $_isXHRequest)
 	{
 		##	Set default target if not exists
 
@@ -47,21 +47,21 @@ class	controllerTags extends CController
 		$_logicResults = false;
 		switch($_controllerAction)
 		{
-			case 'view'		: $_logicResults = $this -> logicView(	$_sqlConnection, $_isXHRequest, $enableEdit, $enableDelete);	break;
-			case 'edit'		: $_logicResults = $this -> logicEdit(	$_sqlConnection, $_isXHRequest);	break;	
-			case 'create'	: $_logicResults = $this -> logicCreate($_sqlConnection, $_isXHRequest);	break;
-			case 'delete'	: $_logicResults = $this -> logicDelete($_sqlConnection, $_isXHRequest);	break;	
+			case 'view'		: $_logicResults = $this -> logicView(	$_pDatabase, $_isXHRequest, $enableEdit, $enableDelete);	break;
+			case 'edit'		: $_logicResults = $this -> logicEdit(	$_pDatabase, $_isXHRequest);	break;	
+			case 'create'	: $_logicResults = $this -> logicCreate($_pDatabase, $_isXHRequest);	break;
+			case 'delete'	: $_logicResults = $this -> logicDelete($_pDatabase, $_isXHRequest);	break;	
 		}
 
 		if(!$_logicResults)
 		{
 			##	Default View
-			$this -> logicIndex($_sqlConnection, $enableEdit, $enableDelete);	
+			$this -> logicIndex($_pDatabase, $enableEdit, $enableDelete);	
 		}
 	}
 
 	private function
-	logicIndex(&$_sqlConnection, $_enableEdit = false, $_enableDelete = false)
+	logicIndex(CDatabaseConnection &$_pDatabase, $_enableEdit = false, $_enableDelete = false)
 	{
 		$conditionAllocation = new CModelCondition();
 		$conditionAllocation -> where('tb_tags.tag_id', 'tb_tags_allocation.tag_id');
@@ -72,12 +72,12 @@ class	controllerTags extends CController
 		$modelCondition = new CModelCondition();
 		$modelCondition -> groupBy('tag_id');
 
-		$this -> m_pModel -> load($_sqlConnection, $modelCondition);	
+		$this -> m_pModel -> load($_pDatabase, $modelCondition);	
 		$this -> setView(	
 						'index',	
 						'',
 						[
-							'tagsList' 			=> $this -> m_pModel -> getDataInstance(),
+							'tagsList' 			=> $this -> m_pModel -> getResult(),
 							'enableEdit'		=> $_enableEdit,
 							'enableDelete'		=> $_enableDelete
 						]
@@ -85,7 +85,7 @@ class	controllerTags extends CController
 	}
 
 	private function
-	logicCreate(&$_sqlConnection, $_isXHRequest)
+	logicCreate(CDatabaseConnection &$_pDatabase, $_isXHRequest)
 	{
 		if($_isXHRequest !== false)
 		{
@@ -119,7 +119,7 @@ class	controllerTags extends CController
 
 				$dataId = 0;
 
-				if($this -> m_pModel -> insert($_sqlConnection, $_aFormData, $dataId))
+				if($this -> m_pModel -> insert($_pDatabase, $_aFormData, $dataId))
 				{					
 					$_bValidationMsg = CLanguage::get() -> string('MOD_BETAGS_TAG') .' '. CLanguage::get() -> string('WAS_CREATED') .' - '. CLanguage::get() -> string('WAIT_FOR_REDIRECT');
 											
@@ -145,30 +145,27 @@ class	controllerTags extends CController
 	}
 
 	private function
-	logicView(&$_sqlConnection, $_isXHRequest = false, $_enableEdit = false, $_enableDelete = false)
-	{	
-		$_pURLVariables	 =	new CURLVariables();
-		$_request		 =	[];
-		$_request[] 	 = 	[	"input" => "cms-system-id",  	"validate" => "strip_tags|!empty" ,	"use_default" => true, "default_value" => false ]; 		
-		$_pURLVariables -> retrieve($_request, true, false); // POST 
+	logicView(CDatabaseConnection &$_pDatabase, $_isXHRequest = false, $_enableEdit = false, $_enableDelete = false)
+	{
+		$systemId = $this -> querySystemId();
 
-		if($_pURLVariables -> getValue("cms-system-id") !== false )
+		if($systemId !== false )
 		{	
 			$modelCondition = new CModelCondition();
-			$modelCondition -> where('tag_id', $_pURLVariables -> getValue("cms-system-id"));
+			$modelCondition -> where('tag_id', $systemId);
 
-			if($this -> m_pModel -> load($_sqlConnection, $modelCondition))
+			if($this -> m_pModel -> load($_pDatabase, $modelCondition))
 			{
 				##	Gathering additional data
 
-				$_crumbName	 = $this -> m_pModel -> searchValue(intval($_pURLVariables -> getValue("cms-system-id")),'tag_id','tag_name');
+				$_crumbName	 = $this -> m_pModel -> getResultItem('tag_id', intval($systemId),'tag_name');
 
 				$this -> setCrumbData('edit', $_crumbName, true);
 				$this -> setView(
 								'edit',
-								'tag/'. $_pURLVariables -> getValue("cms-system-id"),								
+								'tag/'. $systemId,								
 								[
-									'tagsList' 	=> $this -> m_pModel -> getDataInstance(),
+									'tagsList' 	=> $this -> m_pModel -> getResult(),
 									'enableEdit'		=> $_enableEdit,
 									'enableDelete'		=> $_enableDelete
 								]								
@@ -182,14 +179,11 @@ class	controllerTags extends CController
 	}
 
 	private function
-	logicEdit(&$_sqlConnection, $_isXHRequest = false)
-	{	
-		$_pURLVariables	 =	new CURLVariables();
-		$_request		 =	[];
-		$_request[] 	 = 	[	"input" => "cms-system-id",  	"validate" => "strip_tags|!empty" ,	"use_default" => true, "default_value" => false ]; 		
-		$_pURLVariables -> retrieve($_request, true, false); // POST 
+	logicEdit(CDatabaseConnection &$_pDatabase, $_isXHRequest = false)
+	{
+		$systemId = $this -> querySystemId();
 
-		if($_pURLVariables -> getValue("cms-system-id") !== false && $_isXHRequest !== false)
+		if($systemId !== false && $_isXHRequest !== false)
 		{	
 			$_bValidationErr =	false;
 			$_bValidationMsg =	'';
@@ -204,8 +198,8 @@ class	controllerTags extends CController
 										$_request[] 	 = 	[	"input" => "tag_name",  	"validate" => "strip_tags|trim|!empty" ]; 	
 										$_request[] 	 = 	[	"input" => "tag_hidden",  	"validate" => "strip_tags|trim|!empty" ]; 	
 										$_request[] 	 = 	[	"input" => "tag_disabled", "validate" => "strip_tags|trim|!empty" ]; 		
-										$_pURLVariables -> retrieve($_request, false, true); // POST 
-										$_aFormData		 = $_pURLVariables ->getArray();
+										$_pFormVariables -> retrieve($_request, false, true); // POST 
+										$_aFormData		 = $_pFormVariables ->getArray();
 
 										if(empty($_aFormData['tag_name'])) 	{ 	$_bValidationErr = true; 	$_bValidationDta[] = 'tag_name'; 	}
 										if(!isset($_aFormData['tag_hidden'])) { 	$_bValidationErr = true; 	$_bValidationDta[] = 'tag_hidden'; 	}
@@ -216,9 +210,9 @@ class	controllerTags extends CController
 											$_aFormData['tag_url'] 	= tk::normalizeFilename($_aFormData['tag_name'], true);
 
 											$modelCondition = new CModelCondition();
-											$modelCondition -> where('tag_id', $_pURLVariables -> getValue("cms-system-id"));
+											$modelCondition -> where('tag_id', $systemId);
 
-											if($this -> m_pModel -> update($_sqlConnection, $_aFormData, $modelCondition))
+											if($this -> m_pModel -> update($_pDatabase, $_aFormData, $modelCondition))
 											{
 												$_bValidationMsg = CLanguage::get() -> string('MOD_BETAGS_TAG') .' '. CLanguage::get() -> string('WAS_UPDATED');
 											}
@@ -244,14 +238,11 @@ class	controllerTags extends CController
 	}
 
 	private function
-	logicDelete(&$_sqlConnection, $_isXHRequest = false)
-	{	
-		$_pURLVariables	 =	new CURLVariables();
-		$_request		 =	[];
-		$_request[] 	 = 	[	"input" => "cms-system-id",  	"validate" => "strip_tags|!empty" ,	"use_default" => true, "default_value" => false ]; 		
-		$_pURLVariables -> retrieve($_request, true, false); // POST 
+	logicDelete(CDatabaseConnection &$_pDatabase, $_isXHRequest = false)
+	{
+		$systemId = $this -> querySystemId();
 
-		if($_pURLVariables -> getValue("cms-system-id") !== false && $_isXHRequest !== false)
+		if($systemId !== false && $_isXHRequest !== false)
 		{	
 			$_bValidationErr =	false;
 			$_bValidationMsg =	'';
@@ -262,9 +253,9 @@ class	controllerTags extends CController
 				case 'tag-delete':
 
 									$modelCondition = new CModelCondition();
-									$modelCondition -> where('tag_id', $_pURLVariables -> getValue("cms-system-id"));
+									$modelCondition -> where('tag_id', $systemId);
 
-									if($this -> m_pModel -> delete($_sqlConnection, $modelCondition))
+									if($this -> m_pModel -> delete($_pDatabase, $modelCondition))
 									{
 										$_bValidationMsg = CLanguage::get() -> string('MOD_BETAGS_TAG') .' '. CLanguage::get() -> string('WAS_DELETED') .' - '. CLanguage::get() -> string('WAIT_FOR_REDIRECT');
 										$_bValidationDta['redirect'] = CMS_SERVER_URL_BACKEND . CPageRequest::instance() -> urlPath;

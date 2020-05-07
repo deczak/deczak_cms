@@ -80,12 +80,10 @@ class	controllerEnvironment extends CController
 	private function
 	logicEdit(&$_sqlConnection, $_isXHRequest = false)
 	{	
-		$_pURLVariables	 =	new CURLVariables();
-		$_request		 =	[];
-		$_request[] 	 = 	[	"input" => "cms-system-id",  	"validate" => "strip_tags|!empty" ,	"use_default" => true, "default_value" => false ]; 		
-		$_pURLVariables -> retrieve($_request, true, false); // POST 
 
-		if($_pURLVariables -> getValue("cms-system-id") !== false && $_isXHRequest !== false)
+		$systemId = $this -> querySystemId();
+
+		if($systemId !== false && $_isXHRequest !== false)
 		{	
 			$_bValidationErr =	false;
 			$_bValidationMsg =	'';

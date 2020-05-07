@@ -7,8 +7,7 @@ class 	modelCategoriesAllocation extends CModel
 	public function
 	__construct()
 	{		
-		parent::__construct('CategoriesAllocation');		
-		$this -> m_sheme = new shemeCategoriesAllocation();
+		parent::__construct('shemeCategoriesAllocation', 'categoriesAllocation');
 	}	
 }
 

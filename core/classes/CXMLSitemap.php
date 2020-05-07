@@ -3,7 +3,7 @@
 class CXMLSitemap
 {
 	public function
-	generate(&$_sqlConnection)
+	generate(CDatabaseConnection &$_pDatabase)
 	{
 		$timestamp = time();
 		$_targetFile	= 'sitemap.xml';
@@ -33,9 +33,9 @@ class CXMLSitemap
 				$modelCondition -> where('page_path', '/');	
 
 				$_pSitemap 	 = new modelSitemap();
-				$_pSitemap	-> load($_sqlConnection, $modelCondition);
+				$_pSitemap	-> load($_pDatabase, $modelCondition);
 
-				$sitemap	= $_pSitemap	-> getDataInstance();
+				$sitemap	= $_pSitemap	-> getResult();
 
 				for($i = count($sitemap) - 1; $i >= 0; $i--)
 				{		

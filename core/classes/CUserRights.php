@@ -11,8 +11,9 @@ class	CUserRights
 	}
 
 	public function
-	loadUserRights(&$_sqlConnection, $_userId)
+	loadUserRights(CDatabaseConnection &$_pDatabase, $_userId)
 	{
+		/*
 		$sqlString		=	"	SELECT		tb_users_groups.*,
 											tb_right_groups.*
 								FROM		tb_users_groups
@@ -20,16 +21,44 @@ class	CUserRights
 								WHERE		tb_users_groups.user_id	= '". $_sqlConnection -> real_escape_string($_userId) ."'
 							";
 
+		$sqlURightsRes	= 	$_sqlConnection -> query($sqlString);	
+*/
 
 
-		$sqlURightsRes	= 	$_sqlConnection -> query($sqlString);		
 
-		while($sqlURightsRes !== false && $sqlURightsItm = $sqlURightsRes -> fetch_assoc())
+			$joinCondition		 = new CModelCondition();
+			$joinCondition		-> where('tb_right_groups.group_id', 'tb_users_groups.group_id');
+
+
+
+
+		$relationsList[] = new CModelRelations('LEFT JOIN', 'tb_right_groups', $joinCondition);
+
+
+								$condition		 = new CModelCondition();
+								$condition		-> where('tb_users_groups.user_id', $_userId);
+
+
+								$dbQuery 	= $_pDatabase			-> query(DB_SELECT) 
+																-> table('tb_users_groups') 
+																-> selectColumns(['tb_users_groups.*','tb_right_groups.*'])
+																-> condition($condition)
+																-> relations($relationsList);
+
+								$sqlURightsRes = $dbQuery -> exec();
+
+
+
+
+
+
+		foreach($sqlURightsRes as $sqlURightsItm)
 		{
-			$sqlURightsItm['group_rights'] = json_decode($sqlURightsItm['group_rights'], true);
+			$sqlURightsItm -> group_rights = json_decode($sqlURightsItm -> group_rights, true);
 		
-			if(!empty($sqlURightsItm['group_rights']))
-			foreach($sqlURightsItm['group_rights'] as $_moduleRights  => $_rightsSet)
+
+			if(!empty($sqlURightsItm -> group_rights))
+			foreach($sqlURightsItm -> group_rights as $_moduleRights  => $_rightsSet)
 			{
 				if(!isset($this -> m_rightsList[$_moduleRights]))
 					$this -> m_rightsList[$_moduleRights] = new CUserRightsItm($_moduleRights);

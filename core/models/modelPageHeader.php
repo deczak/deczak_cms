@@ -7,8 +7,7 @@ class 	modelPageHeader extends CModel
 	public function
 	__construct()
 	{		
-		parent::__construct('pageHeader');		
-		$this -> m_sheme = new shemePageHeader();
+		parent::__construct('shemePageHeader', 'pageHeader');
 	}	
 }
 

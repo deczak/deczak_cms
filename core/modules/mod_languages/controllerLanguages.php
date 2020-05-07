@@ -19,7 +19,7 @@ class	controllerLanguages extends CController
 	}
 	
 	public function
-	logic(&$_sqlConnection, array $_rcaTarget, $_isXHRequest)
+	logic(CDatabaseConnection &$_pDatabase, array $_rcaTarget, $_isXHRequest)
 	{
 		##	Set default target if not exists
 
@@ -50,21 +50,21 @@ class	controllerLanguages extends CController
 		$_logicResults = false;
 		switch($_controllerAction)
 		{
-			case 'view'		: $_logicResults = $this -> logicView(	$_sqlConnection, $_isXHRequest, $enableEdit, $enableDelete);	break;
-			case 'edit'		: $_logicResults = $this -> logicEdit(	$_sqlConnection, $_isXHRequest);	break;	
-			case 'create'	: $_logicResults = $this -> logicCreate($_sqlConnection, $_isXHRequest);	break;
-			case 'delete'	: $_logicResults = $this -> logicDelete($_sqlConnection, $_isXHRequest);	break;	
+			case 'view'		: $_logicResults = $this -> logicView(	$_pDatabase, $_isXHRequest, $enableEdit, $enableDelete);	break;
+			case 'edit'		: $_logicResults = $this -> logicEdit(	$_pDatabase, $_isXHRequest);	break;	
+			case 'create'	: $_logicResults = $this -> logicCreate($_pDatabase, $_isXHRequest);	break;
+			case 'delete'	: $_logicResults = $this -> logicDelete($_pDatabase, $_isXHRequest);	break;	
 		}
 
 		if(!$_logicResults)
 		{
 			##	Default View
-			$this -> logicIndex($_sqlConnection, $_isXHRequest, $enableEdit, $enableDelete);	
+			$this -> logicIndex($_pDatabase, $_isXHRequest, $enableEdit, $enableDelete);	
 		}
 	}
 
 	private function
-	logicIndex(&$_sqlConnection, $_isXHRequest, $_enableEdit = false, $_enableDelete = false)
+	logicIndex(CDatabaseConnection &$_pDatabase, $_isXHRequest, $_enableEdit = false, $_enableDelete = false)
 	{
 		##	XHR request
 
@@ -78,25 +78,22 @@ class	controllerLanguages extends CController
 			{
 				case 'raw-data'  :	// Request raw data
 
-									$_pURLVariables	 =	new CURLVariables();
-									$_request		 =	[];
-									$_request[] 	 = 	[	"input" => "cms-system-id",  	"validate" => "strip_tags|!empty" ,	"use_default" => true, "default_value" => false ]; 		
-									$_pURLVariables -> 	retrieve($_request, true, false); // POST 
+									$systemId = $this -> querySystemId();
 
 									$modelCondition  = 	new CModelCondition();
 
-									if($_pURLVariables -> getValue("cms-system-id") !== false)
+									if($systemId !== false)
 									{	
-										$modelCondition -> where('lang_key', $_pURLVariables -> getValue("cms-system-id"));
+										$modelCondition -> where('lang_key', $systemId);
 									}
 
-									if(!$this -> m_pModel -> load($_sqlConnection, $modelCondition))
+									if(!$this -> m_pModel -> load($_pDatabase, $modelCondition))
 									{
 										$_bValidationMsg .= CLanguage::get() -> string('ERR_SQL_ERROR');
 										$_bValidationErr = true;
 									}											
 						
-										$data = $this -> m_pModel -> getDataInstance();
+										$data = $this -> m_pModel -> getResult();
 
 
 									break;
@@ -110,7 +107,7 @@ class	controllerLanguages extends CController
 		
 		$modelCondition = new CModelCondition();
 
-		$this -> m_pModel -> load($_sqlConnection, $modelCondition);	
+		$this -> m_pModel -> load($_pDatabase, $modelCondition);	
 		$this -> setView(	
 						'index',	
 						'',
@@ -123,7 +120,7 @@ class	controllerLanguages extends CController
 	}
 
 	private function
-	logicCreate(&$_sqlConnection, $_isXHRequest)
+	logicCreate(CDatabaseConnection &$_pDatabase, $_isXHRequest)
 	{
 		if($_isXHRequest !== false)
 		{
@@ -149,7 +146,7 @@ class	controllerLanguages extends CController
 			if(!$_bValidationErr)	// Validation OK (by pre check)
 			{		
 
-				if(!$this -> m_pModel -> isUnique($_sqlConnection, ['lang_key' => $_aFormData['lang_key']]))
+				if(!$this -> m_pModel -> isUnique($_pDatabase, ['lang_key' => $_aFormData['lang_key']]))
 				{
 					$_bValidationMsg .= CLanguage::get() -> string('M_BERMADDR_MSG_DENIEDEXIST');
 					$_bValidationErr = true;
@@ -174,7 +171,7 @@ class	controllerLanguages extends CController
 
 				$dataId = 0;
 
-				if($this -> m_pModel -> insert($_sqlConnection, $_aFormData, $dataId))
+				if($this -> m_pModel -> insert($_pDatabase, $_aFormData, $dataId))
 				{
 					$_bValidationMsg = CLanguage::get() -> string('M_BELANG_BEENCREATED') .' - '. CLanguage::get() -> string('WAIT_FOR_REDIRECT');
 					$_bValidationDta['redirect'] = CMS_SERVER_URL_BACKEND . CPageRequest::instance() -> urlPath .'language/'.$_aFormData['lang_key'];
@@ -184,12 +181,12 @@ class	controllerLanguages extends CController
 					if(intval($_aFormData['lang_default']) === 1)
 					{
 						$modelCondition = new CModelCondition();
-						$modelCondition -> whereNot('lang_key', $_pURLVariables -> getValue("cms-system-id"));
+						$modelCondition -> whereNot('lang_key', $_aFormData['lang_key']);
 
 						$_aFormData = [];
 						$_aFormData['lang_default'] = 0;
 
-						$this -> m_pModel -> update($_sqlConnection, $_aFormData, $modelCondition);
+						$this -> m_pModel -> update($_pDatabase, $_aFormData, $modelCondition);
 					}
 
 					$rootPage = [];
@@ -206,16 +203,16 @@ class	controllerLanguages extends CController
 					$nodeId = 0;
 
 					$modelPage  = new modelPage();
-					$modelPage -> insert($_sqlConnection, $rootPage, $nodeId);
+					$modelPage -> insert($_pDatabase, $rootPage, $nodeId);
 
 					## Update .htacces and sitemap.xml
 
 					$_pHTAccess  = new CHTAccess();
-					$_pHTAccess -> generatePart4Frontend($_sqlConnection);
+					$_pHTAccess -> generatePart4Frontend($_pDatabase);
 					$_pHTAccess -> writeHTAccess();
 
 					$sitemap  	 = new CXMLSitemap();
-					$sitemap 	-> generate($_sqlConnection);
+					$sitemap 	-> generate($_pDatabase);
 				}
 				else
 				{
@@ -236,30 +233,27 @@ class	controllerLanguages extends CController
 	}
 
 	private function
-	logicView(&$_sqlConnection, $_isXHRequest = false, $_enableEdit = false, $_enableDelete = false)
-	{	
-		$_pURLVariables	 =	new CURLVariables();
-		$_request		 =	[];
-		$_request[] 	 = 	[	"input" => "cms-system-id",  	"validate" => "strip_tags|!empty" ,	"use_default" => true, "default_value" => false ]; 		
-		$_pURLVariables -> retrieve($_request, true, false); // POST 
+	logicView(CDatabaseConnection &$_pDatabase, $_isXHRequest = false, $_enableEdit = false, $_enableDelete = false)
+	{
+		$systemId = $this -> querySystemId();
 
-		if($_pURLVariables -> getValue("cms-system-id") !== false)
+		if($systemId !== false)
 		{	
 			$modelCondition = new CModelCondition();
-			$modelCondition -> where('lang_key', $_pURLVariables -> getValue("cms-system-id"));
+			$modelCondition -> where('lang_key', $systemId);
 
-			if($this -> m_pModel -> load($_sqlConnection, $modelCondition))
+			if($this -> m_pModel -> load($_pDatabase, $modelCondition))
 			{ 
 				##	Gathering additional data
 
-				$_crumbName	 = $this -> m_pModel -> searchValue($_pURLVariables -> getValue("cms-system-id"),'lang_key','lang_name');
+				$_crumbName	 = $this -> m_pModel -> getResultItem('lang_key', $systemId, 'lang_name');
 
 				$this -> setCrumbData('edit', $_crumbName, true);
 				$this -> setView(
 								'edit',
-								'language/'. $_pURLVariables -> getValue("cms-system-id"),								
+								'language/'. $systemId,								
 								[
-									'languagesList' 	=> $this -> m_pModel -> getDataInstance(),
+									'languagesList' 	=> $this -> m_pModel -> getResult(),
 									'enableEdit'	=> $_enableEdit,
 									'enableDelete'	=> $_enableDelete
 								]								
@@ -273,14 +267,11 @@ class	controllerLanguages extends CController
 	}
 
 	private function
-	logicEdit(&$_sqlConnection, $_isXHRequest = false)
-	{	
-		$_pURLVariables	 =	new CURLVariables();
-		$_request		 =	[];
-		$_request[] 	 = 	[	"input" => "cms-system-id",  	"validate" => "strip_tags|!empty" ,	"use_default" => true, "default_value" => false ]; 		
-		$_pURLVariables -> retrieve($_request, true, false); // POST 
+	logicEdit(CDatabaseConnection &$_pDatabase, $_isXHRequest = false)
+	{
+		$systemId = $this -> querySystemId();
 
-		if($_pURLVariables -> getValue("cms-system-id") !== false && $_isXHRequest !== false)
+		if($systemId !== false && $_isXHRequest !== false)
 		{	
 			$_bValidationErr =	false;
 			$_bValidationMsg =	'';
@@ -322,9 +313,9 @@ class	controllerLanguages extends CController
 												$_aFormData['update_time'] 	= time();
 
 												$modelCondition = new CModelCondition();
-												$modelCondition -> where('lang_key', $_pURLVariables -> getValue("cms-system-id"));
+												$modelCondition -> where('lang_key', $systemId);
 												
-												if($this -> m_pModel -> update($_sqlConnection, $_aFormData, $modelCondition))
+												if($this -> m_pModel -> update($_pDatabase, $_aFormData, $modelCondition))
 												{
 													$_bValidationMsg = CLanguage::get() -> string('LANGUAGE') .' '. CLanguage::get() -> string('WAS_UPDATED');
 
@@ -333,22 +324,22 @@ class	controllerLanguages extends CController
 													if(isset($_aFormData['lang_default']) && intval($_aFormData['lang_default']) === 1)
 													{
 														$modelCondition = new CModelCondition();
-														$modelCondition -> whereNot('lang_key', $_pURLVariables -> getValue("cms-system-id"));
+														$modelCondition -> whereNot('lang_key', $systemId);
 
 														$_aFormData = [];
 														$_aFormData['lang_default'] = 0;
 
-														$this -> m_pModel -> update($_sqlConnection, $_aFormData, $modelCondition);
+														$this -> m_pModel -> update($_pDatabase, $_aFormData, $modelCondition);
 													}
 
 													## Update .htacces and sitemap.xml
 
 													$_pHTAccess  = new CHTAccess();
-													$_pHTAccess -> generatePart4Frontend($_sqlConnection);
+													$_pHTAccess -> generatePart4Frontend($_pDatabase);
 													$_pHTAccess -> writeHTAccess();
 
 													$sitemap  	 = new CXMLSitemap();
-													$sitemap 	-> generate($_sqlConnection);
+													$sitemap 	-> generate($_pDatabase);
 												}
 												else
 												{
@@ -372,14 +363,11 @@ class	controllerLanguages extends CController
 	}
 
 	private function
-	logicDelete(&$_sqlConnection, $_isXHRequest = false)
-	{	
-		$_pURLVariables	 =	new CURLVariables();
-		$_request		 =	[];
-		$_request[] 	 = 	[	"input" => "cms-system-id",  	"validate" => "strip_tags|!empty" ,	"use_default" => true, "default_value" => false ]; 		
-		$_pURLVariables -> retrieve($_request, true, false); // POST 
+	logicDelete(CDatabaseConnection &$_pDatabase, $_isXHRequest = false)
+	{
+		$systemId = $this -> querySystemId();
 
-		if($_pURLVariables -> getValue("cms-system-id") !== false && $_isXHRequest !== false)
+		if($systemId !== false && $_isXHRequest !== false)
 		{	
 			$_bValidationErr =	false;
 			$_bValidationMsg =	'';
@@ -390,32 +378,56 @@ class	controllerLanguages extends CController
 				case 'delete':	//	Delete
 
 									$modelCondition = new CModelCondition();
-									$modelCondition -> where('lang_key', $_pURLVariables -> getValue("cms-system-id"));
+									$modelCondition -> where('lang_key', $systemId);
 
-									if($this -> m_pModel -> delete($_sqlConnection, $modelCondition))
+									if($this -> m_pModel -> delete($_pDatabase, $modelCondition))
 									{
 										$_bValidationMsg = CLanguage::get() -> string('M_BELANG_BEENDELETED') .' - '. CLanguage::get() -> string('WAIT_FOR_REDIRECT');
 										$_bValidationDta['redirect'] = CMS_SERVER_URL_BACKEND . CPageRequest::instance() -> urlPath;
 
 										##	Delete Pages
 
-										$sqlRootNodeRes	= $_sqlConnection -> query("SELECT node_id FROM tb_page_header WHERE page_language = '". $_pURLVariables -> getValue("cms-system-id") ."'");
-										$sqlRootNodeItm = $sqlRootNodeRes -> fetch_assoc();
+										#$sqlRootNodeRes	= $_pDatabase -> query("SELECT node_id FROM tb_page_header WHERE page_language = '". $systemId ."'");
+										#$sqlRootNodeItm = $sqlRootNodeRes -> fetch_assoc();
 
-										$modelCondition = new CModelCondition();
-										$modelCondition -> where('node_id', $sqlRootNodeItm['node_id']);
 
-										$modelPage  = new modelPage();
-										$modelPage -> deleteTree($_sqlConnection, $modelCondition);
 
-										## Update .htacces and sitemap.xml
 
-										$_pHTAccess  = new CHTAccess();
-										$_pHTAccess -> generatePart4Frontend($_sqlConnection);
-										$_pHTAccess -> writeHTAccess();
+										$pageHeaderCondition		 = new CModelCondition();
+										$pageHeaderCondition		-> where('page_language', $systemId)
+																	-> limit(1);
 
-										$sitemap  	 = new CXMLSitemap();
-										$sitemap 	-> generate($_sqlConnection);
+
+										$dbQuery 	= $_pDatabase		-> query(DB_SELECT) 
+																		-> table('tb_page_header') 
+																		-> selectColumns(['node_id'])
+																		-> condition($pageHeaderCondition);
+
+										$pageHeaderRes = $dbQuery -> exec();
+
+										if($pageHeaderRes !== false && count($pageHeaderRes) !== 0)
+										{
+
+
+											$pageHeaderItm = $pageHeaderRes[0];
+
+
+											$modelCondition = new CModelCondition();
+											$modelCondition -> where('node_id', $pageHeaderItm -> node_id);
+
+											$modelPage  = new modelPage();
+											$modelPage -> deleteTree($_pDatabase, $modelCondition);
+
+											## Update .htacces and sitemap.xml
+
+											$_pHTAccess  = new CHTAccess();
+											$_pHTAccess -> generatePart4Frontend($_pDatabase);
+											$_pHTAccess -> writeHTAccess();
+
+											$sitemap  	 = new CXMLSitemap();
+											$sitemap 	-> generate($_pDatabase);
+
+										}
 
 									}
 									else

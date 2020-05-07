@@ -5,33 +5,28 @@ class shemePageObject extends CSheme
 	public function
 	__construct()
 	{
-		parent::__construct();		
-
-		$this -> setTable('tb_page_object');
+		parent::__construct('tb_page_object');
 		
-		$this -> addColumn('object_id', 'int') -> setKey('PRIMARY') -> setAttribute('UNSIGNED') -> isAutoIncrement();
-		$this -> addColumn('node_id', 'int') -> setIndex('INDEX') -> setAttribute('UNSIGNED');
+		$this -> addColumn('object_id', DB_COLUMN_TYPE_INT) -> setKey('PRIMARY') -> setAttribute(DB_COLUMN_ATTR_UNSIGNED) -> setAutoIncrement();
+		$this -> addColumn('node_id', DB_COLUMN_TYPE_INT) -> setIndex('INDEX') -> setAttribute(DB_COLUMN_ATTR_UNSIGNED);
 		
-		$this -> addColumn('page_version', 'mediumint') -> setAttribute('UNSIGNED') -> setDefault('1');
-		$this -> addColumn('module_id', 'int') -> setAttribute('UNSIGNED');
-		$this -> addColumn('content_id', 'string') -> setLength(25) -> setDefault('1');
-		$this -> addColumn('object_order_by', 'mediumint') -> setAttribute('UNSIGNED');	
+		$this -> addColumn('page_version', DB_COLUMN_TYPE_MEDIUMINT) -> setAttribute(DB_COLUMN_ATTR_UNSIGNED) -> setDefault('1');
+		$this -> addColumn('module_id', DB_COLUMN_TYPE_INT) -> setAttribute(DB_COLUMN_ATTR_UNSIGNED);
+		$this -> addColumn('content_id', DB_COLUMN_TYPE_STRING) -> setLength(25) -> setDefault('1');
+		$this -> addColumn('object_order_by', DB_COLUMN_TYPE_MEDIUMINT) -> setAttribute(DB_COLUMN_ATTR_UNSIGNED);	
 			
-		$this -> addColumn('update_reason', 'string') -> setLength(250) -> setDefault('NULL');
+		$this -> addColumn('update_reason', DB_COLUMN_TYPE_STRING) -> setLength(250) -> setDefault('NULL');
 		
+		$this -> addColumn('create_time', DB_COLUMN_TYPE_BIGINT) -> setAttribute(DB_COLUMN_ATTR_UNSIGNED);
+		$this -> addColumn('create_by', DB_COLUMN_TYPE_STRING) -> setLength(25);
+		$this -> addColumn('update_time', DB_COLUMN_TYPE_BIGINT) -> setAttribute(DB_COLUMN_ATTR_UNSIGNED) -> setDefault('0');
+		$this -> addColumn('update_by', DB_COLUMN_TYPE_STRING) -> setLength(25) -> setDefault('NULL');
 
-		$this -> addColumn('create_time', 'bigint') -> setAttribute('UNSIGNED');
-		$this -> addColumn('create_by', 'string') -> setLength(25);
-		$this -> addColumn('update_time', 'bigint') -> setAttribute('UNSIGNED') -> setDefault('0');
-		$this -> addColumn('update_by', 'string') -> setLength(25) -> setDefault('NULL');
-
-
-		$this -> addColumn('instance', 'int') -> isVirtual();
-		$this -> addColumn('body', 'string') -> isVirtual();
-		$this -> addColumn('params'	, 'array') -> isVirtual();
+		$this -> addColumn('instance', DB_COLUMN_TYPE_INT) -> setVirtual();
+		$this -> addColumn('body', DB_COLUMN_TYPE_STRING) -> setVirtual();
+		$this -> addColumn('params'	, 0) -> setVirtual();
 
 		$this -> addConstraing('object_node_id', 'node_id', 'tb_page', 'node_id', 'CASCADE', 'CASCADE');
-
 	}
 }
 

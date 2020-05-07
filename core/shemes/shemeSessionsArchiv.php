@@ -5,8 +5,7 @@ class shemeSessions extends CSheme
 	public function
 	__construct()
 	{
-		parent::__construct('tb_sessions');		
-
+		parent::__construct('tb_sessions_archiv');		
 		
 		$this -> addColumn('data_id', DB_COLUMN_TYPE_INT) -> setKey('PRIMARY') -> setAttribute(DB_COLUMN_ATTR_UNSIGNED) -> setAutoIncrement();
 

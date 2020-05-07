@@ -7,8 +7,7 @@ class 	modelSimple extends CModel
 	public function
 	__construct()
 	{		
-		parent::__construct('simple');		
-		$this -> m_sheme = new shemeSimple();
+		parent::__construct('shemeSimple', 'simple');
 	}
 }
 

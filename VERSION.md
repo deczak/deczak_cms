@@ -10,6 +10,17 @@ The version number is the release date. A letter as suffix indicates fixes on sa
 
 ## Version history	 
 
+### 20200507
+
+**Changes**
+- Switched from myslqi to pdo, still only mysql as supported DB. Old mysqli connection class removed.
+- Created a wrapper for all database calls, some modules/classes are still on todo for this wrapper.
+- Refactored model system for the new wrapper.
+
+**Notes**
+- Maybe some parts still broken
+
+
 ### 20200414
 
 **Modules**

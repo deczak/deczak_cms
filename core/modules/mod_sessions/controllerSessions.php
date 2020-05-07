@@ -16,7 +16,7 @@ class	controllerSessions extends CController
 	}
 	
 	public function
-	logic(&$_sqlConnection, array $_rcaTarget, $_isXHRequest)
+	logic(CDatabaseConnection &$_pDatabase, array $_rcaTarget, $_isXHRequest)
 	{
 		##	Set default target if not exists
 
@@ -47,52 +47,34 @@ class	controllerSessions extends CController
 		$_logicResults = false;
 		switch($_controllerAction)
 		{
-			case 'view'		: $_logicResults = $this -> logicView(	$_sqlConnection, $_isXHRequest, $enableEdit, $enableDelete);	break;
-			case 'delete'	: $_logicResults = $this -> logicDelete($_sqlConnection, $_isXHRequest);	break;	
+			case 'view'		: $_logicResults = $this -> logicView(	$_pDatabase, $_isXHRequest, $enableEdit, $enableDelete);	break;
+			case 'delete'	: $_logicResults = $this -> logicDelete($_pDatabase, $_isXHRequest);	break;	
 		}
 
 		if(!$_logicResults)
 		{
 			##	Default View
-			$this -> logicIndex($_sqlConnection, $enableEdit, $enableDelete);	
+			$this -> logicIndex($_pDatabase, $enableEdit, $enableDelete);	
 		}
 	}
 
 	private function
-	logicIndex(&$_sqlConnection, $_enableEdit = false, $_enableDelete = false)
+	logicIndex(CDatabaseConnection &$_pDatabase, $_enableEdit = false, $_enableDelete = false)
 	{
-		$conditionPages		 = new CModelCondition();
-		$conditionPages		-> where('tb_page_header.node_id', 'tb_sessions_access.node_id');
-
-		$modelSessionsAccess = new modelSessionsAccess();
-		$modelSessionsAccess-> addSelectColumns('tb_sessions_access.*','tb_page_header.page_title');
-		$modelSessionsAccess-> addRelation('left join', 'tb_page_header', $conditionPages);
-
-		$modelSACondition  	 = new CModelCondition();
-		$modelSACondition	-> groupBy('session_id') 
-							-> groupBy('node_id');
-
-		$modelSessionsAccess-> load($_sqlConnection, $modelSACondition);
-
-		##
-		
-		$modelComplementary	 = new CModelComplementary();
-		$modelComplementary	-> addComplemantary('pages','session_id', $modelSessionsAccess -> getDataInstance());
-
 		$modelCondition  	 = new CModelCondition();
 		$modelCondition		-> orderBy('time_create', 'DESC');
 
-		$this -> m_pModel 	-> load($_sqlConnection, $modelCondition, $modelComplementary);	
+		$this -> m_pModel 	-> load($_pDatabase, $modelCondition, MODEL_SESSIONS_APPEND_ACCESS_DATA);	
 
 		$modelUserAgent	 	 = new modelUserAgent();
-		$modelUserAgent		-> load($_sqlConnection);
+		$modelUserAgent		-> load($_pDatabase);
 
 		$this -> setView(	
 						'index',	
 						'',
 						[
-							'sessionList' 	=> $this -> m_pModel -> getDataInstance(),
-							'agentsList' 	=> $modelUserAgent -> getDataInstance(),
+							'sessionList' 	=> $this -> m_pModel -> getResult(),
+							'agentsList' 	=> $modelUserAgent -> getResult(),
 							'enableEdit'	=> $_enableEdit,
 							'enableDelete'	=> $_enableDelete
 						]
@@ -100,54 +82,36 @@ class	controllerSessions extends CController
 	}
 
 	private function
-	logicCreate(&$_sqlConnection, $_isXHRequest)
+	logicCreate(CDatabaseConnection &$_pDatabase, $_isXHRequest)
 	{
 	}
 
 	private function
-	logicView(&$_sqlConnection, $_isXHRequest = false, $_enableEdit = false, $_enableDelete = false)
+	logicView(CDatabaseConnection &$_pDatabase, $_isXHRequest = false, $_enableEdit = false, $_enableDelete = false)
 	{	
 
-		$_pURLVariables	 =	new CURLVariables();
-		$_request		 =	[];
-		$_request[] 	 = 	[	"input" => "cms-system-id",  	"validate" => "strip_tags|!empty" ,	"use_default" => true, "default_value" => false ]; 		
-		$_pURLVariables -> retrieve($_request, true, false); // POST 
+		$systemId = $this -> querySystemId();
+
+		if($systemId !== false)
+		{
 	
-		if($_pURLVariables -> getValue("cms-system-id") !== false)
-		{	
 			$modelCondition = new CModelCondition();
-			$modelCondition -> where('data_id', $_pURLVariables -> getValue("cms-system-id"));
+			$modelCondition -> where('data_id', $systemId);
 
-			$modelSACondition  		 = new CModelCondition();
-			$modelSACondition	#	-> groupBy('session_id') 
-								#	-> groupBy('node_id')
-									-> orderBy('time_access');
 
-			$conditionPages = new CModelCondition();
-			$conditionPages -> where('tb_page_header.node_id', 'tb_sessions_access.node_id');
 
-			$modelSessionsAccess	 = new modelSessionsAccess();
-
-			$modelSessionsAccess -> addSelectColumns('tb_sessions_access.*','tb_page_header.page_title');
-			$modelSessionsAccess -> addRelation('left join', 'tb_page_header', $conditionPages);
-
-			$modelSessionsAccess	-> load($_sqlConnection, $modelSACondition);
-
-			$modelComplementary		 = new CModelComplementary();
-			$modelComplementary		-> addComplemantary('pages','session_id', $modelSessionsAccess -> getDataInstance());
-
-			if($this -> m_pModel -> load($_sqlConnection, $modelCondition, $modelComplementary))
+			if($this -> m_pModel -> load($_pDatabase, $modelCondition, MODEL_SESSIONS_APPEND_ACCESS_DATA))
 			{
 				##	Gathering additional data
 
-				$_crumbName	 = $this -> m_pModel -> searchValue(intval($_pURLVariables -> getValue("cms-system-id")),'data_id','user_ip');
+				$_crumbName	 = $this -> m_pModel -> getResultItem('data_id', intval($systemId),'user_ip');
 
-				$this -> setCrumbData('view', $_pURLVariables -> getValue("cms-system-id") .' ('. $_crumbName .')', true);
+				$this -> setCrumbData('view', $systemId .' ('. $_crumbName .')', true);
 				$this -> setView(
 								'view',
-								'session/'. $_pURLVariables -> getValue("cms-system-id"),								
+								'session/'. $systemId,								
 								[
-									'sessionList' 	=> $this -> m_pModel -> getDataInstance(),
+									'sessionList' 	=> $this -> m_pModel -> getResult(),
 									'enableEdit'	=> $_enableEdit,
 									'enableDelete'	=> $_enableDelete
 								]								
@@ -161,19 +125,16 @@ class	controllerSessions extends CController
 	}
 
 	private function
-	logicEdit(&$_sqlConnection, $_isXHRequest = false)
+	logicEdit(CDatabaseConnection &$_pDatabase, $_isXHRequest = false)
 	{	
 	}
 
 	private function
-	logicDelete(&$_sqlConnection, $_isXHRequest = false)
+	logicDelete(CDatabaseConnection &$_pDatabase, $_isXHRequest = false)
 	{	
-		$_pURLVariables	 =	new CURLVariables();
-		$_request		 =	[];
-		$_request[] 	 = 	[	"input" => "cms-system-id",  	"validate" => "strip_tags|!empty" ,	"use_default" => true, "default_value" => false ]; 		
-		$_pURLVariables -> retrieve($_request, true, false); // POST 
+		$systemId = $this -> querySystemId();
 
-		if($_pURLVariables -> getValue("cms-system-id") !== false)
+		if($systemId !== false)
 		{	
 			##	XHR Function call
 
@@ -189,16 +150,16 @@ class	controllerSessions extends CController
 
 
 										$modelCondition = new CModelCondition();
-										$modelCondition -> where('data_id', $_pURLVariables -> getValue("cms-system-id"));
+										$modelCondition -> where('data_id', $systemId);
 
 
-										if($this -> m_pModel -> delete($_sqlConnection, $modelCondition))
+										if($this -> m_pModel -> delete($_pDatabase, $modelCondition))
 										{
 											$_bValidationMsg = CLanguage::get() -> string('SESSION WAS_DELETED') .' - '. CLanguage::get() -> string('WAIT_FOR_REDIRECT');
 											$_bValidationDta['redirect'] = CMS_SERVER_URL_BACKEND . CPageRequest::instance() -> urlPath;
 
 											$_pHTAccess  = new CHTAccess();
-											$_pHTAccess -> generatePart4DeniedAddress($_sqlConnection);
+											$_pHTAccess -> generatePart4DeniedAddress($_pDatabase);
 											$_pHTAccess -> writeHTAccess();
 
 										}

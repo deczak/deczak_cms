@@ -13,17 +13,18 @@ class	CModules extends CSingleton
 	private $m_pUserRights;
 
 	public function
-	init(&$_sqlConnection, CUserRights &$_pUserRights)
+	initialize(CDatabaseConnection &$_dbConnection, CUserRights &$_pUserRights)
 	{
-		if($_sqlConnection === false)
+		if($_dbConnection === null)
 			return; 
+
 		$this -> modelModules	 =	new modelModules();
-		$this -> modelModules	->	load($_sqlConnection);
-		$this -> modulesList 	 =	$this -> modelModules -> getDataInstance();
+		$this -> modelModules	->	load($_dbConnection);
+		$this -> modulesList 	 =	&$this -> modelModules -> getResult();
 
 		$this -> loadedList		 =	[];
 
-		$this -> m_pUserRights	 = $_pUserRights;
+		$this -> m_pUserRights	 = &$_pUserRights;
 	}
 
 	/**
@@ -287,7 +288,7 @@ class	CModules extends CSingleton
 	}
 
 	public function
-	install(&$_sqlConnection, $moduleLocation, $moduleType, &$errorMsg)
+	install(CDatabaseConnection &$_dbConnection, $moduleLocation, $moduleType, &$errorMsg)
 	{
 		// Read module.json
 
@@ -335,17 +336,16 @@ class	CModules extends CSingleton
 							'module_extends_by' => $moduleConfig -> module_controller
 							];
 
-			$modelModules -> update($_sqlConnection, $updateParent, $parentCondition);
+			$modelModules -> update($_dbConnection, $updateParent, $parentCondition);
 
 		}
 
 
 
-		$moduleId		= 0;
 
-		$modelModules -> insert($_sqlConnection, $moduleData, $moduleId);
+		
 
-		$moduleData['module_id'] = $moduleId;
+		$moduleData['module_id'] = $modelModules -> insert($_sqlConnection, $moduleData);
 		
 		//	Create module Tables
 
@@ -364,7 +364,7 @@ class	CModules extends CSingleton
 				
 				$sheme  = new $shemeItem -> filename();
 
-				if(!$sheme -> createTable($_sqlConnection, $errorMsg))
+				if(!$sheme -> createTable($_dbConnection, $errorMsg))
 				{
 					return false;
 				}
@@ -392,7 +392,7 @@ class	CModules extends CSingleton
 										"menu_order"		=> "0",
 										"objects"			=> [
 																	[
-																		"module_id"	=> strval($moduleId),
+																		"module_id"	=> strval($moduleData['module_id']),
 																		"object_id"	=> "0",     					
 																		"body"		=> "",
 																		"params"	=> ""
@@ -410,11 +410,11 @@ class	CModules extends CSingleton
 
 			file_put_contents($backendObjFilepath, $backendObjectId);
 
-			$this -> modelModules	->	load($_sqlConnection);
-			$this -> modulesList 	 =	$this -> modelModules -> getDataInstance();
+			$this -> modelModules	->	load($_dbConnection);
+			$this -> modulesList 	 =	$this -> modelModules -> getREsult();
 
 			$_pHTAccess  = new CHTAccess();
-			$_pHTAccess -> generatePart4Backend($_sqlConnection);
+			$_pHTAccess -> generatePart4Backend($_dbConnection);
 			$_pHTAccess -> writeHTAccess();
 		}
 
@@ -422,7 +422,7 @@ class	CModules extends CSingleton
 	}
 
 	public function
-	uninstall(&$_sqlConnection, $_moduleId)
+	uninstall(CDatabaseConnection &$_dbConnection, $_moduleId)
 	{
 		##	Get module data from db
 
@@ -430,9 +430,9 @@ class	CModules extends CSingleton
 		$modelCondition	-> where('module_id', $_moduleId);
 
 		$modelModules	 = new modelModules();
-		$modelModules 	-> load($_sqlConnection, $modelCondition);	
+		$modelModules 	-> load($_dbConnection, $modelCondition);	
 
-		$moduleData		 = $modelModules -> getDataInstance()[0];
+		$moduleData		 = $modelModules -> getResult()[0];
 
 		if(empty($moduleData))
 			return false;
@@ -487,11 +487,11 @@ class	CModules extends CSingleton
 				
 				$sheme  = new $shemeItem -> filename();
 
-				$sheme -> dropTable($_sqlConnection);
+				$sheme -> dropTable($_dbConnection);
 			}
 		}
 
-		$modelModules -> delete($_sqlConnection, $modelCondition);	
+		$modelModules -> delete($_dbConnection, $modelCondition);	
 
 
 		//	Remote extends_by if set
@@ -507,7 +507,7 @@ class	CModules extends CSingleton
 							'module_extends_by' => ''
 							];
 
-			$modelModules -> update($_sqlConnection, $updateParent, $parentCondition);
+			$modelModules -> update($_dbConnection, $updateParent, $parentCondition);
 		}		
 	}
 

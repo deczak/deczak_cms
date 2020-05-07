@@ -4,25 +4,25 @@ require_once 'CBasic.php';
 
 class	CImperator extends CBasic
 {
-	private	$m_sqlConnection;
+	private	$m_dbConnection;
 
 	private $m_pUserRights;
 
 	private $m_pDirector;
 
 	public function
-	__construct(&$_sqlConnection)
+	__construct(CDatabaseConnection &$_pDatabase)
 	{
 		parent::__construct();
 
-		$this -> m_sqlConnection 	= &$_sqlConnection;
+		$this -> m_dbConnection 	= &$_pDatabase;
 
 		$this -> m_pDirector		= new CDirector;
 	}
 
 
 	public function
-	logic(&$_sqlConnection, &$_pPageRequest, $_modules, array $_rcaTarget, bool $_isBackendMode, CUserRights &$_pUserRights)
+	logic(CDatabaseConnection &$_pDatabase, &$_pPageRequest, $_modules, array $_rcaTarget, bool $_isBackendMode, CUserRights &$_pUserRights)
 	{
 		if($_isBackendMode)
 		{
@@ -34,7 +34,7 @@ class	CImperator extends CBasic
 
 				$pageRequest = CPageRequest::instance();
 
-				$_pPageRequest -> init($_sqlConnection, $_pPageRequest -> node_id, $_pPageRequest -> page_language, $_pPageRequest -> page_version, $_pPageRequest -> xhRequest);
+				$_pPageRequest -> init($_pDatabase, $_pPageRequest -> node_id, $_pPageRequest -> page_language, $_pPageRequest -> page_version, $_pPageRequest -> xhRequest);
 
 				$_pPageRequest -> enablePageEdit = ((!empty($pageRequest -> languageInfo) && !$pageRequest -> languageInfo -> lang_locked) ? $_pPageRequest -> enablePageEdit : false);
 				
@@ -68,7 +68,7 @@ class	CImperator extends CBasic
 
 			$_pPageRequest -> objectsList[$_objectIndex] -> instance	 = 	new $module -> module_controller($module, $_object);
 			$_pPageRequest -> objectsList[$_objectIndex] -> instance	->	logic(
-																				$this -> m_sqlConnection, 
+																				$this -> m_dbConnection, 
 																				$_rcaTarget,
 																				$_pPageRequest -> xhRequest, 
 																				$_logicResult, 
@@ -141,19 +141,27 @@ class	CImperator extends CBasic
 										'create_time'		=>	time(),
 										'create_by'			=>	CSession::instance() -> getValue('user_id')
 									];
-
-					$objectId = 0;				
+			
 
 					$_objectModel  = new modelPageObject();
-					$_objectModel -> insert($this -> m_sqlConnection, $_initObj, $objectId);
-					$objectData	   = $_objectModel -> getDataInstance();
-					$objectData	   = current($objectData);
-					$objectData -> object_id = $objectId;
+					$_initObj['object_id'] = $_objectModel -> insert($this -> m_dbConnection, $_initObj);
+					//$objectData	   = $_objectModel -> getResult();
+					//$objectData	   = current($objectData);
+					// = $objectId;
+
+						$objectData = new stdClass();
+						foreach ($_initObj as $key => $value)
+						{
+							$objectData -> $key = $value;
+						}
+
+// insert liefert die id zurück, nicht das result object
+
 
 					$_logicResult 	  = [];
 					$_objectInstance  = new $module -> module_controller($module, $objectData);
 					$_objectInstance -> logic(
-												$this -> m_sqlConnection, 
+												$this -> m_dbConnection, 
 												[ $objectData -> object_id => 'create' ],
 												$_pPageRequest -> xhRequest, 
 												$_logicResult, 
@@ -189,7 +197,7 @@ class	CImperator extends CBasic
 					$modelCondition -> where('node_id', $_pageNodeID);
 					$modelCondition -> where('object_id', $_objectID);
 					
-					$_objectModel -> update($this -> m_sqlConnection, $_updateSet, $modelCondition);					
+					$_objectModel -> update($this -> m_dbConnection, $_updateSet, $modelCondition);					
 				}
 
 				tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $_bValidationDta);	// contains exit call
@@ -216,7 +224,7 @@ class	CImperator extends CBasic
 
 			$_logicResult =	false;
 			$_pPageRequest -> objectsList[$_objectKey] -> instance 	 = 	new $module -> module_controller($module, $_object);
-			$_pPageRequest -> objectsList[$_objectKey] -> instance	->	logic($this -> m_sqlConnection, $_rcaTarget, $_pPageRequest -> xhRequest, $_logicResult, false);
+			$_pPageRequest -> objectsList[$_objectKey] -> instance	->	logic($this -> m_dbConnection, $_rcaTarget, $_pPageRequest -> xhRequest, $_logicResult, false);
 
 			if($_logicResult !== false && $_logicResult['state'] === 1)
 			{	## 	This means exit function and recall imperator public logic
@@ -244,10 +252,8 @@ class	CImperator extends CBasic
 	public function
 	view(string $_viewId = '')
 	{
-
 		$_viewId = $this -> m_pDirector -> register($_viewId);
 		$this -> m_pDirector -> view($_viewId, $this -> pageRequest, $this -> m_pUserRights);
-
 	}
 }
 

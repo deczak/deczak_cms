@@ -26,7 +26,7 @@ class	CHTAccess
 	}
 
 	public function
-	generatePart4Backend(&$_sqlConnection)
+	generatePart4Backend(CDatabaseConnection &$_pDatabase)
 	{
 		$_targetFile = '2-backend';
 
@@ -176,7 +176,7 @@ class	CHTAccess
 	}
 
 	public function
-	generatePart4Frontend(&$_sqlConnection)
+	generatePart4Frontend(CDatabaseConnection &$_pDatabase)
 	{
 		$_targetFile = '3-frontend';
 
@@ -200,7 +200,7 @@ class	CHTAccess
 
 			##	Read pages from sql and write it to file
 
-			CLanguage::instance() -> initialize($_sqlConnection);
+			CLanguage::instance() -> initialize($_pDatabase);
 
 			$supportedLanguages = CLanguage::instance() -> getLanguages();
 			
@@ -219,9 +219,9 @@ class	CHTAccess
 				$modelCondition -> where('page_path', '/');		
 
 				$_pSitemap 	 = new modelSitemap();
-				$_pSitemap	-> load($_sqlConnection, $modelCondition);
+				$_pSitemap	-> load($_pDatabase, $modelCondition);
 
-				$_sitemap	= $_pSitemap	-> getDataInstance();
+				$_sitemap	= $_pSitemap	-> getResult();
 
 				for($i = count($_sitemap) - 1; $i >= 0; $i--)
 				{
@@ -273,7 +273,7 @@ class	CHTAccess
 	}
 
 	public function
-	generatePart4DeniedAddress(&$_sqlConnection)
+	generatePart4DeniedAddress(CDatabaseConnection &$_pDatabase)
 	{
 		$_targetFile = '0-denied';
 
@@ -288,9 +288,9 @@ class	CHTAccess
 			fwrite($_hFile, "\r\n");
 
 			$modelDeniedRemote 	 = new modelDeniedRemote();
-			$modelDeniedRemote	-> load($_sqlConnection);
+			$modelDeniedRemote	-> load($_pDatabase);
 
-			$deniedList			 = $modelDeniedRemote -> getDataInstance();
+			$deniedList			 = $modelDeniedRemote -> getResult();
 
 			if(is_array($deniedList)) // workaround weil kein array wenn leer (?)
 			{

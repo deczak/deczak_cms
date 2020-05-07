@@ -52,8 +52,9 @@ class	TK
 	}
 
 	public static function
-	getBackendUserName(&$_sqlConnection,string $_userId)
+	getBackendUserName(CDatabaseConnection &$_pDatabase, string $_userId)
 	{
+
 		require_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelUsersBackend.php';
 		require_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelUsersRegister.php';	
 
@@ -61,12 +62,12 @@ class	TK
 		$registerCondition 	-> where('user_id', $_userId);
 		$registerCondition 	-> groupBy('user_id');
 		$modelUsersRegister	 = new modelUsersRegister();
-		$modelUsersRegister -> load($_sqlConnection, $registerCondition);
+		$modelUsersRegister -> load($_pDatabase, $registerCondition);
 
-		if(empty($modelUsersRegister -> getDataInstance()))
+		if(empty($modelUsersRegister -> getResult()))
 			return '';
 
-		$registerData = $modelUsersRegister -> getDataInstance()[0];
+		$registerData = $modelUsersRegister -> getResult()[0];
 
 		switch($registerData -> user_type)
 		{
@@ -75,12 +76,12 @@ class	TK
 					$backendCondition	 = new CModelCondition();
 					$backendCondition 	-> where('user_id', strval($_userId));
 					$modelUsersBackend 	 = new modelUsersBackend();
-					$modelUsersBackend 	-> load($_sqlConnection, $modelCondition);
+					$modelUsersBackend 	-> load($_pDatabase, $modelCondition);
 
-					if(empty($modelUsersBackend -> getDataInstance()))
+					if(empty($modelUsersBackend -> getResult()))
 						return '';
 
-					$user = $modelUsersBackend -> getDataInstance()[0];
+					$user = $modelUsersBackend -> getResult()[0];
 					return $user -> user_name_first .' '. $user -> user_name_last;
 
 			case 3: // Remote user

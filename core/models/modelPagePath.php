@@ -1,27 +1,20 @@
 <?php
 
-include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SHEME.'shemePageObject.php';	
+include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SHEME.'shemePagePath.php';	
 
-class 	modelPageObject extends CModel
+class 	modelPagePath extends CModel
 {
 	public function
 	__construct()
 	{		
-		parent::__construct('shemePageObject', 'pageObject');	
+		parent::__construct('shemePagePath', 'pagePath');
 	}	
-
-
-	public function
-	createClass()
-	{
-		return $this -> createPrototype();
-	}
 }
 
 /**
  * 	Parent class for the data class with toolkit functions. It get the child instance to access the child properties.
 
-class 	toolkitPageObject
+class 	toolkitPagePath
 {
 	protected	$m_childInstance;
 

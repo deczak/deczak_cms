@@ -7,8 +7,7 @@ class 	modelModules extends CModel
 	public function
 	__construct()
 	{		
-		parent::__construct('modules');		
-		$this -> m_sheme = new shemeModules();
+		parent::__construct('shemeModules', 'modules');
 	}	
 }
 

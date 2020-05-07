@@ -20,7 +20,7 @@ class	controllerUsersBackend extends CController
 	}
 	
 	public function
-	logic(&$_sqlConnection, array $_rcaTarget, $_isXHRequest)
+	logic(CDatabaseConnection &$_pDatabase, array $_rcaTarget, $_isXHRequest)
 	{
 		##	Set default target if not exists
 
@@ -51,31 +51,31 @@ class	controllerUsersBackend extends CController
 		$_logicResults = false;
 		switch($_controllerAction)
 		{
-			case 'view'		: $_logicResults = $this -> logicView(	$_sqlConnection, $_isXHRequest, $enableEdit, $enableDelete);	break;
-			case 'edit'		: $_logicResults = $this -> logicEdit(	$_sqlConnection, $_isXHRequest);	break;	
-			case 'create'	: $_logicResults = $this -> logicCreate($_sqlConnection, $_isXHRequest);	break;
-			case 'delete'	: $_logicResults = $this -> logicDelete($_sqlConnection, $_isXHRequest);	break;	
+			case 'view'		: $_logicResults = $this -> logicView(	$_pDatabase, $_isXHRequest, $enableEdit, $enableDelete);	break;
+			case 'edit'		: $_logicResults = $this -> logicEdit(	$_pDatabase, $_isXHRequest);	break;	
+			case 'create'	: $_logicResults = $this -> logicCreate($_pDatabase, $_isXHRequest);	break;
+			case 'delete'	: $_logicResults = $this -> logicDelete($_pDatabase, $_isXHRequest);	break;	
 		}
 
 		if(!$_logicResults)
 		{
 			##	Default View
-			$this -> logicIndex($_sqlConnection, $enableEdit, $enableDelete);		
+			$this -> logicIndex($_pDatabase, $enableEdit, $enableDelete);		
 		}
 	}
 
 	private function
-	logicIndex(&$_sqlConnection, $_enableEdit = false, $_enableDelete = false)
+	logicIndex(CDatabaseConnection &$_pDatabase, $_enableEdit = false, $_enableDelete = false)
 	{
 		#$modelCondition = new CModelCondition();
 		#$modelCondition -> orderBy('data_id', 'DESC');
 
-		$this -> m_pModel -> load($_sqlConnection);	
+		$this -> m_pModel -> load($_pDatabase);	
 		$this -> setView(	
 						'index',	
 						'',
 						[
-							'usersList' 		=> $this -> m_pModel -> getDataInstance(),
+							'usersList' 		=> $this -> m_pModel -> getResult(),
 							'enableEdit'	=> $_enableEdit,
 							'enableDelete'	=> $_enableDelete
 						]
@@ -83,7 +83,7 @@ class	controllerUsersBackend extends CController
 	}
 
 	private function
-	logicCreate(&$_sqlConnection, $_isXHRequest)
+	logicCreate(CDatabaseConnection &$_pDatabase, $_isXHRequest)
 	{
 		if($_isXHRequest !== false)
 		{
@@ -118,7 +118,7 @@ class	controllerUsersBackend extends CController
 				$_aFormData['login_name'] 	= CRYPT::LOGIN_HASH($_aFormData['login_name']);
 
 				$modelUsersRegister	 	= new modelUsersRegister();
-				$_aFormData['user_id'] 	= $modelUsersRegister -> registerUserId($_sqlConnection, 0);
+				$_aFormData['user_id'] 	= $modelUsersRegister -> registerUserId($_pDatabase, 0);
 
 			
 
@@ -128,7 +128,7 @@ class	controllerUsersBackend extends CController
 				while(true)
 				{
 					$_aFormData['user_id']  = substr(rand(),0,10);
-					if($this -> m_pModel -> isUnique($_sqlConnection, ['user_id' => $_aFormData['user_id']]))
+					if($this -> m_pModel -> isUnique($_pDatabase, ['user_id' => $_aFormData['user_id']]))
 						break;
 				}
 				*/
@@ -160,9 +160,9 @@ class	controllerUsersBackend extends CController
 				$_aFormData['create_by'] 	= CSession::instance() -> getValue('user_id');
 				$_aFormData['create_time'] 	= time();
 
-				$dataId = 0;
 				
-				if($this -> m_pModel -> insert($_sqlConnection, $_aFormData, $dataId))
+				
+				if($this -> m_pModel -> insert($_pDatabase, $_aFormData))
 				{
 					$_bValidationMsg = CLanguage::get() -> string('USER WAS_CREATED') .' - '. CLanguage::get() -> string('WAIT_FOR_REDIRECT');
 					$_bValidationDta['redirect'] = CMS_SERVER_URL_BACKEND . CPageRequest::instance() -> urlPath .'user/'.$_aFormData['user_id'];
@@ -171,7 +171,7 @@ class	controllerUsersBackend extends CController
 				{
 					$_bValidationMsg .= CLanguage::get() -> string('ERR_SQL_ERROR');
 
-					$modelUsersRegister -> removeUserId($_sqlConnection, $_aFormData['user_id']);
+					$modelUsersRegister -> removeUserId($_pDatabase, $_aFormData['user_id']);
 				}
 			}
 
@@ -189,41 +189,39 @@ class	controllerUsersBackend extends CController
 	}
 
 	private function
-	logicView(&$_sqlConnection, $_isXHRequest = false, $_enableEdit = false, $_enableDelete = false)
+	logicView(CDatabaseConnection &$_pDatabase, $_isXHRequest = false, $_enableEdit = false, $_enableDelete = false)
 	{	
-		$_pURLVariables	 =	new CURLVariables();
-		$_request		 =	[];
-		$_request[] 	 = 	[	"input" => "cms-system-id",  	"validate" => "strip_tags|!empty" ,	"use_default" => true, "default_value" => false ]; 		
-		$_pURLVariables -> retrieve($_request, true, false); // POST 
 
-		if($_pURLVariables -> getValue("cms-system-id") !== false)
+		$systemId = $this -> querySystemId();
+
+		if($systemId !== false)
 		{	
 			$this -> m_modelRightGroups = new modelRightGroups();
-			$this -> m_modelRightGroups -> load($_sqlConnection);
+			$this -> m_modelRightGroups -> load($_pDatabase);
 
 			$this -> m_pModelUserGroups	 = new modelUserGroups();
 
 			$modelCondition = new CModelCondition();
-			$modelCondition -> where('user_id', $_pURLVariables -> getValue("cms-system-id"));
+			$modelCondition -> where('user_id', $systemId);
 
-			$this -> m_pModelUserGroups -> load($_sqlConnection, $modelCondition);
+			$this -> m_pModelUserGroups -> load($_pDatabase, $modelCondition);
 
-			if($this -> m_pModel -> load($_sqlConnection, $modelCondition))
+			if($this -> m_pModel -> load($_pDatabase, $modelCondition))
 			{
 				##	Gathering additional data
 
-				$_crumbName	 = $this -> m_pModel -> searchValue($_pURLVariables -> getValue("cms-system-id"),'user_id','user_name_first');
-				$_crumbName	.= ' '. $this -> m_pModel -> searchValue($_pURLVariables -> getValue("cms-system-id"),'user_id','user_name_last');
-				$_crumbName	.= ' ('. $_pURLVariables -> getValue("cms-system-id") .')';
+				$_crumbName	 = $this -> m_pModel -> getResultItem('user_id',$systemId,'user_name_first');
+				$_crumbName	.= ' '. $this -> m_pModel -> getResultItem('user_id',$systemId,'user_name_last');
+				$_crumbName	.= ' ('. $systemId .')';
 
 				$this -> setCrumbData('edit', $_crumbName, true);
 				$this -> setView(
 								'edit',
-								'user/'. $_pURLVariables -> getValue("cms-system-id"),								
+								'user/'. $systemId,								
 								[
-									'usersList' 	=> $this -> m_pModel -> getDataInstance(),
-									'right_groups' 	=> $this -> m_modelRightGroups -> getDataInstance(),
-									'user_groups' 	=> $this -> m_pModelUserGroups -> getDataInstance()
+									'usersList' 	=> $this -> m_pModel -> getResult(),
+									'right_groups' 	=> $this -> m_modelRightGroups -> getResult(),
+									'user_groups' 	=> $this -> m_pModelUserGroups -> getResult()
 								]								
 								);
 				return true;
@@ -235,14 +233,12 @@ class	controllerUsersBackend extends CController
 	}
 
 	private function
-	logicEdit(&$_sqlConnection, $_isXHRequest = false)
+	logicEdit(CDatabaseConnection &$_pDatabase, $_isXHRequest = false)
 	{	
-		$_pURLVariables	 =	new CURLVariables();
-		$_request		 =	[];
-		$_request[] 	 = 	[	"input" => "cms-system-id",  	"validate" => "strip_tags|!empty" ,	"use_default" => true, "default_value" => false ]; 		
-		$_pURLVariables -> retrieve($_request, true, false); // POST 
 
-		if($_pURLVariables -> getValue("cms-system-id") !== false && $_isXHRequest !== false)
+		$systemId = $this -> querySystemId();
+
+		if($systemId !== false && $_isXHRequest !== false)
 		{	
 			$_bValidationErr =	false;
 			$_bValidationMsg =	'';
@@ -273,9 +269,9 @@ class	controllerUsersBackend extends CController
 										$_aFormData['update_time'] 	= time();
 
 										$modelCondition = new CModelCondition();
-										$modelCondition -> where('user_id', $_pURLVariables -> getValue("cms-system-id"));
+										$modelCondition -> where('user_id', $systemId);
 
-										if($this -> m_pModel -> update($_sqlConnection, $_aFormData, $modelCondition))
+										if($this -> m_pModel -> update($_pDatabase, $_aFormData, $modelCondition))
 										{
 											$_bValidationMsg = CLanguage::get() -> string('USER WAS_UPDATED');
 										}
@@ -316,7 +312,7 @@ class	controllerUsersBackend extends CController
 										$_aFormData['update_time'] 	= time();
 
 
-										if(!$this -> m_pModel -> isUnique($_sqlConnection, ['login_name' => $_aFormData['login_name']], ['user_id' => $_pURLVariables -> getValue("cms-system-id")]))
+										if(!$this -> m_pModel -> isUnique($_pDatabase, ['login_name' => $_aFormData['login_name']], ['user_id' => $systemId]))
 										{
 											$_bValidationMsg .= CLanguage::get() -> string('M_BEUSER_MSG_USERNAMEEXIST');
 											$_bValidationErr = true;
@@ -344,9 +340,9 @@ class	controllerUsersBackend extends CController
 										$_aFormData['update_time'] 	= time();
 
 										$modelCondition = new CModelCondition();
-										$modelCondition -> where('user_id', $_pURLVariables -> getValue("cms-system-id"));
+										$modelCondition -> where('user_id', $systemId);
 
-										if($this -> m_pModel -> update($_sqlConnection, $_aFormData, $modelCondition))
+										if($this -> m_pModel -> update($_pDatabase, $_aFormData, $modelCondition))
 										{
 											$_bValidationMsg = CLanguage::get() -> string('USER WAS_UPDATED');
 										}
@@ -379,30 +375,30 @@ class	controllerUsersBackend extends CController
 									##	Updating rights table
 
 									$modelCondition = new CModelCondition();
-									$modelCondition -> where('user_id', $_pURLVariables -> getValue("cms-system-id"));
+									$modelCondition -> where('user_id', $systemId);
 
 									$modelUserGroups = new modelUserGroups();
-									$modelUserGroups -> delete($_sqlConnection, $modelCondition);
+									$modelUserGroups -> delete($_pDatabase, $modelCondition);
 
 									foreach($_aFormData['groups'] as $_groupID)
 									{
 										$insertedId = 0;
 
 										$insertData = [
-														'user_id' 	=> $_pURLVariables -> getValue('cms-system-id'),
+														'user_id' 	=> $systemId,
 														'group_id' 	=> $_groupID,
 														'update_by' 	=> $_aFormData['update_by'],
 														'update_time' 	=> $_aFormData['update_time']
 													  ];
 
-										$modelUserGroups -> insert($_sqlConnection,$insertData, $insertedId);
+										$modelUserGroups -> insert($_pDatabase,$insertData, $insertedId);
 									}
 
 									##	Updating locked state
 
 									unset($_aFormData['groups']);
 
-									if($this -> m_pModel -> update($_sqlConnection, $_aFormData, $modelCondition))
+									if($this -> m_pModel -> update($_pDatabase, $_aFormData, $modelCondition))
 									{
 										$_bValidationMsg = CLanguage::get() -> string('USER WAS_UPDATED');
 									}
@@ -421,14 +417,11 @@ class	controllerUsersBackend extends CController
 	}
 
 	private function
-	logicDelete(&$_sqlConnection, $_isXHRequest = false)
+	logicDelete(CDatabaseConnection &$_pDatabase, $_isXHRequest = false)
 	{	
-		$_pURLVariables	 =	new CURLVariables();
-		$_request		 =	[];
-		$_request[] 	 = 	[	"input" => "cms-system-id",  	"validate" => "strip_tags|!empty" ,	"use_default" => true, "default_value" => false ]; 		
-		$_pURLVariables -> retrieve($_request, true, false); // POST 
 
-		if($_pURLVariables -> getValue("cms-system-id") !== false)
+		$systemId = $this -> querySystemId();
+		if($systemId !== false)
 		{	
 			##	XHR Function call
 
@@ -443,17 +436,17 @@ class	controllerUsersBackend extends CController
 					case 'user-delete': // delete user
 
 										$modelCondition = new CModelCondition();
-										$modelCondition -> where('user_id', $_pURLVariables -> getValue("cms-system-id"));
+										$modelCondition -> where('user_id', $systemId);
 
-										if($this -> m_pModel -> delete($_sqlConnection, $modelCondition))
+										if($this -> m_pModel -> delete($_pDatabase, $modelCondition))
 										{
 											$_bValidationMsg = CLanguage::get() -> string('USER WAS_DELETED') .' - '. CLanguage::get() -> string('WAIT_FOR_REDIRECT');
 											$_bValidationDta['redirect'] = CMS_SERVER_URL_BACKEND . CPageRequest::instance() -> urlPath;
 
 											$modelUsersRegister  = new modelUsersRegister();
-											$modelUsersRegister -> removeUserId($_sqlConnection, $_pURLVariables -> getValue("cms-system-id"));
+											$modelUsersRegister -> removeUserId($_pDatabase, $systemId);
 											
-											$_sqlConnection -> query("DELETE FROM tb_users_groups WHERE tb_users_groups.user_id = '". $_pURLVariables -> getValue("cms-system-id") ."'");
+											$_pDatabase -> query("DELETE FROM tb_users_groups WHERE tb_users_groups.user_id = '". $systemId ."'");
 										}
 										else
 										{

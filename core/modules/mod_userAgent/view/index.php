@@ -28,7 +28,7 @@
 				<td><?php echo $_dataSet -> agent_desc; ?></td>
 				<td><div class="color-indicator positive" data-state="<?php echo $_dataSet -> agent_allowed; ?>"></div></td>
 				<td><?php echo $_dataSet -> create_time; ?></td>
-				<td><?php echo tk::getBackendUserName($sqlConnection, $_dataSet -> create_by); ?></td>
+				<td><?php echo tk::getBackendUserName($pDatabase, $_dataSet -> create_by); ?></td>
 				<td class="bach-item-menu"><span>&equiv;</span><div class="dropdown-content"><div></div><a href="<?php echo CMS_SERVER_URL_BACKEND . $pageRequest -> urlPath; ?>agent/<?php echo $_dataSet -> data_id; ?>"><?php echo $language -> string('BUTTON_EDIT'); ?></a></div></td>
 			</tr>
 

@@ -29,8 +29,6 @@
 
 						foreach($backendMenu as $menuItem)
 						{
-
-
 							if(empty($menuItem -> page_path))
 								continue;
 
@@ -41,11 +39,8 @@
 								continue;
 
 							$moduleId = current($menuItem -> objects) -> module_id;
-						
 							if(!$modules -> existsRights($moduleId, 'index'))
 								continue;
-
-
 
 							echo '<a  class="menu-group-item" href="'. CMS_SERVER_URL_BACKEND . $menuItem -> page_path .'/">'. $menuItem -> page_name .'</a>';
 						}

@@ -20,7 +20,7 @@ class	controllerRightGroups extends CController
 	}
 	
 	public function
-	logic(&$_sqlConnection, array $_rcaTarget, $_isXHRequest)
+	logic(CDatabaseConnection &$_pDatabase, array $_rcaTarget, $_isXHRequest)
 	{
 		##	Set default target if not exists
 
@@ -51,34 +51,34 @@ class	controllerRightGroups extends CController
 		$_logicResults = false;
 		switch($_controllerAction)
 		{
-			case 'view'		: $_logicResults = $this -> logicView(	$_sqlConnection, $_isXHRequest, $enableEdit, $enableDelete);	break;
-			case 'edit'		: $_logicResults = $this -> logicEdit(	$_sqlConnection, $_isXHRequest, $enableEdit, $enableDelete);	break;	
-			case 'create'	: $_logicResults = $this -> logicCreate($_sqlConnection, $_isXHRequest);	break;
-			case 'delete'	: $_logicResults = $this -> logicDelete($_sqlConnection, $_isXHRequest);	break;	
+			case 'view'		: $_logicResults = $this -> logicView(	$_pDatabase, $_isXHRequest, $enableEdit, $enableDelete);	break;
+			case 'edit'		: $_logicResults = $this -> logicEdit(	$_pDatabase, $_isXHRequest, $enableEdit, $enableDelete);	break;	
+			case 'create'	: $_logicResults = $this -> logicCreate($_pDatabase, $_isXHRequest);	break;
+			case 'delete'	: $_logicResults = $this -> logicDelete($_pDatabase, $_isXHRequest);	break;	
 		}
 
 		if(!$_logicResults)
 		{
 			##	Default View
-			$this -> logicIndex($_sqlConnection, $enableEdit, $enableDelete);		
+			$this -> logicIndex($_pDatabase, $enableEdit, $enableDelete);		
 		}
 	}
 
 	private function
-	logicIndex(&$_sqlConnection, $_enableEdit = false, $_enableDelete = false)
+	logicIndex(CDatabaseConnection &$_pDatabase, $_enableEdit = false, $_enableDelete = false)
 	{
 		#$modelCondition = new CModelCondition();
 		#$modelCondition -> orderBy('data_id', 'DESC');
 
-		$this -> modelRightGroups -> load($_sqlConnection);	
-		$this -> modelUserGroups -> load($_sqlConnection);	
+		$this -> modelRightGroups -> load($_pDatabase);	
+		$this -> modelUserGroups -> load($_pDatabase);	
 
 		$this -> setView(	
 						'index',	
 						'',
 						[
-							'right_groups' 		=> $this -> modelRightGroups -> getDataInstance(),
-							'user_groups' 		=> $this -> modelUserGroups -> getDataInstance(),
+							'right_groups' 		=> $this -> modelRightGroups -> getResult(),
+							'user_groups' 		=> $this -> modelUserGroups -> getResult(),
 							'enableEdit'	=> $_enableEdit,
 							'enableDelete'	=> $_enableDelete
 						]
@@ -86,7 +86,7 @@ class	controllerRightGroups extends CController
 	}
 
 	private function
-	logicCreate(&$_sqlConnection, $_isXHRequest)
+	logicCreate(CDatabaseConnection &$_pDatabase, $_isXHRequest)
 	{
 		if($_isXHRequest !== false)
 		{
@@ -122,7 +122,7 @@ class	controllerRightGroups extends CController
 	
 
 				$groupId = '0';
-				if($this -> modelRightGroups -> insert($_sqlConnection, $_aFormData, $groupId))
+				if($this -> modelRightGroups -> insert($_pDatabase, $_aFormData, $groupId))
 				{
 
 
@@ -152,37 +152,35 @@ class	controllerRightGroups extends CController
 	}
 
 	private function
-	logicView(&$_sqlConnection, $_isXHRequest = false, $_enableEdit = false, $_enableDelete = false)
+	logicView(CDatabaseConnection &$_pDatabase, $_isXHRequest = false, $_enableEdit = false, $_enableDelete = false)
 	{	
 
-		$_pURLVariables	 =	new CURLVariables();
-		$_request		 =	[];
-		$_request[] 	 = 	[	"input" => "cms-system-id",  	"validate" => "strip_tags|!empty" ,	"use_default" => true, "default_value" => false ]; 		
-		$_pURLVariables -> retrieve($_request, true, false); 
 
-		if($_pURLVariables -> getValue("cms-system-id") !== false)
+		$systemId = $this -> querySystemId();
+
+		if($systemId !== false)
 		{	
 			$modelCondition = new CModelCondition();
-			$modelCondition -> where('group_id', $_pURLVariables -> getValue("cms-system-id"));
+			$modelCondition -> where('group_id', $systemId);
 
-			if($this -> modelRightGroups -> load($_sqlConnection, $modelCondition))
+			if($this -> modelRightGroups -> load($_pDatabase, $modelCondition))
 			{
 				##	Gathering additional data
 
 				$modelCondition = new CModelCondition();
-				$modelCondition -> where('group_id', $_pURLVariables -> getValue("cms-system-id"));
+				$modelCondition -> where('group_id', $systemId);
 
-				$this -> modelUserGroups -> load($_sqlConnection, $modelCondition);
+				$this -> modelUserGroups -> load($_pDatabase, $modelCondition);
 
-				$_crumbName	 = $this -> modelRightGroups -> searchValue(intval($_pURLVariables -> getValue("cms-system-id")),'group_id','group_name');
+				$_crumbName	 = $this -> modelRightGroups -> getResultItem('group_id',intval($systemId),'group_name');
 
 				$this -> setCrumbData('edit', $_crumbName, true);
 				$this -> setView(
 								'edit',
-								'group/'. $_pURLVariables -> getValue("cms-system-id"),								
+								'group/'. $systemId,								
 								[
-									'right_groups' 	=> $this -> modelRightGroups -> getDataInstance(),
-									'user_groups' 	=> $this -> modelUserGroups -> getDataInstance(),
+									'right_groups' 	=> $this -> modelRightGroups -> getResult(),
+									'user_groups' 	=> $this -> modelUserGroups -> getResult(),
 									'enableEdit'	=> $_enableEdit,
 									'enableDelete'	=> $_enableDelete
 								]								
@@ -196,14 +194,12 @@ class	controllerRightGroups extends CController
 	}
 
 	private function
-	logicEdit(&$_sqlConnection, $_isXHRequest = false)
+	logicEdit(CDatabaseConnection &$_pDatabase, $_isXHRequest = false)
 	{	
-		$_pURLVariables	 =	new CURLVariables();
-		$_request		 =	[];
-		$_request[] 	 = 	[	"input" => "cms-system-id",  	"validate" => "strip_tags|!empty" ,	"use_default" => true, "default_value" => false ]; 		
-		$_pURLVariables -> retrieve($_request, true, false); 
 
-		if($_pURLVariables -> getValue("cms-system-id") !== false && $_isXHRequest !== false)
+		$systemId = $this -> querySystemId();
+
+		if($systemId !== false && $_isXHRequest !== false)
 		{	
 			$_bValidationErr =	false;
 			$_bValidationMsg =	'';
@@ -226,12 +222,12 @@ class	controllerRightGroups extends CController
 										$_aFormData['update_by'] 	= CSession::instance() -> getValue('user_id');
 										$_aFormData['update_time'] 	= time();
 
-										$_aFormData['group_id'] 	= $_pURLVariables -> getValue("cms-system-id");
+										$_aFormData['group_id'] 	= $systemId;
 
 										$modelCondition = new CModelCondition();
-										$modelCondition -> where('group_id', $_pURLVariables -> getValue("cms-system-id"));
+										$modelCondition -> where('group_id', $systemId);
 
-										if($this -> modelRightGroups -> update($_sqlConnection, $_aFormData, $modelCondition))
+										if($this -> modelRightGroups -> update($_pDatabase, $_aFormData, $modelCondition))
 										{
 											$_bValidationMsg = CLanguage::get() -> string('MOD_RGROUPS_GROUP_RIGHTS') .' '. CLanguage::get() -> string('WAS_UPDATED');
 										}
@@ -269,12 +265,12 @@ class	controllerRightGroups extends CController
 									{
 
 										$modelCondition = new CModelCondition();
-										$modelCondition -> where('group_id', $_pURLVariables -> getValue("cms-system-id"));
+										$modelCondition -> where('group_id', $systemId);
 
 
 										if(isset($_aFormData['group_rights'])) $_aFormData['group_rights'] = json_encode($_aFormData['group_rights']);
 
-										if($this -> modelRightGroups -> update($_sqlConnection, $_aFormData, $modelCondition))
+										if($this -> modelRightGroups -> update($_pDatabase, $_aFormData, $modelCondition))
 										{
 											$_bValidationMsg = CLanguage::get() -> string('MOD_RGROUPS_GROUP_RIGHTS') .' '. CLanguage::get() -> string('WAS_UPDATED');
 										}
@@ -301,14 +297,12 @@ class	controllerRightGroups extends CController
 	}
 
 	private function
-	logicDelete(&$_sqlConnection, $_isXHRequest = false)
+	logicDelete(CDatabaseConnection &$_pDatabase, $_isXHRequest = false)
 	{	
-		$_pURLVariables	 =	new CURLVariables();
-		$_request		 =	[];
-		$_request[] 	 = 	[	"input" => "cms-system-id",  	"validate" => "strip_tags|!empty" ,	"use_default" => true, "default_value" => false ]; 		
-		$_pURLVariables -> retrieve($_request, true, false); // POST 
 
-		if($_pURLVariables -> getValue("cms-system-id") !== false)
+		$systemId = $this -> querySystemId();
+
+		if($systemId !== false)
 		{	
 			##	XHR Function call
 
@@ -324,9 +318,9 @@ class	controllerRightGroups extends CController
 
 
 										$modelCondition = new CModelCondition();
-										$modelCondition -> where('group_id', $_pURLVariables -> getValue("cms-system-id"));
+										$modelCondition -> where('group_id', $systemId);
 
-										if($this -> modelRightGroups -> delete($_sqlConnection, $modelCondition))
+										if($this -> modelRightGroups -> delete($_pDatabase, $modelCondition))
 										{
 											$_bValidationMsg = CLanguage::get() -> string('MOD_RGROUPS_GROUP_RIGHTS') .' '. CLanguage::get() -> string('WAS_DELETED'). ' - '. CLanguage::get() -> string('WAIT_FOR_REDIRECT');
 											$_bValidationDta['redirect'] = CMS_SERVER_URL_BACKEND . CPageRequest::instance() -> urlPath;

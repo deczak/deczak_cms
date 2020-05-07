@@ -5,19 +5,17 @@ class shemePageHeader extends CSheme
 	public function
 	__construct()
 	{
-		parent::__construct();		
-
-		$this -> setTable('tb_page_header');
+		parent::__construct('tb_page_header');	
 		
-		$this -> addColumn('data_id'		, 'int') -> setKey('PRIMARY') -> setAttribute('UNSIGNED') -> isAutoIncrement();
-		$this -> addColumn('node_id'		, 'int') -> setIndex('INDEX') -> setAttribute('UNSIGNED');
-		$this -> addColumn('page_id'		, 'int') -> setIndex('INDEX') ->  setAttribute('UNSIGNED');
+		$this -> addColumn('data_id'		, DB_COLUMN_TYPE_INT) -> setKey('PRIMARY') -> setAttribute(DB_COLUMN_ATTR_UNSIGNED) -> setAutoIncrement();
+		$this -> addColumn('node_id'		, DB_COLUMN_TYPE_INT) -> setIndex('INDEX') -> setAttribute(DB_COLUMN_ATTR_UNSIGNED);
+		$this -> addColumn('page_id'		, DB_COLUMN_TYPE_INT) -> setIndex('INDEX') ->  setAttribute(DB_COLUMN_ATTR_UNSIGNED);
 
-		$this -> addColumn('page_language'	, 'string') -> setLength(5);
-		$this -> addColumn('page_title'		, 'string') -> setLength(100);
-		$this -> addColumn('page_name'		, 'string') -> setLength(100);
-		$this -> addColumn('page_description', 'string') -> setLength(160);
-		$this -> addColumn('page_version'	, 'mediumint') -> setAttribute('UNSIGNED');
+		$this -> addColumn('page_language'	, DB_COLUMN_TYPE_STRING) -> setLength(5);
+		$this -> addColumn('page_title'		, DB_COLUMN_TYPE_STRING) -> setLength(100);
+		$this -> addColumn('page_name'		, DB_COLUMN_TYPE_STRING) -> setLength(100);
+		$this -> addColumn('page_description', DB_COLUMN_TYPE_STRING) -> setLength(160);
+		$this -> addColumn('page_version'	, DB_COLUMN_TYPE_MEDIUMINT) -> setAttribute(DB_COLUMN_ATTR_UNSIGNED);
 
 		$this -> addConstraing('header_node_id', 'node_id', 'tb_page', 'node_id', 'CASCADE', 'CASCADE');
 	}

@@ -7,8 +7,7 @@ class 	modelRedirect extends CModel
 	public function
 	__construct()
 	{		
-		parent::__construct('Redirect');		
-		$this -> m_sheme = new shemeRedirect();
+		parent::__construct('shemeRedirect', 'redirect');
 	}	
 }
 

@@ -16,16 +16,22 @@
 
 	// get columns from authentication tables
 
+	$connection = $pDatabase -> getConnection();
+
 	$tablesColumns = [];
 	foreach($tablesList as $tableGroup)
 	foreach($tableGroup as $table)
 	{
-		$sqlTableRes 	= $sqlConnection -> query("SELECT DISTINCT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '$table'");
-		while($sqlTableItm = $sqlTableRes -> fetch_assoc())
+		$tableInfoRes 	= $connection -> query("SELECT DISTINCT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '$table'", PDO::FETCH_CLASS, 'stdClass');
+		$tableInfoList	= $tableInfoRes -> fetchAll();
+
+		foreach($tableInfoList as $tableInfoItm)
 		{
-			$tablesColumns[$table][] = $sqlTableItm['COLUMN_NAME'];
+			$tablesColumns[$table][] = $tableInfoItm -> COLUMN_NAME;
 		}
 	}
+
+
 ?>
 
 <div class="be-module-container forms-view">
@@ -66,7 +72,7 @@
 
 	
 		<fieldset class="ui fieldset submit-able" id="group-data" data-xhr-target="login-data" data-xhr-overwrite-target="edit/<?php echo $login_object -> object_id; ?>">
-			<legend style=""><?php echo CLanguage::instance() -> getString('MOD_LOGINO_OBJECT'); ?></legend>
+			<legend><?php echo CLanguage::instance() -> getString('MOD_LOGINO_OBJECT'); ?></legend>
 			<div>
 
 
@@ -192,7 +198,7 @@
 
 				<!-- Submit button - beware of fieldset name -->
 
-				<div class="submit-container" style="">
+				<div class="submit-container">
 					<button class="ui button icon labeled trigger-submit-fieldset" type="button" disabled><span><i class="fas fa-save" data-icon="fa-save"></i></span><?php echo CLanguage::instance() -> getString('BUTTON_SAVE'); ?></button>
 					<div class="protector"><input type="checkbox" class="trigger-submit-protector" id="protector-login-objects"><label for="protector-login-objects"></label></div>
 				</div>
@@ -240,9 +246,6 @@
 	</div>
 </div>
 
-<?php
-tk::dbug($login_object);
-?>
 
 <script>
 	var		tablesList 		= <?= json_encode($tablesList); ?>;

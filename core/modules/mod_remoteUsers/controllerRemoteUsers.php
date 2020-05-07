@@ -20,7 +20,7 @@ class	controllerRemoteUsers extends CController
 	}
 	
 	public function
-	logic(&$_sqlConnection, array $_rcaTarget, $_isXHRequest)
+	logic(CDatabaseConnection &$_pDatabase, array $_rcaTarget, $_isXHRequest)
 	{
 		##	Set default target if not exists
 
@@ -51,34 +51,34 @@ class	controllerRemoteUsers extends CController
 		$_logicResults = false;
 		switch($_controllerAction)
 		{
-			case 'view'		: $_logicResults = $this -> logicView(	$_sqlConnection, $_isXHRequest, $enableEdit, $enableDelete);	break;
-			case 'edit'		: $_logicResults = $this -> logicEdit(	$_sqlConnection, $_isXHRequest);	break;	
-		#	case 'create'	: $_logicResults = $this -> logicCreate($_sqlConnection, $_isXHRequest);	break;
-		#	case 'delete'	: $_logicResults = $this -> logicDelete($_sqlConnection, $_isXHRequest);	break;	
+			case 'view'		: $_logicResults = $this -> logicView(	$_pDatabase, $_isXHRequest, $enableEdit, $enableDelete);	break;
+			case 'edit'		: $_logicResults = $this -> logicEdit(	$_pDatabase, $_isXHRequest);	break;	
+		#	case 'create'	: $_logicResults = $this -> logicCreate($_pDatabase, $_isXHRequest);	break;
+		#	case 'delete'	: $_logicResults = $this -> logicDelete($_pDatabase, $_isXHRequest);	break;	
 		}
 
 		if(!$_logicResults)
 		{
 			##	Default View
-			$this -> logicIndex($_sqlConnection, $enableEdit, $enableDelete);	
+			$this -> logicIndex($_pDatabase, $enableEdit, $enableDelete);	
 		}
 	}
 
 	private function
-	logicIndex(&$_sqlConnection, $_enableEdit = false, $_enableDelete = false)
+	logicIndex(CDatabaseConnection &$_pDatabase, $_enableEdit = false, $_enableDelete = false)
 	{
 		$usersList = $this -> _getUsersList();
 
 		$registerCondition	 = new CModelCondition();
 		$registerCondition 	-> groupBy('user_id');
 		$modelUsersRegister	 = new modelUsersRegister();
-		$modelUsersRegister -> load($_sqlConnection, $registerCondition);
+		$modelUsersRegister -> load($_pDatabase, $registerCondition);
 
 		$usergroupCondition	 = new CModelCondition();
 		$usergroupCondition	-> groupBy('user_id');
 		$modelUserGroups	 = new modelUserGroups();
 		$modelUserGroups 	-> addSelectColumns('*', 'COUNT(DISTINCT(group_id)) AS allocation');
-		$modelUserGroups	-> load($_sqlConnection, $usergroupCondition);
+		$modelUserGroups	-> load($_pDatabase, $usergroupCondition);
 
 		##	set view
 
@@ -87,8 +87,8 @@ class	controllerRemoteUsers extends CController
 						'',
 						[
 							'usersList' 	=> $usersList,
-							'registersList' => $modelUsersRegister -> getDataInstance(),
-							'groupsList' 	=> $modelUserGroups -> getDataInstance(),
+							'registersList' => $modelUsersRegister -> getResult(),
+							'groupsList' 	=> $modelUserGroups -> getResult(),
 							'enableEdit'	=> $_enableEdit,
 							'enableDelete'	=> $_enableDelete
 						]
@@ -106,7 +106,7 @@ class	controllerRemoteUsers extends CController
 			if($database['name'] === CFG::GET() -> MYSQL -> PRIMARY_DATABASE)
 				continue;
 
-			$remoteSQL = CSQLConnect::GET() -> getConnection($database['name']);
+			$remoteDB = CDatabase::instance() -> getConnection($database['name']);
 
 			##	condition
 
@@ -118,10 +118,10 @@ class	controllerRemoteUsers extends CController
 
 			$modelUsers	  = new modelUsers();
 
-			$modelUsers  -> load($remoteSQL, $remoteCondition);	
-			$modelUsers  -> getDataInstance();
+			$modelUsers  -> load($remoteDB, $remoteCondition);	
+			$modelUsers  -> getResult();
 
-			foreach($modelUsers -> getDataInstance() as $user)
+			foreach($modelUsers -> getResult() as $user)
 			{
 				$id = hash('sha256', $database['name'] . $database['server'] . $user -> user_id . $user -> login_name);
 
@@ -139,10 +139,10 @@ class	controllerRemoteUsers extends CController
 			## get backend users
 
 			$modelUsersBackend	= new modelUsersBackend();
-			$modelUsersBackend  -> load($remoteSQL, $remoteCondition);	
-			$modelUsersBackend -> getDataInstance();
+			$modelUsersBackend  -> load($remoteDB, $remoteCondition);	
+			$modelUsersBackend -> getResult();
 
-			foreach($modelUsersBackend -> getDataInstance() as $user)
+			foreach($modelUsersBackend -> getResult() as $user)
 			{
 				$id = hash('sha256', $database['name'] . $database['server'] . $user -> user_id . $user -> login_name);
 
@@ -162,33 +162,30 @@ class	controllerRemoteUsers extends CController
 	}
 
 	private function
-	logicCreate(&$_sqlConnection, $_isXHRequest)
+	logicCreate(CDatabaseConnection &$_pDatabase, $_isXHRequest)
 	{
 	}
 
 	private function
-	logicView(&$_sqlConnection, $_isXHRequest = false, $_enableEdit = false, $_enableDelete = false)
-	{	
-		$_pURLVariables	 =	new CURLVariables();
-		$_request		 =	[];
-		$_request[] 	 = 	[	"input" => "cms-system-id",  	"validate" => "strip_tags|!empty" ,	"use_default" => true, "default_value" => false ]; 		
-		$_pURLVariables -> retrieve($_request, true, false); // POST 
+	logicView(CDatabaseConnection &$_pDatabase, $_isXHRequest = false, $_enableEdit = false, $_enableDelete = false)
+	{
+		$systemId = $this -> querySystemId();
 
-		if($_pURLVariables -> getValue("cms-system-id") !== false )
+		if($systemId !== false )
 		{	
-			$usersList = $this -> _getUsersList($_pURLVariables -> getValue("cms-system-id"));
+			$usersList = $this -> _getUsersList($systemId);
 
 			if(!empty($usersList))
 			{
 				$this -> m_modelRightGroups = new modelRightGroups();
-				$this -> m_modelRightGroups -> load($_sqlConnection);
+				$this -> m_modelRightGroups -> load($_pDatabase);
 
 				$modelUserGroups	 = new modelUserGroups();
 
 				$modelCondition = new CModelCondition();
-				$modelCondition -> where('user_hash', $_pURLVariables -> getValue("cms-system-id"));
+				$modelCondition -> where('user_hash', $systemId);
 
-				$modelUserGroups -> load($_sqlConnection, $modelCondition);
+				$modelUserGroups -> load($_pDatabase, $modelCondition);
 
 				##
 
@@ -201,11 +198,11 @@ class	controllerRemoteUsers extends CController
 				$this -> setCrumbData('edit', $_crumbName, true);
 				$this -> setView(
 								'edit',
-								'user/'. $_pURLVariables -> getValue("cms-system-id"),								
+								'user/'. $systemId,								
 								[
 									'usersList' 	=> $usersList,
-									'right_groups' 	=> $this -> m_modelRightGroups -> getDataInstance(),
-									'user_groups' 	=> $modelUserGroups -> getDataInstance(),
+									'right_groups' 	=> $this -> m_modelRightGroups -> getResult(),
+									'user_groups' 	=> $modelUserGroups -> getResult(),
 									'enableEdit'	=> $_enableEdit,
 									'enableDelete'	=> $_enableDelete
 								]								
@@ -219,14 +216,11 @@ class	controllerRemoteUsers extends CController
 	}
 
 	private function
-	logicEdit(&$_sqlConnection, $_isXHRequest = false)
-	{	
-		$_pURLVariables	 =	new CURLVariables();
-		$_request		 =	[];
-		$_request[] 	 = 	[	"input" => "cms-system-id",  	"validate" => "strip_tags|!empty" ,	"use_default" => true, "default_value" => false ]; 		
-		$_pURLVariables -> retrieve($_request, true, false); // POST 
+	logicEdit(CDatabaseConnection &$_pDatabase, $_isXHRequest = false)
+	{
+		$systemId = $this -> querySystemId();
 
-		if($_pURLVariables -> getValue("cms-system-id") !== false && $_isXHRequest !== false)
+		if($systemId !== false && $_isXHRequest !== false)
 		{	
 			$_bValidationErr =	false;
 			$_bValidationMsg =	'';
@@ -240,12 +234,12 @@ class	controllerRemoteUsers extends CController
 										$_request		 =	[];
 										$_request[] 	 = 	[	"input" => "groups",    	"validate" => "strip_tags|strip_whitespaces|!empty", 	"use_default" => true, "default_value" => [] ]; 		
 	
-										$_pURLVariables -> retrieve($_request, false, true); // POST 
-										$_aFormData		 = $_pURLVariables ->getArray();
+										$_pFormVariables -> retrieve($_request, false, true); // POST 
+										$_aFormData		 = $_pFormVariables ->getArray();
 
 										if(!$_bValidationErr)
 										{
-											$usersList = $this -> _getUsersList($_pURLVariables -> getValue("cms-system-id"));
+											$usersList = $this -> _getUsersList($systemId);
 
 											if(!empty($usersList))
 											{
@@ -257,23 +251,23 @@ class	controllerRemoteUsers extends CController
 												$modelUsersRegister	 	= new modelUsersRegister();
 
 												$registerCondition = new CModelCondition();
-												$registerCondition -> where('user_hash', $_pURLVariables -> getValue("cms-system-id"));
+												$registerCondition -> where('user_hash', $systemId);
 
-												$modelUsersRegister -> load($_sqlConnection, $registerCondition);
+												$modelUsersRegister -> load($_pDatabase, $registerCondition);
 
-												if(empty($modelUsersRegister -> getDataInstance()))
-													$_aFormData['user_id'] 	= $modelUsersRegister -> registerUserId($_sqlConnection, 3, $_pURLVariables -> getValue("cms-system-id"), $user -> user_name_first .' '. $user -> user_name_last);
+												if(empty($modelUsersRegister -> getResult()))
+													$_aFormData['user_id'] 	= $modelUsersRegister -> registerUserId($_pDatabase, 3, $systemId, $user -> user_name_first .' '. $user -> user_name_last);
 												else
-													$_aFormData['user_id'] 	= $modelUsersRegister -> getDataInstance()[0] -> user_id;
+													$_aFormData['user_id'] 	= $modelUsersRegister -> getResult()[0] -> user_id;
 
 												##	Updating rights table
 
 												$modelCondition = new CModelCondition();
 												$modelCondition -> where('user_id', $_aFormData['user_id']);
-												$modelCondition -> where('user_hash', $_pURLVariables -> getValue("cms-system-id"));
+												$modelCondition -> where('user_hash', $systemId);
 
 												$modelUserGroups = new modelUserGroups();
-												$modelUserGroups -> delete($_sqlConnection, $modelCondition);
+												$modelUserGroups -> delete($_pDatabase, $modelCondition);
 
 												foreach($_aFormData['groups'] as $_groupID)
 												{
@@ -282,12 +276,12 @@ class	controllerRemoteUsers extends CController
 													$insertData = [
 																	'user_id' 	=> $_aFormData['user_id'],
 																	'group_id' 	=> $_groupID,
-																	'user_hash' 	=> $_pURLVariables -> getValue("cms-system-id"),
+																	'user_hash' 	=> $systemId,
 																	'update_by' 	=> $_aFormData['update_by'],
 																	'update_time' 	=> $_aFormData['update_time']
 																	];
 
-													$modelUserGroups -> insert($_sqlConnection,$insertData, $insertedId);
+													$modelUserGroups -> insert($_pDatabase,$insertData, $insertedId);
 												}
 
 										
@@ -316,7 +310,7 @@ class	controllerRemoteUsers extends CController
 	}
 
 	private function
-	logicDelete(&$_sqlConnection, $_isXHRequest = false)
+	logicDelete(CDatabaseConnection &$_pDatabase, $_isXHRequest = false)
 	{	
 	}
 }

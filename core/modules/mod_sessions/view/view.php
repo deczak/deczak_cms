@@ -107,7 +107,7 @@ $_dataSet -> time_create 	= ($_dataSet -> time_create == 0 ? '-' : date(CFG::GET
 								
 
 									?>
-									<tr style="">
+									<tr>
 										<td><?= date("d / m / Y H:i:s", $page -> time_access); ?></td>
 										<td><?= $page -> page_title; ?></td>
 									</tr>									

@@ -1,5 +1,6 @@
 <?php
 
+/*
 class CModelConditionStage
 {
 	public	$type;
@@ -261,5 +262,5 @@ class CModelCondition
 		return false;
 	}
 }
-
+*/
 ?>

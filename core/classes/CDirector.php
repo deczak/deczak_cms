@@ -27,7 +27,6 @@ class	CDirector
 	public function
 	view(string $_viewId = '', CPageRequest &$_pPageRequest, &$_pUserRights)
 	{
-
 		if($_pPageRequest -> isEditMode)
 		{
 			echo '<div class="cms-edit-content-container" data-view="'. $_viewId .'">';

@@ -1,28 +1,28 @@
 <?php
 
 include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SHEME.'shemePage.php';		
-include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SHEME.'shemePageObject.php';		
+include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SHEME.'shemePageObject.php';	
+
+include_once 'modelPageObject.php';		
 
 class 	modelBackend extends CModel
 {
-	private	$m_shemeBackend;
 	private	$m_shemePageObjects;
 
 	public function
 	__construct()
 	{		
-		parent::__construct();		
+		parent::__construct('shemePage', 'page');	
 
-		$this -> m_shemeBackend 		= new shemePage();
 		$this -> m_shemePageObjects 	= new shemePageObject();
 	}	
 	
 	public function
-	loadOld(&$_sqlConnection, string $_nodeID)
+	loadOld(CDatabaseConnection &$_pDatabase, string $_nodeID)
 	{
 		## Create Class
 
-		$_className		=	$this -> createClass($this -> m_shemeBackend,'backend');
+		$_className		=	$this -> createPrototype();
 
 		##	Read backend file
 
@@ -53,23 +53,24 @@ class 	modelBackend extends CModel
 
 			##	Create Page object
 
-			$this -> m_storage = new $_className($_pageData, $this -> m_shemeBackend -> getColumns());
+			$this -> m_resultList = new $_className($_pageData, $this -> m_pSheme -> getColumns());
 
 
 			##	Create object object
 
-			$_className		=	$this -> createClass($this -> m_shemePageObjects,'object');
+			$modelPageObject = new modelPageObject();
 
-			foreach($this -> m_storage -> objects as $_objectKey =>  $_objectData)
+			$_className		=	$modelPageObject -> createClass();
+
+			foreach($this -> m_resultList -> objects as $_objectKey =>  $_objectData)
 			{
-				$this -> m_storage -> objects[$_objectKey] = new $_className($_objectData, $this -> m_shemePageObjects -> getColumns());
+				$this -> m_resultList -> objects[$_objectKey] = new $_className($_objectData, $this -> m_shemePageObjects -> getColumns());
 			}
 			
 			return true;
 		}
 		return false;
 	}
-
 }
 
 /**
