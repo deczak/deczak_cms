@@ -55,22 +55,83 @@ class	controllerDeniedRemote extends CController
 		if(!$_logicResults)
 		{
 			##	Default View
-			$this -> logicIndex($_pDatabase, $enableEdit, $enableDelete);	
+			$this -> logicIndex($_pDatabase, $_isXHRequest, $enableEdit, $enableDelete);	
 		}
 	}
 
 	private function
-	logicIndex(CDatabaseConnection &$_pDatabase, $_enableEdit = false, $_enableDelete = false)
+	logicIndex(CDatabaseConnection &$_pDatabase, $_isXHRequest, $_enableEdit = false, $_enableDelete = false)
 	{
-		#$modelCondition = new CModelCondition();
-		#$modelCondition -> orderBy('data_id', 'DESC');
+		##	XHR request
+
+		if($_isXHRequest !== false)
+		{	
+			$_bValidationErr =	false;
+			$_bValidationMsg =	'';
+			$_bValidationDta = 	[];
+
+			switch($_isXHRequest)
+			{
+				case 'raw-data'  :	// Request raw data
+
+									$_pURLVariables	 =	new CURLVariables();
+									$_request		 =	[];
+									$_request[] 	 = 	[	"input" => 'q',  	"validate" => "strip_tags|!empty" ,	"use_default" => true, "default_value" => false ]; 		
+									$_pURLVariables -> retrieve($_request, false, true);	
+
+									
+
+
+									$modelCondition  = 	new CModelCondition();
+
+									if($_pURLVariables -> getValue("q") !== false)
+									{	
+										$conditionSource = 	explode(' ', $_pURLVariables -> getValue("q"));
+										foreach($conditionSource as $conditionItem)
+										{
+											$itemParts = explode(':', $conditionItem);
+
+											if(count($itemParts) == 1)
+											{
+												$modelCondition -> whereLike('agent_name', $itemParts[0]);
+												$modelCondition -> whereLike('agent_suffix', $itemParts[0]);
+											}
+											else
+											{
+												if( $itemParts[0] == 'cms-system-id' )
+													$itemParts[0] = 'data_id';
+												
+												$modelCondition -> where($itemParts[0], $itemParts[1]);
+											}
+										}										
+									}
+
+									if(!$this -> m_pModel -> load($_pDatabase, $modelCondition))
+									{
+										$_bValidationMsg .= CLanguage::get() -> string('ERR_SQL_ERROR');
+										$_bValidationErr = true;
+									}											
+						
+									$data = $this -> m_pModel -> getResult();
+
+									foreach($data as &$item)
+									{
+										$item -> creaty_by_name = tk::getBackendUserName($_pDatabase, $item -> create_by);
+										$item -> update_by_name = tk::getBackendUserName($_pDatabase, $item -> update_by);
+									}
+
+									break;
+			}
+
+			tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $data);	// contains exit call
+		}
+
+		##	No XHR request
 		
-		$this -> m_pModel -> load($_pDatabase);	
 		$this -> setView(	
 						'index',	
 						'',
 						[
-							'deniedList' 	=> $this -> m_pModel -> getResult(),
 							'enableEdit'	=> $_enableEdit,
 							'enableDelete'	=> $_enableDelete
 						]
@@ -243,8 +304,10 @@ class	controllerDeniedRemote extends CController
 			$_bValidationMsg =	'';
 			$_bValidationDta = 	[];
 
-			// check if dataset is locked, call his own xhrResult() 
-		#	$this -> detectLock($_pDatabase, $systemId);
+			$pingId 	= $this -> querySystemId('cms-ping-id', true);
+
+			## check if dataset is locked, call his own xhrResult() 
+			$this -> detectLock($_pDatabase, $systemId, $pingId);
 
 			switch($_isXHRequest)
 			{
@@ -252,13 +315,11 @@ class	controllerDeniedRemote extends CController
 
 											$_pFormVariables =	new CURLVariables();
 											$_request		 =	[];
-											$_request[] 	 = 	[	"input" => "data_id",  	"validate" => "strip_tags|strip_whitespaces|!empty" ]; 	
 											$_request[] 	 = 	[	"input" => "denied_ip",  	"validate" => "strip_tags|strip_whitespaces|!empty" ]; 	
 											$_request[] 	 = 	[	"input" => "denied_desc",  	"validate" => "strip_tags|!empty" ]; 	
 											$_pFormVariables-> retrieve($_request, false, true); // POST 
 											$_aFormData		 = $_pFormVariables ->getArray();
 
-											if(empty($_aFormData['data_id'])) { 	$_bValidationErr = true; 	$_bValidationDta[] = 'data_id'; 	}
 											if(empty($_aFormData['denied_ip'])) { 	$_bValidationErr = true; 	$_bValidationDta[] = 'denied_ip'; 	}
 
 											if(!$_bValidationErr)	// Validation OK (by pre check)
@@ -269,7 +330,7 @@ class	controllerDeniedRemote extends CController
 
 										$uniqueCondition = new CModelCondition();
 										$uniqueCondition -> where('denied_ip', $_aFormData['denied_ip']);
-										$uniqueCondition -> whereNot('data_id', $_aFormData['data_id']);
+										$uniqueCondition -> whereNot('data_id', $systemId);
 
 
 												if(!$this -> m_pModel -> unique($_pDatabase, $uniqueCondition))
@@ -381,8 +442,10 @@ class	controllerDeniedRemote extends CController
 			$_bValidationMsg =	'';
 			$_bValidationDta = 	[];
 
-			// check if dataset is locked, call his own xhrResult() 
-		#	$this -> detectLock($_pDatabase, $systemId);
+			$pingId 	= $this -> querySystemId('cms-ping-id', true);
+
+			## check if dataset is locked, call his own xhrResult() 
+			$this -> detectLock($_pDatabase, $systemId, $pingId);
 
 			switch($_isXHRequest)
 			{
@@ -413,12 +476,12 @@ class	controllerDeniedRemote extends CController
 
 		return false;
 	}
-	
+
 	public function
 	logicPing(CDatabaseConnection &$_pDatabase, $_isXHRequest = false, $_enableEdit = false, $_enableDelete = false)
 	{
-		/*
-		$systemId = $this -> querySystemId();
+		$systemId 	= $this -> querySystemId();
+		$pingId 	= $this -> querySystemId('cms-ping-id', true);
 
 		if($systemId !== false && $_isXHRequest !== false)
 		{	
@@ -430,14 +493,13 @@ class	controllerDeniedRemote extends CController
 			{
 				case 'lockState':	
 				
-					$locked	= $this -> m_pModel -> lock($_pDatabase, CSession::instance() -> getValue('user_id'), $systemId, LOCK_UPDATE);
+					$locked	= $this -> m_pModel -> ping($_pDatabase, CSession::instance() -> getValue('user_id'), $systemId, $pingId, MODEL_LOCK_UPDATE);
 					tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $locked);
 					break;
 			}
 
 			tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $_bValidationDta);
 		}
-		*/
 	}
 
 

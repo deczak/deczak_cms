@@ -76,5 +76,7 @@
 	LOCK_IS_LOCKED		=	This dataset is locked by user 
 	LOCK_IS_NOT_LOCKED	=	This dataset can be edited
 	LOCK_NO_RIGHTS		=	You have no rights to edit
+
+	LOCK_IS_MISMATCH_ID = 	Editing is blocked by another instance
 	
 	

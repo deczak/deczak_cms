@@ -68,9 +68,9 @@ class	CController
 	}
 
 	protected function
-	detectLock(&$_sqlConnection, $_systemId)
+	detectLock(CDatabaseConnection &$_pDatabase,string $_systemId, string $_pingId)
 	{
-		$locked	= $this -> m_pModel -> lock($_sqlConnection, CSession::instance() -> getValue('user_id'), $_systemId);
+		$locked	= $this -> m_pModel -> ping($_pDatabase, CSession::instance() -> getValue('user_id'), $_systemId, $_pingId);
 
 		if($locked['lockedState'] !== 0)
 		{
@@ -127,14 +127,14 @@ class	CController
 	}
 	
 	protected function
-	querySystemId(string $variableName = 'cms-system-id')
+	querySystemId(string $variableName = 'cms-system-id', bool $_methodPost = false)
 	{
 		$_pURLVariables	 =	new CURLVariables();
 		$_request		 =	[];
 		$_request[] 	 = 	[	"input" => $variableName,  	"validate" => "strip_tags|!empty" ,	"use_default" => true, "default_value" => false ]; 		
-		$_pURLVariables -> retrieve($_request, true, false);	
+		$_pURLVariables -> retrieve($_request, !$_methodPost, $_methodPost);	
 
-		return $_pURLVariables -> getValue("cms-system-id");
+		return $_pURLVariables -> getValue($variableName);
 	}
 
 	protected function

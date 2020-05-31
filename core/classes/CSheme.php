@@ -33,6 +33,7 @@ class	CShemeColumn
 	public	$m_isNull;
 	public	$m_keyType;
 	public	$m_indexType;
+	public	$m_isSystemId;
 
 	public function
 	__construct($_columnName, $_columnType)
@@ -44,9 +45,10 @@ class	CShemeColumn
 
 
 		$this -> m_isAutoIncrement 	= false;
-		$this -> m_defaultValue 	 = NULL;
-		$this -> m_isNull		 	 = false;
-		$this -> m_length			 = 0;
+		$this -> m_defaultValue 	= NULL;
+		$this -> m_isNull		 	= false;
+		$this -> m_length			= 0;
+		$this -> m_isSystemId		= false;
 	}
 
 	public function
@@ -102,6 +104,13 @@ class	CShemeColumn
 
 		return $this;
 	}
+
+	public function
+	setSystemId()
+	{
+		$this -> m_isSystemId = true;
+	}
+
 }
 
 define('DB_COLUMN_TYPE_STRING',0x1);
@@ -116,6 +125,10 @@ define('DB_COLUMN_TYPE_MEDIUMINT',0x9);
 define('DB_COLUMN_TYPE_TINYINT',0x10);
 
 define('DB_COLUMN_ATTR_UNSIGNED',0x1);
+
+define('DB_COLUMN_GROUP_LOCK',0x1);
+define('DB_COLUMN_GROUP_UPDATE',0x2);
+define('DB_COLUMN_GROUP_CREATE',0x3);
 
 class	CSheme
 {
@@ -160,11 +173,52 @@ class	CSheme
 	}
 
 	public function
+	getSystemIdColumnName()
+	{
+		foreach($this -> m_columnsList as $column)
+		{
+			if($column -> m_isSystemId)
+				return $column -> m_columnName;
+		}
+		return NULL;
+	}
+
+	public function
 	&addColumn($_columnName, $_columnType)
 	{
 		$columnIndex = count($this -> m_columnsList);
 		$this -> m_columnsList[$columnIndex] = new CShemeColumn($_columnName, $_columnType);
 		return $this -> m_columnsList[$columnIndex];
+	}
+
+	/**
+	 * 	Add pre defined columns
+	 */
+	public function
+	addColumnGroup(int $_columnGroupType)
+	{
+		switch($_columnGroupType)
+		{
+			case DB_COLUMN_GROUP_CREATE:
+
+				$this -> addColumn('create_time', DB_COLUMN_TYPE_BIGINT) -> setAttribute(DB_COLUMN_ATTR_UNSIGNED);
+				$this -> addColumn('create_by', DB_COLUMN_TYPE_STRING) -> setLength(25);
+				break;
+
+			case DB_COLUMN_GROUP_UPDATE:
+
+				$this -> addColumn('update_time', DB_COLUMN_TYPE_BIGINT) -> setAttribute(DB_COLUMN_ATTR_UNSIGNED) -> setDefault('0');
+				$this -> addColumn('update_by', DB_COLUMN_TYPE_STRING) -> setLength(25) -> setDefault('NULL');
+				break;
+
+
+			case DB_COLUMN_GROUP_LOCK:
+
+				$this -> addColumn('lock_time', DB_COLUMN_TYPE_BIGINT) -> setAttribute(DB_COLUMN_ATTR_UNSIGNED) -> setDefault('0');
+				$this -> addColumn('lock_by', DB_COLUMN_TYPE_STRING) -> setLength(25) -> setDefault('0');
+				$this -> addColumn('lock_id', DB_COLUMN_TYPE_STRING) -> setLength(40) -> setDefault('0');
+				break;
+		}
 	}
 	
 	protected function

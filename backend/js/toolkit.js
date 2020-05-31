@@ -119,11 +119,11 @@ class cmstk
 	}
 
 	static 
-	ping(requestURL, iTimeout)
+	ping(requestURL, iTimeout, pingId)
 	{
-		
 		let	formData = new FormData();
 			formData.append('cms-xhrequest', 'lockState');
+			formData.append('cms-ping-id', pingId);
 
 		let xhRequest = new XMLHttpRequest();
 			xhRequest.open('POST', requestURL);
@@ -132,15 +132,11 @@ class cmstk
 
 				if(this.status === 200)
 				{
-					
 					cmstk.pingSuccess(xhRequest.response);
 
-					if(xhRequest.response.data.lockedState == 2)
-						return;
-					
 					setTimeout(function() {
 
-						cmstk.ping(requestURL, iTimeout);
+						cmstk.ping(requestURL, iTimeout, pingId);
 
 					}, iTimeout);
 
@@ -154,12 +150,12 @@ class cmstk
 	}	
 
 	static
-	pingLock()
+	pingLock(lock = true)
 	{
 		let	submitContainers = document.querySelectorAll('.submit-container');
 
 		for(let i = 0; i < submitContainers.length; i++)		
-			submitContainers[i].querySelector('.trigger-submit-protector').disabled = true;
+			submitContainers[i].querySelector('.trigger-submit-protector').disabled = lock;
 	}
 
 	static
@@ -186,11 +182,13 @@ class cmstk
 					
 					break;		
 
-			case 2: // Freigabe, aber nicht reserviert zur Bearbeitung
+			case 2: // Freigabe, Daten neu laden, Bearbeitung freigeben
 
-					cmstk.pingLock();
-					resultBox.innerHTML = template;
-					resultBox.setAttribute('data-error', 2);
+					cmstk.pingLock(false);
+					resultBox.innerHTML = '';
+					resultBox.setAttribute('data-error', '-1');
+
+					document.dataInstance.requestData();
 					
 					break;
 
@@ -202,6 +200,21 @@ class cmstk
 										
 					break;
 		}
+	}
+
+	static
+	getRandomId()
+	{
+		//return Math.random().toString(36).substring(2, 20) + Math.random().toString(36).substring(2, 20);
+		
+		var result           = '';
+		var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_.:';
+		var charactersLength = characters.length;
+		for ( var i = 0; i < 40; i++ )
+		{
+			result += characters.charAt(Math.floor(Math.random() * charactersLength));
+		}
+		return result;
 	}
 
 

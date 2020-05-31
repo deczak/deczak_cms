@@ -30,7 +30,7 @@ class	CHTAccess
 	{
 		$_targetFile = '2-backend';
 
-		$_hFile 	 = fopen($this -> m_dataLocation . $_targetFile, "w");
+		$_hFile 	 = fopen($this -> m_dataLocation . $_targetFile, "r+");
 
 		if (flock($_hFile, LOCK_EX))
 		{
@@ -180,9 +180,9 @@ class	CHTAccess
 	{
 		$_targetFile = '3-frontend';
 
-		$_hFile 	 = fopen($this -> m_dataLocation . $_targetFile, "w");
+		$_hFile 	 = fopen($this -> m_dataLocation . $_targetFile, "r+");
 
-		if (flock($_hFile, LOCK_EX))
+		if(flock($_hFile, LOCK_EX))
 		{
 			ftruncate($_hFile, 0);
 		
@@ -277,11 +277,17 @@ class	CHTAccess
 	{
 		$_targetFile = '0-denied';
 
-		$_hFile 	 = fopen($this -> m_dataLocation . $_targetFile, "w");
-
-		if (flock($_hFile, LOCK_EX))
+		if(!CFG::GET() -> SESSION -> DENIED_ACCESS_ON || !CFG::GET() -> SESSION -> DENIED_ACCESS_HTACCESS)
 		{
-			#ftruncate($_hFile, 0);
+			@unlink($this -> m_dataLocation . $_targetFile);
+			return;
+		}
+
+		$_hFile 	 = fopen($this -> m_dataLocation . $_targetFile, "r+");
+
+		if(flock($_hFile, LOCK_EX))
+		{
+			ftruncate($_hFile, 0);
 
 			fwrite($_hFile, "\r\n");
 			fwrite($_hFile, 'Order Allow,Deny');

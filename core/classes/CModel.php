@@ -228,8 +228,9 @@ define('MODEL_PROTOTYPE_EXCEPT_VIRTUALCOLUMN',0x2);
 define('MODEL_PROTOTYPE_EXCEPT_ALLCOLUMNS',0x3);
 define('MODEL_PROTOTYPE_EXCEPT_UNKNOWNS',0x4);
 
-define('MODEL_RESULT_RESET',0x11);
-define('MODEL_RESULT_APPEND_DTAOBJECT',0x12);
+define('MODEL_RESULT_RESET',0x31);
+define('MODEL_RESULT_APPEND_DTAOBJECT',0x32);
+define('MODEL_LOCK_UPDATE',0x51);
 
 class	CModel
 {
@@ -529,6 +530,121 @@ class	CModel
 
 		return NULL;
 	}
+
+	public function
+	ping(CDatabaseConnection &$_pDatabase, string $_userId, string $_systemId, string $_pingId, $_execFlags = NULL)
+	{
+		$tableName		=	$this -> m_pSheme -> getTableName();
+		$systemIdColumn	= 	$this -> m_pSheme -> getSystemIdColumnName();
+
+		$timeStamp 		   = time();
+		$timeOut		   = $timeStamp - CFG::GET() -> USER_SYSTEM -> MODULE_LOCKING -> LOCK_TIMEOUT;
+
+		$responseData	   = [
+								'lockedById' 	=> 0,
+								'lockedState' 	=> 0
+							];
+
+		if($systemIdColumn === NULL)
+			return $responseData;
+
+		$selectCondition = new CModelCondition();
+		$selectCondition -> where($systemIdColumn, $_systemId);
+
+		$dbQuery 	= $_pDatabase		-> query(DB_SELECT) 
+										-> table($this -> m_pSheme -> getTableName()) 
+										-> selectColumns(['lock_time', 'lock_by', 'lock_id'])
+										-> condition($selectCondition);
+
+		$this -> m_resultList = $dbQuery -> exec($_execFlags);
+
+		if(count($this -> m_resultList) == 1)
+		{
+			$resultItm = $this -> m_resultList[0];
+
+			if(		$resultItm -> lock_by == 0 
+				|| ($resultItm -> lock_by == $_userId && $resultItm -> lock_id == $_pingId)
+			  )
+			{
+				## Lock dataset
+
+				$responseData['lockedState']	= 0;	
+				$responseData['lockedMessage']	= '';
+				$responseData['lockedById'] 	= $_userId;
+
+				if($_execFlags & MODEL_LOCK_UPDATE)
+				{
+					$dtaObject  = new stdClass;
+					$dtaObject -> lock_by 	= $_userId;
+					$dtaObject -> lock_id 	= $_pingId;
+					$dtaObject -> lock_time = $timeStamp;
+
+					$updateCondition = new CModelCondition();
+					$updateCondition -> where($systemIdColumn, $_systemId);
+
+					$dbQuery 	= $_pDatabase		-> query(DB_UPDATE) 
+													-> table($this -> m_pSheme -> getTableName()) 
+													-> dtaObject($dtaObject)
+													-> condition($updateCondition)
+													-> exec($_execFlags);
+				}
+			}
+			elseif($resultItm -> lock_by == $_userId && $resultItm -> lock_id != $_pingId && $timeOut <= $resultItm -> lock_time)
+			{
+				## Locked by same user but different pingId
+
+				$username = TK::getBackendUserName($_pDatabase, $resultItm -> lock_by);
+				$responseData['lockedByName'] = (!empty($username) ? $username : CLanguage::get() -> string('UNKNOWN'));
+
+				$responseData['lockedState']	= 1;	
+				$responseData['lockedMessage']	= CLanguage::get() -> string('LOCK_IS_MISMATCH_ID');
+				$responseData['lockedById'] 	= $_userId;
+			}
+			elseif($resultItm -> lock_by != $_userId && $timeOut <= $resultItm -> lock_time)
+			{
+				## Locked by other user
+
+				$username = TK::getBackendUserName($_pDatabase, $resultItm -> lock_by);
+				$responseData['lockedByName'] = (!empty($username) ? $username : CLanguage::get() -> string('UNKNOWN'));
+
+				$responseData['lockedState']	= 1;	
+				$responseData['lockedMessage']	= CLanguage::get() -> string('LOCK_IS_LOCKED') .' <b>'. $responseData['lockedByName'] .'</b>';
+				$responseData['lockedById'] 	= $resultItm -> lock_by;
+			}
+			elseif(		$resultItm -> lock_by != $_userId && $timeOut > $resultItm -> lock_time
+					|| ($resultItm -> lock_by == $_userId && $resultItm -> lock_id != $_pingId && $timeOut > $resultItm -> lock_time)
+				  )
+			{
+				## Locked by other user but timed out
+
+				$username = TK::getBackendUserName($_pDatabase, $resultItm -> lock_by);
+				$responseData['lockedByName'] = (!empty($username) ? $username : CLanguage::get() -> string('UNKNOWN'));
+
+				$responseData['lockedState']	= 2;	
+				$responseData['lockedMessage']	= '';
+				$responseData['lockedById'] 	= $_userId;
+
+				if($_execFlags & MODEL_LOCK_UPDATE)
+				{
+					$dtaObject  = new stdClass;
+					$dtaObject -> lock_by 	= $_userId;
+					$dtaObject -> lock_id 	= $_pingId;
+					$dtaObject -> lock_time = $timeStamp;
+
+					$updateCondition = new CModelCondition();
+					$updateCondition -> where($systemIdColumn, $_systemId);
+
+					$dbQuery 	= $_pDatabase		-> query(DB_UPDATE) 
+													-> table($this -> m_pSheme -> getTableName()) 
+													-> dtaObject($dtaObject)
+													-> condition($updateCondition)
+													-> exec($_execFlags);
+				}
+			}
+		}
+
+		return $responseData;
+	}	
 }
 
 

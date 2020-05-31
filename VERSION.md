@@ -10,6 +10,18 @@ The version number is the release date. A letter as suffix indicates fixes on sa
 
 ## Version history	 
 
+### 20200531
+
+**Changes**
+- updated handling of edit lock for data if multiple users are working with them
+- added edit lock for tags module
+- added edit lock for categories module
+- added edit lock for language module
+- added edit lock for users module
+- added edit lock for backend users module
+- added option in configuration.json to disable denied remote system
+
+
 ### 20200507
 
 **Changes**
@@ -29,7 +41,7 @@ The version number is the release date. A letter as suffix indicates fixes on sa
 **Changes**
 - Added test of edit lock to modules user-agent and denied-remote
 - Moved some settings from static config to dynamic config, some of them are no in environment module
-- Added prototyp (first step) of multiple content sections per page page
+- Added prototype (first step) of multiple content sections per page page
 
 
 ### 20200326

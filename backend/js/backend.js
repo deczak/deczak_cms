@@ -28,6 +28,12 @@
 		var	formData 	= collectFields(fieldset);
 			formData.append('cms-xhrequest',fieldset.getAttribute('data-xhr-target'));
 
+
+		let pingId = fieldset.getAttribute('data-ping-id');
+		if(pingId !== null && pingId !== '')
+			formData.append('cms-ping-id', pingId);
+	
+
 		var	requestTarget	= CMS.SERVER_URL_BACKEND + CMS.PAGE_PATH + CMS.MODULE_TARGET;
 		var	customTarget 	= fieldset.getAttribute('data-xhr-overwrite-target');
 		if(customTarget !== null)

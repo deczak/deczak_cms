@@ -1,5 +1,8 @@
 <?php
 
+define('MODEL_USERSBACKEND_STRIP_SENSITIVE_DATA',0x101);
+define('MODEL_USERSBACKEND_APPEND_RIGHTGROUPS',0x102);
+
 include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SHEME.'shemeUsersBackend.php';	
 
 class 	modelUsersBackend extends CModel
@@ -17,7 +20,45 @@ class 	modelUsersBackend extends CModel
 			return false;
 
 		foreach($this -> m_resultList as $dataset)
+		{
 			$this -> decryptRawSQLDataset($dataset, $dataset -> user_id, ['user_name_first', 'user_name_last', 'user_mail']);
+		
+			if($_execFlags & MODEL_USERSBACKEND_STRIP_SENSITIVE_DATA) 
+			{
+				$dataset -> login_pass 		= '';
+				$dataset -> login_name 		= '';
+				$dataset -> cookie_id 		= '';
+				$dataset -> recover_key 	= '';
+				$dataset -> recover_timeout = '';
+			}
+
+
+
+
+			if($_execFlags & MODEL_USERSBACKEND_APPEND_RIGHTGROUPS) 
+			{
+
+			$modelUserGroups	 = new modelUserGroups();
+
+			$modelCondition = new CModelCondition();
+			$modelCondition -> where('user_id', $dataset -> user_id);
+
+			$modelUserGroups -> load($_pDatabase, $modelCondition);
+
+			$dataset -> user_groups = [];
+
+			foreach($modelUserGroups -> getResult() as $group)
+			{
+					$dataset -> user_groups[] = $group -> group_id;
+					sort($dataset -> user_groups);
+			}
+
+			
+
+
+
+			}
+		}
 
 		return true;
 	}

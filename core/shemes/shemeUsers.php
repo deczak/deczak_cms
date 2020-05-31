@@ -12,7 +12,7 @@ class shemeUsers extends CSheme
 		$this -> addColumn('login_name', DB_COLUMN_TYPE_TEXT);
 		$this -> addColumn('login_pass', DB_COLUMN_TYPE_STRING) 	-> setLength(135);
 		$this -> addColumn('login_count', DB_COLUMN_TYPE_INT) 		-> setAttribute(DB_COLUMN_ATTR_UNSIGNED) -> setDefault('0');
-		$this -> addColumn('user_id', DB_COLUMN_TYPE_STRING) 	-> setKey('UNIQUE') -> setLength(25);
+		$this -> addColumn('user_id', DB_COLUMN_TYPE_STRING) 	-> setKey('UNIQUE') -> setLength(25) -> setSystemId();
 		$this -> addColumn('user_name_first', DB_COLUMN_TYPE_TEXT);
 		$this -> addColumn('user_name_last', DB_COLUMN_TYPE_TEXT);
 		$this -> addColumn('user_mail', DB_COLUMN_TYPE_TEXT);
@@ -24,10 +24,9 @@ class shemeUsers extends CSheme
 		$this -> addColumn('language', DB_COLUMN_TYPE_STRING) 	-> setLength(3);
 		$this -> addColumn('allow_remote', DB_COLUMN_TYPE_BOOL) 		-> setDefault(false);
 
-		$this -> addColumn('create_time', DB_COLUMN_TYPE_BIGINT) -> setAttribute(DB_COLUMN_ATTR_UNSIGNED);
-		$this -> addColumn('create_by', DB_COLUMN_TYPE_STRING) -> setLength(25);
-		$this -> addColumn('update_time', DB_COLUMN_TYPE_BIGINT) -> setAttribute(DB_COLUMN_ATTR_UNSIGNED) -> setDefault('0');
-		$this -> addColumn('update_by', DB_COLUMN_TYPE_STRING) -> setLength(25) -> setDefault('NULL');
+		$this -> addColumnGroup(DB_COLUMN_GROUP_CREATE);
+		$this -> addColumnGroup(DB_COLUMN_GROUP_UPDATE);
+		$this -> addColumnGroup(DB_COLUMN_GROUP_LOCK);
 		
 		$this -> addColumn('user_rights', DB_COLUMN_TYPE_TEXT) -> setVirtual();
 	}

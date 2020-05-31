@@ -75,5 +75,6 @@
 	LOCK_IS_LOCKED		=	Dieser Datensatz ist gesperrt durch Benutzer
 	LOCK_IS_NOT_LOCKED	=	Dieser Datensatz kann bearbeitet werden
 	LOCK_NO_RIGHTS		=	Sie haben kein Recht zur Bearbeitung
+	LOCK_IS_MISMATCH_ID = 	Die Bearbeitung ist durch eine anderen Instanz gesperrt
 	
 	

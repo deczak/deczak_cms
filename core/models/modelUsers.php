@@ -1,5 +1,7 @@
 <?php
 
+define('MODEL_USERS_STRIP_SENSITIVE_DATA',0x101);
+
 include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SHEME.'shemeUsers.php';	
 
 class 	modelUsers extends CModel
@@ -17,7 +19,18 @@ class 	modelUsers extends CModel
 			return false;
 
 		foreach($this -> m_resultList as $dataset)
+		{
 			$this -> decryptRawSQLDataset($dataset, $dataset -> user_id, ['user_name_first', 'user_name_last', 'user_mail']);
+		
+			if($_execFlags & MODEL_USERS_STRIP_SENSITIVE_DATA) 
+			{
+				$dataset -> login_pass 		= '';
+				$dataset -> login_name 		= '';
+				$dataset -> cookie_id 		= '';
+				$dataset -> recover_key 	= '';
+				$dataset -> recover_timeout = '';
+			}
+		}
 
 		return true;
 	}

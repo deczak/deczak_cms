@@ -104,52 +104,56 @@ class	CSession extends CSingleton
 
 			$_sqlSpamAccRes		=	$_db -> query($_sqlString);		
 */
-
-
-			$sessionCondition		 = new CModelCondition();
-			$sessionCondition		-> where('user_ip', $_SERVER['REMOTE_ADDR'])
-									-> whereGreater('time_create', $spamAccessTimeout);
-
-
-			$dbQuery 	= $pDatabase		-> query(DB_SELECT) 
-											-> table('tb_sessions') 
-											-> selectColumns(['user_ip'])
-											-> condition($sessionCondition);
-
-			$_sqlSpamAccRes = $dbQuery -> exec();
-
 			
-
-			if(count($_sqlSpamAccRes) >= $spamAccessLimit)
+			if(CFG::GET() -> SESSION -> SPAM_ACCESS_ON)
 			{
-				$newDeniedAddress['denied_ip'] 		= $_SERVER['REMOTE_ADDR'];
-				$newDeniedAddress['denied_desc'] 	= 'Automatic added by mass access protection';
-				$newDeniedAddress['create_time'] 	= time();
-				$newDeniedAddress['create_by'] 		= '1';
 
-				$insertedIdDeniedRemote = NULL;
 
-				$modelDeniedRemote	 =	new modelDeniedRemote();
-				$modelDeniedRemote	->	insert($_db, $newDeniedAddress, $insertedIdDeniedRemote);
+				$sessionCondition		 = new CModelCondition();
+				$sessionCondition		-> where('user_ip', $_SERVER['REMOTE_ADDR'])
+										-> whereGreater('time_create', $spamAccessTimeout);
 
-				$_pHTAccess  = new CHTAccess();
-				$_pHTAccess -> generatePart4DeniedAddress($_db);
-				$_pHTAccess -> writeHTAccess();
 
-				CSysMailer::instance() 	-> sendMail(
-													CLanguage::instance() -> getString('SYSMAIL_SESSDENIED_SUBJ'), 
-													CLanguage::instance() -> getStringExt(
-																						  'SYSMAIL_SESSDENIED_TEXT',
-																						  [
-																							'[USER_IP]' => $_SERVER['REMOTE_ADDR']
-																						  ]
-																						  ),
-													true,
-													'mass-access-protection'
-													);
+				$dbQuery 	= $pDatabase		-> query(DB_SELECT) 
+												-> table('tb_sessions') 
+												-> selectColumns(['user_ip'])
+												-> condition($sessionCondition);
 
-				header("HTTP/1.0 403 Forbidden");
-				exit;
+				$_sqlSpamAccRes = $dbQuery -> exec();
+
+				
+
+				if(count($_sqlSpamAccRes) >= $spamAccessLimit && CFG::GET() -> SESSION -> DENIED_ACCESS_ON)
+				{
+					$newDeniedAddress['denied_ip'] 		= $_SERVER['REMOTE_ADDR'];
+					$newDeniedAddress['denied_desc'] 	= 'Automatic added by mass access protection';
+					$newDeniedAddress['create_time'] 	= time();
+					$newDeniedAddress['create_by'] 		= '1';
+
+					$insertedIdDeniedRemote = NULL;
+
+					$modelDeniedRemote	 =	new modelDeniedRemote();
+					$modelDeniedRemote	->	insert($_db, $newDeniedAddress, $insertedIdDeniedRemote);
+
+					$_pHTAccess  = new CHTAccess();
+					$_pHTAccess -> generatePart4DeniedAddress($_db);
+					$_pHTAccess -> writeHTAccess();
+
+					CSysMailer::instance() 	-> sendMail(
+														CLanguage::instance() -> getString('SYSMAIL_SESSDENIED_SUBJ'), 
+														CLanguage::instance() -> getStringExt(
+																							'SYSMAIL_SESSDENIED_TEXT',
+																							[
+																								'[USER_IP]' => $_SERVER['REMOTE_ADDR']
+																							]
+																							),
+														true,
+														'mass-access-protection'
+														);
+
+					header("HTTP/1.0 403 Forbidden");
+					exit;
+				}
 			}
 
 			##	Write session data

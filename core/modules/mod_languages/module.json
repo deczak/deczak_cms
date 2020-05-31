@@ -42,6 +42,13 @@
 								"menu_name"	:"",
 								"menu_order":"0",
 								"use_right" :"delete"
+							},
+							{
+								"url_name"	:"ping",
+								"ctl_target":"ping",
+								"menu_name"	:"",
+								"menu_order":"0",
+								"use_right" :"edit"
 							}
 						],
 	"htaccess"			:{
@@ -51,8 +58,5 @@
 													"wildcard"	:"(.*)"
 												}
 											]
-						},
-	"include"			:[
-							{"type":"script",	"file":"script.js"}
-						 ]
+						}
 }

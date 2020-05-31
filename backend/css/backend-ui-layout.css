@@ -45,8 +45,7 @@
 	div.be-module-container table.table-overview td.bach-item-menu > span { margin-top:-3px; display:block; cursor:pointer; color:black; }
 	div.be-module-container table.table-overview tbody tr:nth-of-type(2n+0) td { background-color:var(--be-module-table-second-row); }
 	div.be-module-container table.table-overview tbody tr:hover td { background-color:var(--be-module-table-row-hover); }
-	div.be-module-container table.table-overview tfoot tr:first-child td { background-color:rgb(80,80,80); height:1px; padding:0px; }
-	div.be-module-container table.table-overview tfoot tr:last-child  td { font-weight:700; font-size:0.9em; padding:9px 9px; }
+	div.be-module-container table.table-overview tfoot tr:last-child  td { font-weight:700; font-size:0.9em; padding:9px 9px; border-top:1px solid rgb(80,80,80); }
 	div.be-module-container table.table-overview tfoot tr:last-child  td.batch-selection-item { width:50px; position:relative; padding-left: 18px; }
 
 	/* batch item menu dropdown */

@@ -5,6 +5,8 @@
 	
 	MOD_BE_RMADDR_DENIEDADDR		=	Denied address
 
+	MOD_BE_RMADDR_FUNC_DISABLED		=	The system to block remote addresses is disabled
+
 
 
 	
