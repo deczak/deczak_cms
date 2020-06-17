@@ -80,10 +80,7 @@ class	controllerUserAgent extends CController
 									$_request		 =	[];
 									$_request[] 	 = 	[	"input" => 'q',  	"validate" => "strip_tags|!empty" ,	"use_default" => true, "default_value" => false ]; 		
 									$_pURLVariables -> retrieve($_request, false, true);	
-
-									
-
-
+					
 									$modelCondition  = 	new CModelCondition();
 
 									if($_pURLVariables -> getValue("q") !== false)

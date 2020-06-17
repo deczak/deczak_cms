@@ -32,7 +32,7 @@ else
 	</div>
 	<div>
 		
-		<fieldset class="ui fieldset submit-able" id="denied-address" data-xhr-target="denied-address" <?= ($agentsList !== false ? 'data-xhr-overwrite-target="edit/'. $dataset -> data_id .'"' : ''); ?>>
+		<fieldset class="ui fieldset submit-able" id="denied-address" data-xhr-target="denied-address" <?= ($deniedList !== false ? 'data-xhr-overwrite-target="edit/'. $dataset -> data_id .'"' : ''); ?>>
 			
 			<legend><?php echo $language -> string('DENIED'); ?> <?php echo $language -> string('ADDRESS'); ?></legend>
 			<div>

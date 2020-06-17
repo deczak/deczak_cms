@@ -3,6 +3,7 @@
 require_once CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CModelCondition.php';
 require_once CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CSheme.php';
 require_once CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CModel.php';
+require_once CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CMessages.php';
 
 require_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelRightGroups.php';	
 require_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelUserGroups.php';	

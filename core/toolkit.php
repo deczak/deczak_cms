@@ -108,6 +108,65 @@ class	TK
 			return true;
 		return false;
 	}
+
+	public static function
+	matchRemoteAddr(string $_ip, string $_range) : bool
+	{
+		if(strpos($_range, '/') !== false)
+		{
+			## IPv4 & IPv6 with CIDR
+			list($net, $maskBits) = explode('/', $_range);
+
+			$size = (strpos($_ip, ':') === false) ? 4 : 16;
+
+			$ip = inet_pton($_ip);
+			$net = inet_pton($net);
+			if (!$ip || !$net)
+				return false;
+
+			$solid = floor($maskBits / 8);
+			$solidBits = $solid * 8;
+			$mask = str_repeat(chr(255), $solid);
+			for ($i = $solidBits; $i < $maskBits; $i += 8) {
+			$bits = max(0, min(8, $maskBits - $i));
+			$mask .= chr((pow(2, $bits) - 1) << (8 - $bits));
+			}
+			$mask = str_pad($mask, $size, chr(0));
+
+			return ($ip & $mask) === ($net & $mask);
+		}
+		else
+		{
+			## IPv4 only 
+
+			if(strpos($_range, '*') !==false)
+			{	
+				$lower 	= str_replace('*', '0', $_range);
+				$upper 	= str_replace('*', '255', $_range);
+				$_range = "$lower-$upper";
+			}
+			
+			if(strpos($_range, '-')!==false)
+			{ 
+				list($lower, $upper) = explode('-', $_range, 2);
+
+				$lower_dec 	= floatval(sprintf("%u",ip2long($lower)));
+				$upper_dec 	= floatval(sprintf("%u",ip2long($upper)));
+				$ip_dec 	= floatval(sprintf("%u",ip2long($_ip)));
+
+				return ( ($ip_dec >= $lower_dec) && ($ip_dec <= $upper_dec) );
+			}
+			else
+			{
+				return ($_ip == $_range);
+			}
+		}
+
+		return false;
+	}
+
+
+
 }
 
 class	CRYPT

@@ -1,10 +1,11 @@
 
 class	cmsRequestDataIndex
 {
-	constructor(templateId, timestampFormat)
+	constructor(templateId, timestampFormat, replaceCallback = null)
 	{
 		this.templateId 		= templateId;
 		this.timestampFormat	= timestampFormat;
+		this.replaceCallback	= replaceCallback;
 	}
 	
 	init()
@@ -36,8 +37,6 @@ class	cmsRequestDataIndex
 
 	replaceProcess(object)
 	{
-		let numProperties 	= Object.keys(object).length;
-
 		let	template = document.getElementById(this.templateId).innerHTML;
 		for(var prop in object)
 		{		
@@ -60,6 +59,10 @@ class	cmsRequestDataIndex
 			let regex = new RegExp('%'+ prop +'%',"g");
 			template = template.replace(regex, object[prop]);
 		}
+
+		if(this.replaceCallback != null)
+			template = this.replaceCallback(template, object);
+
 		return template;
 	}
 

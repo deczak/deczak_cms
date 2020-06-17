@@ -49,6 +49,10 @@
 
 
 
+tk::dbug($dbSessionRes);
+
+
+
 
 
 
@@ -104,9 +108,6 @@
 													-> table('tb_sessions_access_archiv') 
 													-> condition($condSessAccArchiv)
 													-> exec();
-
-
-
 
 
 
@@ -247,8 +248,6 @@
 
 	}
 
-	#tk::dbug($statistic);
-
 
 	if(CFG::GET() -> SESSION -> REPORT_WEEKLYACCESS)
 	{
@@ -278,17 +277,34 @@
 
 				foreach($statsDay['pages']['unique']['user'] as $uniqueNode => $uniquSum)
 				{
+
+
+/*
+
 					$sqlNodeString	=	"	SELECT		tb_page_header.page_name
 											FROM		tb_page_header
 											WHERE		tb_page_header.node_id = '". $uniqueNode ."'
 										";
 
 					$sqlNodeRes		=	$sqlInstance -> query($sqlNodeString);
+*/
 
-					if($sqlNodeRes -> num_rows != 0)
+			$pageCondition	 = new CModelCondition();
+			$pageCondition	-> where('node_id', $uniqueNode);
+
+			$pageInfo 		 = $pDatabase	-> query(DB_SELECT) 
+											-> table('tb_page_header') 
+											-> selectColumns(['page_name'])
+											-> condition($pageCondition)
+											-> exec();
+
+
+
+					if(count($pageInfo) != 0)
 					{
-						$sqlNodeData	=	$sqlNodeRes -> fetch_array();
-						$message[] 	= "  - ". $uniquSum['counter'] ."x ". $sqlNodeData['page_name'];
+						#$sqlNodeData	=	$sqlNodeRes -> fetch_array();
+						$sqlNodeData	=	$pageInfo[0];
+						$message[] 	= "  - ". $uniquSum['counter'] ."x ". $sqlNodeData -> page_name;
 					}
 					else
 					{
@@ -317,7 +333,7 @@
 					if($sqlNodeRes -> num_rows != 0)
 					{
 						$sqlNodeData	=	$sqlNodeRes -> fetch_array();
-						$message[] 	= "  - ". $uniquSum['counter'] ."x ". $sqlNodeData['page_name'];
+						$message[] 	= "  - ". $uniquSum['counter'] ."x ". $sqlNodeData -> page_name;
 					}
 					else
 					{
