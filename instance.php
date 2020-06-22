@@ -32,6 +32,7 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CSheme.php';
 
 	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CURLVariables.php';
+	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CRouter.php';
 	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CMessages.php';
 	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CSysMailer.php';
 	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CHTAccess.php';
@@ -85,7 +86,6 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 		CPageRequest::instance() -> setResponseCode(920);
 	}	
 
-
 ##	L A N G U A G E   S Y S T E M   /   I N I T I A L   F I L E S
 
 	//	CLanguage is a singleton class
@@ -94,6 +94,46 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 	$_pLanguage		 = 	CLanguage::instance();		
 	$_pLanguage		-> 	initialize($pDBInstance -> getConnection(CFG::GET() -> MYSQL -> PRIMARY_DATABASE));	
 	$_pLanguage		->	loadLanguageFile(CMS_SERVER_ROOT.DIR_CORE.DIR_LANGUAGES.CLanguage::instance() -> getDefault() .'/');
+
+
+
+##	R O U T I N G
+
+
+
+
+echo '<br><br><br><br><br><br><br><br><br><br>';
+
+tk::dbug($_SERVER['REQUEST_URI']);
+
+
+
+$pRouter  = CRouter::instance();
+$pRouter -> initialize(CFG::GET() -> LANGUAGE, CLanguage::instance() -> getLanguages());
+
+
+//tmp call
+$pRouter -> createRoutes($pDBInstance -> getConnection(CFG::GET() -> MYSQL -> PRIMARY_DATABASE));
+
+
+
+$pRouteRequest = $pRouter -> route($_SERVER['REQUEST_URI']);
+
+
+
+
+tk::dbug('$pRouteRequest');
+tk::dbug($pRouteRequest);
+
+
+
+
+
+
+
+
+
+
 
 ##	C O O K I E   M A N A G E R
 

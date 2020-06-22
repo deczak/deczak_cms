@@ -65,7 +65,8 @@ class 	modelSitemap extends CModel
 										tb_page.publish_until,
 										tb_page.publish_expired,
 										tb_page.hidden_state,
-										tb_page.menu_follow
+										tb_page.menu_follow,
+										o.page_path AS page_path_segment
 							FROM 		tb_page_path AS n,
 										tb_page_path AS p,
 										tb_page_path AS o
@@ -118,6 +119,8 @@ class 	modelSitemap extends CModel
 			}
 
 			$_sqlNode -> page_path = $this -> getPagePath($_pDatabase, $_sqlNode -> node_id, $_sqlNode -> page_language);
+			$_sqlNode -> page_path_segment = trim($_sqlNode -> page_path_segment, '/');
+	
 			$_pages[]  = $_sqlNode;
 		}
 
