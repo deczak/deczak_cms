@@ -71,14 +71,6 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 ##  S Q L   C O N N E C T I O N
 
 	//	CSQLConnect is a singleton class
-/*
-	$_pSQLObject 	 =	CSQLConnect::instance();
-	$_pSQLObject 	->	initialize();
-	if(!$_pSQLObject-> 	createConnection())
-	{	##	create connection failed
-		CPageRequest::instance() -> setResponseCode(920);
-	}	
-*/
 
 	$pDBInstance 	 = CDatabase::instance();
 	if(!$pDBInstance -> connect(CFG::GET() -> MYSQL -> DATABASE))
@@ -95,45 +87,15 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 	$_pLanguage		-> 	initialize($pDBInstance -> getConnection(CFG::GET() -> MYSQL -> PRIMARY_DATABASE));	
 	$_pLanguage		->	loadLanguageFile(CMS_SERVER_ROOT.DIR_CORE.DIR_LANGUAGES.CLanguage::instance() -> getDefault() .'/');
 
-
-
 ##	R O U T I N G
 
+	$pRouter  = CRouter::instance();
+	$pRouter -> initialize(CFG::GET() -> LANGUAGE, CLanguage::instance() -> getLanguages());
 
+	$pRouteRequest = $pRouter -> route($_SERVER['REQUEST_URI']);
 
-
-echo '<br><br><br><br><br><br><br><br><br><br>';
-
-tk::dbug($_SERVER['REQUEST_URI']);
-
-
-
-$pRouter  = CRouter::instance();
-$pRouter -> initialize(CFG::GET() -> LANGUAGE, CLanguage::instance() -> getLanguages());
-
-
-//tmp call
-$pRouter -> createRoutes($pDBInstance -> getConnection(CFG::GET() -> MYSQL -> PRIMARY_DATABASE));
-
-
-
-$pRouteRequest = $pRouter -> route($_SERVER['REQUEST_URI']);
-
-
-
-
-tk::dbug('$pRouteRequest');
-tk::dbug($pRouteRequest);
-
-
-
-
-
-
-
-
-
-
+	$_GET['cms-node'] = $pRouteRequest -> nodeId;
+	$_GET['cms-lang'] = $pRouteRequest -> language;
 
 ##	C O O K I E   M A N A G E R
 
@@ -222,7 +184,6 @@ tk::dbug($pRouteRequest);
 	$_pModules		 =	CModules::instance();
 	$_pModules		->	initialize($pDBInstance -> getConnection(CFG::GET() -> MYSQL -> PRIMARY_DATABASE), $pUserRights);
 
-
 ##	I M P E R A T O R
 
 	CBenchmark::instance() -> measurementPoint('call imperator');	
@@ -234,9 +195,7 @@ tk::dbug($pRouteRequest);
 							$_pLanguage			-> getActiveLanguage(),
 							$_pURLVariables 	-> getValue("cms-node-version"),
 							$_pURLVariables 	-> getValue("cms-xhrequest")
-							);
-
-						
+							);				
 
 	if($_pURLVariables -> getValue("cms-error") !== false)
 		CPageRequest::instance() -> setResponseCode($_pURLVariables -> getValue("cms-error"));
@@ -254,4 +213,7 @@ tk::dbug($pRouteRequest);
 
 	$_pHTML -> openDocument($_pImperator -> m_page, $_pImperator, $_pPageRequest);
 
+
+tk::dbug($pRouteRequest);
+tk::dbug($_GET);
 ?>

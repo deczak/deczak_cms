@@ -36,6 +36,9 @@ class	CHTAccess
 		{
 			ftruncate($_hFile, 0);
 
+
+			/*
+
 			##	Get Page and object data
 
 			$_backend	= file_get_contents($this -> m_backendFilepath);
@@ -142,6 +145,18 @@ class	CHTAccess
 			
 			fwrite($_hFile, "\r\n");	
 
+			*/
+
+
+
+
+			fwrite($_hFile, "RewriteCond %{REQUEST_URI} =/". $this -> m_backendFolder ."/" . "\r\n");	
+			fwrite($_hFile, "RewriteRule ^". $this -> m_backendFolder ."/index.php?%{QUERY_STRING} [NC,L]" . "\r\n");	
+			fwrite($_hFile, "RewriteCond %{REQUEST_FILENAME} -f" . "\r\n");	
+			fwrite($_hFile, "RewriteRule ^". $this -> m_backendFolder ."/(.*)/?$ ". $this -> m_backendFolder ."/$1 [NC,L]" . "\r\n");	
+			fwrite($_hFile, "RewriteRule ^". $this -> m_backendFolder ."/(.*)/?$ ". $this -> m_backendFolder ."/index.php?$1 [L,QSA]" . "\r\n");	
+
+
 
 			if(CFG::GET() -> CRONJOB -> CRON_DIRECTORY_PUBLIC)
 			{	
@@ -180,11 +195,13 @@ class	CHTAccess
 	{
 		$_targetFile = '3-frontend';
 
-		$_hFile 	 = fopen($this -> m_dataLocation . $_targetFile, "r+");
+		$_hFile 	 = fopen($this -> m_dataLocation . $_targetFile, "a");
 
 		if(flock($_hFile, LOCK_EX))
 		{
 			ftruncate($_hFile, 0);
+
+			
 		
 			if(CFG::GET() -> ERROR_PAGES -> ERROR403)
 			{
@@ -197,6 +214,10 @@ class	CHTAccess
 				fwrite($_hFile, 'RewriteRule ^404/?$ index.php?cms-error=404 [NC,L]');
 				fwrite($_hFile, "\r\n");
 			}
+
+			
+
+			/*
 
 			##	Read pages from sql and write it to file
 
@@ -259,6 +280,16 @@ class	CHTAccess
 				fwrite($_hFile, "\r\n");
 			}
 
+			*/
+
+
+			fwrite($_hFile, "RewriteCond %{THE_REQUEST} /public/([^\s?]*) [NC]" . "\r\n");	
+			fwrite($_hFile, "RewriteRule ^ %1 [L,NE,R=302]" . "\r\n");	
+			fwrite($_hFile, "RewriteRule ^(.*)$ public/index.php?$1 [L,QSA]" . "\r\n");	
+
+
+
+
 			##	Release lock
 
 			fflush($_hFile); 
@@ -283,7 +314,7 @@ class	CHTAccess
 			return;
 		}
 
-		$_hFile 	 = fopen($this -> m_dataLocation . $_targetFile, "r+");
+		$_hFile 	 = fopen($this -> m_dataLocation . $_targetFile, "a");
 
 		if(flock($_hFile, LOCK_EX))
 		{
@@ -323,8 +354,19 @@ class	CHTAccess
 	}
 
 	public function
-	writeHTAccess()
+	writeHTAccess(CDatabaseConnection &$_pDatabase)
 	{
+
+// TODO .. router.json aktualisieren
+
+
+		$pRouter  = CRouter::instance();
+		$pRouter -> createRoutes($_pDatabase);
+
+
+
+
+
 		##	get source files and order by name
 
 		$_filenames 	= [];
@@ -345,21 +387,22 @@ class	CHTAccess
 
 		if (flock($_hDstFile, LOCK_EX))
 		{
-			ftruncate($_hDstFile, 0);
+			ftruncate($_hDstFile, 0);	
+
+			if(CFG::GET() -> ERROR_PAGES -> ERROR403)
+			{
+				fwrite($_hDstFile, 'ErrorDocument 403 '. CMS_SERVER_URL .'403');
+				fwrite($_hDstFile, "\r\n");
+			}
+
+			if(CFG::GET() -> ERROR_PAGES -> ERROR404)
+			{
+				fwrite($_hDstFile, 'ErrorDocument 404 '. CMS_SERVER_URL .'404 ');
+				fwrite($_hDstFile, "\r\n");
+			}
 
 			foreach($_filenames as $_file)
-			{		
-				if(CFG::GET() -> ERROR_PAGES -> ERROR403)
-				{
-					fwrite($_hDstFile, 'ErrorDocument 403 '. CMS_SERVER_URL .'403');
-					fwrite($_hDstFile, "\r\n");
-				}
-
-				if(CFG::GET() -> ERROR_PAGES -> ERROR404)
-				{
-					fwrite($_hDstFile, 'ErrorDocument 404 '. CMS_SERVER_URL .'404 ');
-					fwrite($_hDstFile, "\r\n");
-				}
+			{	
 						
 				##	Read Source File
 

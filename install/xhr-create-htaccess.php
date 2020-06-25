@@ -68,7 +68,7 @@
 	$_pHTAccess  = new CHTAccess();
 	$_pHTAccess -> generatePart4Backend($db);
 	$_pHTAccess -> generatePart4Frontend($db);
-	$_pHTAccess -> writeHTAccess();
+	$_pHTAccess -> writeHTAccess($db);
 
 	tk::xhrResult(0, 'OK');
 ?>

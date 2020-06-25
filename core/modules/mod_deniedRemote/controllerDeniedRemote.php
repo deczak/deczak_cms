@@ -237,7 +237,7 @@ class	controllerDeniedRemote extends CController
 
 					$_pHTAccess  = new CHTAccess();
 					$_pHTAccess -> generatePart4DeniedAddress($_pDatabase);
-					$_pHTAccess -> writeHTAccess();
+					$_pHTAccess -> writeHTAccess($_pDatabase);
 				}
 				else
 				{
@@ -407,7 +407,7 @@ class	controllerDeniedRemote extends CController
 
 													$_pHTAccess  = new CHTAccess();
 													$_pHTAccess -> generatePart4DeniedAddress($_pDatabase);
-													$_pHTAccess -> writeHTAccess();
+													$_pHTAccess -> writeHTAccess($_pDatabase);
 
 												}
 												else
@@ -461,7 +461,7 @@ class	controllerDeniedRemote extends CController
 
 										$_pHTAccess  = new CHTAccess();
 										$_pHTAccess -> generatePart4DeniedAddress($_pDatabase);
-										$_pHTAccess -> writeHTAccess();
+										$_pHTAccess -> writeHTAccess($_pDatabase);
 									}
 									else
 									{

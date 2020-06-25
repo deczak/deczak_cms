@@ -152,7 +152,7 @@ class	controllerEnvironment extends CController
 										$_pHTAccess -> generatePart4Backend($_sqlConnection);
 										$_pHTAccess -> generatePart4Frontend($_sqlConnection);
 										$_pHTAccess -> generatePart4DeniedAddress($_sqlConnection);
-										$_pHTAccess -> writeHTAccess();
+										$_pHTAccess -> writeHTAccess($_sqlConnection);
 									
 										break;
 
