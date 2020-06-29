@@ -25,14 +25,24 @@
 								"ctl_target":"edit",
 								"menu_name"	:"",
 								"menu_order":"0",
-								"use_right" :"edit"
+								"use_right" :"edit",
+								"query_var" :"cms-ctrl-action",
+								"subSection":{
+												"url_name"	:false,
+												"query_var" :"cms-system-id"
+											 }
 							},
 							{
 								"url_name"	:"delete",
 								"ctl_target":"delete",
 								"menu_name"	:"",
 								"menu_order":"0",
-								"use_right" :"edit"
+								"use_right" :"edit",
+								"query_var" :"cms-ctrl-action",
+								"subSection":{
+												"url_name"	:false,
+												"query_var" :"cms-system-id"
+											 }
 							}
 						]
 }

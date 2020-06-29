@@ -388,7 +388,7 @@ class	controllerPages extends CController
 
 												$_pHTAccess  = new CHTAccess();
 												$_pHTAccess -> generatePart4Frontend($_pDatabase);
-												$_pHTAccess -> writeHTAccess();
+												$_pHTAccess -> writeHTAccess($_pDatabase);
 
 												$sitemap  	 = new CXMLSitemap();
 												$sitemap 	-> generate($_pDatabase);												
@@ -441,7 +441,7 @@ class	controllerPages extends CController
 		{
 			$_pHTAccess  = new CHTAccess();
 			$_pHTAccess -> generatePart4Frontend($_pDatabase);
-			$_pHTAccess -> writeHTAccess();
+			$_pHTAccess -> writeHTAccess($_pDatabase);
 
 			$sitemap  	 = new CXMLSitemap();
 			$sitemap 	-> generate($_pDatabase);	
@@ -472,7 +472,7 @@ class	controllerPages extends CController
 		{
 			$_pHTAccess  = new CHTAccess();
 			$_pHTAccess -> generatePart4Frontend($_pDatabase);
-			$_pHTAccess -> writeHTAccess();
+			$_pHTAccess -> writeHTAccess($_pDatabase);
 
 			$sitemap  	 = new CXMLSitemap();
 			$sitemap 	-> generate($_pDatabase);	
@@ -503,7 +503,7 @@ class	controllerPages extends CController
 		{
 			$_pHTAccess  = new CHTAccess();
 			$_pHTAccess -> generatePart4Frontend($_pDatabase);
-			$_pHTAccess -> writeHTAccess();
+			$_pHTAccess -> writeHTAccess($_pDatabase);
 
 			$sitemap  	 = new CXMLSitemap();
 			$sitemap 	-> generate($_pDatabase);	

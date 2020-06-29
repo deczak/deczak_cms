@@ -415,7 +415,7 @@ class	CModules extends CSingleton
 
 			$_pHTAccess  = new CHTAccess();
 			$_pHTAccess -> generatePart4Backend($_dbConnection);
-			$_pHTAccess -> writeHTAccess();
+			$_pHTAccess -> writeHTAccess($_dbConnection);
 		}
 
 		return true;

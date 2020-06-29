@@ -148,7 +148,7 @@ class	CSession extends CSingleton
 
 					$_pHTAccess  = new CHTAccess();
 					$_pHTAccess -> generatePart4DeniedAddress($_db);
-					$_pHTAccess -> writeHTAccess();
+					$_pHTAccess -> writeHTAccess($_db);
 
 					CSysMailer::instance() 	-> sendMail(
 														CLanguage::instance() -> getString('SYSMAIL_SESSDENIED_SUBJ'), 
