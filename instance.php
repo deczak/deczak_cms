@@ -213,7 +213,4 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 
 	$_pHTML -> openDocument($_pImperator -> m_page, $_pImperator, $_pPageRequest);
 
-
-tk::dbug($pRouteRequest);
-tk::dbug($_GET);
 ?>
