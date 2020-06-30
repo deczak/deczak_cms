@@ -1,15 +1,15 @@
+
 <?php
+if(isset($rightGroupsList))
+{
+	$dataset = &$rightGroupsList[0];
+}
+else
+{
+	$rightGroupsList = false;
+}
 
-#tk::dbug($right_groups);
-#tk::dbug($user_groups);
-
-	$right_group = &$right_groups[0];
- 
-#	$right_group -> time_login 	= ($right_group -> time_login == 0 ? '-' : date(CFG::GET() -> BACKEND -> TIME_FORMAT, $right_group -> time_login) );
-#	$right_group -> time_create 	= ($right_group -> time_create == 0 ? '-' : date(CFG::GET() -> BACKEND -> TIME_FORMAT, $right_group -> time_create) );
-
-	$_pModules		 =	CModules::instance();
-	$_aActiveModules = $_pModules -> getModules();	
+$activeModulesList = CModules::instance() -> getModules();	
 
 ?>
 
@@ -24,35 +24,38 @@
 			</ul>
 			<hr>
 			<div class="delete-box">	
-				<?php if($enableDelete) { ?>
-					<fieldset class="ui fieldset" data-xhr-target="group-delete" data-xhr-overwrite-target="delete/<?php echo $right_group -> group_id; ?>">	
+				<?php if(isset($enableDelete) && $enableDelete && $rightGroupsList !== false) { ?>	
+					<fieldset class="ui fieldset" data-xhr-target="group-delete" data-xhr-overwrite-target="delete/<?php echo $dataset -> group_id; ?>">	
 						<div class="submit-container button-only">
 							<button class="ui button icon labeled trigger-submit-fieldset" type="button" disabled><span><i class="fas fa-trash-alt" data-icon="fa-trash-alt"></i></span><?php echo CLanguage::get() -> string('BUTTON_DELETE'); ?></button>
 							<div class="protector"><input type="checkbox" class="trigger-submit-protector" id="protector-user-delete"><label for="protector-user-delete"></label></div>
 						</div>
-						<div class="result-box" data-error=""></div>
+						<div class="ui result-box" data-error=""></div>
 					</fieldset>
 				<?php } ?>
 			</div>
+
+			<div class="ui result-box ping-result lower-font-size" id="ping-lock-result" data-error=""></div>
+			
 		</div>
 	</div>
-	<div>
 
+	<div>
 		
-		<fieldset class="ui fieldset submit-able" id="group-data" data-xhr-target="group-data" data-xhr-overwrite-target="edit/<?php echo $right_group -> group_id; ?>">
+		<fieldset class="ui fieldset submit-able" id="group-data" data-xhr-target="group-rights" <?= ($rightGroupsList !== false ? 'data-xhr-overwrite-target="edit/'. $dataset -> group_id .'"' : ''); ?>>
 			<legend><?php echo CLanguage::get() -> string('MOD_RGROUPS_GROUP_INFO'); ?></legend>
 			<div>
 				<!-- group -->
 				<div class="group width-100">
 					<div class="input width-25">
 						<label><?php echo CLanguage::get() -> string('MOD_RGROUPS_GROUP_ID'); ?></label>
-						<input type="text" disabled value="<?php echo $right_group -> group_id; ?>">
-						<i class="fas fa-lock"></i>
+						<input name="group_id" type="text" <?= ($rightGroupsList !== false ? 'disabled' : ''); ?> value="<?php echo $dataset -> group_id; ?>">
+						<?= ($rightGroupsList !== false ? '<i class="fas fa-lock"></i>' : ''); ?>
 					</div>
 
 					<div class="input width-25">
 						<label><?php echo CLanguage::get() -> string('MOD_RGROUPS_GROUP_NAME'); ?></label>
-						<input type="text" name="group_name" value="<?php echo $right_group -> group_name; ?>">
+						<input type="text" name="group_name" value="<?php echo $dataset -> group_name; ?>">
 					</div>
 
 					<div class="input width-25">
@@ -62,28 +65,6 @@
 					</div>
 				</div>
 
-			</div>
-
-			<?php if($enableEdit) { ?>
-
-				<div class="result-box" data-error=""></div>
-
-				<!-- Submit button - beware of fieldset name -->
-
-				<div class="submit-container">
-					<button class="ui button icon labeled trigger-submit-fieldset" type="button" disabled><span><i class="fas fa-save" data-icon="fa-save"></i></span><?php echo CLanguage::get() -> string('BUTTON_SAVE'); ?></button>
-					<div class="protector"><input type="checkbox" class="trigger-submit-protector" id="protector-group-data"><label for="protector-group-data"></label></div>
-				</div>
-				
-			<?php } ?>
-
-		</fieldset>
-
-
-
-		<fieldset class="ui fieldset submit-able" id="group-rights" data-xhr-target="group-rights" data-xhr-overwrite-target="edit/<?php echo $right_group -> group_id; ?>">
-			<legend><?php echo CLanguage::get() -> string('MOD_RGROUPS_GROUP_RIGHTS'); ?></legend>
-			<div>
 
 				<!-- group -->
 				<div class="group width-100">
@@ -99,7 +80,7 @@
 							<tbody>
 
 								<?php
-								foreach($_aActiveModules as $_module)
+								foreach($activeModulesList as $_module)
 								{
 
 
@@ -116,24 +97,16 @@
 									$_moduleData = json_decode($_moduleData);
 
 									?>
-									<tr style="">
+									<tr>
 										<td><?php echo $_module -> module_name; ?></td>
 										<td>
 											<div style="display:flex;">
 											<?php
 											foreach($_moduleData -> module_rights as $_right)
 											{
-												$_isActiveRight = '';
-												$_tempBullShit = $_module -> module_id;
-
-												if(property_exists($right_group -> group_rights, $_module -> module_id) && in_array($_right -> name, $right_group -> group_rights -> $_tempBullShit))
-												{
-													$_isActiveRight = 'checked';
-												}
-
 												?>
 												<div class="ui pick-item">
-													<input type="checkbox" id="<?php echo $_module -> module_id .'-'. $_right -> name; ?>" name="group_rights[<?php echo $_module -> module_id; ?>][]" value="<?php echo $_right -> name; ?>" <?php echo $_isActiveRight; ?>>
+													<input type="checkbox" id="<?php echo $_module -> module_id .'-'. $_right -> name; ?>" name="group_rights[<?php echo $_module -> module_id; ?>][]" value="<?php echo $_right -> name; ?>">
 													<label for="<?php echo $_module -> module_id .'-'. $_right -> name; ?>" title="<?php echo CLanguage::get() -> string($_right -> desc); ?>">
 														<?php echo CLanguage::get() -> string($_right -> desc); ?>
 													</label>
@@ -166,9 +139,9 @@
 		
 			</div>
 
-			<?php if($enableEdit) { ?>
+			<?php if(isset($enableEdit) && $enableEdit || $rightGroupsList === false) { ?>
 
-				<div class="result-box" data-error=""></div>
+				<div class="ui result-box" data-error=""></div>
 
 				<!-- Submit button - beware of fieldset name -->
 
@@ -181,14 +154,57 @@
 
 		</fieldset>
 
-
-
-
-
-
-			<br><br>
-
 	</div>
-</div>
-<?php tk::dbug($_aActiveModules); ?>
 
+</div>
+
+<?php if($rightGroupsList !== false) { ?>
+<script src="<?php echo CMS_SERVER_URL_BACKEND; ?>js/classes/cms-request-data-index.js"></script>
+<script src="<?php echo CMS_SERVER_URL_BACKEND; ?>js/classes/cms-request-data-item.js"></script>
+<script>
+
+	let	requestURL	= CMS.SERVER_URL_BACKEND + CMS.PAGE_PATH +'ping/<?= $dataset -> group_id; ?>';
+	let pingId		= cmstk.getRandomId();
+	
+	cmstk.ping(requestURL, <?= CFG::GET() -> USER_SYSTEM -> MODULE_LOCKING -> PING_TIMEOUT; ?>, pingId);
+
+	document.addEventListener("DOMContentLoaded", function(){
+
+		document.dataInstance = new cmsRequestDataItem('', '<?= CFG::GET() -> BACKEND -> TIME_FORMAT; ?>', <?= $dataset -> group_id; ?>, extendedReplace);
+		document.dataInstance.requestData();
+
+		let fieldsets = document.querySelectorAll('fieldset[data-xhr-target]');
+		for(let i = 0; i < fieldsets.length; i++)
+		{
+			fieldsets[i].setAttribute('data-ping-id', pingId);
+		}
+	});	
+
+	function extendedReplace(prop, propContent)
+	{
+
+		let rightsTable = document.getElementById('table-mod-group-rights');
+
+		switch(prop)
+		{
+			case   'group_rights':
+
+					for(var group in propContent)
+					{	
+						
+						for(var right in propContent[group])
+						{	
+
+							let rightItem = rightsTable.querySelector('[name="group_rights['+ group +'][]"][value="'+ propContent[group][right] +'"]');
+							if(rightItem !== null)
+								rightItem.checked = true;
+
+						}				
+					}
+
+					break;
+		}
+	}
+
+</script>
+<?php } ?>

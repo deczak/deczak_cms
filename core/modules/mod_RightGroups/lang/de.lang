@@ -11,3 +11,7 @@
 	
 	MOD_RGROUPS_GROUP_INFO				=	Gruppen Information			
 	MOD_RGROUPS_GROUP_RIGHTS			=	Gruppen Rechte
+
+
+
+	MOD_RGROUP_ERR_RGROUP_ID_UK			=	Gruppe ist unbekannt

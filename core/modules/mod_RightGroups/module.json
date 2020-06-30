@@ -55,14 +55,18 @@
 												"url_name"	:false,
 												"query_var" :"cms-system-id"
 											 }
+							},
+							{
+								"url_name"	:"ping",
+								"ctl_target":"ping",
+								"menu_name"	:"",
+								"menu_order":"0",
+								"use_right" :"edit",
+								"query_var" :"cms-ctrl-action",
+								"subSection":{
+												"url_name"	:false,
+												"query_var" :"cms-system-id"
+											 }
 							}
-						],
-	"htaccess"			:{
-							"variables"		:[
-												{
-													"key" 		: "cms-system-id",
-													"wildcard"	:"(.*)"
-												}
-											]
-						}
+						]
 }
