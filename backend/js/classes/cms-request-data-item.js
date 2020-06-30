@@ -1,11 +1,12 @@
 
 class cmsRequestDataItem extends cmsRequestDataIndex
 {
-	constructor(templateId, timestampFormat, systemId)
+	constructor(templateId, timestampFormat, systemId, replaceCallback = null)
 	{
 		super(templateId, timestampFormat);
 
 		this.systemId = systemId;
+		this.replaceCallback = replaceCallback;
 	}
 
 	requestData(onSuccess = null)
@@ -63,6 +64,10 @@ class cmsRequestDataItem extends cmsRequestDataIndex
 							break;
 				}
 			}
+
+			if(callInstance.replaceCallback != null)
+				callInstance.replaceCallback(prop, response.data[0][prop]);
+				
 		}
 	}
 }
