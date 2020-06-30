@@ -1,27 +1,16 @@
 <?php
+$tablesColumns = [];
+foreach($tablesList as $tableGroup)
+foreach($tableGroup as $table)
+{
+	$tableInfoRes 	= $pDatabase -> getConnection() -> query("SELECT DISTINCT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '$table'", PDO::FETCH_CLASS, 'stdClass');
+	$tableInfoList	= $tableInfoRes -> fetchAll();
 
-	$tablesColumns = [];
-	foreach($tablesList as $tableGroup)
-	foreach($tableGroup as $table)
+	foreach($tableInfoList as $tableInfoItm)
 	{
-		/*
-		$sqlTableRes 	= $sqlConnection -> query("SELECT DISTINCT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '$table'");
-		while($sqlTableItm = $sqlTableRes -> fetch_assoc())
-		{
-			$tablesColumns[$table][] = $sqlTableItm['COLUMN_NAME'];
-		}
-		*/
-		$tableInfoRes 	= $connection -> query("SELECT DISTINCT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '$table'", PDO::FETCH_CLASS, 'stdClass');
-		$tableInfoList	= $tableInfoRes -> fetchAll();
-
-		foreach($tableInfoList as $tableInfoItm)
-		{
-			$tablesColumns[$table][] = $tableInfoItm -> COLUMN_NAME;
-		}
-	
-
-	}	
-
+		$tablesColumns[$table][] = $tableInfoItm -> COLUMN_NAME;
+	}
+}	
 ?>
 
 <div class="be-module-container forms-view">
@@ -38,7 +27,6 @@
 		</div>
 	</div>
 	<div>
-
 		
 		<fieldset class="ui fieldset submit-able" id="group-data" data-xhr-target="group-data">
 			<legend><?= CLanguage::get() -> string('MOD_LOGINO_SUB_CREATE_NAME'); ?></legend>
