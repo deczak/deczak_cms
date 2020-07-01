@@ -311,6 +311,7 @@ class	CModel
 									case DB_COLUMN_TYPE_BOOL      : $_objectString .= " case '". $column -> m_columnName ."': \$this->". $column -> m_columnName ." = boolval(\$_initialValue); break;"; break;				
 									case DB_COLUMN_TYPE_DECIMAL   : 				
 									case DB_COLUMN_TYPE_FLOAT     : $_objectString .= " case '". $column -> m_columnName ."': \$this->". $column -> m_columnName ." = floatval(\$_initialValue); break;"; break;				
+									case DB_COLUMN_TYPE_ARRAY     : $_objectString .= " case '". $column -> m_columnName ."': \$this->". $column -> m_columnName ." = (is_string(\$_initialValue) ? json_decode(\$_initialValue, true) : \$_initialValue); break;"; break;				
 									case DB_COLUMN_TYPE_JSON      : $_objectString .= " case '". $column -> m_columnName ."': \$this->". $column -> m_columnName ." = (is_string(\$_initialValue) ? json_decode(\$_initialValue) : \$_initialValue); break;"; break;				
 									default         			  : $_objectString .= " case '". $column -> m_columnName ."': \$this->". $column -> m_columnName ." = \$_initialValue; break;"; break;				
 								}
