@@ -3,8 +3,9 @@ $tablesColumns = [];
 foreach($tablesList as $tableGroup)
 foreach($tableGroup as $table)
 {
-	$tableInfoRes 	= $pDatabase -> getConnection() -> query("SELECT DISTINCT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '$table'", PDO::FETCH_CLASS, 'stdClass');
-	$tableInfoList	= $tableInfoRes -> fetchAll();
+	$tableInfoList 	= $pDatabase	-> query(DB_COLUMNS) 
+									-> table($table)
+									-> exec();
 
 	foreach($tableInfoList as $tableInfoItm)
 	{

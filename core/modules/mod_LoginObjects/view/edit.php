@@ -1,35 +1,47 @@
 <?php
 
-	$login_object = &$login_objects[0];
 
-	$login_object -> object_fields 		= json_decode($login_object -> object_fields, true);
-	$login_object -> object_session_ext	= json_decode($login_object -> object_session_ext, true);
-	$login_object -> object_databases	= json_decode($login_object -> object_databases, true);
- 
-	$login_object -> time_create 	= ($login_object -> time_create == 0 ? '-' : date(CFG::GET() -> BACKEND -> TIME_FORMAT, $login_object -> time_create) );
-	$login_object -> time_update 	= ($login_object -> time_update == 0 ? '-' : date(CFG::GET() -> BACKEND -> TIME_FORMAT, $login_object -> time_update) );
+/*
+$dataset = &$datasets[0];
 
-	$login_object -> create_by 	= ($login_object -> create_by == 0 ? '-' : $login_object -> create_by );
-	$login_object -> update_by 	= ($login_object -> update_by == 0 ? '-' : $login_object -> update_by );
+$dataset -> object_fields 		= json_decode($dataset -> object_fields, true);
+$dataset -> object_session_ext	= json_decode($dataset -> object_session_ext, true);
+$dataset -> object_databases	= json_decode($dataset -> object_databases, true);
 
-	// this will be replaced later by another source, possible $authenticationTables gets removed and replaced by new one with direct use
+$dataset -> time_create 	= ($dataset -> time_create == 0 ? '-' : date(CFG::GET() -> BACKEND -> TIME_FORMAT, $dataset -> time_create) );
+$dataset -> time_update 	= ($dataset -> time_update == 0 ? '-' : date(CFG::GET() -> BACKEND -> TIME_FORMAT, $dataset -> time_update) );
 
-	// get columns from authentication tables
+$dataset -> create_by 	= ($dataset -> create_by == 0 ? '-' : $dataset -> create_by );
+$dataset -> update_by 	= ($dataset -> update_by == 0 ? '-' : $dataset -> update_by );
+*/
 
-	$connection = $pDatabase -> getConnection();
 
-	$tablesColumns = [];
-	foreach($tablesList as $tableGroup)
-	foreach($tableGroup as $table)
+
+$tablesColumns = [];
+foreach($tablesList as $tableGroup)
+foreach($tableGroup as $table)
+{
+	$tableInfoList 	= $pDatabase	-> query(DB_COLUMNS) 
+									-> table($table)
+									-> exec();	
+
+	foreach($tableInfoList as $tableInfoItm)
 	{
-		$tableInfoRes 	= $connection -> query("SELECT DISTINCT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '$table'", PDO::FETCH_CLASS, 'stdClass');
-		$tableInfoList	= $tableInfoRes -> fetchAll();
-
-		foreach($tableInfoList as $tableInfoItm)
-		{
-			$tablesColumns[$table][] = $tableInfoItm -> COLUMN_NAME;
-		}
+		$tablesColumns[$table][] = $tableInfoItm -> COLUMN_NAME;
 	}
+}
+
+
+
+
+if(isset($loginObjectsList))
+{
+	$dataset = &$loginObjectsList[0];
+}
+else
+{
+	$loginObjectsList = false;
+}
 
 
 ?>
@@ -45,20 +57,22 @@
 			<hr>
 			<div class="delete-box">	
 
-				
-			<?php if($enableDelete && $login_object -> is_protected != 1) { ?>
+				<?php if(isset($enableDelete) && $enableDelete && $loginObjectsList !== false) { ?>	
 
-				<fieldset class="ui fieldset" data-xhr-target="object-delete" data-xhr-overwrite-target="delete/<?php echo $login_object -> object_id; ?>">	
-					<div class="submit-container button-only">
-						<button class="ui button icon labeled trigger-submit-fieldset" type="button" disabled><span><i class="fas fa-trash-alt" data-icon="fa-trash-alt"></i></span><?php echo CLanguage::instance() -> getString('BUTTON_DELETE'); ?></button>
-						<div class="protector"><input type="checkbox" class="trigger-submit-protector" id="protector-login-objects-delete"><label for="protector-login-objects-delete"></label></div>
-					</div>
-					<div class="result-box" data-error=""></div>
-				</fieldset>
+					<fieldset class="ui fieldset" data-xhr-target="object-delete" data-xhr-overwrite-target="delete/<?php echo $dataset -> object_id; ?>">	
+						<div class="submit-container button-only">
+							<button class="ui button icon labeled trigger-submit-fieldset" type="button" disabled><span><i class="fas fa-trash-alt" data-icon="fa-trash-alt"></i></span><?php echo CLanguage::instance() -> getString('BUTTON_DELETE'); ?></button>
+							<div class="protector"><input type="checkbox" class="trigger-submit-protector" id="protector-login-objects-delete"><label for="protector-login-objects-delete"></label></div>
+						</div>
+						<div class="result-box" data-error=""></div>
+					</fieldset>
 
-			<?php } ?>
+				<?php } ?>
 			
 			</div>
+
+			<div class="ui result-box ping-result lower-font-size" id="ping-lock-result" data-error=""></div>
+
 		</div>
 	</div>
 	<div>
@@ -71,39 +85,10 @@
 
 
 	
-		<fieldset class="ui fieldset submit-able" id="group-data" data-xhr-target="login-data" data-xhr-overwrite-target="edit/<?php echo $login_object -> object_id; ?>">
+		<fieldset class="ui fieldset submit-able" id="group-data" data-xhr-target="login-data" <?= ($loginObjectsList !== false ? 'data-xhr-overwrite-target="edit/'. $dataset -> object_id .'"' : ''); ?>>
 			<legend><?php echo CLanguage::instance() -> getString('MOD_LOGINO_OBJECT'); ?></legend>
 			<div>
-
-
-				<!-- group 
-				<div class="group width-100">
-
-					<div class="group-head width-100"><?php echo CLanguage::instance() -> getString('MOD_LOGINO_OBJECT_INFO'); ?></div>
-
-
-					<div class="input width-25">
-						<label><?php echo CLanguage::instance() -> getString('TIME_CREATE_AT'); ?></label>
-						<input type="text" disabled value="<?php echo $login_object -> time_create; ?>">
-						<i class="fas fa-lock"></i>
-					</div>
-					<div class="input width-25">
-						<label><?php echo CLanguage::instance() -> getString('CREATE_BY'); ?></label>
-						<input type="text" disabled name="group_name" value="<?php echo $login_object -> create_by; ?>">
-						<i class="fas fa-lock"></i>
-					</div>
-					<div class="input width-25">
-						<label><?php echo CLanguage::instance() -> getString('TIME_UPDATE_AT'); ?></label>
-						<input type="text" disabled name="group_name" value="<?php echo $login_object -> time_update; ?>">
-						<i class="fas fa-lock"></i>
-					</div>
-					<div class="input width-25">
-						<label><?php echo CLanguage::instance() -> getString('UPDATE_BY'); ?></label>
-						<input type="text" disabled name="group_name" value="<?php echo $login_object -> update_by; ?>">
-						<i class="fas fa-lock"></i>
-					</div>
-				</div>
-				-->
+		
 				<!-- group -->
 				<div class="group width-100">
 
@@ -111,24 +96,24 @@
 
 					<div class="input width-25">
 						<label><?php echo CLanguage::instance() -> getString('MOD_LOGINO_OBJECT_NAME'); ?></label>
-						<input type="text" disabled name="object_id" value="<?php echo $login_object -> object_id; ?>">
+						<input type="text" disabled name="object_id" value="">
 						<i class="fas fa-lock"></i>
 					</div>
 
 					<div class="input width-50">
 						<label><?php echo CLanguage::instance() -> getString('MOD_LOGINO_OBJECT_DESC'); ?></label>
-						<input type="text" name="object_description" <?php if($login_object -> is_protected == 1) { echo 'disabled'; } ?> maxlength="200" value="<?php echo $login_object -> object_description; ?>">
-						<?php if($login_object -> is_protected == 1) { echo '<i class="fas fa-lock"></i>'; } ?>
+						<input type="text" name="object_description" <?php if($dataset -> is_protected == 1) { echo 'disabled'; } ?> maxlength="200" value="">
+						<?php if($dataset -> is_protected == 1) { echo '<i class="fas fa-lock"></i>'; } ?>
 					</div>
 
 			
 					<div class="input width-25">
-						<?php if($login_object -> is_protected != 1) { ?>
+						<?php if($dataset -> is_protected != 1) { ?>
 						<label><?php echo CLanguage::instance() -> getString('MOD_LOGINO_OBJECT_DISABLED'); ?></label>
 						<div class="select-wrapper">
 						<select name="is_disabled">
-							<option value="0" <?php echo ($login_object -> is_disabled == 0 ? 'selected' : ''); ?>><?php echo CLanguage::get() -> string('NO'); ?></option>
-							<option value="1" <?php echo ($login_object -> is_disabled == 1 ? 'selected' : ''); ?>><?php echo CLanguage::get() -> string('YES'); ?></option>
+							<option value="0"><?php echo CLanguage::get() -> string('NO'); ?></option>
+							<option value="1"><?php echo CLanguage::get() -> string('YES'); ?></option>
 						</select>	
 						</div>
 						<?php } ?>
@@ -144,7 +129,7 @@
 					<div class="input width-100">
 						<label><?php echo CLanguage::instance() -> getString('MOD_LOGINO_OBJECT_DATABASE_SELECT'); ?></label>
 						<div class="select-wrapper">
-						<select name="object_databases[]" class="dropdown" data-preset="<?php echo implode(',', $login_object -> object_databases); ?>">
+						<select name="object_databases[]" class="dropdown" data-preset="<?php echo implode(',', (array)$dataset -> object_databases); ?>">
 							<option></option>
 							<?php
 							foreach(CFG::GET() -> MYSQL -> DATABASE as $_database)
@@ -156,7 +141,7 @@
 
 				</div>
 
-				<?php if($login_object -> is_protected != 1) { ?>
+				<?php if($dataset -> is_protected != 1) { ?>
 
 				<!-- group -->
 				<div class="group width-100">
@@ -192,9 +177,9 @@
 
 			</div>
 
-			<?php if($enableEdit) { ?>
+			<?php if(isset($enableEdit) && $enableEdit || $loginObjectsList === false) { ?>
 
-				<div class="result-box" data-error=""></div>
+				<div class="ui result-box" data-error=""></div>
 
 				<!-- Submit button - beware of fieldset name -->
 
@@ -216,22 +201,22 @@
 				<div class="group width-100">
 					<div class="input width-25">
 						<label><?php echo CLanguage::instance() -> getString('TIME_CREATE_AT'); ?></label>
-						<input type="text" disabled value="<?php echo $login_object -> time_create; ?>">
+						<input type="text" disabled value="<?php echo $dataset -> time_create; ?>">
 						<i class="fas fa-lock"></i>
 					</div>
 					<div class="input width-25">
 						<label><?php echo CLanguage::instance() -> getString('CREATE_BY'); ?></label>
-						<input type="text" disabled name="group_name" value="<?php echo $login_object -> create_by; ?>">
+						<input type="text" disabled name="group_name" value="<?php echo $dataset -> create_by; ?>">
 						<i class="fas fa-lock"></i>
 					</div>
 					<div class="input width-25">
 						<label><?php echo CLanguage::instance() -> getString('TIME_UPDATE_AT'); ?></label>
-						<input type="text" disabled name="group_name" value="<?php echo $login_object -> time_update; ?>">
+						<input type="text" disabled name="group_name" value="<?php echo $dataset -> time_update; ?>">
 						<i class="fas fa-lock"></i>
 					</div>
 					<div class="input width-25">
 						<label><?php echo CLanguage::instance() -> getString('UPDATE_BY'); ?></label>
-						<input type="text" disabled name="group_name" value="<?php echo $login_object -> update_by; ?>">
+						<input type="text" disabled name="group_name" value="<?php echo $dataset -> update_by; ?>">
 						<i class="fas fa-lock"></i>
 					</div>
 				</div>
@@ -239,7 +224,7 @@
 		</fieldset>
 
 
-
+<?php tk::dbug($dataset); ?>
 
 			<br><br>
 
@@ -918,25 +903,49 @@
 
 
 	<?php
-	foreach($login_object -> object_fields as $fieldSet)
+	foreach($dataset -> object_fields as $fieldSet)
 	{
-		switch($fieldSet['query_type'])
+		switch($fieldSet -> query_type)
 		{
-			case 'compare': echo 'document.cmsLoginObjectAuthFields.onAddAuthCheck('. json_encode($fieldSet, JSON_FORCE_OBJECT) .'); '; break;
-			case 'assign' : echo 'document.cmsLoginObjectAuthFields.onAddAssignmentCheck('. json_encode($fieldSet, JSON_FORCE_OBJECT) .'); '; break;
+			case 'compare': echo 'document.cmsLoginObjectAuthFields.onAddAuthCheck('. json_encode((array)$fieldSet, JSON_FORCE_OBJECT) .'); '; break;
+			case 'assign' : echo 'document.cmsLoginObjectAuthFields.onAddAssignmentCheck('. json_encode((array)$fieldSet, JSON_FORCE_OBJECT) .'); '; break;
 		}
 	}
 
-	foreach($login_object -> object_session_ext as $fieldSet)
+	foreach($dataset -> object_session_ext as $fieldSet)
 	{
-		switch($fieldSet['query_type'])
+		switch($fieldSet -> query_type)
 		{
-			case 'compare': echo 'document.cmsLoginObjectAuthFields.onAddExtendedSessionInfo('. json_encode($fieldSet, JSON_FORCE_OBJECT) .'); '; break;
-			case 'assign' : echo 'document.cmsLoginObjectAuthFields.onAddAssignmentSession('. json_encode($fieldSet, JSON_FORCE_OBJECT) .'); '; break;
+			case 'compare': echo 'document.cmsLoginObjectAuthFields.onAddExtendedSessionInfo('. json_encode((array)$fieldSet, JSON_FORCE_OBJECT) .'); '; break;
+			case 'assign' : echo 'document.cmsLoginObjectAuthFields.onAddAssignmentSession('. json_encode((array)$fieldSet, JSON_FORCE_OBJECT) .'); '; break;
 		}
 		//echo 'onClickAddNewExtendSessionField('. json_encode($fieldSet, JSON_FORCE_OBJECT) .');';
 	}
 	?>
 </script>
 
-<br><br>
+
+<?php if($loginObjectsList !== false) { ?>
+<script src="<?php echo CMS_SERVER_URL_BACKEND; ?>js/classes/cms-request-data-index.js"></script>
+<script src="<?php echo CMS_SERVER_URL_BACKEND; ?>js/classes/cms-request-data-item.js"></script>
+<script>
+
+	let	requestURL	= CMS.SERVER_URL_BACKEND + CMS.PAGE_PATH +'ping/<?= $dataset -> object_id; ?>';
+	let pingId		= cmstk.getRandomId();
+	
+	cmstk.ping(requestURL, <?= CFG::GET() -> USER_SYSTEM -> MODULE_LOCKING -> PING_TIMEOUT; ?>, pingId);
+
+	document.addEventListener("DOMContentLoaded", function(){
+
+		document.dataInstance = new cmsRequestDataItem('', '<?= CFG::GET() -> BACKEND -> TIME_FORMAT; ?>', '<?= $dataset -> object_id; ?>');
+		document.dataInstance.requestData();
+
+		let fieldsets = document.querySelectorAll('fieldset[data-xhr-target]');
+		for(let i = 0; i < fieldsets.length; i++)
+		{
+			fieldsets[i].setAttribute('data-ping-id', pingId);
+		}
+	});	
+
+</script>
+<?php } ?>

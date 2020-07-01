@@ -237,9 +237,9 @@ class	CSession extends CSingleton
 					{
 						$_loginObject			 =	&$_loginObjects[0];
 				
-						$_loginObject -> object_databases 	= json_decode($_loginObject -> object_databases);
-						$_loginObject -> object_session_ext = json_decode($_loginObject -> object_session_ext);
-						$_loginObject -> object_fields 		= json_decode($_loginObject -> object_fields);
+					#	$_loginObject -> object_databases 	= json_decode($_loginObject -> object_databases);
+					#	$_loginObject -> object_session_ext = json_decode($_loginObject -> object_session_ext);
+					#	$_loginObject -> object_fields 		= json_decode($_loginObject -> object_fields);
 
 					}
 								
