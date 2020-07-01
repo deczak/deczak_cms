@@ -10,6 +10,7 @@ define('DB_DESCRIBE',0x7);
 define('DB_ALTER_TABLE',0x8);
 define('DB_CREATE',0x9);
 define('DB_CONSTRAINTS',0x10);
+define('DB_COLUMNS',0x11);
 
 class	CDatabaseQuery
 {
@@ -190,6 +191,14 @@ class	CDatabaseQuery
 					$queryString[]	= '`'. $this -> m_pDatabase -> getDatabaseName() .'`.`'. $this -> m_tableName .'`';
 					break;
 
+			case 	DB_COLUMNS:
+
+					$queryString[]	= 'SELECT DISTINCT COLUMN_NAME FROM';
+					$queryString[]	= 'INFORMATION_SCHEMA.COLUMNS';
+					$queryString[]	= 'WHERE';
+					$queryString[]	= 'TABLE_NAME = \''. $this -> m_tableName .'\'';
+					break;
+
 			case 	DB_CREATE:
 
 					return $this -> _createTable();
@@ -243,6 +252,7 @@ class	CDatabaseQuery
 					return $fetchedData;
 					
 			case 	DB_DESCRIBE:
+			case 	DB_COLUMNS:
 
 					return $statement -> fetchAll(PDO::FETCH_CLASS, "stdClass");
 
@@ -284,6 +294,7 @@ class	CDatabaseQuery
 				case DB_COLUMN_TYPE_BOOL      : 
 				case DB_COLUMN_TYPE_TINYINT	  : $sqlString[] 	= 'TINYINT' . ($columnData -> m_length !== 0 ? "(". $columnData -> m_length .")" : ""); break;
 				case DB_COLUMN_TYPE_INT	      : $sqlString[] 	= 'INT' . ($columnData -> m_length !== 0 ? "(". $columnData -> m_length .")" : ""); break;			
+				case DB_COLUMN_TYPE_ARRAY     : 
 				case DB_COLUMN_TYPE_JSON      : 
 				case DB_COLUMN_TYPE_TEXT      : $sqlString[] 	= 'TEXT' . ($columnData -> m_length !== 0 ? "(". $columnData -> m_length .")" : ""); break;
 				case DB_COLUMN_TYPE_STRING    : $sqlString[] 	= 'VARCHAR' . ($columnData -> m_length !== 0 ? "(". $columnData -> m_length .")" : ""); break;			
