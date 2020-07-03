@@ -165,8 +165,26 @@ class	TK
 		return false;
 	}
 
+	public static function
+	put($string, $append = false)
+	{
+		static $buffer;
 
+		if(!$append)
+			echo '<br>';
 
+		$lineLength = 125;
+
+		if($append)
+		{
+			echo str_pad(' '. $string, $lineLength - strlen($buffer), '.', STR_PAD_LEFT);
+		}
+		else
+		{
+			$buffer = $string;
+			echo $string .' ';
+		}
+	}
 }
 
 class	CRYPT
@@ -263,5 +281,15 @@ class	CRYPT
 		return CRYPT::HASH512($_string, CRYPT::CHECKSUM(CRYPT::HASH256($_string)), $_key ) . CRYPT::CHECKSUM(CRYPT::HASH256($_string));
 	}
 }
+
+/**
+ *	Round function for bcmath results 
+ */
+function bcround($n, $p = 0)
+{
+    $e = bcpow(10, $p + 1);
+    return bcdiv(bcadd(bcmul($n, $e, 0), (strpos($n, '-') === 0 ? -5 : 5)), $e, $p);
+}
+		
 
 ?>

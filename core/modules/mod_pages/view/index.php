@@ -24,17 +24,8 @@
 				<td class="bach-item-menu"></td>
 			</tr>
 		</thead>
-		<tbody id="table-body-overview"></tbody>
+		<tbody id="table-body-overview"><!-- javascript injection --></tbody>
 		<tfoot>
-			<tr>
-				<td></td>
-				<td></td>
-				<td></td>
-				<td></td>
-				<td></td>
-				<td></td>
-				<td></td>
-			</tr>
 			<tr>
 				<td class="batch-selection-item"><input type="checkbox" class="trigger-batch-item-all-checkbox" id="item-all"><label for="item-all"></label></td>
 				<td colspan="2"><?php echo CLanguage::instance() -> getString('SELECT_ALL'); ?></td>

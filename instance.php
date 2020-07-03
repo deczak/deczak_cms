@@ -20,7 +20,7 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 
 ##	I N C L U D E   C L A S S E S   &   F U N C T O N S	
 
-	require_once	CMS_SERVER_ROOT.DIR_CORE. 'toolkit.php';
+	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'toolkit.php';
 	
 	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CDatabase.php';
 
