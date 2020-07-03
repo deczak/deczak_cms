@@ -29,7 +29,11 @@
 								"query_var" :"cms-ctrl-action",
 								"subSection":{
 												"url_name"	:false,
-												"query_var" :"cms-system-id"
+												"query_var" :"cms-edit-page-lang",
+												"subSection":{
+													"url_name"	:false,
+													"query_var" :"cms-edit-page-node"
+												 }
 											 }
 							},
 							{

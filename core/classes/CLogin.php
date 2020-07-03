@@ -57,8 +57,8 @@ class	CLogin extends CSingleton
 
 		$conditionCryptUsername		 = new CModelCondition();
 		
-		$_loginObject -> object_fields 		= json_decode($_loginObject -> object_fields);
-		$_loginObject -> object_databases 	= json_decode($_loginObject -> object_databases);
+	#	$_loginObject -> object_fields 		= json_decode($_loginObject -> object_fields);
+	#	$_loginObject -> object_databases 	= json_decode($_loginObject -> object_databases);
 
 		## retrieve form data
 		$_pLoginVariables	 =	new CURLVariables();

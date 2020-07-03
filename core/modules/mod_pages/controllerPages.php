@@ -55,14 +55,15 @@ class	controllerPages extends CController
 
 		switch($_controllerAction)
 		{
-			case 'view'			: $_logicResults = $this -> logicView($_pDatabase, $_isXHRequest, $_logicResult, $enableEdit, $enableDelete); break;
-			case 'edit'			: $_logicResults = $this -> logicEdit($_pDatabase, $_isXHRequest); break;	
-			case 'create'		: $_logicResults = $this -> logicCreate($_pDatabase, $_isXHRequest); break;
-			case 'delete'		: $_logicResults = $this -> logicDelete($_pDatabase, $_isXHRequest); break;	
-			case 'deletetree'	: $_logicResults = $this -> logicDeleteTree($_pDatabase, $_isXHRequest); break;	
+			case 'view'			: $logicResults = $this -> logicView($_pDatabase, $_isXHRequest, $_logicResult, $enableEdit, $enableDelete); break;
+			case 'edit'			: $logicResults = $this -> logicEdit($_pDatabase, $_isXHRequest); break;	
+			case 'create'		: $logicResults = $this -> logicCreate($_pDatabase, $_isXHRequest); break;
+			case 'delete'		: $logicResults = $this -> logicDelete($_pDatabase, $_isXHRequest); break;	
+			case 'deletetree'	: $logicResults = $this -> logicDeleteTree($_pDatabase, $_isXHRequest); break;	
 		}
 
-		if(!$_logicResults)
+
+		if(!$logicResults)
 		{
 			##	Default View
 			$this -> logicIndex($_pDatabase, $_isXHRequest, $enableEdit, $enableDelete);

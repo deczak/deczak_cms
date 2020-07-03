@@ -2,7 +2,7 @@
 <?php
 
 
-$login_object -> object_fields = json_decode($login_object -> object_fields);
+#$login_object -> object_fields = json_decode($login_object -> object_fields);
 
 
 ?>

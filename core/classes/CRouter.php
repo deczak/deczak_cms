@@ -88,39 +88,39 @@ class CRouter extends CSingleton
 
 				foreach($_moduleParams -> module_subs as $_moduleSub)
 				{	
-
 					if(empty($_moduleSub -> url_name))
 					{
 						$_createEndNullSub = true;
 					}
 					else
-					{
-
-
-
-
-
-						
-
+					{		
 						if(property_exists($_moduleSub, 'query_var'))
 							$sub = $module -> addChild( new CRouteNode($page -> node_id, 'en', $_moduleSub -> url_name, $_moduleSub -> query_var, [$_object -> object_id => $_moduleSub -> ctl_target]) );
 						else
 							$sub = $module -> addChild( new CRouteNode($page -> node_id, 'en', $_moduleSub -> url_name, 'cms-ctrl-action', [$_object -> object_id => $_moduleSub -> ctl_target]) );
 
-
-
-
-
 						if(property_exists($_moduleSub, 'subSection'))
 						{
-							$sub -> addChild( new CRouteNode($page -> node_id, 'en', $_moduleSub -> subSection -> url_name, $_moduleSub -> subSection -> query_var ) );
+							$sub2 = $sub -> addChild( new CRouteNode($page -> node_id, 'en', $_moduleSub -> subSection -> url_name, $_moduleSub -> subSection -> query_var ) );
+
+
+
+
+
+							if(property_exists($_moduleSub -> subSection, 'subSection'))
+							{
+								$sub2 -> addChild( new CRouteNode($page -> node_id, 'en', $_moduleSub -> subSection -> subSection -> url_name, $_moduleSub -> subSection -> subSection -> query_var ) );
+
+							
+							}
+
+
 						}
-
-
-
-
 					}
 				}
+
+
+
 			}
 
 
