@@ -37,9 +37,9 @@ class	CHTAccess
 			ftruncate($_hFile, 0);
 
 			fwrite($_hFile, "RewriteCond %{REQUEST_FILENAME} !-f " . "\r\n");	
-			fwrite($_hFile, "RewriteRule ^backend/(.*)/?$ backend/index.php?$1 [NC,L,QSA]" . "\r\n");	
+			fwrite($_hFile, "RewriteRule ^". $this -> m_backendFolder ."/(.*)/?$ ". $this -> m_backendFolder ."/index.php?$1 [NC,L,QSA]" . "\r\n");	
 			fwrite($_hFile, "RewriteCond %{REQUEST_FILENAME} -f " . "\r\n");	
-			fwrite($_hFile, "RewriteRule ^backend/(.*)$ backend/$1 [L,NC,QSA]" . "\r\n");	
+			fwrite($_hFile, "RewriteRule ^". $this -> m_backendFolder ."/(.*)$ ". $this -> m_backendFolder ."/$1 [L,NC,QSA]" . "\r\n");	
 
 			if(CFG::GET() -> CRONJOB -> CRON_DIRECTORY_PUBLIC)
 			{	
