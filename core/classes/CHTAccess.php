@@ -30,17 +30,16 @@ class	CHTAccess
 	{
 		$_targetFile = '2-backend';
 
-		$_hFile 	 = fopen($this -> m_dataLocation . $_targetFile, "r+");
+		$_hFile 	 = fopen($this -> m_dataLocation . $_targetFile, "a");
 
 		if (flock($_hFile, LOCK_EX))
 		{
 			ftruncate($_hFile, 0);
 
-			fwrite($_hFile, "RewriteCond %{REQUEST_URI} =/". $this -> m_backendFolder ."/" . "\r\n");	
-			fwrite($_hFile, "RewriteRule ^". $this -> m_backendFolder ."/index.php?%{QUERY_STRING} [NC,L]" . "\r\n");	
-			fwrite($_hFile, "RewriteCond %{REQUEST_FILENAME} -f" . "\r\n");	
-			fwrite($_hFile, "RewriteRule ^". $this -> m_backendFolder ."/(.*)/?$ ". $this -> m_backendFolder ."/$1 [NC,L]" . "\r\n");	
-			fwrite($_hFile, "RewriteRule ^". $this -> m_backendFolder ."/(.*)/?$ ". $this -> m_backendFolder ."/index.php?$1 [L,QSA]" . "\r\n");	
+			fwrite($_hFile, "RewriteCond %{REQUEST_FILENAME} !-f " . "\r\n");	
+			fwrite($_hFile, "RewriteRule ^backend/(.*)/?$ backend/index.php?$1 [NC,L,QSA]" . "\r\n");	
+			fwrite($_hFile, "RewriteCond %{REQUEST_FILENAME} -f " . "\r\n");	
+			fwrite($_hFile, "RewriteRule ^backend/(.*)$ backend/$1 [L,NC,QSA]" . "\r\n");	
 
 			if(CFG::GET() -> CRONJOB -> CRON_DIRECTORY_PUBLIC)
 			{	
@@ -98,9 +97,10 @@ class	CHTAccess
 		
 			fwrite($_hFile, "RewriteCond %{THE_REQUEST} /public/([^\s?]*) [NC]" . "\r\n");	
 			fwrite($_hFile, "RewriteRule ^ %1 [L,NE,R=302]" . "\r\n");	
-			fwrite($_hFile, "RewriteCond %{REQUEST_FILENAME} !-f " . "\r\n");	
-			fwrite($_hFile, "RewriteRule ^public/(.*)/?$ public/index.php?$1 [L,NC,QSA]" . "\r\n");	
-			fwrite($_hFile, "RewriteRule ^((?!public/).*)$ public/$1 [L,NC]" . "\r\n");	
+
+			fwrite($_hFile, "RewriteCond %{REQUEST_FILENAME} !-f " . "\r\n");
+			fwrite($_hFile, "RewriteRule ^public/(.*)/?$ public/index.php?$1 [L,NC,QSA]" . "\r\n");
+			fwrite($_hFile, "RewriteRule ^((?!public/).*)$ public/$1 [L,NC]" . "\r\n");
 
 			##	Release lock
 

@@ -9,6 +9,8 @@
 	define('CMS_SERVER_URL' , '<protocol>://www.<domain>.<tld>/');
 	define('CMS_SERVER_URL_BACKEND' , '<protocol>://www.<domain>.<tld>/backend/');
 
+	define('CMS_URL_BASE', false);
+
 ##	L O G I N   O B J E C T   N A M E S
 
 	define('LOGIN_OBJECT_BACKEND','ABKND');

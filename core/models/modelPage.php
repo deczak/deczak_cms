@@ -266,7 +266,7 @@ class 	modelPage extends CModel
 		$_parentNode = [];
 		if(!$this -> getNodeData($_pDatabase, $_insertData['cms-edit-page-node'], $_parentNode))
 		{
-			trigger_error('modelPage::delete() - Node does not exists');
+			trigger_error('modelPage::insert() - Node does not exists');
 			return false;
 		}
 

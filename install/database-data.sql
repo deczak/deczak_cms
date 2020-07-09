@@ -46,10 +46,10 @@ INSERT INTO `tb_page_object` (`object_id`, `node_id`, `page_version`, `module_id
 (4, 3, 1, 4, 1, 2, '', %TIMESTAMP%, 1, 0, 0);
 
 INSERT INTO `tb_page_object_simple` (`data_id`, `object_id`, `body`, `params`) VALUES
-(1, 1, '<p>For more information and the documentation about the content management system see <a href="https://www.dennczak.de/en/projects/content-managment-system/" style="">this website</a>&nbsp;(external link)</p>', ''),
+(1, 1, '<p>For more information and the documentation about the content management system see <a href="https://www.dennczak.de/en/projects/content-management-system/" style="">this website</a>&nbsp;(external link)</p>', ''),
 (2, 2, '<h1>Welcome to your new<p>Content Management System<br></p></h1>', ''),
 (3, 3, '<h1>Willkommen zu Ihrem neuen<p>Content Management System</p></h1>', ''),
-(4, 4, '<p>Für weitere Informationen und die Dokumentation zu diesem Content Management System schauen Sie auf <a href="https://www.dennczak.de/projekte/content-managment-system/">diese Website</a> (externer Link)</p>', '');
+(4, 4, '<p>Für weitere Informationen und die Dokumentation zu diesem Content Management System schauen Sie auf <a href="https://www.dennczak.de/projekte/content-management-system/">diese Website</a> (externer Link)</p>', '');
 
 INSERT INTO `tb_right_groups` (`group_id`, `group_name`, `group_rights`, `create_time`, `create_by`, `update_time`, `update_by`) VALUES
 (1, 'administrator', '{"1":["view","create","edit","delete"],"2":["index","view","create","edit","delete"],"3":["index","view","create","edit","delete"],"4":["view","create","edit","delete"],"5":["view","create","edit","delete"],"6":["index","view","create","edit","delete"],"7":["view","create","edit","delete"],"8":["index","view","create","edit","delete"],"9":["index","view","create","edit","delete"],"10":["index","view","create","edit","delete"],"11":["index","view","edit","delete"],"12":["index","view","create","edit","delete"],"13":["index","view","create","edit","delete"],"14":["index","edit"],"15":["index","view","create","edit","delete"],"16":["index","view","create","edit","delete"],"17":["index","view","create","edit","delete"],"18":["index","view","edit"]}', %TIMESTAMP%, 1, 0, 0);

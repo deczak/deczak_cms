@@ -18,7 +18,16 @@
 								"ctl_target":"create",
 								"menu_name"	:"",
 								"menu_order":"0",
-								"use_right" :"edit"
+								"use_right" :"edit",
+								"query_var" :"cms-ctrl-action",
+								"subSection":{
+												"url_name"	:false,
+												"query_var" :"cms-edit-page-lang",
+												"subSection":{
+													"url_name"	:false,
+													"query_var" :"cms-edit-page-node"
+												 }
+											 }
 							},
 							{
 								"url_name"	:"view",

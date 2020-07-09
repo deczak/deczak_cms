@@ -40,7 +40,7 @@ class CRouter extends CSingleton
 		$backend	= file_get_contents($backendFilepath);
 		$backend	= json_decode($backend);
 
-		$backendStructure = $this -> nodesList -> addChild( new CRouteNode(-1, 'en', 'backyard') );
+		$backendStructure = $this -> nodesList -> addChild( new CRouteNode(-1, 'en', CMS_BACKEND_PUBLIC) );
 
 		##	looping pages
 
@@ -103,40 +103,20 @@ class CRouter extends CSingleton
 						{
 							$sub2 = $sub -> addChild( new CRouteNode($page -> node_id, 'en', $_moduleSub -> subSection -> url_name, $_moduleSub -> subSection -> query_var ) );
 
-
-
-
-
 							if(property_exists($_moduleSub -> subSection, 'subSection'))
 							{
-								$sub2 -> addChild( new CRouteNode($page -> node_id, 'en', $_moduleSub -> subSection -> subSection -> url_name, $_moduleSub -> subSection -> subSection -> query_var ) );
-
-							
+								$sub2 -> addChild( new CRouteNode($page -> node_id, 'en', $_moduleSub -> subSection -> subSection -> url_name, $_moduleSub -> subSection -> subSection -> query_var ) );						
 							}
-
-
 						}
 					}
 				}
-
-
-
 			}
-
-
-
-
 		}
-
 
 		## 	Structure into file
 
 		file_put_contents($this -> routesFilepah, json_encode($this -> nodesList));
-
-
 	}
-
-
 
 	private function
 	_createRoute($_sitemap, $_sitemapIndex, $_parentLevel, &$_destStructure)
@@ -157,17 +137,11 @@ class CRouter extends CSingleton
 		return $i - 1;
 	}
 
-
-
 	public function
 	route(string $_requestedURI) : CRouteRequest
 	{
-
-			
-
 		$this -> nodesList = file_get_contents($this -> routesFilepah);
 		$this -> nodesList = json_decode($this -> nodesList);
-
 
 		$routeRequest  = new CRouteRequest;
 		$routeRequest -> requestedURI = $_requestedURI;
@@ -180,7 +154,6 @@ class CRouter extends CSingleton
 
 		if($questionMark !== false)
 		{
-
 			$buffer = substr($buffer, 0, $questionMark);
 		}
 
@@ -189,12 +162,9 @@ class CRouter extends CSingleton
 
 		$nodeInstance = &$this-> nodesList;
 
-		#	tk::dbug($buffer);
-
 		for($sIndex = 0; $sIndex < count($buffer); $sIndex++)
 		{
 			## determine language of request
-
 
 			if($sIndex == 0)
 			{
@@ -205,7 +175,6 @@ class CRouter extends CSingleton
 					if(		$buffer[$sIndex] == $language -> lang_key 
 						&& 	( 		!$language -> lang_default 
 								|| 	($language -> lang_default && $this -> languageSettings -> DEFAULT_IN_URL)
-						
 							)
 					  )
 					{
@@ -217,55 +186,24 @@ class CRouter extends CSingleton
 						$routeRequest -> language = $language -> lang_key;
 					}
 				}
-
-
 			}
-
 
 			if($sIndex == 0 && count($buffer) == 1 && empty($buffer[$sIndex]))
 			{
-
-
-					$buffer[$sIndex] = $routeRequest -> language;
-
-			
-
-
-
+				$buffer[$sIndex] = $routeRequest -> language;
 			}
-
-
-
 
 			$nodeFound = false;
 
-
 			foreach($nodeInstance -> childNodesList as $childNode)
 			{
-/*
-
-			tk::dbug('$buffer[$sIndex]');
-			tk::dbug($buffer[$sIndex]);
-tk::dbug($sIndex);
-tk::dbug($childNode -> uriSegmentName .' == '. $buffer[$sIndex]);
-tk::dbug($childNode -> language .' == '. $routeRequest -> language);
-
-*/
-
-
-				if($sIndex == 0 && $childNode -> uriSegmentName == ''  && $nodeInstance -> nodeId == 1 && $childNode -> language == $routeRequest -> language && $buffer[$sIndex] != 'backyard')
+				if($sIndex == 0 && $childNode -> uriSegmentName == ''  && $nodeInstance -> nodeId == 1 && $childNode -> language == $routeRequest -> language && $buffer[$sIndex] != CMS_BACKEND_PUBLIC)
 				{
-
 					$nodeInstance = &$childNode;
 					$nodeFound = !$nodeFound;
 
 					break;
-
-
 				}
-
-
-
 					
 				if($childNode -> uriSegmentName == $buffer[$sIndex] && ( (!CMS_BACKEND && $childNode -> language == $routeRequest -> language ) || CMS_BACKEND)  )
 				{
@@ -274,56 +212,28 @@ tk::dbug($childNode -> language .' == '. $routeRequest -> language);
 
 					if($childNode -> queryVar !== false)
 					{
-
-
-
-					if($childNode -> queryVar == 'cms-ctrl-action' && !empty($childNode -> uriSegmentNameAlias))
-						$childNode -> uriSegmentNameAlias = json_decode($childNode -> uriSegmentNameAlias, true);
-					#	$buffer[$sIndex] = json_decode(json_encode($buffer[$sIndex]), true);
-
+						if($childNode -> queryVar == 'cms-ctrl-action' && !empty($childNode -> uriSegmentNameAlias))
+							$childNode -> uriSegmentNameAlias = json_decode($childNode -> uriSegmentNameAlias, true);
 					
-
-
 						$_GET[ $childNode -> queryVar ] = (!empty($childNode -> uriSegmentNameAlias) ? $childNode -> uriSegmentNameAlias: $childNode -> uriSegmentName);
 					}
 
 					break;
 				}
 
-	if($childNode -> uriSegmentName === false && $childNode -> queryVar !== false)
-	{
+				if($childNode -> uriSegmentName === false && $childNode -> queryVar !== false)
+				{
+					$nodeInstance 	= &$childNode;
+					$nodeFound 		= !$nodeFound;
 
-					$nodeInstance = &$childNode;
-					$nodeFound = !$nodeFound;
-
-
-						$_GET[ $childNode -> queryVar ] = $buffer[$sIndex];
-
-	}
-
-
-
-
+					$_GET[ $childNode -> queryVar ] = $buffer[$sIndex];
+				}
 			}
 
-
-
-
 			$routeRequest -> nodeId = $nodeInstance -> nodeId;
-
-
-
-
-
-
-
 		}
 
-
 		return $routeRequest;
-
-
-
 	}
 
 	private function

@@ -4,7 +4,7 @@
 	error_reporting(E_ALL);
 	ini_set('display_errors', true);
 
-	include '../core/toolkit.php';
+	include '../core/classes/toolkit.php';
 	include '../config/directories.php';
 	include '../config/standard.php';
 	include '../core/classes/CSheme.php';

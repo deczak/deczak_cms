@@ -92,6 +92,9 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 	$pRouter  = CRouter::instance();
 	$pRouter -> initialize(CFG::GET() -> LANGUAGE, CLanguage::instance() -> getLanguages());
 
+	if(CMS_URL_BASE !== false)
+		$_SERVER['REQUEST_URI'] = str_replace('/'. CMS_URL_BASE, '', $_SERVER['REQUEST_URI']);
+	
 	$pRouteRequest = $pRouter -> route($_SERVER['REQUEST_URI']);
 
 	$_GET['cms-node'] = $pRouteRequest -> nodeId;

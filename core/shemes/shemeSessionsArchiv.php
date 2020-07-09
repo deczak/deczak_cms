@@ -1,6 +1,6 @@
 <?php
 
-class shemeSessions extends CSheme
+class shemeSessionsArchiv extends CSheme
 {
 	public function
 	__construct()

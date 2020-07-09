@@ -20,6 +20,9 @@
 	"SESSION"		:	{
 							"SPAM_ACCESS_TIMEOUT"	: 60,
 							"SPAM_ACCESS_LIMIT"		: 5,
+							"SPAM_ACCESS_ON"		: true,
+							"DENIED_ACCESS_ON"		: true,
+							"DENIED_ACCESS_HTACCESS": true,
 							"TIMEOUT"				: 14400,
 							"REPORT_WEEKLYACCESS"	: true,
 							"FAIL_LIMIT"			: 5

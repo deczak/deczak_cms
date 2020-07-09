@@ -111,6 +111,7 @@
 								var	formData = new FormData();
 									formData.append("server-root", document.querySelector('input[name="server-root"]').value);
 									formData.append("server-url", document.querySelector('input[name="server-url"]').value);
+									formData.append("server-subpath", document.querySelector('input[name="server-sub"]').value);
 									formData.append("database-server", document.querySelector('input[name="database-server"]').value);
 									formData.append("database-user", document.querySelector('input[name="database-user"]').value);
 									formData.append("database-pass", document.querySelector('input[name="database-pass"]').value);
