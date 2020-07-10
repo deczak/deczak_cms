@@ -168,7 +168,7 @@ class CRouter extends CSingleton
 
 			if($sIndex == 0)
 			{
-				$langFound = false;
+				#$langFound = false;
 
 				foreach($this -> languagesList as $lIndex => $language)
 				{
@@ -179,11 +179,12 @@ class CRouter extends CSingleton
 					  )
 					{
 						$routeRequest -> language = $language -> lang_key;
-						$langFound = !$langFound;
+						#$langFound = !$langFound;
 						break;
 					} elseif($language -> lang_default)
 					{
 						$routeRequest -> language = $language -> lang_key;
+						$buffer = array_merge([$language -> lang_key], $buffer);
 					}
 				}
 			}
@@ -197,7 +198,11 @@ class CRouter extends CSingleton
 
 			foreach($nodeInstance -> childNodesList as $childNode)
 			{
-				if($sIndex == 0 && $childNode -> uriSegmentName == ''  && $nodeInstance -> nodeId == 1 && $childNode -> language == $routeRequest -> language && $buffer[$sIndex] != CMS_BACKEND_PUBLIC)
+				if(		$sIndex == 0 
+					&& 	$childNode -> uriSegmentName == ''  
+					&& 	$nodeInstance -> nodeId == 1 
+					&& 	$childNode -> language == $routeRequest -> language 
+					&& 	$buffer[$sIndex] != CMS_BACKEND_PUBLIC)
 				{
 					$nodeInstance = &$childNode;
 					$nodeFound = !$nodeFound;
@@ -229,6 +234,18 @@ class CRouter extends CSingleton
 					$_GET[ $childNode -> queryVar ] = $buffer[$sIndex];
 				}
 			}
+
+	/*
+
+		->	Wenn childnode nicht gefunden wurde, existiert die Seite mutmaßlich nicht, dann 404 setzen
+
+		->	Wäre es ein unterbereich eines modules, würde ein child node existieren mit queryVar Vorgabe
+
+	
+	*/
+
+
+
 
 			$routeRequest -> nodeId = $nodeInstance -> nodeId;
 		}
