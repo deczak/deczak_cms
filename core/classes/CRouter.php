@@ -165,7 +165,7 @@ class CRouter extends CSingleton
 		$nodeInstance = &$this-> nodesList;
 
 		for($sIndex = 0; $sIndex < count($buffer); $sIndex++)
-		{	
+		{
 			## if error documents request
 
 			if($sIndex == 0 && $buffer[$sIndex] === '404')
@@ -197,7 +197,7 @@ class CRouter extends CSingleton
 						$routeRequest -> language = $language -> lang_key;
 						#$langFound = !$langFound;
 						break;
-					} elseif($language -> lang_default)
+					} elseif($language -> lang_default && !CMS_BACKEND)
 					{
 						$routeRequest -> language = $language -> lang_key;
 						$buffer = array_merge([$language -> lang_key], $buffer);
@@ -256,25 +256,8 @@ class CRouter extends CSingleton
 			if(!$nodeFound)
 			{
 				header("Location: ". CMS_SERVER_URL ."404"); 	
-			#	echo 'wenn status code seite aufgerufen wird, müssen diese hier raus genommen werden, ansonsten redirect auf status code seite';
 				exit;	
 			}
-
-	/*
-
-		->	Wenn childnode nicht gefunden wurde, existiert die Seite mutmaßlich nicht, dann 404 setzen
-
-		->	Wäre es ein unterbereich eines modules, würde ein child node existieren mit queryVar Vorgabe
-
-			->	Wenn eine der bedinungen zutrifft, ein Flag setzen das abgefragt wird. Wenn gesetzt, dann 404 und weitere Verarbeitung unterbrechen
-
-			->	Prüfen ob redirect zu 404 oder response code 404
-
-	
-	*/
-
-
-
 
 			$routeRequest -> nodeId = $nodeInstance -> nodeId;
 		}

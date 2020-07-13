@@ -43,8 +43,8 @@ class	CHTAccess
 
 			if(CFG::GET() -> CRONJOB -> CRON_DIRECTORY_PUBLIC)
 			{	
-				$_string = "RewriteRule ^cron/(.*)/?$ cron/$1 [NC,L]" . "\r\n";
-				fwrite($_hFile, $_string);	
+				fwrite($_hFile, "\r\n");
+				fwrite($_hFile, "RewriteRule ^cron/(.*)/?$ cron/$1 [NC,L]" . "\r\n");	
 				fwrite($_hFile, "\r\n");	
 			}
 
@@ -83,20 +83,22 @@ class	CHTAccess
 		{
 			ftruncate($_hFile, 0);
 		
-			if(CFG::GET() -> ERROR_PAGES -> ERROR403)
-			{
-				fwrite($_hFile, 'RewriteRule ^403/?$ index.php?cms-error=403 [NC,L]');
-				fwrite($_hFile, "\r\n");
-			}
+		#	if(CFG::GET() -> ERROR_PAGES -> ERROR403)
+		#	{
+		#		fwrite($_hFile, 'RewriteRule ^403/?$ index.php?cms-error=403 [NC,L]');
+		#		fwrite($_hFile, "\r\n");
+		#	}
 
-			if(CFG::GET() -> ERROR_PAGES -> ERROR404)
-			{
-				fwrite($_hFile, 'RewriteRule ^404/?$ index.php?cms-error=404 [NC,L]');
-				fwrite($_hFile, "\r\n");
-			}
+		#	if(CFG::GET() -> ERROR_PAGES -> ERROR404)
+		#	{
+		#		fwrite($_hFile, 'RewriteRule ^404/?$ index.php?cms-error=404 [NC,L]');
+		#		fwrite($_hFile, "\r\n");
+		#	}
 		
 			fwrite($_hFile, "RewriteCond %{THE_REQUEST} /public/([^\s?]*) [NC]" . "\r\n");	
 			fwrite($_hFile, "RewriteRule ^ %1 [L,NE,R=302]" . "\r\n");	
+			
+			fwrite($_hFile, "\r\n");
 
 			fwrite($_hFile, "RewriteCond %{REQUEST_FILENAME} !-f " . "\r\n");
 			fwrite($_hFile, "RewriteRule ^public/(.*)/?$ public/index.php?$1 [L,NC,QSA]" . "\r\n");
@@ -193,17 +195,17 @@ class	CHTAccess
 		{
 			ftruncate($_hDstFile, 0);	
 
-			if(CFG::GET() -> ERROR_PAGES -> ERROR403)
-			{
-				fwrite($_hDstFile, 'ErrorDocument 403 '. CMS_SERVER_URL .'403');
-				fwrite($_hDstFile, "\r\n");
-			}
+		#	if(CFG::GET() -> ERROR_PAGES -> ERROR403)
+		#	{
+		#		fwrite($_hDstFile, 'ErrorDocument 403 '. CMS_SERVER_URL .'403');
+		#		fwrite($_hDstFile, "\r\n");
+		#	}
 
-			if(CFG::GET() -> ERROR_PAGES -> ERROR404)
-			{
-				fwrite($_hDstFile, 'ErrorDocument 404 '. CMS_SERVER_URL .'404 ');
-				fwrite($_hDstFile, "\r\n");
-			}
+		#	if(CFG::GET() -> ERROR_PAGES -> ERROR404)
+		#	{
+		#		fwrite($_hDstFile, 'ErrorDocument 404 '. CMS_SERVER_URL .'404 ');
+		#		fwrite($_hDstFile, "\r\n");
+		#	}
 
 			foreach($_filenames as $_file)
 			{	
