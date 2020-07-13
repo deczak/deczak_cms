@@ -100,6 +100,9 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 	$_GET['cms-node'] = $pRouteRequest -> nodeId;
 	$_GET['cms-lang'] = $pRouteRequest -> language;
 
+	if($pRouteRequest -> responseCode != 200)
+		$_GET['cms-error'] = $pRouteRequest -> responseCode;
+	
 ##	C O O K I E   M A N A G E R
 
 	//	CCookie is a singleton class
@@ -112,7 +115,7 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 
 	$_pURLVariables	 =	new CURLVariables();
 
-	$_request[] 	 = 	[	"input" => "cms-lang", 		  	 	"validate" => "strip_tags|strip_whitespaces|lowercase|!empty",      "use_default" => true, "default_value" => CLanguage::instance() -> getDefault() ]; // language key
+	$_request[] 	 = 	[	"input" => "cms-lang", 		  	"validate" => "strip_tags|strip_whitespaces|lowercase|!empty",      	"use_default" => true, "default_value" => CLanguage::instance() -> getDefault() ]; // language key
 	$_request[] 	 = 	[	"input" => "cms-node",  		"validate" => "strip_tags|strip_whitespaces|lowercase|is_digit|!empty", "use_default" => true, "default_value" => false     ]; // node_id
 	$_request[] 	 = 	[	"input" => "cms-ctrl-action",	"validate" => "strip_tags|strip_whitespaces|lowercase|!empty", 			"use_default" => true, "default_value" => []	]; // requested controller action
 	$_request[] 	 = 	[	"input" => "cms-error",			"validate" => "strip_tags|strip_whitespaces|lowercase|!empty", 			"use_default" => true, "default_value" => false	]; // url rewrite error redirect (eg 403,404)
