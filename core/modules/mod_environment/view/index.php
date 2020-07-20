@@ -52,7 +52,7 @@
 
 			<div class="submit-container" style="">
 				<button class="ui button icon labeled trigger-submit-fieldset" type="button" disabled><span><i class="fas fa-save" data-icon="fa-save"></i></span><?php echo CLanguage::instance() -> getString('BUTTON_SAVE'); ?></button>
-				<div class="protector"><input type="checkbox" class="trigger-submit-protector" id="protector-login-objects"><label for="protector-login-objects"></label></div>
+				<div class="protector"><input type="checkbox" class="trigger-submit-protector" id="protector-backend-settings"><label for="protector-backend-settings"></label></div>
 			</div>
 
 

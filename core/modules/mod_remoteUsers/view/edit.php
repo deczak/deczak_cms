@@ -59,7 +59,7 @@ isActiveGroup($group_id, &$groups)
 
 
 		
-		<fieldset class="ui fieldset submit-able" id="user" data-xhr-target="edit-user" data-xhr-overwrite-target="edit/<?= $dataSet[id]; ?>">
+		<fieldset class="ui fieldset submit-able" id="user" data-xhr-target="edit-user" data-xhr-overwrite-target="edit/<?= $dataSet['id']; ?>">
 
 			<legend><?= $language -> string('MOD_BEREMOTEU_USERRIGHTS'); ?></legend>
 			<div>
@@ -108,9 +108,3 @@ isActiveGroup($group_id, &$groups)
 
 	</div>
 </div>
-
-<?php
-
-#tk::dbug($dataSet);
-
-?>

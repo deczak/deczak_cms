@@ -12,8 +12,7 @@ class	controllerRemoteUsers extends CController
 
 	public function
 	__construct($_module, &$_object)
-	{		
-		#$this -> m_pModel	= new modelCategories();
+	{
 		parent::__construct($_module, $_object);
 
 		CPageRequest::instance() -> subs = $this -> getSubSection();
@@ -48,47 +47,77 @@ class	controllerRemoteUsers extends CController
 		$enableEdit 	= $this -> existsUserRight('edit');
 		$enableDelete	= $enableEdit;
 
-		$_logicResults = false;
+		$logicResults = false;
 		switch($_controllerAction)
 		{
-			case 'view'		: $_logicResults = $this -> logicView(	$_pDatabase, $_isXHRequest, $enableEdit, $enableDelete);	break;
-			case 'edit'		: $_logicResults = $this -> logicEdit(	$_pDatabase, $_isXHRequest);	break;	
-		#	case 'create'	: $_logicResults = $this -> logicCreate($_pDatabase, $_isXHRequest);	break;
-		#	case 'delete'	: $_logicResults = $this -> logicDelete($_pDatabase, $_isXHRequest);	break;	
+			case 'view'		: $logicResults = $this -> logicView(	$_pDatabase, $_isXHRequest, $enableEdit, $enableDelete);	break;
+			case 'edit'		: $logicResults = $this -> logicEdit(	$_pDatabase, $_isXHRequest);	break;	
 		}
 
-		if(!$_logicResults)
+		if(!$logicResults)
 		{
 			##	Default View
-			$this -> logicIndex($_pDatabase, $enableEdit, $enableDelete);	
+			$this -> logicIndex($_pDatabase, $_isXHRequest, $enableEdit, $enableDelete);	
 		}
 	}
 
 	private function
-	logicIndex(CDatabaseConnection &$_pDatabase, $_enableEdit = false, $_enableDelete = false)
+	logicIndex(CDatabaseConnection &$_pDatabase, $_isXHRequest, $_enableEdit = false, $_enableDelete = false)
 	{
-		$usersList = $this -> _getUsersList();
 
-		$registerCondition	 = new CModelCondition();
-		$registerCondition 	-> groupBy('user_id');
-		$modelUsersRegister	 = new modelUsersRegister();
-		$modelUsersRegister -> load($_pDatabase, $registerCondition);
+		##	XHR request
 
-		$usergroupCondition	 = new CModelCondition();
-		$usergroupCondition	-> groupBy('user_id');
-		$modelUserGroups	 = new modelUserGroups();
-		$modelUserGroups 	-> addSelectColumns('*', 'COUNT(DISTINCT(group_id)) AS allocation');
-		$modelUserGroups	-> load($_pDatabase, $usergroupCondition);
+		if($_isXHRequest !== false)
+		{	
+			$_bValidationErr =	false;
+			$_bValidationMsg =	'';
+			$_bValidationDta = 	[];
 
-		##	set view
+			switch($_isXHRequest)
+			{
+				case 'raw-data'  :	// Request raw data
+
+									$_pURLVariables	 =	new CURLVariables();
+									$_request		 =	[];
+									$_request[] 	 = 	[	"input" => 'q',  	"validate" => "strip_tags|!empty" ,	"use_default" => true, "default_value" => false ]; 		
+									$_pURLVariables -> retrieve($_request, false, true);	
+					
+									$registerCondition	 = new CModelCondition();
+									$registerCondition 	-> groupBy('user_id');
+									$modelUsersRegister	 = new modelUsersRegister();
+									$modelUsersRegister -> load($_pDatabase, $registerCondition);
+
+									$usergroupCondition	 = new CModelCondition();
+									$usergroupCondition	-> groupBy('user_id');
+									$modelUserGroups	 = new modelUserGroups();
+									$modelUserGroups 	-> addSelectColumns('*', 'COUNT(DISTINCT(group_id)) AS allocation');
+									$modelUserGroups	-> load($_pDatabase, $usergroupCondition);
+
+									$data		= $this -> _getUsersList();
+									
+									foreach($data as $dataKey => $dataSet)
+									{
+										$data[$dataKey]['allocations'] 	= $this ->getAllocations($modelUserGroups -> getResult(), $dataSet['id']);
+										$data[$dataKey]['update_time'] 	= $this ->getUpdateTime($modelUserGroups -> getResult(), $dataSet['id']);
+										$data[$dataKey]['update_by'] 	= $this ->getUpdateBy($modelUserGroups -> getResult(), $dataSet['id']);
+										$data[$dataKey]['update_by'] 	= tk::getBackendUserName($_pDatabase, $data[$dataKey]['update_by']);
+										
+										$data[$dataKey]['user_name_first'] 	= $dataSet['user'] -> user_name_first;
+										$data[$dataKey]['user_name_last'] 	= $dataSet['user'] -> user_name_last;
+									}
+
+									break;
+			}
+
+			tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $data);	// contains exit call
+		}
+
+		##	No XHR request
 
 		$this -> setView(	
 						'index',	
 						'',
 						[
-							'usersList' 	=> $usersList,
-							'registersList' => $modelUsersRegister -> getResult(),
-							'groupsList' 	=> $modelUserGroups -> getResult(),
 							'enableEdit'	=> $_enableEdit,
 							'enableDelete'	=> $_enableDelete
 						]
@@ -162,9 +191,41 @@ class	controllerRemoteUsers extends CController
 	}
 
 	private function
-	logicCreate(CDatabaseConnection &$_pDatabase, $_isXHRequest)
+	getAllocations($_groupsList, $_userHash)
 	{
+		foreach($_groupsList as $group)
+		{
+			if($group -> user_hash === $_userHash)
+				return $group -> allocation;
+		}
+		
+		return 0;
 	}
+
+	private function
+	getUpdateBy($_groupsList, $_userHash)
+	{
+		foreach($_groupsList as $group)
+		{
+			if($group -> user_hash === $_userHash)
+				return $group -> update_by;
+		}
+		
+		return 0;
+	}
+
+	private function
+	getUpdateTime($_groupsList, $_userHash)
+	{
+		foreach($_groupsList as $group)
+		{
+			if($group -> user_hash === $_userHash)
+				return $group -> update_time;
+		}
+		
+		return 0;
+	}
+
 
 	private function
 	logicView(CDatabaseConnection &$_pDatabase, $_isXHRequest = false, $_enableEdit = false, $_enableDelete = false)
@@ -309,10 +370,6 @@ class	controllerRemoteUsers extends CController
 		return false;
 	}
 
-	private function
-	logicDelete(CDatabaseConnection &$_pDatabase, $_isXHRequest = false)
-	{	
-	}
 }
 
 ?>
