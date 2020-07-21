@@ -363,8 +363,6 @@ class	controllerUserAgent extends CController
 			tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $_bValidationDta);
 		}
 	}
-
-
 }
 
 ?>

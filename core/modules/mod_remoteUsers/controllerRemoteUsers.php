@@ -50,8 +50,9 @@ class	controllerRemoteUsers extends CController
 		$logicResults = false;
 		switch($_controllerAction)
 		{
-			case 'view'		: $logicResults = $this -> logicView(	$_pDatabase, $_isXHRequest, $enableEdit, $enableDelete);	break;
-			case 'edit'		: $logicResults = $this -> logicEdit(	$_pDatabase, $_isXHRequest);	break;	
+			case 'view'		: $logicResults = $this -> logicView($_pDatabase, $_isXHRequest, $enableEdit, $enableDelete);	break;
+			case 'ping'		: $logicResults = $this -> logicPing($_pDatabase, $_isXHRequest, $enableEdit, $enableDelete);	break;	
+			case 'edit'		: $logicResults = $this -> logicEdit($_pDatabase, $_isXHRequest);	break;	
 		}
 
 		if(!$logicResults)
@@ -94,6 +95,7 @@ class	controllerRemoteUsers extends CController
 									$modelUserGroups	-> load($_pDatabase, $usergroupCondition);
 
 									$data		= $this -> _getUsersList();
+
 									
 									foreach($data as $dataKey => $dataSet)
 									{
@@ -104,6 +106,14 @@ class	controllerRemoteUsers extends CController
 										
 										$data[$dataKey]['user_name_first'] 	= $dataSet['user'] -> user_name_first;
 										$data[$dataKey]['user_name_last'] 	= $dataSet['user'] -> user_name_last;
+
+										$data[$dataKey]['userGroups'] 	=  [];
+
+										foreach($modelUserGroups -> getResult() as $userGroup)
+										{
+											if($dataSet['id'] == $userGroup -> user_hash)
+												$data[$dataKey]['userGroups'][]	=  $userGroup;
+										}
 									}
 
 									break;
@@ -369,6 +379,35 @@ class	controllerRemoteUsers extends CController
 
 		return false;
 	}
+
+	public function
+	logicPing(CDatabaseConnection &$_pDatabase, $_isXHRequest = false, $_enableEdit = false, $_enableDelete = false)
+	{
+
+		$systemId 	= $this -> querySystemId();
+		$pingId 	= $this -> querySystemId('cms-ping-id', true);
+
+		if($systemId !== false && $_isXHRequest !== false)
+		{	
+			$_bValidationErr =	false;
+			$_bValidationMsg =	'';
+			$_bValidationDta = 	[];
+
+			switch($_isXHRequest)
+			{
+				case 'lockState':	
+				
+					$modelUsersRegister	 = new modelUsersRegister();
+					$locked	= $modelUsersRegister -> ping($_pDatabase, CSession::instance() -> getValue('user_id'), $systemId, $pingId, MODEL_LOCK_UPDATE);
+					tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $locked);
+					break;
+			}
+
+			tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $_bValidationDta);
+		}
+	}
+
+
 
 }
 
