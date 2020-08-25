@@ -36,13 +36,17 @@ class	CDatabaseQuery
 		$this -> m_queryType			= $_queryType;
 		$this -> m_tableColumns			= ['*'];
 		$this -> m_printException		= true;
-		$this -> m_queryString	= '';
+		$this -> m_queryString			= '';
+		$this -> m_tableName			= [];
 	}
 
 	public function
-	table(string $_tableName)
+	table(string $_tableName, string $_asName = '')
 	{
-		$this -> m_tableName = $_tableName;
+		$table  = new stdClass;
+		$table -> name	= $_tableName;
+		$table -> as	= $_asName;
+		$this -> m_tableName[] 	= $table;
 		return $this;
 	}
 
@@ -122,7 +126,8 @@ class	CDatabaseQuery
 					$queryString[]	= 'SELECT';
 					$queryString[]	= implode(', ', $this -> m_tableColumns);
 					$queryString[]	= 'FROM';
-					$queryString[]	= '`'. $this -> m_pDatabase -> getDatabaseName() .'`.`'. $this -> m_tableName .'`';
+					foreach($this -> m_tableName as $tableIndex => $table)
+						$queryString[]	= ($tableIndex != 0 ? ', ' : '') .'`'. $this -> m_pDatabase -> getDatabaseName() .'`.`'. $table -> name .'`'. (!empty($table -> as) ? ' AS '. $table -> as : '');
 					$queryString[]	= $this -> _getRelations();
 					$queryString[]	= $this -> _getConditions();
 					$execParameters = $this -> _getConditionsValues();
@@ -131,7 +136,8 @@ class	CDatabaseQuery
 			case 	DB_INSERT:
 
 					$queryString[]	= 'INSERT INTO';
-					$queryString[]	= '`'. $this -> m_pDatabase -> getDatabaseName() .'`.`'. $this -> m_tableName .'`';
+					foreach($this -> m_tableName as $tableIndex => $table)
+						$queryString[]	= ($tableIndex != 0 ? ', ' : '') .'`'. $this -> m_pDatabase -> getDatabaseName() .'`.`'. $table -> name .'`'. (!empty($table -> as) ? ' AS '. $table -> as : '');
 					$queryString[]	= 'SET';
 	
 					$insertColumns 	= [];
@@ -144,7 +150,8 @@ class	CDatabaseQuery
 			case 	DB_UPDATE:
 
 					$queryString[]	= 'UPDATE';
-					$queryString[]	= '`'. $this -> m_pDatabase -> getDatabaseName() .'`.`'. $this -> m_tableName .'`';
+					foreach($this -> m_tableName as $tableIndex => $table)
+						$queryString[]	= ($tableIndex != 0 ? ', ' : '') .'`'. $this -> m_pDatabase -> getDatabaseName() .'`.`'. $table -> name .'`'. (!empty($table -> as) ? ' AS '. $table -> as : '');
 					$queryString[]	= 'SET';
 	
 					$insertColumns 	= [];
@@ -166,7 +173,8 @@ class	CDatabaseQuery
 			case 	DB_DELETE:
 
 					$queryString[]	= 'DELETE FROM';
-					$queryString[]	= '`'. $this -> m_pDatabase -> getDatabaseName() .'`.`'. $this -> m_tableName .'`';
+					foreach($this -> m_tableName as $tableIndex => $table)
+						$queryString[]	= ($tableIndex != 0 ? ', ' : '') .'`'. $this -> m_pDatabase -> getDatabaseName() .'`.`'. current($this -> m_tableName) -> name .'`';
 				
 					$queryString[]	= $this -> _getConditions();
 					$execParameters = $this -> _getConditionsValues();
@@ -175,20 +183,21 @@ class	CDatabaseQuery
 			case 	DB_TRUNCATE:
 
 					$queryString[]	= 'TRUNCATE TABLE';
-					$queryString[]	= '`'. $this -> m_pDatabase -> getDatabaseName() .'`.`'. $this -> m_tableName .'`';
+					foreach($this -> m_tableName as $tableIndex => $table)
+						$queryString[]	= ($tableIndex != 0 ? ', ' : '') .'`'. $this -> m_pDatabase -> getDatabaseName() .'`.`'. current($this -> m_tableName) -> name .'`';
 					break;
 
 
 			case 	DB_DROP:
 
 					$queryString[]	= '"DROP TABLE IF EXISTS';
-					$queryString[]	= '`'. $this -> m_pDatabase -> getDatabaseName() .'`.`'. $this -> m_tableName .'`';
+					$queryString[]	= ($tableIndex != 0 ? ', ' : '') .'`'. $this -> m_pDatabase -> getDatabaseName() .'`.`'. current($this -> m_tableName) -> name .'`';
 					break;
 
 			case 	DB_DESCRIBE:
 
 					$queryString[]	= 'DESCRIBE';
-					$queryString[]	= '`'. $this -> m_pDatabase -> getDatabaseName() .'`.`'. $this -> m_tableName .'`';
+					$queryString[]	= ($tableIndex != 0 ? ', ' : '') .'`'. $this -> m_pDatabase -> getDatabaseName() .'`.`'. current($this -> m_tableName) -> name .'`';
 					break;
 
 			case 	DB_COLUMNS:
@@ -196,7 +205,7 @@ class	CDatabaseQuery
 					$queryString[]	= 'SELECT DISTINCT COLUMN_NAME FROM';
 					$queryString[]	= 'INFORMATION_SCHEMA.COLUMNS';
 					$queryString[]	= 'WHERE';
-					$queryString[]	= 'TABLE_NAME = \''. $this -> m_tableName .'\'';
+					$queryString[]	= ($tableIndex != 0 ? ', ' : '') .'TABLE_NAME = \''. current($this -> m_tableName) -> name .'\'';
 					break;
 
 			case 	DB_CREATE:
@@ -472,13 +481,21 @@ class	CDatabaseQuery
 						{
 							$_sqlString .= " AND ";
 						}
-
+						
+						if(!$conditionStage -> directUse)
 						switch($conditionStage -> type)
 						{
 							case 'BETWEEN'		: $_sqlString .= " ". $conditionStage -> column ." ". $conditionStage -> type ." :". $this -> _getValidConditionPlaceholder($conditionStage -> column) ."A AND  :". $this -> _getValidConditionPlaceholder($conditionStage -> column) ."B "; break;
 							case 'IS NULL'  	: 
 							case 'IS NOT NULL'  : $_sqlString .= " ". $conditionStage -> column ." ". $conditionStage -> type ." "; break;
 							default				: $_sqlString .= " ". $conditionStage -> column ." ". $conditionStage -> type ." :". $this -> _getValidConditionPlaceholder($conditionStage -> column) ." ";
+						}
+
+						if($conditionStage -> directUse)
+						switch($conditionStage -> type)
+						{
+							case 'BETWEEN'		: $_sqlString .= " ". $conditionStage -> column ." ". $conditionStage -> type ." ". $conditionStage -> valueA ." AND  ". $conditionStage -> valueB ." "; break;
+							default				: $_sqlString .= " ". $conditionStage -> column ." ". $conditionStage -> type ." ". ($conditionStage -> valueA) ." ";
 						}
 
 					}
@@ -490,7 +507,7 @@ class	CDatabaseQuery
 				$arrayOrderBy = [];
 
 				foreach($this -> m_queryCondition -> groupByList as $oderBy)
-					$arrayOrderBy[] = " `". $oderBy -> column ."` ";
+					$arrayOrderBy[] = " ". $oderBy -> column ." ";
 
 				$_sqlString	.= " GROUP BY ". implode(',', $arrayOrderBy);
 			}	
@@ -500,7 +517,7 @@ class	CDatabaseQuery
 				$arrayOrderBy = [];
 
 				foreach($this -> m_queryCondition -> oderByList as $oderBy)
-					$arrayOrderBy[] = " `". $oderBy -> column ."` ". $oderBy -> direction;
+					$arrayOrderBy[] = " ". $oderBy -> column ." ". $oderBy -> direction;
 
 				$_sqlString	.= " ORDER BY ". implode(',', $arrayOrderBy);
 			}	
@@ -547,6 +564,7 @@ class	CDatabaseQuery
 				foreach($condition as $conditionStage)
 				{
 
+					if(!$conditionStage -> directUse)
 					switch($conditionStage -> type)
 					{
 						case 'IS NULL'  	: 
@@ -557,7 +575,7 @@ class	CDatabaseQuery
 												$conditionValues[ $this -> _getValidConditionPlaceholder($conditionStage -> column).'B' ] = $conditionStage -> valueB;
 												break;
 										  
-						default				: 	$conditionValues[ $this -> _getValidConditionPlaceholder($conditionStage -> column) ] = $conditionStage -> valueA;;
+						default				: 	$conditionValues[ $this -> _getValidConditionPlaceholder($conditionStage -> column) ] = $conditionStage -> valueA;
 					}
 
 

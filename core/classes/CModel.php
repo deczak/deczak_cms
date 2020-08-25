@@ -6,14 +6,16 @@ class 	CModelConditionStage
 	public	$column;
 	public	$valueA;
 	public	$valueB;
+	public	$directUse;
 
 	public function
-	__construct($_type, $_column, $_valueA = NULL, $_valueB = NULL)
+	__construct($_type, $_column, $_valueA = NULL, $_valueB = NULL, bool $_directUse = false)
 	{
 		$this -> type 		= $_type;
 		$this -> column 	= $_column;
 		$this -> valueA 	= $_valueA;
 		$this -> valueB 	= $_valueB;
+		$this -> directUse 	= $_directUse;
 	}
 }
 
@@ -114,9 +116,9 @@ class 	CModelCondition
 	}
 
 	public function
-	whereBetween(string $_columnName, string $_columnValueA, string $_columnValueB)
+	whereBetween(string $_columnName, string $_columnValueA, string $_columnValueB, bool $_directUse = false)
 	{
-		$this -> conditionList[$this -> conditionLevel][] = new CModelConditionStage('BETWEEN', $_columnName, $_columnValueA, $_columnValueB);
+		$this -> conditionList[$this -> conditionLevel][] = new CModelConditionStage('BETWEEN', $_columnName, $_columnValueA, $_columnValueB, $_directUse);
 		return $this;
 	}
 
