@@ -11,7 +11,7 @@
 												},
 							"MODULE_LOCKING":	{
 													"LOCK_TIMEOUT"	: 45,
-													"PING_TIMEOUT"	: 15
+													"PING_TIMEOUT"	: 15000
 												}
 						},
 	"BACKEND"		:	{
