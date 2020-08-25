@@ -81,6 +81,9 @@ class 	modelPage extends CModel
 			$page -> page_categories = $this -> getCategories($_pDatabase, $page -> node_id);
 			$page -> page_tags 		 = $this -> getTags($_pDatabase, $page -> node_id);
 
+		$test = [];
+		$this -> getNodeTree($_pDatabase,  $page -> node_id, $test);
+
 		
 			$this -> m_resultList[] = new $className($page, $this -> m_shemePage -> getColumns());
 		}
@@ -370,6 +373,31 @@ class 	modelPage extends CModel
 	{
 		$_tablePagePath	=	$this -> m_shemePagePath 	-> getTableName();
 
+		/*
+			the directUse paramter is not a good practice
+
+			but this between condition with table names needs to be outside of execute-input-parameters
+		*/
+
+
+		$nodeTreeCond	 = new CModelCondition();
+		$nodeTreeCond	-> whereBetween('o.node_lft', 'p.node_lft', 'p.node_rgt', true)
+						-> whereBetween('o.node_lft', 'n.node_lft', 'n.node_rgt', true)
+						-> where('n.node_id', $_nodeID)
+						-> groupBy('o.node_lft')
+						-> orderBy('o.node_lft');
+
+		$accessRes 		 = $_pDatabase		-> query(DB_SELECT) 
+											-> table($_tablePagePath, 'n') 
+											-> table($_tablePagePath, 'p') 
+											-> table($_tablePagePath, 'o') 
+											-> selectColumns(['o.page_path', 'o.node_id', 'COUNT(p.node_id)-1 AS level'])
+											-> condition($nodeTreeCond)
+											-> exec();
+
+
+		/*
+
 		$sqlString 	=	"	SELECT 		o.page_path,
 											o.node_id,
 											COUNT(p.node_id)-1 AS level
@@ -385,7 +413,12 @@ class 	modelPage extends CModel
 
 		$accessRes = $_pDatabase -> getConnection() -> query($sqlString, PDO::FETCH_CLASS, 'stdClass');
 
-		$_nodeData = $accessRes -> fetchAll();
+		tk::dbug($sqlString);
+		*/
+
+		$_nodeData = $accessRes;
+
+
 	}
 
 	private function
@@ -438,6 +471,28 @@ class 	modelPage extends CModel
 	getAlternatePaths(CDatabaseConnection &$_pDatabase, $_pageID)
 	{
 		$timestamp 		= 	time();
+
+		/*
+			TODO : removing two last old queries, replace with the wrapper
+
+		$nodeTreeCond	 = new CModelCondition();
+		$nodeTreeCond	-> whereBetween('o.node_lft', 'p.node_lft', 'p.node_rgt', true)
+						-> whereBetween('o.node_lft', 'n.node_lft', 'n.node_rgt', true)
+						-> where('n.node_id', $_nodeID)
+						-> groupBy('o.node_lft')
+						-> orderBy('o.node_lft');
+
+		$accessRes 		 = $_pDatabase		-> query(DB_SELECT) 
+											-> table($_tablePagePath, 'n') 
+											-> table($_tablePagePath, 'p') 
+											-> table($_tablePagePath, 'o') 
+											-> selectColumns(['o.page_path', 'o.node_id', 'COUNT(p.node_id)-1 AS level'])
+											-> condition($nodeTreeCond)
+											-> exec();
+
+													
+		*/
+
 
 		$_returnArray	=	[];
 
