@@ -210,7 +210,6 @@ class	CLogin extends CSingleton
 							$_sqlLoginChkRes		=	$_db -> query($_sqlString);	
 							*/
 
-tk::dbug($_sqlLoginChkRes);
 
 
 

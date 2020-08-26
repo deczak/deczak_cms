@@ -224,7 +224,6 @@ else
 		</fieldset>
 
 
-<?php tk::dbug($dataset); ?>
 
 			<br><br>
 
