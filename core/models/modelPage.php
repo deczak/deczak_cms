@@ -391,29 +391,7 @@ class 	modelPage extends CModel
 											-> condition($nodeTreeCond)
 											-> exec();
 
-
-		/*
-
-		$sqlString 	=	"	SELECT 		o.page_path,
-											o.node_id,
-											COUNT(p.node_id)-1 AS level
-								FROM 		$_tablePagePath AS n,
-											$_tablePagePath AS p,
-											$_tablePagePath AS o
-								WHERE 		o.node_lft BETWEEN p.node_lft AND p.node_rgt
-								AND 		o.node_lft BETWEEN n.node_lft AND n.node_rgt
-								AND 		n.node_id = '". $_nodeID ."'
-								GROUP BY	o.node_lft
-								ORDER BY 	o.node_lft
-							";
-
-		$accessRes = $_pDatabase -> getConnection() -> query($sqlString, PDO::FETCH_CLASS, 'stdClass');
-
-		*/
-
 		$_nodeData = $accessRes;
-
-
 	}
 
 	private function
@@ -579,7 +557,6 @@ class 	modelPage extends CModel
 
 		return $tagArray;
 	}
-
 }
 
 /**
