@@ -59,9 +59,6 @@ foreach($login_objects as $objecKey => $objectSet )
 
 </div>
 
-<?php
-#tk::dbug($object -> params);
-?>
 
 <script>
 (function() {
