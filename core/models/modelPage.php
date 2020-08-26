@@ -466,32 +466,7 @@ class 	modelPage extends CModel
 	getAlternatePaths(CDatabaseConnection &$_pDatabase, $_pageID)
 	{
 		$timestamp 		= 	time();
-
 		$_returnArray	=	[];
-
-		/*
-		$sqlString 	=	"	SELECT 		tb_page_path.node_id,
-											tb_page_path.page_language,
-											tb_page.hidden_state,
-											tb_page.page_auth,
-											tb_page.publish_from,
-											tb_page.publish_until
-								FROM 		tb_page_path
-								JOIN		tb_page
-									ON		tb_page.node_id			= tb_page_path.node_id
-								WHERE 		tb_page_path.page_id 	= '". $_pageID ."'
-							";
-		
-		try
-		{
-			$sqlPagesRes = $_pDatabase -> getConnection() -> query($sqlString, PDO::FETCH_CLASS, 'stdClass') -> fetchAll();
-		}
-		catch(PDOException $exception)
-		{
-			CMessages::instance() -> addMessage('modelPage::getAlternatePaths - Query src node failed', MSG_LOG, '', true);				  
-			return $_returnArray;
-		}
-		*/
 		
 		$nodePageRelCond = new CModelCondition();
 		$nodePageRelCond-> where('tb_page.node_id', 'tb_page_path.node_id');
@@ -520,57 +495,25 @@ class 	modelPage extends CModel
 					)
 			); else continue;
 
-			$sqlString =	"	SELECT 		p.node_id, 
-											p.page_path,
-											p.page_id,
-											p.page_language
-								FROM 		tb_page_path AS n,
-											tb_page_path AS p
-								WHERE 		n.node_lft
-									BETWEEN p.node_lft 
-										AND	p.node_rgt 
-									AND 	n.node_id = '". $_sqlPages -> node_id ."'
-								ORDER BY 	p.node_lft
-							";
-			try
-			{
-				$sqlPgHeadRes = $_pDatabase -> getConnection() -> query($sqlString, PDO::FETCH_CLASS, 'stdClass') -> fetchAll();
-			}
-			catch(PDOException $exception)
-			{
-				CMessages::instance() -> addMessage('modelPage::getPagePath - Query alternate node failed', MSG_LOG, '', true);				  
-				break;
-			}
+			$nodePathCond	 = new CModelCondition();
+			$nodePathCond	-> whereBetween('n.node_lft', 'p.node_lft', 'p.node_rgt', true)
+							-> where('n.node_id', $_sqlPages -> node_id)
+							-> orderBy('p.node_lft');
 
-
-		/*
-
-		$nodeTreeCond	 = new CModelCondition();
-		$nodeTreeCond	-> whereBetween('o.node_lft', 'p.node_lft', 'p.node_rgt', true)
-						-> whereBetween('o.node_lft', 'n.node_lft', 'n.node_rgt', true)
-						-> where('n.node_id', $_nodeID)
-						-> groupBy('o.node_lft')
-						-> orderBy('o.node_lft');
-
-		$accessRes 		 = $_pDatabase		-> query(DB_SELECT) 
-											-> table($_tablePagePath, 'n') 
-											-> table($_tablePagePath, 'p') 
-											-> table($_tablePagePath, 'o') 
-											-> selectColumns(['o.page_path', 'o.node_id', 'COUNT(p.node_id)-1 AS level'])
-											-> condition($nodeTreeCond)
+			$sqlPgHeadRes	 = $_pDatabase	-> query(DB_SELECT) 
+											-> table('tb_page_path', 'n') 
+											-> table('tb_page_path', 'p') 
+											-> selectColumns(['p.node_id', 'p.page_path', 'p.page_id', 'p.page_language'])
+											-> condition($nodePathCond)
 											-> exec();
 
-													
-		*/
-
-
-
-
-
+			if($sqlPgHeadRes === false)
+				break;
 
 			foreach($sqlPgHeadRes as $_sqlPgHead)
 			{
-				if($_sqlPgHead -> page_language == '0') continue;
+				if($_sqlPgHead -> page_language == '0')
+					continue;
 
 				if(!isset($_returnArray[$_sqlPgHead -> page_language]))
 					$_returnArray[$_sqlPgHead -> page_language]['path'] = '';
