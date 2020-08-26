@@ -11,6 +11,14 @@ The version number is the release date. A letter as suffix indicates fixes on sa
 
 ## Version history	 
 
+### 20200826
+
+**Changes**
+- various fixes
+- removed comments
+- changed old mysql queries to pdo wrapper
+
+
 ### 20200703
 
 **Changes**
