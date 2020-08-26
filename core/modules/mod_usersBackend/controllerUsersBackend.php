@@ -182,23 +182,6 @@ class	controllerUsersBackend extends CController
 				$modelUsersRegister	 	= new modelUsersRegister();
 				$_aFormData['user_id'] 	= $modelUsersRegister -> registerUserId($_pDatabase, 0);
 
-			
-
-
-
-				/*
-				while(true)
-				{
-					$_aFormData['user_id']  = substr(rand(),0,10);
-					if($this -> m_pModel -> isUnique($_pDatabase, ['user_id' => $_aFormData['user_id']]))
-						break;
-				}
-				*/
-				
-
-
-
-
 				// Checking password	
 
 				if(isset($_aFormData['login_pass_a']) && isset($_aFormData['login_pass_b']) && $_aFormData['login_pass_a'] === $_aFormData['login_pass_b'])
@@ -369,8 +352,11 @@ class	controllerUsersBackend extends CController
 										$_aFormData['update_by'] 	= CSession::instance() -> getValue('user_id');
 										$_aFormData['update_time'] 	= time();
 
+										$uniqueCondition = new CModelCondition();
+										$uniqueCondition -> where('login_name', $_aFormData['login_name']);
+										$uniqueCondition -> whereNot('user_id', $systemId);
 
-										if(!$this -> m_pModel -> isUnique($_pDatabase, ['login_name' => $_aFormData['login_name']], ['user_id' => $systemId]))
+										if(!$this -> m_pModel -> unique($_pDatabase, $uniqueCondition))
 										{
 											$_bValidationMsg .= CLanguage::get() -> string('M_BEUSER_MSG_USERNAMEEXIST');
 											$_bValidationErr = true;
