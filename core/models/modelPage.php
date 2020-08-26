@@ -80,10 +80,6 @@ class 	modelPage extends CModel
 			$page -> alternate_path  = $this -> getAlternatePaths($_pDatabase, $page -> page_id);
 			$page -> page_categories = $this -> getCategories($_pDatabase, $page -> node_id);
 			$page -> page_tags 		 = $this -> getTags($_pDatabase, $page -> node_id);
-
-		$test = [];
-		$this -> getNodeTree($_pDatabase,  $page -> node_id, $test);
-
 		
 			$this -> m_resultList[] = new $className($page, $this -> m_shemePage -> getColumns());
 		}
@@ -413,7 +409,6 @@ class 	modelPage extends CModel
 
 		$accessRes = $_pDatabase -> getConnection() -> query($sqlString, PDO::FETCH_CLASS, 'stdClass');
 
-		tk::dbug($sqlString);
 		*/
 
 		$_nodeData = $accessRes;
@@ -472,30 +467,9 @@ class 	modelPage extends CModel
 	{
 		$timestamp 		= 	time();
 
-		/*
-			TODO : removing two last old queries, replace with the wrapper
-
-		$nodeTreeCond	 = new CModelCondition();
-		$nodeTreeCond	-> whereBetween('o.node_lft', 'p.node_lft', 'p.node_rgt', true)
-						-> whereBetween('o.node_lft', 'n.node_lft', 'n.node_rgt', true)
-						-> where('n.node_id', $_nodeID)
-						-> groupBy('o.node_lft')
-						-> orderBy('o.node_lft');
-
-		$accessRes 		 = $_pDatabase		-> query(DB_SELECT) 
-											-> table($_tablePagePath, 'n') 
-											-> table($_tablePagePath, 'p') 
-											-> table($_tablePagePath, 'o') 
-											-> selectColumns(['o.page_path', 'o.node_id', 'COUNT(p.node_id)-1 AS level'])
-											-> condition($nodeTreeCond)
-											-> exec();
-
-													
-		*/
-
-
 		$_returnArray	=	[];
 
+		/*
 		$sqlString 	=	"	SELECT 		tb_page_path.node_id,
 											tb_page_path.page_language,
 											tb_page.hidden_state,
@@ -517,6 +491,24 @@ class 	modelPage extends CModel
 			CMessages::instance() -> addMessage('modelPage::getAlternatePaths - Query src node failed', MSG_LOG, '', true);				  
 			return $_returnArray;
 		}
+		*/
+		
+		$nodePageRelCond = new CModelCondition();
+		$nodePageRelCond-> where('tb_page.node_id', 'tb_page_path.node_id');
+		$nodePathRel	 = new CModelRelations('join', 'tb_page', $nodePageRelCond);
+
+		$nodePageCond	 = new CModelCondition();
+		$nodePageCond	-> where('tb_page_path.page_id', $_pageID);
+
+		$sqlPagesRes 	 = $_pDatabase		-> query(DB_SELECT) 
+											-> table('tb_page_path') 
+											-> selectColumns(['tb_page_path.node_id', 'tb_page_path.page_language', 'tb_page.hidden_state', 'tb_page.page_auth', 'tb_page.publish_from', 'tb_page.publish_until'])
+											-> condition($nodePageCond)
+											-> relations([$nodePathRel])
+											-> exec();
+
+		if($sqlPagesRes === false)
+			return $_returnArray;
 
 		foreach($sqlPagesRes as $_sqlPages)
 		{
@@ -549,6 +541,32 @@ class 	modelPage extends CModel
 				CMessages::instance() -> addMessage('modelPage::getPagePath - Query alternate node failed', MSG_LOG, '', true);				  
 				break;
 			}
+
+
+		/*
+
+		$nodeTreeCond	 = new CModelCondition();
+		$nodeTreeCond	-> whereBetween('o.node_lft', 'p.node_lft', 'p.node_rgt', true)
+						-> whereBetween('o.node_lft', 'n.node_lft', 'n.node_rgt', true)
+						-> where('n.node_id', $_nodeID)
+						-> groupBy('o.node_lft')
+						-> orderBy('o.node_lft');
+
+		$accessRes 		 = $_pDatabase		-> query(DB_SELECT) 
+											-> table($_tablePagePath, 'n') 
+											-> table($_tablePagePath, 'p') 
+											-> table($_tablePagePath, 'o') 
+											-> selectColumns(['o.page_path', 'o.node_id', 'COUNT(p.node_id)-1 AS level'])
+											-> condition($nodeTreeCond)
+											-> exec();
+
+													
+		*/
+
+
+
+
+
 
 			foreach($sqlPgHeadRes as $_sqlPgHead)
 			{
