@@ -17,86 +17,63 @@ class 	modelSitemap extends CModel
 	{
 		$_mainpageNodeID = 1;
 
-		#$_pCondition -> where('page_path', $_sqlConnection -> real_escape_string('/'));
-
-		##
-/*
-
-		#$_sqlString =	"	SELECT 		tb_page_path.node_id
-		$_sqlString =	"	SELECT 		*
-							FROM 		tb_page_path
-						".	($_pCondition != NULL ? $_pCondition -> getConditions($_sqlConnection, $_pCondition) : '');
-
-		$_sqlNodeRes = $_sqlConnection -> query($_sqlString);
-*/
-
-
-
-
-
 		$dbQuery 	= $_pDatabase		-> query(DB_SELECT) 
 										-> table('tb_page_path') 
 										-> selectColumns(['*'])
 										-> condition($_pCondition);
 
 		$nodeResult = $dbQuery -> exec($_execFlags);
-
-
-
 		
-			$_sqlNode 			= $nodeResult[0];
-			$_mainpageNodeID 	= $_sqlNode -> node_id;
-		
+		$_sqlNode 			= $nodeResult[0];
+		$_mainpageNodeID 	= $_sqlNode -> node_id;
 
 		##	Get node and children
+					
+		$relCondPgHead	 = new CModelCondition();
+		$relCondPgHead	-> where('tb_page_header.node_id', 'o.node_id');
+		$relPgHead		 = new CModelRelations('join', 'tb_page_header', $relCondPgHead);
+					
+		$relCondPg		 = new CModelCondition();
+		$relCondPg		-> where('tb_page.node_id', 'o.node_id');
+		$relPg			 = new CModelRelations('join', 'tb_page', $relCondPg);
 
-		$sqlString 	=	"	SELECT 		o.node_id,
-										o.page_id,
-										o.page_language,
-										COUNT(p.node_id)-1 AS level,
-										ROUND ((o.node_rgt - o.node_lft - 1) / 2) AS offspring,
-										tb_page_header.page_title,
-										tb_page_header.page_name,
-										tb_page_header.page_version,
-										tb_page.create_time,
-										tb_page.update_time,
-										tb_page.page_auth,
-										tb_page.publish_from,
-										tb_page.publish_until,
-										tb_page.publish_expired,
-										tb_page.hidden_state,
-										tb_page.menu_follow,
-										o.page_path AS page_path_segment
-							FROM 		tb_page_path AS n,
-										tb_page_path AS p,
-										tb_page_path AS o
-							LEFT JOIN	tb_page_header
-								ON		tb_page_header.node_id 			= o.node_id
-							LEFT JOIN	tb_page
-								ON		tb_page.node_id 				= o.node_id
-							WHERE 		o.node_lft BETWEEN p.node_lft AND p.node_rgt
-							AND 		o.node_lft BETWEEN n.node_lft AND n.node_rgt
-							AND 		n.node_id = '$_mainpageNodeID'
-							GROUP BY	o.node_lft
-							ORDER BY 	o.node_lft
-						";
+		$condPgPath	 	 = new CModelCondition();
+		$condPgPath		-> whereBetween('o.node_lft', 'p.node_lft', 'p.node_rgt', true)
+						-> whereBetween('o.node_lft', 'n.node_lft', 'n.node_rgt', true)
+						-> where('n.node_id', $_mainpageNodeID)
+						-> groupBy('o.node_lft')
+						-> orderBy('o.node_lft');
 
-		try
-		{
-			$sqlNodeRes = $_pDatabase -> getConnection() -> query($sqlString, PDO::FETCH_CLASS, 'stdClass') -> fetchAll();
-		}
-		catch(PDOException $exception)
-		{
-			CMessages::instance() -> addMessage('modelSitemap::load - Query node and childrens failed', MSG_LOG, '', true);				  
-			return false;
-		}
-
+		$sqlNodeRes 	 = $_pDatabase		-> query(DB_SELECT) 
+											-> table('tb_page_path', 'n') 
+											-> table('tb_page_path', 'p') 
+											-> table('tb_page_path', 'o') 
+											-> selectColumns([	'o.node_id',
+																'o.page_id',
+																'o.page_language',
+																'COUNT(p.node_id)-1 AS level',
+																'ROUND ((o.node_rgt - o.node_lft - 1) / 2) AS offspring',
+																'tb_page_header.page_title',
+																'tb_page_header.page_name',
+																'tb_page_header.page_version',
+																'tb_page.create_time',
+																'tb_page.update_time',
+																'tb_page.page_auth',
+																'tb_page.publish_from',
+																'tb_page.publish_until',
+																'tb_page.publish_expired',
+																'tb_page.hidden_state',
+																'tb_page.menu_follow',
+																'o.page_path AS page_path_segment'])
+											-> condition($condPgPath)
+											-> relations([$relPgHead, $relPg])
+											-> exec();
+		
 		if($sqlNodeRes === false || !count($sqlNodeRes))
 		{
 			trigger_error('modelSitemap::load() - Node does not exists');
 			return false;
 		}
-
 
 		##	Loop node result and add page path by parents
 		$childsLevel = NULL;
@@ -124,7 +101,6 @@ class 	modelSitemap extends CModel
 			$_pages[]  = $_sqlNode;
 		}
 
-
 		##	Create data objects and get alternate pages
 
 		$_className		=	$this -> createPrototype();
@@ -143,50 +119,38 @@ class 	modelSitemap extends CModel
 	getAlternatePaths(CDatabaseConnection &$_pDatabase, $_pageID) : array
 	{
 		$_returnArray	=	[];
+					
+		$condPage = new CModelCondition();
+		$condPage-> where('page_id', $_pageID);
 
-		$sqlString 	=	"	SELECT 		tb_page_path.node_id,
-										tb_page_path.page_language
-							FROM 		tb_page_path
-							WHERE 		tb_page_path.page_id 		= '". $_pageID ."'
-						";
+		$sqlPagesRes 	 = $_pDatabase		-> query(DB_SELECT) 
+											-> table('tb_page_path') 
+											-> selectColumns(['node_id', 'page_language'])
+											-> condition($condPage)
+											-> exec();
 
-		try
-		{
-			$sqlPagesRes = $_pDatabase -> getConnection() -> query($sqlString, PDO::FETCH_CLASS, 'stdClass') -> fetchAll();
-		}
-		catch(PDOException $exception)
-		{
-			CMessages::instance() -> addMessage('modelSitemap::getAlternatePaths - Query src node failed', MSG_LOG, '', true);				  
+		if($sqlPagesRes === false)
 			return $_returnArray;
-		}
 
 		foreach($sqlPagesRes as $_sqlPages)
 		{
-			$sqlString =	"	SELECT 		p.node_id, 
-											p.page_path,
-											p.page_language
-								FROM 		tb_page_path AS n,
-											tb_page_path AS p
-								WHERE 		n.node_lft
-									BETWEEN p.node_lft 
-										AND	p.node_rgt 
-									AND 	n.node_id = '". $_sqlPages -> node_id ."'
-								ORDER BY 	p.node_lft ASC
-							";
+			$condPgHead		 = new CModelCondition();
+			$condPgHead		-> whereBetween('n.node_lft', 'p.node_lft', 'p.node_rgt', true)
+							-> where('n.node_id', $_sqlPages -> node_id)
+							-> orderBy('p.node_lft');
 
-			try
-			{
-				$sqlPgHeadRes = $_pDatabase -> getConnection() -> query($sqlString, PDO::FETCH_CLASS, 'stdClass') -> fetchAll();
-			}
-			catch(PDOException $exception)
-			{
-				CMessages::instance() -> addMessage('modelSitemap::getPagePath - Query alternate node failed', MSG_LOG, '', true);				  
+			$sqlPgHeadRes	 = $_pDatabase		-> query(DB_SELECT) 
+												-> table('tb_page_path', 'n') 
+												-> table('tb_page_path', 'p') 
+												-> selectColumns(['p.node_id', 'p.page_path', 'p.page_language'])
+												-> condition($condPgHead)
+												-> exec();
+		
+			if($sqlPgHeadRes === false)
 				break;
-			}
 
 			foreach($sqlPgHeadRes as $_sqlPgHead)
 			{
-
 				if($_sqlPgHead -> page_language == '0') continue;
 
 				if(!isset($_returnArray[$_sqlPgHead -> page_language]))
@@ -203,27 +167,18 @@ class 	modelSitemap extends CModel
 	private function
 	getPagePath(CDatabaseConnection &$_pDatabase, int $_nodeID, string $_language) : string
 	{
-		$sqlString =	"	SELECT 		p.node_id, 
-										p.page_path
-							FROM 		tb_page_path n,
-										tb_page_path p
-							WHERE 		n.node_lft
-								BETWEEN p.node_lft 
-									AND	p.node_rgt 
-								AND 	n.node_id 		= '$_nodeID'
-								AND 	p.page_language = '$_language'
-							ORDER BY 	p.node_lft ASC
-						";
-	
-		try
-		{
-			$sqlNodeRes = $_pDatabase -> getConnection() -> query($sqlString, PDO::FETCH_CLASS, 'stdClass') -> fetchAll();
-		}
-		catch(PDOException $exception)
-		{
-			CMessages::instance() -> addMessage('modelSitemap::getPagePath - Query node failed', MSG_LOG, '', true);				  
-			return '/';
-		}
+		$condNode		 = new CModelCondition();
+		$condNode		-> whereBetween('n.node_lft', 'p.node_lft', 'p.node_rgt', true)
+						-> where('n.node_id', $_nodeID)
+						-> where('p.page_language', $_language)
+						-> orderBy('p.node_lft');
+
+		$sqlNodeRes 	 = $_pDatabase		-> query(DB_SELECT) 
+											-> table('tb_page_path', 'n') 
+											-> table('tb_page_path', 'p') 
+											-> selectColumns(['p.node_id', 'p.page_path'])
+											-> condition($condNode)
+											-> exec();
 
 		if($sqlNodeRes === false || !count($sqlNodeRes))
 		{
@@ -238,7 +193,6 @@ class 	modelSitemap extends CModel
 		}
 		return $_pagePath;
 	}
-	
 }
 
 
