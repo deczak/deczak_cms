@@ -191,13 +191,13 @@ class	CDatabaseQuery
 			case 	DB_DROP:
 
 					$queryString[]	= '"DROP TABLE IF EXISTS';
-					$queryString[]	= ($tableIndex != 0 ? ', ' : '') .'`'. $this -> m_pDatabase -> getDatabaseName() .'`.`'. current($this -> m_tableName) -> name .'`';
+					$queryString[]	= '`'. $this -> m_pDatabase -> getDatabaseName() .'`.`'. current($this -> m_tableName) -> name .'`';
 					break;
 
 			case 	DB_DESCRIBE:
 
 					$queryString[]	= 'DESCRIBE';
-					$queryString[]	= ($tableIndex != 0 ? ', ' : '') .'`'. $this -> m_pDatabase -> getDatabaseName() .'`.`'. current($this -> m_tableName) -> name .'`';
+					$queryString[]	= '`'. $this -> m_pDatabase -> getDatabaseName() .'`.`'. current($this -> m_tableName) -> name .'`';
 					break;
 
 			case 	DB_COLUMNS:
@@ -205,7 +205,7 @@ class	CDatabaseQuery
 					$queryString[]	= 'SELECT DISTINCT COLUMN_NAME FROM';
 					$queryString[]	= 'INFORMATION_SCHEMA.COLUMNS';
 					$queryString[]	= 'WHERE';
-					$queryString[]	= ($tableIndex != 0 ? ', ' : '') .'TABLE_NAME = \''. current($this -> m_tableName) -> name .'\'';
+					$queryString[]	= 'TABLE_NAME = \''. current($this -> m_tableName) -> name .'\'';
 					break;
 
 			case 	DB_CREATE:
