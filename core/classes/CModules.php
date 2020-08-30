@@ -345,7 +345,7 @@ class	CModules extends CSingleton
 
 		
 
-		$moduleData['module_id'] = $modelModules -> insert($_sqlConnection, $moduleData);
+		$moduleData['module_id'] = $modelModules -> insert($_dbConnection, $moduleData);
 		
 		//	Create module Tables
 
