@@ -7,7 +7,7 @@ require_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelLoginObjects.php';
 class	CLogin extends CSingleton
 {
 	public	function
-	login(&$_sqlConnection, string $_loginObjectName)
+	login(CDatabaseConnection &$_pDatabase, string $_loginObjectName)
 	{
 				$modelCondition = new CModelCondition();
 		$modelCondition -> where('object_id', $_loginObjectName);
@@ -15,7 +15,7 @@ class	CLogin extends CSingleton
 		## get login objects
 
 		$_pModelLoginObjects	 =	new modelLoginObjects();
-		$_pModelLoginObjects	->	load($_sqlConnection, $modelCondition);	
+		$_pModelLoginObjects	->	load($_pDatabase, $modelCondition);	
 
 		$_loginObjects			 = 	$_pModelLoginObjects -> getResult();
 
