@@ -18,7 +18,12 @@
 								"ctl_target":"view",
 								"menu_name"	:"",
 								"menu_order":"0",
-								"use_right" :"view"
+								"use_right" :"view",
+								"query_var" :"cms-ctrl-action",
+								"subSection":{
+												"url_name"	:false,
+												"query_var" :"cms-system-id"
+											 }
 							},
 							{
 								"url_name"	:"edit",

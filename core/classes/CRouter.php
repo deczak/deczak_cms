@@ -30,7 +30,6 @@ class CRouter extends CSingleton
 
 		$this -> nodesList 			= new CRouteNode(1, '', '');
 
-
 		$this  -> _createRoute($sitemap, 1, 0, $this -> nodesList);
 
 		##	backend nodes
@@ -46,13 +45,12 @@ class CRouter extends CSingleton
 
 		foreach($backend as $page)
 		{
-			$module = $backendStructure -> addChild( new CRouteNode($page -> node_id, 'en', $page -> page_path) );
+			$module = null;
 
 			if(empty($page -> page_path))
 				continue;
 
 			$_createEndNullSub = true;
-
 
 			$_activeModules	= CModules::instance() -> getModules();
 
@@ -73,6 +71,9 @@ class CRouter extends CSingleton
 					$_createEndNullSub = false;
 					continue;
 				}	
+
+				if($module === null)
+					$module = $backendStructure -> addChild( new CRouteNode($page -> node_id, 'en', $page -> page_path) );
 
 				##
 					
@@ -221,15 +222,15 @@ class CRouter extends CSingleton
 					&& 	$buffer[$sIndex] != CMS_BACKEND_PUBLIC)
 				{
 					$nodeInstance = &$childNode;
-					$nodeFound = !$nodeFound;
+					$nodeFound = true;
 
 					break;
 				}
-					
+
 				if($childNode -> uriSegmentName == $buffer[$sIndex] && ( (!CMS_BACKEND && $childNode -> language == $routeRequest -> language ) || CMS_BACKEND)  )
 				{
 					$nodeInstance = &$childNode;
-					$nodeFound = !$nodeFound;
+					$nodeFound = true;
 
 					if($childNode -> queryVar !== false)
 					{
@@ -245,7 +246,7 @@ class CRouter extends CSingleton
 				if($childNode -> uriSegmentName === false && $childNode -> queryVar !== false)
 				{
 					$nodeInstance 	= &$childNode;
-					$nodeFound 		= !$nodeFound;
+					$nodeFound = true;
 
 					$_GET[ $childNode -> queryVar ] = $buffer[$sIndex];
 
