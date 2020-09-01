@@ -47,6 +47,9 @@ class CRouter extends CSingleton
 		{
 			$module = null;
 
+			if(empty($page -> objects) || empty($page -> page_path))
+				$module = $backendStructure -> addChild( new CRouteNode($page -> node_id, 'en', $page -> page_path) );
+
 			if(empty($page -> page_path))
 				continue;
 
@@ -58,8 +61,11 @@ class CRouter extends CSingleton
 
 			foreach($page -> objects as $_object)
 			{	
-				
 				$_moduleData = $this -> _findActiveModuleData($_activeModules, $_object -> module_id);
+
+				if($module === null && empty($_moduleData -> module_extends_by))
+					$module = $backendStructure -> addChild( new CRouteNode($page -> node_id, 'en', $page -> page_path) );
+
 
 				if($_moduleData === false)
 					continue;
@@ -71,10 +77,7 @@ class CRouter extends CSingleton
 					$_createEndNullSub = false;
 					continue;
 				}	
-
-				if($module === null)
-					$module = $backendStructure -> addChild( new CRouteNode($page -> node_id, 'en', $page -> page_path) );
-
+				
 				##
 					
 				$_moduleJSON = CMS_SERVER_ROOT.$_moduleData -> module_type.'/'.DIR_MODULES.$_moduleData -> module_location.'/module.json';
