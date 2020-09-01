@@ -46,8 +46,11 @@ class 	modelSessions extends CModel
 			$this -> m_resultList[$i] -> pages = $modelSessionsAccess -> getResult();
 
 			$this -> m_resultList[$i] -> num_pages = count($this -> m_resultList[$i] -> pages);
-			
-			$this -> m_resultList[$i] -> latest_page = $this -> m_resultList[$i] -> pages[ $this -> m_resultList[$i] -> num_pages - 1] -> page_title;
+
+			if($this -> m_resultList[$i] -> num_pages != 0)			
+				$this -> m_resultList[$i] -> latest_page = $this -> m_resultList[$i] -> pages[ $this -> m_resultList[$i] -> num_pages - 1] -> page_title;
+			else
+				$this -> m_resultList[$i] -> latest_page = '';		
 		}
 
 		return $dtaCount;
