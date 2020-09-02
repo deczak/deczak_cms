@@ -172,13 +172,13 @@ class	controllerCategories extends CController
 			{
 				$_aFormData['category_url'] 	= tk::normalizeFilename($_aFormData['category_name'], true);
 
-				$dataId = 0;
+				$dataId = $this -> m_pModel -> insert($_pDatabase, $_aFormData);
 
-				if($this -> m_pModel -> insert($_pDatabase, $_aFormData, $dataId))
+				if($dataId !== false)
 				{					
 					$_bValidationMsg = CLanguage::get() -> string('MOD_BECATEGORIES_CATEGORY') .' '. CLanguage::get() -> string('WAS_CREATED') .' - '. CLanguage::get() -> string('WAIT_FOR_REDIRECT');
 											
-					$_bValidationDta['redirect'] = CMS_SERVER_URL_BACKEND . CPageRequest::instance() -> urlPath .'category/'.$dataId;
+					$_bValidationDta['redirect'] = CMS_SERVER_URL_BACKEND . CPageRequest::instance() -> urlPath .'category/'. $dataId;
 				}
 				else
 				{

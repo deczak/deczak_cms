@@ -173,9 +173,9 @@ class	controllerTags extends CController
 			{
 				$_aFormData['tag_url'] 	= tk::normalizeFilename($_aFormData['tag_name'], true);
 
-				$dataId = 0;
+				$dataId = $this -> m_pModel -> insert($_pDatabase, $_aFormData);
 
-				if($this -> m_pModel -> insert($_pDatabase, $_aFormData, $dataId))
+				if($dataId !== false)
 				{					
 					$_bValidationMsg = CLanguage::get() -> string('MOD_BETAGS_TAG') .' '. CLanguage::get() -> string('WAS_CREATED') .' - '. CLanguage::get() -> string('WAIT_FOR_REDIRECT');
 											
