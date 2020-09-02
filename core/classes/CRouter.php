@@ -166,10 +166,17 @@ class CRouter extends CSingleton
 		$buffer = explode('/', $buffer);
 		$buffer = array_filter($buffer, 'strlen');
 
+
+
+
 		$nodeInstance = &$this-> nodesList;
 
 		for($sIndex = 0; $sIndex < count($buffer); $sIndex++)
 		{
+
+
+
+
 			## if error documents request
 
 			if($sIndex == 0 && $buffer[$sIndex] === '404')
@@ -188,8 +195,52 @@ class CRouter extends CSingleton
 
 			if($sIndex == 0)
 			{
-				#$langFound = false;
+				$langFound = false;
 
+
+				$defaultLanguage = null;
+
+				foreach($this -> languagesList as $lIndex => $language)
+				{
+
+
+					if($buffer[$sIndex] == $language -> lang_key)
+					{
+						# das erste segment entspricht der sprache
+
+$routeRequest -> language = $language -> lang_key;
+
+						$langFound = true;
+
+					}
+
+					if($language -> lang_default)
+					{
+
+$defaultLanguage = $language;
+
+					}
+
+
+				}
+
+				if(!$langFound )
+				{
+
+
+						$routeRequest -> language = $defaultLanguage -> lang_key;
+				}
+
+
+				if(!$langFound && $this -> languageSettings -> DEFAULT_IN_URL)
+				{
+
+						$buffer = array_merge([$defaultLanguage -> lang_key], $buffer);
+				}
+
+
+
+/*
 				foreach($this -> languagesList as $lIndex => $language)
 				{
 					if(		$buffer[$sIndex] == $language -> lang_key 
@@ -198,15 +249,33 @@ class CRouter extends CSingleton
 							)
 					  )
 					{
-						$routeRequest -> language = $language -> lang_key;
-						#$langFound = !$langFound;
+					#	$routeRequest -> language = $language -> lang_key;
+						$langFound = !$langFound;
 						break;
-					} elseif($language -> lang_default && !CMS_BACKEND)
+					} elseif($language -> lang_default && !$this -> languageSettings -> DEFAULT_IN_URL && !CMS_BACKEND)
 					{
-						$routeRequest -> language = $language -> lang_key;
-						$buffer = array_merge([$language -> lang_key], $buffer);
+
+$routeRequest -> language = $language -> lang_key;
+
+if(!CMS_BACKEND)
+{
+echo '<br> ... append lang key to buffer : ' . $language -> lang_key;
+}
+
+
+
+				
 					}
 				}
+
+				if(!$langFound)
+				{
+						$routeRequest -> language = $language -> lang_key;
+						#$buffer = array_merge([$language -> lang_key], $buffer);
+				}
+
+*/
+
 			}
 
 			if($sIndex == 0 && count($buffer) == 1 && empty($buffer[$sIndex]))
@@ -214,10 +283,14 @@ class CRouter extends CSingleton
 				$buffer[$sIndex] = $routeRequest -> language;
 			}
 
+
 			$nodeFound = false;
 
 			foreach($nodeInstance -> childNodesList as $childNode)
 			{
+
+
+
 				if(		$sIndex == 0 
 					&& 	$childNode -> uriSegmentName == ''  
 					&& 	$nodeInstance -> nodeId == 1 
@@ -230,10 +303,17 @@ class CRouter extends CSingleton
 					break;
 				}
 
+
+
+
+
 				if($childNode -> uriSegmentName == $buffer[$sIndex] && ( (!CMS_BACKEND && $childNode -> language == $routeRequest -> language ) || CMS_BACKEND)  )
 				{
 					$nodeInstance = &$childNode;
 					$nodeFound = true;
+
+
+
 
 					if($childNode -> queryVar !== false)
 					{
@@ -259,6 +339,7 @@ class CRouter extends CSingleton
 
 			if(!$nodeFound)
 			{
+				if(!CMS_BACKEND)
 				header("Location: ". CMS_SERVER_URL ."404"); 	
 				exit;	
 			}
@@ -266,6 +347,7 @@ class CRouter extends CSingleton
 			$routeRequest -> nodeId = $nodeInstance -> nodeId;
 		}
 
+#exit;
 		return $routeRequest;
 	}
 
