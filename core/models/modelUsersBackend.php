@@ -32,31 +32,22 @@ class 	modelUsersBackend extends CModel
 				$dataset -> recover_timeout = '';
 			}
 
-
-
-
 			if($_execFlags & MODEL_USERSBACKEND_APPEND_RIGHTGROUPS) 
 			{
+				$modelUserGroups	 = new modelUserGroups();
 
-			$modelUserGroups	 = new modelUserGroups();
+				$modelCondition = new CModelCondition();
+				$modelCondition -> where('user_id', $dataset -> user_id);
 
-			$modelCondition = new CModelCondition();
-			$modelCondition -> where('user_id', $dataset -> user_id);
+				$modelUserGroups -> load($_pDatabase, $modelCondition);
 
-			$modelUserGroups -> load($_pDatabase, $modelCondition);
+				$dataset -> user_groups = [];
 
-			$dataset -> user_groups = [];
-
-			foreach($modelUserGroups -> getResult() as $group)
-			{
-					$dataset -> user_groups[] = $group -> group_id;
-					sort($dataset -> user_groups);
-			}
-
-			
-
-
-
+				foreach($modelUserGroups -> getResult() as $group)
+				{
+						$dataset -> user_groups[] = $group -> group_id;
+						sort($dataset -> user_groups);
+				}
 			}
 		}
 
