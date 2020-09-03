@@ -28,14 +28,15 @@ class cmsRequestDataItem extends cmsRequestDataIndex
 		
 				for(let nodeIndex = 0; nodeIndex < nodes.length; nodeIndex++)
 				{
+					nodes[nodeIndex].checked = false;
 					let value = 	nodes[nodeIndex].getAttribute('value');
-
 					for(let objectProp in response.data[0][prop])
 					{
 						if(String(response.data[0][prop][objectProp]) === String(value))
 						{
 							nodes[nodeIndex].checked = true;
-						}
+							break;
+						}							
 					}
 				}
 			}
