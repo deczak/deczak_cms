@@ -197,7 +197,6 @@ else
 							<?php 						
 							foreach($right_groups as $_group)
 							{
-								$isActiveGroup  = isActiveGroup($_group -> group_id, $user_groups);
 								?>
 								<div class="ui pick-item">
 									<input type="checkbox" id="group-<?= $_group -> group_id; ?>" data-input-checkbox="user_groups" name="groups[]" value="<?= $_group -> group_id; ?>">

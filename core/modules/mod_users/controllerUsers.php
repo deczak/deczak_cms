@@ -258,7 +258,7 @@ class	controllerUsers extends CController
 			$modelCondition = new CModelCondition();
 			$modelCondition -> where('user_id', $systemId);
 
-			if($this -> m_pModel -> load($_pDatabase, $modelCondition, MODEL_USERS_STRIP_SENSITIVE_DATA))
+			if($this -> m_pModel -> load($_pDatabase, $modelCondition, MODEL_USERS_STRIP_SENSITIVE_DATA | MODEL_USERS_APPEND_RIGHTGROUPS))
 			{
 				##	Gathering additional data
 

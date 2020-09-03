@@ -1,6 +1,7 @@
 <?php
 
 define('MODEL_USERS_STRIP_SENSITIVE_DATA',0x101);
+define('MODEL_USERS_APPEND_RIGHTGROUPS',0x102);
 
 include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SHEME.'shemeUsers.php';	
 
@@ -29,6 +30,24 @@ class 	modelUsers extends CModel
 				$dataset -> cookie_id 		= '';
 				$dataset -> recover_key 	= '';
 				$dataset -> recover_timeout = '';
+			}
+
+			if($_execFlags & MODEL_USERS_APPEND_RIGHTGROUPS) 
+			{
+				$modelUserGroups	 = new modelUserGroups();
+
+				$modelCondition = new CModelCondition();
+				$modelCondition -> where('user_id', $dataset -> user_id);
+
+				$modelUserGroups -> load($_pDatabase, $modelCondition);
+
+				$dataset -> user_groups = [];
+
+				foreach($modelUserGroups -> getResult() as $group)
+				{
+						$dataset -> user_groups[] = $group -> group_id;
+						sort($dataset -> user_groups);
+				}
 			}
 		}
 
