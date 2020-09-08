@@ -381,6 +381,17 @@ class	CModules extends CSingleton
 			$backendPages		= file_get_contents($backendFilepath);
 			$backendPages		= json_decode($backendPages, true);
 
+/*
+			foreach($backendPages as $pageIndex => $page)
+			{
+				if($page['page_path'] === $moduleConfig -> module_path)
+				{
+					unset($backendPages[$pageIndex]);
+					break;
+				}
+			}
+*/
+
 			$backendPages[]		= 	[
 										"page_name"			=> $moduleConfig -> module_name,
 										"page_title"		=> $moduleConfig -> module_name,
@@ -399,6 +410,10 @@ class	CModules extends CSingleton
 																	]
 																]
 									];
+
+
+
+
 
 			$backendPages		= json_encode($backendPages);
 
@@ -431,6 +446,9 @@ class	CModules extends CSingleton
 
 		$modelModules	 = new modelModules();
 		$modelModules 	-> load($_dbConnection, $modelCondition);	
+
+		if(empty($modelModules -> getResult()))
+			return false;
 
 		$moduleData		 = $modelModules -> getResult()[0];
 

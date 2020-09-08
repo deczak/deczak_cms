@@ -135,9 +135,10 @@ class	CDatabaseQuery
 
 			case 	DB_INSERT:
 
+					$tableName = ($this -> m_tableSheme != null && !empty($this -> m_tableSheme -> getTableName()) ? $this -> m_tableSheme -> getTableName() : current($this -> m_tableName) -> name);
+
 					$queryString[]	= 'INSERT INTO';
-					foreach($this -> m_tableName as $tableIndex => $table)
-						$queryString[]	= ($tableIndex != 0 ? ', ' : '') .'`'. $this -> m_pDatabase -> getDatabaseName() .'`.`'. $table -> name .'`'. (!empty($table -> as) ? ' AS '. $table -> as : '');
+					$queryString[]	= '`'. $this -> m_pDatabase -> getDatabaseName() .'`.`'. $tableName .'`';
 					$queryString[]	= 'SET';
 	
 					$insertColumns 	= [];
@@ -149,9 +150,11 @@ class	CDatabaseQuery
 
 			case 	DB_UPDATE:
 
+					$tableName = ($this -> m_tableSheme != null && !empty($this -> m_tableSheme -> getTableName()) ? $this -> m_tableSheme -> getTableName() : current($this -> m_tableName) -> name);
+
 					$queryString[]	= 'UPDATE';
 					foreach($this -> m_tableName as $tableIndex => $table)
-						$queryString[]	= ($tableIndex != 0 ? ', ' : '') .'`'. $this -> m_pDatabase -> getDatabaseName() .'`.`'. $table -> name .'`'. (!empty($table -> as) ? ' AS '. $table -> as : '');
+					$queryString[]	= '`'. $this -> m_pDatabase -> getDatabaseName() .'`.`'. $tableName .'`';
 					$queryString[]	= 'SET';
 	
 					$insertColumns 	= [];
@@ -172,40 +175,48 @@ class	CDatabaseQuery
 
 			case 	DB_DELETE:
 
+					$tableName = ($this -> m_tableSheme != null && !empty($this -> m_tableSheme -> getTableName()) ? $this -> m_tableSheme -> getTableName() : current($this -> m_tableName) -> name);
+
 					$queryString[]	= 'DELETE FROM';
-					foreach($this -> m_tableName as $tableIndex => $table)
-						$queryString[]	= ($tableIndex != 0 ? ', ' : '') .'`'. $this -> m_pDatabase -> getDatabaseName() .'`.`'. current($this -> m_tableName) -> name .'`';
-				
+					$queryString[]	= '`'. $this -> m_pDatabase -> getDatabaseName() .'`.`'. $tableName .'`';
 					$queryString[]	= $this -> _getConditions();
 					$execParameters = $this -> _getConditionsValues();
 					break;
 
 			case 	DB_TRUNCATE:
 
+					$tableName = ($this -> m_tableSheme != null && !empty($this -> m_tableSheme -> getTableName()) ? $this -> m_tableSheme -> getTableName() : current($this -> m_tableName) -> name);
+
 					$queryString[]	= 'TRUNCATE TABLE';
-					foreach($this -> m_tableName as $tableIndex => $table)
-						$queryString[]	= ($tableIndex != 0 ? ', ' : '') .'`'. $this -> m_pDatabase -> getDatabaseName() .'`.`'. current($this -> m_tableName) -> name .'`';
+					$queryString[]	= '`'. $this -> m_pDatabase -> getDatabaseName() .'`.`'. $tableName .'`';
 					break;
 
 
 			case 	DB_DROP:
 
-					$queryString[]	= '"DROP TABLE IF EXISTS';
-					$queryString[]	= '`'. $this -> m_pDatabase -> getDatabaseName() .'`.`'. current($this -> m_tableName) -> name .'`';
+					$tableName = ($this -> m_tableSheme != null && !empty($this -> m_tableSheme -> getTableName()) ? $this -> m_tableSheme -> getTableName() : current($this -> m_tableName) -> name);
+
+					$queryString[]	= 'DROP TABLE IF EXISTS';
+					$queryString[]	= '`'. $this -> m_pDatabase -> getDatabaseName() .'`.`'. $tableName .'`';
+
 					break;
 
 			case 	DB_DESCRIBE:
 
+					$tableName = ($this -> m_tableSheme != null && !empty($this -> m_tableSheme -> getTableName()) ? $this -> m_tableSheme -> getTableName() : current($this -> m_tableName) -> name);
+
 					$queryString[]	= 'DESCRIBE';
-					$queryString[]	= '`'. $this -> m_pDatabase -> getDatabaseName() .'`.`'. current($this -> m_tableName) -> name .'`';
+					$queryString[]	= '`'. $this -> m_pDatabase -> getDatabaseName() .'`.`'. $tableName .'`';
 					break;
 
 			case 	DB_COLUMNS:
 
+					$tableName = ($this -> m_tableSheme != null && !empty($this -> m_tableSheme -> getTableName()) ? $this -> m_tableSheme -> getTableName() : current($this -> m_tableName) -> name);
+
 					$queryString[]	= 'SELECT DISTINCT COLUMN_NAME FROM';
 					$queryString[]	= 'INFORMATION_SCHEMA.COLUMNS';
 					$queryString[]	= 'WHERE';
-					$queryString[]	= 'TABLE_NAME = \''. current($this -> m_tableName) -> name .'\'';
+					$queryString[]	= 'TABLE_NAME = \''. $tableName .'\'';
 					break;
 
 			case 	DB_CREATE:
@@ -226,7 +237,7 @@ class	CDatabaseQuery
 			$this -> m_queryString = $queryString;
 			
 			$statement  	 = 	$this -> m_pDatabase -> getConnection() -> prepare($queryString);
-			$statement 		-> 	execute($execParameters);	
+			$statement 		-> 	execute((!empty($execParameters) ? $execParameters : null));	
 		}
 		catch(PDOException $exception)
 		{

@@ -292,7 +292,7 @@ document.addEventListener("DOMContentLoaded", function(){
 			return;
 		}
 		
-		instance.requestData();
+		//instance.requestData();
 	}
 
 // TODO :: 
