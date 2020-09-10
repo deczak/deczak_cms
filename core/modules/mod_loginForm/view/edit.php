@@ -3,10 +3,9 @@
 $object -> params = json_decode($object -> params);
 
 $fieldsList = [];
-
 foreach($login_objects as $objecKey => $objectSet )
-	$fieldsList[] = [ "object_id" => $objectSet -> object_id, "object_fields" => json_decode( $objectSet -> object_fields, true ) ];
-		
+	$fieldsList[] = [ "object_id" => $objectSet -> object_id, "object_fields" => $objectSet -> object_fields ];
+
 ?>
 
 <input type="hidden" name="cms-object-id" value="<?php echo $object -> object_id; ?>">
@@ -72,6 +71,9 @@ foreach($login_objects as $objecKey => $objectSet )
 		var	selectedObject 	= element.value;
 		var	fieldList 		= <?php echo json_encode($fieldsList); ?>;
 		var	fieldLabels 	= <?php echo json_encode($object -> params, JSON_HEX_QUOT | JSON_HEX_APOS | JSON_UNESCAPED_UNICODE); ?>;
+console.log(fieldList);
+console.log(fieldLabels);
+
 		var	formContainer 	= element.closest('fieldset');
 		var	fieldsContainer = formContainer.querySelector('.login-fields');
 			fieldsContainer.innerHTML = '';
@@ -80,7 +82,6 @@ foreach($login_objects as $objecKey => $objectSet )
 		{
 			if(fieldList[i].object_id === selectedObject)
 			{
-
 				for(var f = 0; f < fieldList[i].object_fields.length; f++)
 				{
 					var	oFieldBox = document.createElement('div');
@@ -100,11 +101,8 @@ foreach($login_objects as $objecKey => $objectSet )
 
 					fieldsContainer.appendChild(oFieldBox);
 
-
-
 					var	oFieldBox = document.createElement('div');
 						oFieldBox.classList.add('input', 'width-100');
-
 
 					var oInput = document.createElement('input');
 						oInput.setAttribute('type', fieldList[i].object_fields[f].type);

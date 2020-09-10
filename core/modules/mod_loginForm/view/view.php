@@ -1,12 +1,3 @@
-
-<?php
-
-
-#$login_object -> object_fields = json_decode($login_object -> object_fields);
-
-
-?>
-
 <div class="login-form-container" style="margin:0 auto; max-width:300px;">
 	<form action="" method="post">
 		<input type="hidden" name="cms-risa" value="login">
