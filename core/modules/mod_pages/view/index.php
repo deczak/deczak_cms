@@ -64,8 +64,8 @@
 		<a data-right="view" href="<?php echo CMS_SERVER_URL_BACKEND . $pageRequest -> urlPath; ?>view/%PAGE_LANGUAGE%/%NODE_ID%?language=<?= CLanguage::get() -> getActive(); ?>"><?php echo CLanguage::instance() -> getString('VIEW'); ?></a>
 		<a data-right="edit" href="<?php echo CMS_SERVER_URL_BACKEND . $pageRequest -> urlPath; ?>view/%PAGE_LANGUAGE%/%NODE_ID%?language=<?= CLanguage::get() -> getActive(); ?>"><?php echo CLanguage::instance() -> getString('EDIT'); ?></a>
 		<a data-right="edit" class="trigger-page-option" data-xhr-overwrite-target="create/%PAGE_LANGUAGE%/%NODE_ID%"><?php echo CLanguage::instance() -> getString('MOD_SITES_OV_TABLE_PAGECREATE'); ?></a>
-		<a data-right="edit" class="trigger-page-option" data-xhr-overwrite-target="delete/%PAGE_LANGUAGE%/%NODE_ID%"><?php echo CLanguage::instance() -> getString('DELETE'); ?></a>
-		<a data-right="edit" class="trigger-page-option" data-xhr-overwrite-target="deletetree/%PAGE_LANGUAGE%/%NODE_ID%"><?php echo CLanguage::instance() -> getString('MOD_SITES_OV_TABLE_PAGEDELETETREE'); ?></a>
+		<a data-right="edit" class="trigger-page-option" data-xhr-overwrite-target="delete/%NODE_ID%"><?php echo CLanguage::instance() -> getString('DELETE'); ?></a>
+		<a data-right="edit" class="trigger-page-option" data-xhr-overwrite-target="deletetree/%NODE_ID%"><?php echo CLanguage::instance() -> getString('MOD_SITES_OV_TABLE_PAGEDELETETREE'); ?></a>
 		</div></td>
 	
 </template>
