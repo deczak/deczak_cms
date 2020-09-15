@@ -216,6 +216,19 @@ class cmstk
 		}
 		return result;
 	}
-
-
+		
+    static
+    in_array(needle, haystack, strict = false)
+    {
+        let haystackSize = haystack.length;
+        if(strict)
+            for(let i = 0; i < haystackSize; i++)
+            if(haystack[i] === needle)
+                return true;
+        else
+            for(let i = 0; i < haystackSize; i++)
+            if(haystack[i] == needle)
+                return true;
+        return false;
+    }
 }
