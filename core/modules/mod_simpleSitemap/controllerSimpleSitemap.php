@@ -81,8 +81,12 @@ class	controllerSimpleSitemap extends CController
 
 		##	gathering child nodes
 
+
+
+		$parentNode = (empty($this -> m_modelSimple -> getResult()[0] -> params -> parent_node_id) ? $this -> m_aObject -> node_id : $this -> m_modelSimple -> getResult()[0] -> params -> parent_node_id);
+
 		$modelCondition = new CModelCondition();
-		$modelCondition -> where('node_id', $this -> m_aObject -> node_id);		
+		$modelCondition -> where('node_id', $parentNode);		
 
 		$modelSitemap  = new modelSitemap();
 		$modelSitemap -> load($_pDatabase, $modelCondition, NULL, SITEMAP_OWN_CHILDS_ONLY);	
@@ -124,6 +128,7 @@ class	controllerSimpleSitemap extends CController
 								$_request[] 	 = 	[	"input" => "cms-object-id", 			"output" => "object_id", 	"validate" => "strip_tags|!empty" ]; 
 								$_request[] 	 = 	[	"input" => "sitemap-template",  		"validate" => "strip_tags|!empty" ]; 
 								$_request[] 	 = 	[	"input" => "sitemap-display-hidden", 	"validate" => "strip_tags|!empty" ]; 
+								$_request[] 	 = 	[	"input" => "sitemap-parent-node-id", 	"validate" => "strip_tags|!empty" ]; 
 								$_pFormVariables-> retrieve($_request, false, true); // POST 
 								$_aFormData		 = $_pFormVariables ->getArray();
 
@@ -136,7 +141,8 @@ class	controllerSimpleSitemap extends CController
 
 									$_aFormData['params']	= 	[
 																	"template"			=> $_aFormData['sitemap-template'],
-																	"display_hidden"	=> $_aFormData['sitemap-display-hidden']
+																	"display_hidden"	=> $_aFormData['sitemap-display-hidden'],
+																	"parent_node_id"	=> $_aFormData['sitemap-parent-node-id']
 																];
 									$_aFormData['params']	 = 	json_encode($_aFormData['params'], JSON_FORCE_OBJECT);
 
@@ -186,8 +192,14 @@ class	controllerSimpleSitemap extends CController
 
 		##	gathering child nodes
 
+
+
+		$parentNode = (empty($this -> m_modelSimple -> getResult()[0] -> params -> parent_node_id) ? $this -> m_aObject -> node_id : $this -> m_modelSimple -> getResult()[0] -> params -> parent_node_id);
+
+
+
 		$modelCondition = new CModelCondition();
-		$modelCondition -> where('node_id', $this -> m_aObject -> node_id);		
+		$modelCondition -> where('node_id', $parentNode);		
 
 		$modelSitemap  = new modelSitemap();
 		$modelSitemap -> load($_pDatabase, $modelCondition, NULL, SITEMAP_OWN_CHILDS_ONLY);	
@@ -197,7 +209,6 @@ class	controllerSimpleSitemap extends CController
 
 		$moduleTemplates	 = new CModulesTemplates();
 		$moduleTemplates		->	load('simpleSitemap');
-
 
 		$this -> setView(	
 						'edit',	
@@ -230,7 +241,8 @@ class	controllerSimpleSitemap extends CController
 
 			$_dataset['params']		= 	[
 											"template"			=> '',
-											"display_hidden"	=> ''
+											"display_hidden"	=> '',
+											"parent_node_id"	=> ''
 										];
 			$_dataset['params']	 	= 	json_encode($_dataset['params'], JSON_FORCE_OBJECT);
 

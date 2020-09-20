@@ -18,9 +18,14 @@ $timestamp = time();
 Changes on those settings gets visible after reload		
 </div></div>
 
-<div class="ui" style="display:flex; justify-content:space-between; padding:10px;">
+<div class="ui options-container">
 
-	<div class="input" style="width:23%;">
+	<div class="input">
+		<label>Root Page (Node-ID)</label>
+		<input type="text" name="sitemap-parent-node-id" value="<?= $object -> params -> parent_node_id ?? '' ?>">
+	</div>
+
+	<div class="input">
 		<label>View</label>
 		<div class="select-wrapper">
 			<select name="sitemap-template">
@@ -33,7 +38,7 @@ Changes on those settings gets visible after reload
 	</div>
 
 
-	<div class="input" style="width:23%;">
+	<div class="input">
 		<label>Show hidden</label>
 		<div class="select-wrapper">
 			<select name="sitemap-display-hidden">
@@ -43,13 +48,13 @@ Changes on those settings gets visible after reload
 		</div>
 	</div>
 
-	<div class="input" style="width:23%;">
-	</div>
-
-	<div class="input" style="width:23%;">
-	</div>
-
 </div>
+
+<style>
+	.options-container { display:flex;  padding:10px; flex-wrap:wrap; }
+	.options-container > div { width:23%; min-width:250px; }
+	.options-container > div:not(:last-child) { margin-right:15px; }
+</style>
 
 <?php
 if($currentTemplate !== NULL)

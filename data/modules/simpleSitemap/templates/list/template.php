@@ -1,30 +1,80 @@
-<ul class="simple-sitemap template-list">
 
 <?php
-foreach($sitemap as $node)
+function printListSitemap(array &$_sitemap, int $_sitemapIndex, int $_sitemapLevel, int $_activeNodeId, &$_objectParams, $_pagePath, $_printRoodNode)
 {
-	
+	$timestamp 		= time();
 
-	if(	(		$object -> params -> display_hidden == 1
-			&&	$node -> hidden_state === 2 
-			&& $node -> page_auth == 0
-		)
+	$childIsActive 	= false;
+	for($i = $_sitemapIndex; $i < count($_sitemap); $i++)
+	{
 
-		||	(	($node -> hidden_state == 5 && $node -> publish_from  < $timestamp)
-			&&	($node -> hidden_state == 5 && $node -> publish_until > $timestamp && $node -> publish_until != 0)
-			&& $node -> page_auth == 0
+
+		if(	(		$_objectParams -> display_hidden == 1
+				&&	$_sitemap[$i] -> hidden_state === 2 
+				&& $_sitemap[$i] -> page_auth == 0
 			)
 
-		||	$node -> hidden_state === 0 && $node -> page_auth == 0
+			||	(	($_sitemap[$i] -> hidden_state == 5 && $_sitemap[$i] -> publish_from  < $timestamp)
+				&&	($_sitemap[$i] -> hidden_state == 5 && $_sitemap[$i] -> publish_until > $timestamp && $_sitemap[$i] -> publish_until != 0)
+				&& $_sitemap[$i] -> page_auth == 0
+				)
 
-	  ); else continue;
+			||	$_sitemap[$i] -> hidden_state === 0 && $_sitemap[$i] -> page_auth == 0
+			||  CMS_BACKEND
+
+		); else continue;
+
+		if(!$childIsActive)
+				$childIsActive = in_array($_sitemap[$i] -> node_id, array_column($_pagePath, 'nodeId'));
+
+	}
+
+	echo '<ul class="'. ($childIsActive ? 'active-path' : '') .' '. ($_sitemapIndex === (int)!$_printRoodNode ? 'simple-sitemap template-list' : '') .'">';
+
+	for($i = $_sitemapIndex; $i < count($_sitemap); $i++)
+	{
 
 
-	echo '<li><a href="'. $node -> page_path .'" class="darkblue">'. $node -> page_title .'</a></li>';
+		if($_sitemapLevel !== $_sitemap[$i] -> level) 
+			break;
 
 
+		if(	(		$_objectParams -> display_hidden == 1
+				&&	$_sitemap[$i] -> hidden_state === 2 
+				&& $_sitemap[$i] -> page_auth == 0
+			)
+
+			||	(	($_sitemap[$i] -> hidden_state == 5 && $_sitemap[$i] -> publish_from  < $timestamp)
+				&&	($_sitemap[$i] -> hidden_state == 5 && $_sitemap[$i] -> publish_until > $timestamp && $_sitemap[$i] -> publish_until != 0)
+				&& $_sitemap[$i] -> page_auth == 0
+				)
+
+			||	$_sitemap[$i] -> hidden_state === 0 && $_sitemap[$i] -> page_auth == 0
+			||  CMS_BACKEND
+
+		); else continue;
+
+		$issActive = in_array($_sitemap[$i] -> node_id, array_column($_pagePath, 'nodeId'));
+
+
+		if(CMS_BACKEND)
+			echo '<li class="'. ($issActive ? 'active-page' : '') .'"><a data-node="'. $_sitemap[$i] -> node_id .'" class="darkblue" href="'. CMS_SERVER_URL_BACKEND .'pages/view/'. $_sitemap[$i] -> page_language .'/'. $_sitemap[$i] -> node_id .'" title="'. $_sitemap[$i] -> page_title .'">'. $_sitemap[$i] -> page_name .'</a>';
+		else
+			echo '<li class="'. ($issActive ? 'active-page' : '') .'"><a data-node="'. $_sitemap[$i] -> node_id .'" class="darkblue" href="'. CMS_SERVER_URL . URL_LANG_PRREFIX . substr($_sitemap[$i] -> page_path, 1) .'" title="'. $_sitemap[$i] -> page_title .'" '. ($_sitemap[$i] -> menu_follow == 0 ? 'rel="nofollow"' : '') .'>'. $_sitemap[$i] -> page_name  .'</a>';
+
+
+
+
+		if($_sitemap[$i] -> offspring != 0)
+			$i = printListSitemap($_sitemap, ($i + 1), ($_sitemapLevel + 1), $_activeNodeId, $_objectParams, $_pagePath, $_printRoodNode);
+
+		echo '</li>';
+
+
+	}
+
+	echo '</ul>';
+	return $i - 1;
 }
 ?>
-
-
-</ul>
+<?php printListSitemap($sitemap, 1, current($sitemap) -> level + 1 , $pageRequest -> node_id, $object -> params, $pageRequest -> crumbsList, false); ?>
