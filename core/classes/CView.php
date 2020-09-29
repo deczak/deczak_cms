@@ -17,7 +17,6 @@ class	CView
 	public function
 	view()
 	{
-
 		$pDatabase 		= CDatabase::instance() -> getConnection(CFG::GET() -> MYSQL -> PRIMARY_DATABASE);
 		$pageRequest 	= CPageRequest::instance();
 		$language		= CLanguage::instance();
@@ -37,8 +36,10 @@ class	CView
 	}
 
 	public function
-	getHTML()
+	getHTML($pageRequest = null)
 	{
+		$pDatabase 		= CDatabase::instance() -> getConnection(CFG::GET() -> MYSQL -> PRIMARY_DATABASE);
+
 		if(is_file($this -> m_templatePath .'.php'))
 		{
 			ob_start();

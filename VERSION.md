@@ -11,6 +11,15 @@ The version number is the release date. A letter as suffix indicates fixes on sa
 
 ## Version history	 
 
+### 20200929
+
+**Modules**
+- Added frontend module to display tags as list (not complete)
+- Added frontend module to display categories as list (not complete)
+
+**Changes**
+- various fixes
+
 
 ### 20200827
 

@@ -25,14 +25,6 @@
 											 }
 							}
 						],
-	"htaccess"			:{
-							"variables"		:[
-												{
-													"key" 		: "cms-system-id",
-													"wildcard"	:"(.*)"
-												}
-											]
-						},
 	"include"			:[
 						 ]
 }

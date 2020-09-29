@@ -238,6 +238,7 @@ class	CDatabaseQuery
 			
 			$statement  	 = 	$this -> m_pDatabase -> getConnection() -> prepare($queryString);
 			$statement 		-> 	execute((!empty($execParameters) ? $execParameters : null));	
+	
 		}
 		catch(PDOException $exception)
 		{
@@ -492,6 +493,12 @@ class	CDatabaseQuery
 						{
 							$_sqlString .= " AND ";
 						}
+
+						/*
+							IN needs multiple placeholders for the values
+
+							change CModelCondition::whereIn() second parameter to array and create function that returns values
+						*/
 						
 						if(!$conditionStage -> directUse)
 						switch($conditionStage -> type)
@@ -499,6 +506,7 @@ class	CDatabaseQuery
 							case 'BETWEEN'		: $_sqlString .= " ". $conditionStage -> column ." ". $conditionStage -> type ." :". $this -> _getValidConditionPlaceholder($conditionStage -> column) ."A AND  :". $this -> _getValidConditionPlaceholder($conditionStage -> column) ."B "; break;
 							case 'IS NULL'  	: 
 							case 'IS NOT NULL'  : $_sqlString .= " ". $conditionStage -> column ." ". $conditionStage -> type ." "; break;
+							case 'IN'  			: $_sqlString .= " ". $conditionStage -> column ." ". $conditionStage -> type ." ({$conditionStage -> valueA}) "; break;
 							default				: $_sqlString .= " ". $conditionStage -> column ." ". $conditionStage -> type ." :". $this -> _getValidConditionPlaceholder($conditionStage -> column) ." ";
 						}
 
@@ -506,6 +514,7 @@ class	CDatabaseQuery
 						switch($conditionStage -> type)
 						{
 							case 'BETWEEN'		: $_sqlString .= " ". $conditionStage -> column ." ". $conditionStage -> type ." ". $conditionStage -> valueA ." AND  ". $conditionStage -> valueB ." "; break;
+							case 'IN'  			: $_sqlString .= " ". $conditionStage -> column ." ". $conditionStage -> type ." ({$conditionStage -> valueA}) "; break;
 							default				: $_sqlString .= " ". $conditionStage -> column ." ". $conditionStage -> type ." ". ($conditionStage -> valueA) ." ";
 						}
 

@@ -94,6 +94,13 @@ class 	CModelCondition
 	}
 
 	public function
+	whereIn(string $_columnName, string $_columnValue)
+	{
+		$this -> conditionList[$this -> conditionLevel][] = new CModelConditionStage('IN', $_columnName, $_columnValue);
+		return $this;
+	}
+
+	public function
 	whereSmallerEven(string $_columnName, string $_columnValue)
 	{
 		$this -> conditionList[$this -> conditionLevel][] = new CModelConditionStage('<=', $_columnName, $_columnValue);

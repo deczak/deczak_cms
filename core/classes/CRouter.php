@@ -32,6 +32,10 @@ class CRouter extends CSingleton
 
 		$this  -> _createRoute($sitemap, 1, 0, $this -> nodesList);
 
+		##	special module nodes
+
+		$this -> _appendSpecialModuleRoutes($_dbConnection, $this -> nodesList);
+
 		##	backend nodes
 
 		$backendFilepath	= CMS_SERVER_ROOT.DIR_DATA.'backend/backend.json';
@@ -141,6 +145,315 @@ class CRouter extends CSingleton
 		return $i - 1;
 	}
 
+	private function
+	_appendSpecialModuleRoutes(CDatabaseConnection &$_dbConnection, &$_nodesList)
+	{
+
+
+		$condModules  	 = new CModelCondition();
+		$condModules 	-> where('is_frontend', 1)
+						-> where('is_active', 1);	
+
+		$modulesList 	 = $_dbConnection	-> query(DB_SELECT) 
+											-> table('tb_modules') 
+											-> condition($condModules)
+											-> exec();
+
+
+		foreach($modulesList as $module)
+		{
+
+
+			switch($module -> module_type) 
+			{
+				case 'core'   :	
+
+								$moduleConfig 	= file_get_contents( CMS_SERVER_ROOT.DIR_CORE.DIR_MODULES. $module -> module_location .'/module.json');
+								$moduleConfig 	= ($moduleConfig !== false ? json_decode($moduleConfig) : [] );	
+
+								break;
+							
+								
+				case 'mantle' : 
+
+								$moduleConfig 	= file_get_contents( CMS_SERVER_ROOT.DIR_MANTLE.DIR_MODULES. $module -> module_location .'/module.json');
+								$moduleConfig 	= ($moduleConfig !== false ? json_decode($moduleConfig) : [] );	
+
+
+								break;
+
+			}
+
+
+			if( 	property_exists($moduleConfig, 'query_url_name')  && !empty($moduleConfig  -> query_url_name)
+				&&	property_exists($moduleConfig, 'query_url_var')   && !empty($moduleConfig  -> query_url_var)
+				&&	property_exists($moduleConfig, 'query_value_var') && !empty($moduleConfig  -> query_value_var)
+			  )
+			{
+
+
+
+
+
+
+
+
+
+
+
+		$sqlDB = $_dbConnection -> getConnection();
+
+		$objectRes	=	$sqlDB -> query("	SELECT		tb_page_object.node_id,
+														tb_page_object_simple.params
+											FROM		tb_modules
+											JOIN		tb_page_object
+												ON		tb_page_object.module_id 		= tb_modules.module_id
+											JOIN		tb_page_object_simple
+												ON		tb_page_object_simple.object_id	= tb_page_object.object_id
+											WHERE		module_controller = '". $module -> module_controller ."'
+										",
+										PDO::FETCH_CLASS,
+										"stdClass");
+
+		$objectList	=	$objectRes -> fetchAll();
+
+		$node2ExpandList = [];
+
+		foreach($objectList as $object)
+		{
+			$object -> params = json_decode($object -> params);
+
+			if(!empty($object -> params -> parent_node_id))
+				$node2ExpandList[] = $object -> params -> parent_node_id;
+			else
+				$node2ExpandList[] = $object -> node_id;
+		}
+		
+		$node2ExpandList = array_unique($node2ExpandList);
+
+		##	expand nodes
+
+		foreach($node2ExpandList as $exNodeId)
+		{
+			$node = $this -> _getNodeByNodeId($_nodesList, $exNodeId);
+
+			if($node == null)
+				continue;
+
+			$index = count($node -> childNodesList);
+
+			$node -> childNodesList[$index] = new CRouteNode(	$node -> nodeId, 
+																$node -> language, 
+																$moduleConfig  -> query_url_name,
+																$moduleConfig  -> query_url_var
+																);
+
+			$node -> childNodesList[$index] -> childNodesList[] = new CRouteNode(	$node -> nodeId, 
+																					$node -> language, 
+																					false,
+																					$moduleConfig  -> query_value_var
+																					);
+
+		}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+			}
+
+
+			
+
+
+
+
+
+		}
+
+
+
+
+
+		/*
+			-> aktive module holen
+
+			-> modules.json einlesen
+
+			-> controllernamen und die parameter
+
+
+				"query_url_name"	:"tag",
+				"query_url_var"		:"cms-search-nodes-type",
+				"query_value_var"	:"cms-search-nodes-value"
+
+				query_url_name passend zur Übersetzung abrufen und setzen
+
+				original muss aber auch geschrieben werden im node
+
+					CRouteNode 5. parameter ?
+		*/
+
+
+
+/*
+		##	temporary solution
+
+		##	collect nodes id 2 expand
+
+		$pDatabase = &CDatabase::instance() -> getConnection(CFG::GET() -> MYSQL -> PRIMARY_DATABASE);
+
+		$sqlDB = $pDatabase -> getConnection();
+
+		## controller tag
+
+
+		$objectRes	=	$sqlDB -> query("	SELECT		tb_page_object.node_id,
+														tb_page_object_simple.params
+											FROM		tb_modules
+											JOIN		tb_page_object
+												ON		tb_page_object.module_id 		= tb_modules.module_id
+											JOIN		tb_page_object_simple
+												ON		tb_page_object_simple.object_id	= tb_page_object.object_id
+											WHERE		module_controller IN ('controllerTagCloud')
+										",
+										PDO::FETCH_CLASS,
+										"stdClass");
+
+		$objectList	=	$objectRes -> fetchAll();
+
+		$node2ExpandList = [];
+
+		foreach($objectList as $object)
+		{
+			$object -> params = json_decode($object -> params);
+
+			if(!empty($object -> params -> parent_node_id))
+				$node2ExpandList[] = $object -> params -> parent_node_id;
+			else
+				$node2ExpandList[] = $object -> node_id;
+		}
+		
+		$node2ExpandList = array_unique($node2ExpandList);
+
+		##	expand nodes
+
+		foreach($node2ExpandList as $exNodeId)
+		{
+			$node = $this -> _getNodeByNodeId($_nodesList, $exNodeId);
+
+			if($node == null)
+				continue;
+
+			$index = count($node -> childNodesList);
+
+			$node -> childNodesList[$index] = new CRouteNode(	$node -> nodeId, 
+																$node -> language, 
+																'tag',
+																'cms-search-nodes-type'
+																);
+
+			$node -> childNodesList[$index] -> childNodesList[] = new CRouteNode(	$node -> nodeId, 
+																					$node -> language, 
+																					false,
+																					'cms-search-nodes-value'
+																					);
+
+		}
+
+
+
+	
+		##	 controller category
+
+
+		$objectRes	=	$sqlDB -> query("	SELECT		tb_page_object.node_id,
+														tb_page_object_simple.params
+											FROM		tb_modules
+											JOIN		tb_page_object
+												ON		tb_page_object.module_id 		= tb_modules.module_id
+											JOIN		tb_page_object_simple
+												ON		tb_page_object_simple.object_id	= tb_page_object.object_id
+											WHERE		module_controller IN ('controllerCategoryCloud')
+										",
+										PDO::FETCH_CLASS,
+										"stdClass");
+
+		$objectList	=	$objectRes -> fetchAll();
+
+		$node2ExpandList = [];
+
+		foreach($objectList as $object)
+		{
+			$object -> params = json_decode($object -> params);
+
+			if(!empty($object -> params -> parent_node_id))
+				$node2ExpandList[] = $object -> params -> parent_node_id;
+			else
+				$node2ExpandList[] = $object -> node_id;
+		}
+		
+		$node2ExpandList = array_unique($node2ExpandList);
+
+		##	expand nodes
+
+		foreach($node2ExpandList as $exNodeId)
+		{
+			$node = $this -> _getNodeByNodeId($_nodesList, $exNodeId);
+
+			if($node == null)
+				continue;
+
+			$index = count($node -> childNodesList);
+
+			$node -> childNodesList[$index] = new CRouteNode(	$node -> nodeId, 
+																$node -> language, 
+																'category',
+																'cms-search-nodes-type'
+																);
+
+			$node -> childNodesList[$index] -> childNodesList[] = new CRouteNode(	$node -> nodeId, 
+																					$node -> language, 
+																					false,
+																					'cms-search-nodes-value'
+																					);
+
+		}
+		*/
+	}
+
+	private function
+	_getNodeByNodeId(&$_nodesList, $_destNodeId)
+	{
+		if($_nodesList -> nodeId == $_destNodeId)
+			return $_nodesList;
+
+		foreach($_nodesList -> childNodesList as $childNode)
+		{
+			$node = $this -> _getNodeByNodeId($childNode, $_destNodeId);
+
+			if($node != null)
+				return $node;
+		}
+
+		return null;
+	}
+
 	public function
 	route(string $_requestedURI) : CRouteRequest
 	{
@@ -208,7 +521,7 @@ class CRouter extends CSingleton
 					{
 						# das erste segment entspricht der sprache
 
-$routeRequest -> language = $language -> lang_key;
+						$routeRequest -> language = $language -> lang_key;
 
 						$langFound = true;
 
@@ -217,7 +530,7 @@ $routeRequest -> language = $language -> lang_key;
 					if($language -> lang_default)
 					{
 
-$defaultLanguage = $language;
+					$defaultLanguage = $language;
 
 					}
 

@@ -185,6 +185,20 @@ class	TK
 			echo $string .' ';
 		}
 	}
+
+	public static function
+	getNodeFromSitemap(array &$_sitemap, int $_requestedNodeId)
+	{
+		foreach($_sitemap as $node)
+		{
+			if($node -> node_id == $_requestedNodeId)
+				return $node;
+		}
+		return null;
+	}
+
+
+
 }
 
 class	CRYPT

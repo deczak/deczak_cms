@@ -89,6 +89,65 @@ class 	modelPage extends CModel
 
 		return true;
 	}
+
+	public function
+	loadByNodeSearch(CDatabaseConnection &$_pDatabase, CNodesSearch $_nodesSearch)
+	{
+		$nodeIdList = [];
+
+		switch($_nodesSearch -> getType())
+		{
+			case 'tag':
+
+					$tagAllocCondition  = new CModelCondition();
+					$tagAllocCondition -> where('tag_url', $_nodesSearch -> getValue());		
+
+					$conditionPages  = new CModelCondition();
+					$conditionPages -> where('tb_tags_allocation.tag_id', 'tb_tags.tag_id');	
+
+					$modelTagsAllocation  = new modelTagsAllocation();
+					$modelTagsAllocation -> addSelectColumns('tb_tags.*', 'tb_tags_allocation.*');
+					$modelTagsAllocation -> addRelation('join', 'tb_tags', $conditionPages);
+					$modelTagsAllocation -> load($_pDatabase, $tagAllocCondition);
+
+					foreach($modelTagsAllocation -> getResult() as $node)
+						$nodeIdList[] = $node -> node_id;
+
+					break;
+
+			case 'category':
+			
+					$categorieAllocCondition  = new CModelCondition();
+					$categorieAllocCondition -> where('category_url', $_nodesSearch -> getValue());		
+
+					$conditionPages  = new CModelCondition();
+					$conditionPages -> where('tb_categories_allocation.category_id', 'tb_categories.category_id');	
+
+					$modelCategoriesAllocation  = new modelCategoriesAllocation();
+					$modelCategoriesAllocation -> addSelectColumns('tb_categories.*', 'tb_categories_allocation.*');
+					$modelCategoriesAllocation -> addRelation('join', 'tb_categories', $conditionPages);
+					$modelCategoriesAllocation -> load($_pDatabase, $categorieAllocCondition);
+
+					foreach($modelCategoriesAllocation -> getResult() as $node)
+						$nodeIdList[] = $node -> node_id;
+
+					break;
+
+			case 'terms':
+
+					break;
+		}
+
+		$_tablePage				=	$this -> m_shemePage 		-> getTableName();
+
+		$condition	 = new CModelCondition();
+		$condition	-> whereIn("$_tablePage.node_id", implode(',', $nodeIdList));
+		$condition  -> orderBy('create_time', 'DESC'); 
+
+		$this -> load($_pDatabase, $condition);
+
+		return true;
+	}
 	
 	public function
 	update(CDatabaseConnection &$_pDatabase, array $_insertData, CModelCondition &$_pCondition, $_execFlags = NULL)
@@ -133,9 +192,6 @@ class 	modelPage extends CModel
 		return $updateResult;
 	}	
 
-	/**
-	 * 	This function updates target node and all child nodes
-	 */
 	public function
 	updateChilds(CDatabaseConnection &$_pDatabase, $_insertData, CModelCondition $_condition = NULL)
 	{
@@ -159,7 +215,6 @@ class 	modelPage extends CModel
 
 	public function
 	insert(CDatabaseConnection &$_pDatabase, array $_insertData, $_execFlags = NULL)
-	#insert(CDatabaseConnection &$_pDatabase, &$_dataset, &$_insertID)
 	{
 		$_bQueryResult = true;
 
@@ -549,7 +604,7 @@ class 	modelPage extends CModel
 
 		foreach($modelTags -> getResult() as $sqlTagItm)
 		{
-			$catArray[] = 	[	
+			$tagArray[] = 	[	
 							"id" 	=> 	$sqlTagItm -> tag_id,
 							"name" 	=>	$sqlTagItm -> tag_name
 							];

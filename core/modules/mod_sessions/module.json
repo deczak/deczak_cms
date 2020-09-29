@@ -49,13 +49,5 @@
 												"query_var" :"cms-system-id"
 											 }
 							}
-						],
-	"htaccess"			:{
-							"variables"		:[
-												{
-													"key" 		: "cms-system-id",
-													"wildcard"	:"(.*)"
-												}
-											]
-						}
+						]
 }

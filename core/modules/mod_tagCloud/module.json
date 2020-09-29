@@ -1,38 +1,31 @@
 {
-	"module_controller" : "controllerModules",
+	"module_controller" : "controllerTagCloud",
+	"module_name"		: "Tag Cloud",
+	"module_desc"		: "insert description",
+	"module_path" 		: "",
+	"module_group"		: "Other",
+	"module_icon"		: "&#xf02b",
+	"module_frontend"	: 1,
+	"module_menu_group"	: "0",
 	"module_rights"		:[
-							{"name":"index",	"desc":"OVERVIEW"},
 							{"name":"view",		"desc":"VIEW"},
 							{"name":"create",	"desc":"CREATE"},
-							{"name":"edit",		"desc":"EDIT"},
-							{"name":"delete",	"desc":"DELETE"}
+							{"name":"edit",		"desc":"EDIT"}
 						],
 	"module_subs"		:[
 							{
 								"url_name"	:"",
-								"ctl_target":"index",
-								"menu_name"	:"OVERVIEW",
+								"ctl_target":"view",
+								"menu_name"	:"",
 								"menu_order":"0",
-								"use_right" :"index"
+								"use_right" :"view"
 							},
 							{
 								"url_name"	:"create",
 								"ctl_target":"create",
 								"menu_name"	:"",
 								"menu_order":"0",
-								"use_right" :"create"
-							},
-							{
-								"url_name"	:"module",
-								"ctl_target":"view",
-								"menu_name"	:"",
-								"menu_order":"0",
-								"use_right" :"view",
-								"query_var" :"cms-ctrl-action",
-								"subSection":{
-												"url_name"	:false,
-												"query_var" :"cms-system-id"
-											 }
+								"use_right" :"edit"
 							},
 							{
 								"url_name"	:"edit",
@@ -51,18 +44,6 @@
 								"ctl_target":"delete",
 								"menu_name"	:"",
 								"menu_order":"0",
-								"use_right" :"delete",
-								"query_var" :"cms-ctrl-action",
-								"subSection":{
-												"url_name"	:false,
-												"query_var" :"cms-system-id"
-											 }
-							},
-							{
-								"url_name"	:"ping",
-								"ctl_target":"ping",
-								"menu_name"	:"",
-								"menu_order":"0",
 								"use_right" :"edit",
 								"query_var" :"cms-ctrl-action",
 								"subSection":{
@@ -70,5 +51,8 @@
 												"query_var" :"cms-system-id"
 											 }
 							}
-						]
+						],
+	"query_url_name"	:"tag",
+	"query_url_var"		:"cms-search-nodes-type",
+	"query_value_var"	:"cms-search-nodes-value"
 }

@@ -49,6 +49,7 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CTemplate.php';
 	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CPageRequest.php';
 	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CUserRights.php';
+	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CNodesSearch.php';
 
 	CBenchmark::instance() -> measurementPoint('initialize and execute system classes');	
 
@@ -194,8 +195,8 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 
 	CBenchmark::instance() -> measurementPoint('call imperator');	
 
-	$_pPageRequest 	 = 	CPageRequest::instance();
-	$_pPageRequest 	-> 	init(
+	$pageRequest 	 = 	CPageRequest::instance();
+	$pageRequest 	-> 	init(
 							$pDBInstance 		-> getConnection(CFG::GET() -> MYSQL -> PRIMARY_DATABASE),
 							$_pURLVariables 	-> getValue("cms-node"),
 							$_pLanguage			-> getActiveLanguage(),
@@ -206,8 +207,10 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 	if($_pURLVariables -> getValue("cms-error") !== false)
 		CPageRequest::instance() -> setResponseCode($_pURLVariables -> getValue("cms-error"));
 			
+	define('URL_LANG_PRREFIX', ((CFG::GET() -> LANGUAGE -> DEFAULT_IN_URL || $pageRequest -> page_language !== CLanguage::instance() -> getDefault()) ? $pageRequest -> page_language .'/' : '') );
+
 	$_pImperator	 =	new CImperator( $pDBInstance -> getConnection(CFG::GET() -> MYSQL -> PRIMARY_DATABASE) );
-	$_pImperator	->	logic($pDBInstance -> getConnection(CFG::GET() -> MYSQL -> PRIMARY_DATABASE), $_pPageRequest , $_pModules, $_rcaTarget, CMS_BACKEND, $pUserRights);
+	$_pImperator	->	logic($pDBInstance -> getConnection(CFG::GET() -> MYSQL -> PRIMARY_DATABASE), $pageRequest , $_pModules, $_rcaTarget, CMS_BACKEND, $pUserRights);
 
 ##	H T M L   D O C U M E N T
 
@@ -217,6 +220,6 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 
 ##	V I E W 
 
-	$_pHTML -> openDocument($_pImperator -> m_page, $_pImperator, $_pPageRequest);
+	$_pHTML -> openDocument($_pImperator -> m_page, $_pImperator, $pageRequest);
 
 ?>
