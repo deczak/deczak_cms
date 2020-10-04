@@ -238,7 +238,6 @@ class	CDatabaseQuery
 			
 			$statement  	 = 	$this -> m_pDatabase -> getConnection() -> prepare($queryString);
 			$statement 		-> 	execute((!empty($execParameters) ? $execParameters : null));	
-	
 		}
 		catch(PDOException $exception)
 		{
@@ -483,7 +482,7 @@ class	CDatabaseQuery
 						$firstCondition = true;
 					}
 
-					foreach($condition as $conditionStage)
+					foreach($condition as $conditionIndex => $conditionStage)
 					{
 						if($firstCondition)
 						{
@@ -507,7 +506,7 @@ class	CDatabaseQuery
 							case 'IS NULL'  	: 
 							case 'IS NOT NULL'  : $_sqlString .= " ". $conditionStage -> column ." ". $conditionStage -> type ." "; break;
 							case 'IN'  			: $_sqlString .= " ". $conditionStage -> column ." ". $conditionStage -> type ." ({$conditionStage -> valueA}) "; break;
-							default				: $_sqlString .= " ". $conditionStage -> column ." ". $conditionStage -> type ." :". $this -> _getValidConditionPlaceholder($conditionStage -> column) ." ";
+							default				: $_sqlString .= " ". $conditionStage -> column ." ". $conditionStage -> type ." :". $this -> _getValidConditionPlaceholder($conditionStage -> column . $conditionIndex) ." ";
 						}
 
 						if($conditionStage -> directUse)
@@ -581,7 +580,7 @@ class	CDatabaseQuery
 		{
 			foreach($this -> m_queryCondition -> conditionList as $condition)
 			{
-				foreach($condition as $conditionStage)
+				foreach($condition as $conditionIndex =>  $conditionStage)
 				{
 
 					if(!$conditionStage -> directUse)
@@ -589,13 +588,14 @@ class	CDatabaseQuery
 					{
 						case 'IS NULL'  	: 
 						case 'IS NOT NULL'  : 	
+						case 'IN'  : 	
 												break;
 												
 						case 'BETWEEN'		: 	$conditionValues[ $this -> _getValidConditionPlaceholder($conditionStage -> column).'A' ] = $conditionStage -> valueA;
 												$conditionValues[ $this -> _getValidConditionPlaceholder($conditionStage -> column).'B' ] = $conditionStage -> valueB;
 												break;
 										  
-						default				: 	$conditionValues[ $this -> _getValidConditionPlaceholder($conditionStage -> column) ] = $conditionStage -> valueA;
+						default				: 	$conditionValues[ $this -> _getValidConditionPlaceholder($conditionStage -> column . $conditionIndex) ] = $conditionStage -> valueA;
 					}
 
 

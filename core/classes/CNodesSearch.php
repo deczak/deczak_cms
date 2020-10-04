@@ -11,7 +11,7 @@ class CNodesSearch
 		$this -> m_validSearchTypeList 	= [];
 		$this -> m_validSearchTypeList[] = 'tag';
 		$this -> m_validSearchTypeList[] = 'category';
-		$this -> m_validSearchTypeList[] = 'terms';
+		$this -> m_validSearchTypeList[] = 'search';
 	}
 
 	public function
@@ -31,7 +31,7 @@ class CNodesSearch
 		$this -> m_response = new stdClass;
 		$this -> m_response -> type  = $searchType;
 		$this -> m_response -> value = $searchValue;
-
+		
 		return true;		
 	}
 

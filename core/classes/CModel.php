@@ -114,6 +114,12 @@ class 	CModelCondition
 		return $this;
 	}
 
+	public function
+	whereNotLike(string $_columnName, string $_columnValue)
+	{
+		$this -> conditionList[$this -> conditionLevel][] = new CModelConditionStage('NOT LIKE', $_columnName, $_columnValue);
+		return $this;
+	}
 
 	public function
 	whereNot(string $_columnName, string $_columnValue)
@@ -395,6 +401,9 @@ class	CModel
 										-> relations($this -> m_relationsList);
 
 		$this -> m_resultList = $dbQuery -> exec($_execFlags);
+
+		if($this -> m_resultList === false)
+			return 0;
 
 		$dtaCount = count($this -> m_resultList);
 

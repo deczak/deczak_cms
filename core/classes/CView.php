@@ -39,6 +39,7 @@ class	CView
 	getHTML($pageRequest = null)
 	{
 		$pDatabase 		= CDatabase::instance() -> getConnection(CFG::GET() -> MYSQL -> PRIMARY_DATABASE);
+		$language		= CLanguage::instance();
 
 		if(is_file($this -> m_templatePath .'.php'))
 		{

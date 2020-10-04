@@ -7,6 +7,7 @@ include_once 'modelPageHeader.php';
 
 include_once 'modelCategories.php';	
 include_once 'modelTags.php';	
+include_once 'modelSimple.php';
 
 class 	modelPage extends CModel
 {
@@ -91,7 +92,7 @@ class 	modelPage extends CModel
 	}
 
 	public function
-	loadByNodeSearch(CDatabaseConnection &$_pDatabase, CNodesSearch $_nodesSearch)
+	loadByNodeSearch(CDatabaseConnection &$_pDatabase, CNodesSearch $_nodesSearch, int $_rootNodeId = 0)
 	{
 		$nodeIdList = [];
 
@@ -100,7 +101,7 @@ class 	modelPage extends CModel
 			case 'tag':
 
 					$tagAllocCondition  = new CModelCondition();
-					$tagAllocCondition -> where('tag_url', $_nodesSearch -> getValue());		
+					$tagAllocCondition -> where('tag_url', urldecode($_nodesSearch -> getValue()));		
 
 					$conditionPages  = new CModelCondition();
 					$conditionPages -> where('tb_tags_allocation.tag_id', 'tb_tags.tag_id');	
@@ -118,7 +119,7 @@ class 	modelPage extends CModel
 			case 'category':
 			
 					$categorieAllocCondition  = new CModelCondition();
-					$categorieAllocCondition -> where('category_url', $_nodesSearch -> getValue());		
+					$categorieAllocCondition -> where('category_url', urldecode($_nodesSearch -> getValue()));		
 
 					$conditionPages  = new CModelCondition();
 					$conditionPages -> where('tb_categories_allocation.category_id', 'tb_categories.category_id');	
@@ -133,7 +134,54 @@ class 	modelPage extends CModel
 
 					break;
 
-			case 'terms':
+			case 'search':
+
+					if($_rootNodeId == 0)
+						return false;
+
+					$whereInList = [];
+
+					$sitemapCondition = new CModelCondition();
+					$sitemapCondition -> where('node_id', $_rootNodeId);
+
+					$modelSitemap = new modelSitemap();
+					$modelSitemap -> load($_pDatabase, $sitemapCondition);
+
+					foreach($modelSitemap -> getResult() as $node)
+						$whereInList[] = $node -> node_id;
+
+					$searchValues = urldecode($_nodesSearch -> getValue());
+					$searchValues = explode(' ', $searchValues);
+					$searchValues = array_filter($searchValues, 'strlen');
+
+					$condSimple  = new CModelCondition();
+
+					foreach($searchValues as $value)
+					{
+						if($value[0] === '-')
+						{
+							$condSimple -> whereNotLike('tb_page_object_simple.body', '%'. substr($value, 1) .'%');
+						}
+						else
+						{
+							$condSimple -> whereLike('tb_page_object_simple.body', '%'. $value .'%');
+						}
+					}
+
+					$condSimple -> whereIn('tb_page_object.node_id', implode(',', $whereInList));
+
+					$condObject  = new CModelCondition();
+					$condObject -> where('tb_page_object.object_id', 'tb_page_object_simple.object_id');	
+
+					$modelSimple  = new modelSimple();
+					$modelSimple -> addSelectColumns('tb_page_object_simple.*', 'tb_page_object.*');
+					$modelSimple -> addRelation('join', 'tb_page_object', $condObject);
+					$modelSimple -> load($_pDatabase, $condSimple);
+
+					foreach($modelSimple -> getResult() as $node)
+						$nodeIdList[] = $node -> node_id;
+
+					$nodeIdList = array_unique($nodeIdList);
 
 					break;
 		}

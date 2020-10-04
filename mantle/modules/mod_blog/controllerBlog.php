@@ -288,7 +288,7 @@ class	controllerBlog extends CController
 		if($nodesSearch -> detectSearch())
 		{
 			$modelPage  = new modelPage;
-			$modelPage -> loadByNodeSearch($_pDatabase, $nodesSearch);
+			$modelPage -> loadByNodeSearch($_pDatabase, $nodesSearch, $_rootNodeId);
 
 			$nodeList = &$modelPage -> getResult();
 
