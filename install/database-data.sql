@@ -17,8 +17,8 @@ INSERT INTO `tb_modules` (`module_id`, `module_location`, `module_controller`, `
 (16, 'mod_categories', 'controllerCategories', 'core', 'backend', 0, 1, '', 'Categories', NULL, NULL, NULL, %TIMESTAMP%, 1, 0, 0),
 (17, 'mod_tags', 'controllerTags', 'core', 'backend', 0, 1, '', 'Tags', NULL, NULL, NULL, %TIMESTAMP%, 1, 0, 0),
 (18, 'mod_remoteUsers', 'controllerRemoteUsers', 'core', 'backend', 0, 1, '', 'Remote Users', NULL, NULL, NULL, %TIMESTAMP%, 1, 0, 0),
-(19, 'mod_SimpleSitemap', 'controllerSimpleSitemap', 'core', 'Simple Modules', 1, 1, '&#xf0e8;', 'Sitemap', NULL, NULL, NULL, %TIMESTAMP%, 1, 0, 0);
-(20, 'mod_tagCloud', 'controllerTagCloud', 'core', 'Other', 1, 1, '&#xf02b;', 'Tags Cloud', NULL, NULL, NULL, %TIMESTAMP%, 1, 0, 0);
+(19, 'mod_SimpleSitemap', 'controllerSimpleSitemap', 'core', 'Simple Modules', 1, 1, '&#xf0e8;', 'Sitemap', NULL, NULL, NULL, %TIMESTAMP%, 1, 0, 0),
+(20, 'mod_tagCloud', 'controllerTagCloud', 'core', 'Other', 1, 1, '&#xf02b;', 'Tags Cloud', NULL, NULL, NULL, %TIMESTAMP%, 1, 0, 0),
 (21, 'mod_categoryCloud', 'controllerCategoryCloud', 'core', 'Other', 1, 1, '&#xf02b;', 'Categories Cloud', NULL, NULL, NULL, %TIMESTAMP%, 1, 0, 0);
 
 INSERT INTO `tb_languages` (`data_id`, `lang_key`, `lang_name`, `lang_name_native`, `lang_hidden`, `lang_locked`, `lang_default`, `lang_frontend`, `lang_backend`, `create_time`, `create_by`, `update_time`, `update_by`) VALUES
