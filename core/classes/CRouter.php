@@ -26,6 +26,24 @@ class CRouter extends CSingleton
 		$modelSitemap -> load($_dbConnection);
 		$sitemap = &$modelSitemap -> getResult();
 
+		##	We need to ensure that the nodes for default language are the first in the list
+
+		$defaultLangKey = $this -> _getDefaultLanguageKey();
+
+		$nodesListA = [];
+		$nodesListB = [];
+		foreach($sitemap as $node)
+		{
+			if($defaultLangKey == $node -> page_language)
+				$nodesListA[] = $node;
+			else
+				$nodesListB[$node -> page_language][] = $node;
+		}
+
+		$sitemap = array_merge($sitemap, $nodesListA);
+		foreach($nodesListB as $innerList)
+			$sitemap = array_merge($sitemap, $innerList);
+		
 		##	frontend nodes
 
 		$this -> nodesList 			= new CRouteNode(1, '', '');
@@ -124,6 +142,19 @@ class CRouter extends CSingleton
 		## 	Structure into file
 
 		file_put_contents($this -> routesFilepah, json_encode($this -> nodesList));
+	}
+
+	private function
+	_getDefaultLanguageKey()
+	{
+		foreach($this -> languagesList as $lIndex => $language)
+		{
+			if($language -> lang_default)
+			{
+				return $language -> lang_key;
+			}
+		}
+		return 'en'; // should not happen
 	}
 
 	private function
@@ -279,16 +310,10 @@ class CRouter extends CSingleton
 		$buffer = explode('/', $buffer);
 		$buffer = array_filter($buffer, 'strlen');
 
-
-
-
 		$nodeInstance = &$this-> nodesList;
 
 		for($sIndex = 0; $sIndex < count($buffer); $sIndex++)
 		{
-
-
-
 
 			## if error documents request
 
@@ -351,44 +376,6 @@ class CRouter extends CSingleton
 						$buffer = array_merge([$defaultLanguage -> lang_key], $buffer);
 				}
 
-
-
-/*
-				foreach($this -> languagesList as $lIndex => $language)
-				{
-					if(		$buffer[$sIndex] == $language -> lang_key 
-						&& 	( 		!$language -> lang_default 
-								|| 	($language -> lang_default && $this -> languageSettings -> DEFAULT_IN_URL)
-							)
-					  )
-					{
-					#	$routeRequest -> language = $language -> lang_key;
-						$langFound = !$langFound;
-						break;
-					} elseif($language -> lang_default && !$this -> languageSettings -> DEFAULT_IN_URL && !CMS_BACKEND)
-					{
-
-$routeRequest -> language = $language -> lang_key;
-
-if(!CMS_BACKEND)
-{
-echo '<br> ... append lang key to buffer : ' . $language -> lang_key;
-}
-
-
-
-				
-					}
-				}
-
-				if(!$langFound)
-				{
-						$routeRequest -> language = $language -> lang_key;
-						#$buffer = array_merge([$language -> lang_key], $buffer);
-				}
-
-*/
-
 			}
 
 			if($sIndex == 0 && count($buffer) == 1 && empty($buffer[$sIndex]))
@@ -396,7 +383,7 @@ echo '<br> ... append lang key to buffer : ' . $language -> lang_key;
 				$buffer[$sIndex] = $routeRequest -> language;
 			}
 
-
+		
 			$nodeFound = false;
 
 			foreach($nodeInstance -> childNodesList as $childNode)
