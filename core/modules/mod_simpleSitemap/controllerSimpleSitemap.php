@@ -290,7 +290,13 @@ class	controllerSimpleSitemap extends CController
 								]
 								);
 
-				$_bValidationDta['html'] = $this -> m_pView -> getHTML();
+
+				$pageRequest = new stdClass;
+				$pageRequest -> crumbsList = $modelSitemap -> getResult();
+
+
+
+				$_bValidationDta['html'] = $this -> m_pView -> getHTML($pageRequest);
 			}
 
 			tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $_bValidationDta);	// contains exit call

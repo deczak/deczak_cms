@@ -56,10 +56,11 @@ Changes on those settings gets visible after reload
 	.options-container > div:not(:last-child) { margin-right:15px; }
 </style>
 
+
 <?php
 if($currentTemplate !== NULL)
 {
-	$currentTemplate = current($currentTemplate);
-	include $currentTemplate -> templateFilepath;
+	$activeTemplate = current($currentTemplate);
+	include $activeTemplate -> templateFilepath;
 }
 ?>

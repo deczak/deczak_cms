@@ -2,7 +2,7 @@
 <?php
 if($currentTemplate !== NULL)
 {
-	$currentTemplate = current($currentTemplate);
-	include $currentTemplate -> templateFilepath;
+	$activeTemplate = current($currentTemplate);
+	include $activeTemplate -> templateFilepath;
 }
 ?>
