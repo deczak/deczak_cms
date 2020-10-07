@@ -40,7 +40,7 @@ class CRouter extends CSingleton
 				$nodesListB[$node -> page_language][] = $node;
 		}
 
-		$sitemap = array_merge($sitemap, $nodesListA);
+		$sitemap = $nodesListA;
 		foreach($nodesListB as $innerList)
 			$sitemap = array_merge($sitemap, $innerList);
 		
