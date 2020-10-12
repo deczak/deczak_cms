@@ -162,9 +162,15 @@ class	CSheme
 	}
 
 	public function
-	getTableName()
+	getTableName() : string
 	{
 		return $this -> m_tableName;
+	}
+
+	public function
+	setTableName(string $_tableName)
+	{
+		$this -> m_tableName = $_tableName;
 	}
 
 	public function
