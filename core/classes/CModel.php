@@ -268,6 +268,18 @@ class	CModel
 		$this -> m_resultList 			= [];
 		$this -> m_selectList			= [];
 	}
+
+	public function
+	setSheme(string $_shemeName)
+	{
+		$this -> m_pSheme 				= new $_shemeName();
+	}
+	
+	public function
+	setObjectName(string $_objectName)
+	{
+		$this -> m_dataObjectName 		= $_objectName;
+	}
 	
 	protected function
 	createPrototype($_flags = NULL, $_classAppendix = '')

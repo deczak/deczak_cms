@@ -662,19 +662,16 @@ class 	modelPage extends CModel
 	}
 }
 
-/**
- * 	Parent class for the data class with toolkit functions. It get the child instance to access the child properties.
-
-class 	toolkitSite
+class 	modelBackendPage extends modelPage
 {
-	protected	$m_childInstance;
-
 	public function
-	__construct($_instance)
+	__construct()
 	{
-		$this -> m_childInstance = $_instance;
+		parent::__construct();
+	
+		$this -> setSheme('shemeBackendPage');
+		$this -> setObjectName('backendPage');
 	}
-
 }
- */
+
 ?>
