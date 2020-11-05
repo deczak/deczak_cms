@@ -44,12 +44,12 @@
 	
 	$db = $pDBInstance -> getConnection('primary');
 
-
-
-
 	$shemeInstance 	= [];
 	$_dirIterator 	= new DirectoryIterator('../core/shemes/');
 
+	##	loop sheme dir, get all class names and include the files
+
+	$shemeList = [];
 	foreach($_dirIterator as $_dirItem)
 	{
 		if($_dirItem -> isDot() || $_dirItem -> getType() === 'dir')
@@ -57,16 +57,15 @@
 
 		include	'../core/shemes/'. $_dirItem -> getFilename();
 
-		$className = explode('.',$_dirItem -> getFilename())[0];
+		$shemeList[] = explode('.',$_dirItem -> getFilename())[0];
+	}
 
+	##	after this, because of extended shemes, create instances to create tables
+
+	foreach($shemeList as $className)
+	{
 		$instanceKey = count($shemeInstance);
 		$shemeInstance[$instanceKey] = new $className();
-
-
-		// error on costraints
-		#$db -> query("SET FOREIGN_KEY_CHECKS=0");
-		#$shemeInstance[$instanceKey] -> dropTable($db);
-		#$db -> query("SET FOREIGN_KEY_CHECKS=1");
 
 		$errorMsg = '';
 		if(!$shemeInstance[$instanceKey] -> createTable($db, $errorMsg))
