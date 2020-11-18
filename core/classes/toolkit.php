@@ -305,5 +305,4 @@ function bcround($n, $p = 0)
     return bcdiv(bcadd(bcmul($n, $e, 0), (strpos($n, '-') === 0 ? -5 : 5)), $e, $p);
 }
 		
-
 ?>

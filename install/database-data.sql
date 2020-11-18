@@ -22,6 +22,12 @@ INSERT INTO `tb_modules` (`module_id`, `module_location`, `module_controller`, `
 (21, 'mod_categoryCloud', 'controllerCategoryCloud', 'core', 'Other', 1, 1, '&#xf02b;', 'Categories Cloud', NULL, NULL, NULL, %TIMESTAMP%, 1, 0, 0),
 (22, 'mod_search', 'controllerSearch', 'core', 'Other', 1, 1, '&#xf002;', 'Search Field', NULL, NULL, NULL, %TIMESTAMP%, 1, 0, 0);
 
+
+INSERT INTO `tb_backend_menu` (`menu_group`, `menu_name`, `menu_icon`, `menu_order_by`) VALUES
+(1, 'PLACEHOLDER', '', 1),
+(2, 'PLACEHOLDER', '', 2),
+(3, 'PLACEHOLDER', '&#xf013;', 3);
+
 INSERT INTO `tb_languages` (`data_id`, `lang_key`, `lang_name`, `lang_name_native`, `lang_hidden`, `lang_locked`, `lang_default`, `lang_frontend`, `lang_backend`, `create_time`, `create_by`, `update_time`, `update_by`) VALUES
 (1, 'en', 'English', 'English', 0, 0, 1, 1, 1, %TIMESTAMP%, 1, 0, 0),
 (2, 'de', 'German', 'Deutsch', 1, 0, 0, 1, 1, %TIMESTAMP%, 1, 0, 0);
