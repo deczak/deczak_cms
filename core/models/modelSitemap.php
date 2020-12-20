@@ -6,19 +6,27 @@ include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SHEME.'shemeSitemap.php';
 
 class 	modelSitemap extends CModel
 {
+	protected $tbPage;
+	protected $tbPagePath;
+	protected $tbPageHeader;
+
 	public function
 	__construct()
 	{		
         parent::__construct('shemeSitemap', 'sitemap');
+
+		$this -> tbPage		 	= 'tb_page';
+		$this -> tbPagePath 	= 'tb_page_path';
+		$this -> tbPageHeader 	= 'tb_page_header';
 	}	
-				
+		
 	public function
 	load(CDatabaseConnection &$_pDatabase, CModelCondition &$_pCondition = NULL, $_execFlags = NULL) : bool
 	{
 		$_mainpageNodeID = 1;
 
 		$dbQuery 	= $_pDatabase		-> query(DB_SELECT) 
-										-> table('tb_page_path') 
+										-> table($this -> tbPagePath) 
 										-> selectColumns(['*'])
 										-> condition($_pCondition);
 
@@ -30,12 +38,12 @@ class 	modelSitemap extends CModel
 		##	Get node and children
 					
 		$relCondPgHead	 = new CModelCondition();
-		$relCondPgHead	-> where('tb_page_header.node_id', 'o.node_id');
-		$relPgHead		 = new CModelRelations('join', 'tb_page_header', $relCondPgHead);
+		$relCondPgHead	-> where($this -> tbPageHeader .'.node_id', 'o.node_id');
+		$relPgHead		 = new CModelRelations('join', $this -> tbPageHeader, $relCondPgHead);
 					
 		$relCondPg		 = new CModelCondition();
-		$relCondPg		-> where('tb_page.node_id', 'o.node_id');
-		$relPg			 = new CModelRelations('join', 'tb_page', $relCondPg);
+		$relCondPg		-> where($this -> tbPage .'.node_id', 'o.node_id');
+		$relPg			 = new CModelRelations('join', $this -> tbPage, $relCondPg);
 
 		$condPgPath	 	 = new CModelCondition();
 		$condPgPath		-> whereBetween('o.node_lft', 'p.node_lft', 'p.node_rgt', true)
@@ -45,25 +53,25 @@ class 	modelSitemap extends CModel
 						-> orderBy('o.node_lft');
 
 		$sqlNodeRes 	 = $_pDatabase		-> query(DB_SELECT) 
-											-> table('tb_page_path', 'n') 
-											-> table('tb_page_path', 'p') 
-											-> table('tb_page_path', 'o') 
+											-> table($this -> tbPagePath, 'n') 
+											-> table($this -> tbPagePath, 'p') 
+											-> table($this -> tbPagePath, 'o') 
 											-> selectColumns([	'o.node_id',
 																'o.page_id',
 																'o.page_language',
 																'COUNT(p.node_id)-1 AS level',
 																'ROUND ((o.node_rgt - o.node_lft - 1) / 2) AS offspring',
-																'tb_page_header.page_title',
-																'tb_page_header.page_name',
-																'tb_page_header.page_version',
-																'tb_page.create_time',
-																'tb_page.update_time',
-																'tb_page.page_auth',
-																'tb_page.publish_from',
-																'tb_page.publish_until',
-																'tb_page.publish_expired',
-																'tb_page.hidden_state',
-																'tb_page.menu_follow',
+																$this -> tbPageHeader .'.page_title',
+																$this -> tbPageHeader .'.page_name',
+																$this -> tbPageHeader .'.page_version',
+																$this -> tbPage .'.create_time',
+																$this -> tbPage .'.update_time',
+																$this -> tbPage .'.page_auth',
+																$this -> tbPage .'.publish_from',
+																$this -> tbPage .'.publish_until',
+																$this -> tbPage .'.publish_expired',
+																$this -> tbPage .'.hidden_state',
+																$this -> tbPage .'.menu_follow',
 																'o.page_path AS page_path_segment'])
 											-> condition($condPgPath)
 											-> relations([$relPgHead, $relPg])
@@ -124,7 +132,7 @@ class 	modelSitemap extends CModel
 		$condPage-> where('page_id', $_pageID);
 
 		$sqlPagesRes 	 = $_pDatabase		-> query(DB_SELECT) 
-											-> table('tb_page_path') 
+											-> table($this -> tbPagePath) 
 											-> selectColumns(['node_id', 'page_language'])
 											-> condition($condPage)
 											-> exec();
@@ -140,8 +148,8 @@ class 	modelSitemap extends CModel
 							-> orderBy('p.node_lft');
 
 			$sqlPgHeadRes	 = $_pDatabase		-> query(DB_SELECT) 
-												-> table('tb_page_path', 'n') 
-												-> table('tb_page_path', 'p') 
+												-> table($this -> tbPagePath, 'n') 
+												-> table($this -> tbPagePath, 'p') 
 												-> selectColumns(['p.node_id', 'p.page_path', 'p.page_language'])
 												-> condition($condPgHead)
 												-> exec();
@@ -174,8 +182,8 @@ class 	modelSitemap extends CModel
 						-> orderBy('p.node_lft');
 
 		$sqlNodeRes 	 = $_pDatabase		-> query(DB_SELECT) 
-											-> table('tb_page_path', 'n') 
-											-> table('tb_page_path', 'p') 
+											-> table($this -> tbPagePath, 'n') 
+											-> table($this -> tbPagePath, 'p') 
 											-> selectColumns(['p.node_id', 'p.page_path'])
 											-> condition($condNode)
 											-> exec();
@@ -195,20 +203,4 @@ class 	modelSitemap extends CModel
 	}
 }
 
-
-/**
- * 	Parent class for the data class with toolkit functions. It get the child instance to access the child properties.
-
-class 	toolkitSitemap
-{
-	protected	$m_childInstance;
-
-	public function
-	__construct($_instance)
-	{
-		$this -> m_childInstance = $_instance;
-	}
-
-}
-*/
 ?>
