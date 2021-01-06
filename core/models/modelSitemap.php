@@ -21,7 +21,7 @@ class 	modelSitemap extends CModel
 	}	
 		
 	public function
-	load(CDatabaseConnection &$_pDatabase, CModelCondition &$_pCondition = NULL, $_execFlags = NULL) : bool
+	load(CDatabaseConnection &$_pDatabase, CModelCondition $_pCondition = NULL, $_execFlags = NULL) : bool
 	{
 		$_mainpageNodeID = 1;
 

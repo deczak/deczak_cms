@@ -1,5 +1,6 @@
 <?php
-include_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelSitemap.php';	
+
+include_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelBackendSitemap.php';	// includes regular modelSitemap for Frontend
 
 class CRouter extends CSingleton
 {
@@ -22,9 +23,12 @@ class CRouter extends CSingleton
 	public function
 	createRoutes(CDatabaseConnection &$_dbConnection)
 	{
+
+
 		$modelSitemap = new modelSitemap();
 		$modelSitemap -> load($_dbConnection);
 		$sitemap = &$modelSitemap -> getResult();
+
 
 		##	We need to ensure that the nodes for default language are the first in the list
 
@@ -52,9 +56,59 @@ class CRouter extends CSingleton
 
 		##	special module nodes
 
-		$this -> _appendSpecialModuleRoutes($_dbConnection, $this -> nodesList);
+#		$this -> _appendSpecialModuleRoutes($_dbConnection, $this -> nodesList, true);
+
+
+
+
 
 		##	backend nodes
+
+
+		$modelBackendSitemap = new modelBackendSitemap();
+		$modelBackendSitemap -> load($_dbConnection);
+		$backendSitemap = &$modelBackendSitemap -> getResult();
+
+
+
+
+		$defaultLangKey = $this -> _getDefaultLanguageKey();
+
+		$nodesListA = [];
+		$nodesListB = [];
+		foreach($backendSitemap as $node)
+		{
+			if($defaultLangKey == $node -> page_language)
+				$nodesListA[] = $node;
+			else
+				$nodesListB[$node -> page_language][] = $node;
+		}
+
+		$backendSitemap = $nodesListA;
+		foreach($nodesListB as $innerList)
+			$backendSitemap = array_merge($backendSitemap, $innerList);
+
+
+		
+		$backendStructure = $this -> nodesList -> addChild( new CRouteNode(-1, 'en', CMS_BACKEND_PUBLIC) );
+
+
+
+
+
+
+
+		$this  -> _createRoute($backendSitemap, 0, 0, $backendStructure);
+
+
+
+		$this -> _appendSpecialModuleRoutes($_dbConnection, $backendStructure, false);
+
+
+
+
+/*
+
 
 		$backendFilepath	= CMS_SERVER_ROOT.DIR_DATA.'backend/backend.json';
 
@@ -139,9 +193,18 @@ class CRouter extends CSingleton
 			}
 		}
 
+
+	tk::dbug($this -> nodesList);
+*/
+
+
+
+/*
+		*/
 		## 	Structure into file
 
 		file_put_contents($this -> routesFilepah, json_encode($this -> nodesList));
+
 	}
 
 	private function
@@ -177,19 +240,44 @@ class CRouter extends CSingleton
 	}
 
 	private function
-	_appendSpecialModuleRoutes(CDatabaseConnection &$_dbConnection, &$_nodesList)
+	_appendSpecialModuleRoutes(CDatabaseConnection &$_dbConnection, &$_nodesList, bool $_isFrontend)
 	{
+
+		if($_isFrontend)
+		{
+			$tbPageObject 		= 'tb_page_object';
+			$tbPageObjectSimple = 'tb_page_object_simple';
+
 		$condModules  	 = new CModelCondition();
 		$condModules 	-> where('is_frontend', 1)
 						-> where('is_active', 1);	
+		}
+		else
+		{
+			$tbPageObject 		= 'tb_backend_page_object';
+			$tbPageObjectSimple = 'tb_backend_page_object_simple';
+
+		$condModules  	 = new CModelCondition();
+		$condModules 	-> where('is_frontend', 0)
+						-> where('is_active', 1);	
+		}
+
+
+
 
 		$modulesList 	 = $_dbConnection	-> query(DB_SELECT) 
 											-> table('tb_modules') 
 											-> condition($condModules)
 											-> exec();
 
+		$sqlDB = $_dbConnection -> getConnection();
+
+
 		foreach($modulesList as $module)
 		{
+
+
+
 			switch($module -> module_type) 
 			{
 				case 'core'   :	
@@ -210,15 +298,15 @@ class CRouter extends CSingleton
 				&&	property_exists($moduleConfig, 'query_value_var') && !empty($moduleConfig  -> query_value_var)
 			  )
 			{
-				$sqlDB = $_dbConnection -> getConnection();
 
-				$objectRes	=	$sqlDB -> query("	SELECT		tb_page_object.node_id,
-																tb_page_object_simple.params
+
+				$objectRes	=	$sqlDB -> query("	SELECT		$tbPageObject.node_id,
+																$tbPageObjectSimple.params
 													FROM		tb_modules
-													JOIN		tb_page_object
-														ON		tb_page_object.module_id 		= tb_modules.module_id
-													JOIN		tb_page_object_simple
-														ON		tb_page_object_simple.object_id	= tb_page_object.object_id
+													JOIN		$tbPageObject
+														ON		$tbPageObject.module_id 		= tb_modules.module_id
+													JOIN		$tbPageObjectSimple
+														ON		$tbPageObjectSimple.object_id	= $tbPageObject.object_id
 													WHERE		module_controller = '". $module -> module_controller ."'
 												",
 												PDO::FETCH_CLASS,
@@ -265,7 +353,135 @@ class CRouter extends CSingleton
 
 				}
 			}
+
+
+
+			##	looping sub section of module thats used by object		
+			if(property_exists($moduleConfig, 'module_subs')  && !empty($moduleConfig  -> module_subs) && is_array($moduleConfig  -> module_subs))
+			{
+
+
+
+				$objectRes	=	$sqlDB -> query("	SELECT		DISTINCT $tbPageObject.node_id,
+																$tbPageObject.object_id,
+																$tbPageObjectSimple.params
+													FROM		tb_modules
+													JOIN		$tbPageObject
+														ON		$tbPageObject.module_id 		= tb_modules.module_id
+													LEFT JOIN	$tbPageObjectSimple
+														ON		$tbPageObjectSimple.object_id	= $tbPageObject.object_id
+													WHERE		module_controller = '". $module -> module_controller ."'
+												",
+												PDO::FETCH_CLASS,
+												"stdClass");
+
+				$objectList	=	$objectRes -> fetchAll();
+
+
+				$node2ExpandList = [];
+
+				foreach($objectList as $object)
+				{
+
+					if(property_exists($object, 'params') && !empty($object -> params))
+						$object -> params = json_decode($object -> params ?? '{}');
+					else
+						$object -> params = false;
+
+
+					
+					$item  = new stdClass;
+					$item -> objectId = $object -> object_id;
+
+					if($object -> params !== false && property_exists($object -> params, 'parent_node_id') && !empty($object -> params -> parent_node_id))
+					
+						$item -> nodeId   = $object -> params -> parent_node_id;
+					
+					else
+					
+						$item -> nodeId   = $object -> node_id;
+					
+
+					$node2ExpandList[] = $item;
+
+				}
+				
+				#$node2ExpandList = array_unique($node2ExpandList);
+
+
+
+				foreach($node2ExpandList as $exNodeId)
+				{
+					$node = $this -> _getNodeByNodeId($_nodesList, $exNodeId -> nodeId);
+
+					if($node == null)
+						continue;
+					
+
+
+
+
+/*
+
+
+	die section der cms-system-id muss in die section der cms-ctrl-action
+
+
+
+*/
+
+				foreach($moduleConfig -> module_subs as $_moduleSub)
+				{	
+					if(empty($_moduleSub -> url_name))
+					{
+						$_createEndNullSub = true;
+					}
+					else
+					{		
+
+
+					$index = count($node -> childNodesList);
+
+
+						if(property_exists($_moduleSub, 'query_var'))
+							$sub = $node -> addChild( new CRouteNode($node -> nodeId, 'en', $_moduleSub -> url_name, $_moduleSub -> query_var, [$exNodeId -> objectId => $_moduleSub -> ctl_target]) );
+						else
+							$sub = $node -> addChild( new CRouteNode($node -> nodeId, 'en', $_moduleSub -> url_name, 'cms-ctrl-action', [$exNodeId -> objectId => $_moduleSub -> ctl_target]) );
+
+						if(property_exists($_moduleSub, 'subSection'))
+						{
+
+
+
+
+							$sub2 = $sub -> addChild( new CRouteNode($node -> nodeId, 'en', $_moduleSub -> subSection -> url_name, $_moduleSub -> subSection -> query_var ) );
+
+							if(property_exists($_moduleSub -> subSection, 'subSection'))
+							{
+								$sub2 -> addChild( new CRouteNode($node -> nodeId, 'en', $_moduleSub -> subSection -> subSection -> url_name, $_moduleSub -> subSection -> subSection -> query_var ) );						
+							}
+						}
+					}
+				}
+
+				}
+			}
+
+
 		}
+
+
+
+
+
+
+
+
+
+
+
+
+
 	}
 
 	private function

@@ -14,7 +14,7 @@ class 	modelUsersBackend extends CModel
 	}	
 
 	public function
-	load(CDatabaseConnection &$_pDatabase, CModelCondition &$_pCondition = NULL, $_execFlags = NULL)
+	load(CDatabaseConnection &$_pDatabase, CModelCondition $_pCondition = NULL, $_execFlags = NULL)
 	{
 		if(!parent::load($_pDatabase, $_pCondition, $_execFlags))
 			return false;

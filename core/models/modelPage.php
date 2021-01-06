@@ -26,7 +26,7 @@ class 	modelPage extends CModel
 	}	
 	
 	public function
-	load(CDatabaseConnection &$_pDatabase, CModelCondition &$_pCondition = NULL, $_execFlags = NULL)
+	load(CDatabaseConnection &$_pDatabase, CModelCondition $_pCondition = NULL, $_execFlags = NULL)
 	{
 		if($_pDatabase === null)
 			return false;
