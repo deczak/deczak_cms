@@ -8,20 +8,13 @@ class	CHTAccess
 {
 	private $m_dataLocation;
 	private $m_rootLocation;
-	private $m_publicFolder;
 	private $m_backendFolder;
-	private $m_backendFilepath;
-	private $m_modulesFilepath;
 
 	public function
 	__construct()
 	{
 		$this -> m_dataLocation  	= CMS_SERVER_ROOT.DIR_DATA.'htaccess/';
 		$this -> m_rootLocation 	= CMS_SERVER_ROOT;
-
-		$this -> m_backendFilepath	= CMS_SERVER_ROOT.DIR_DATA.'backend/backend.json';
-
-		$this -> m_publicFolder  	= 'public';
 		$this -> m_backendFolder 	= CMS_BACKEND_PUBLIC;
 	}
 
