@@ -45,20 +45,21 @@ class	controllerLoginForm extends CController
 		$enableEdit 	= $this -> existsUserRight('edit');
 		$enableDelete	= $enableEdit;
 
-		$_logicResults = false;
+		$logicResults = false;
 		switch($_controllerAction)
 		{
-			case 'loginSuccess'	: $_logicResults = $this -> logicSuccess($_pDatabase);	break;
-			case 'view'			: $_logicResults = $this -> logicView(	$_pDatabase, $_isXHRequest, $_logicResult);	break;
-			case 'edit'			: $_logicResults = $this -> logicEdit(	$_pDatabase, $_isXHRequest, $_logicResult);	break;	
-			case 'create'		: $_logicResults = $this -> logicCreate($_pDatabase, $_isXHRequest, $_logicResult);	break;
-			case 'delete'		: $_logicResults = $this -> logicDelete($_pDatabase, $_isXHRequest, $_logicResult);	break;	
+			case 'loginSuccess'	: $logicResults = $this -> logicSuccess($_pDatabase);	break;
+			case 'view'			: $logicResults = $this -> logicView(	$_pDatabase, $_isXHRequest, $_logicResult);	break;
+			case 'edit'			: $logicResults = $this -> logicEdit(	$_pDatabase, $_isXHRequest, $_logicResult);	break;	
+			case 'create'		: $logicResults = $this -> logicCreate($_pDatabase, $_isXHRequest, $_logicResult);	break;
+			case 'delete'		: $logicResults = $this -> logicDelete($_pDatabase, $_isXHRequest, $_logicResult);	break;	
 		}
 
-		if(!$_logicResults)
+
+		if(!$logicResults)
 		{
 			##	Default View
-			$_logicResults = $this -> logicView($_pDatabase, $_isXHRequest, $_logicResult);	
+			$logicResults = $this -> logicView($_pDatabase, $_isXHRequest, $_logicResult);	
 		}
 
 	}
@@ -66,7 +67,7 @@ class	controllerLoginForm extends CController
 	public function
 	logicView(CDatabaseConnection &$_pDatabase, $_isXHRequest, &$_logicResult)
 	{
-		if(!isset($this -> m_aObject -> params))
+		if(empty($this -> m_aObject -> params))
 		{
 			$modelCondition = new CModelCondition();
 			$modelCondition -> where('object_id', $this -> m_aObject -> object_id);
@@ -81,7 +82,6 @@ class	controllerLoginForm extends CController
 
 			if(CSession::instance() -> isAuthed($this -> m_modelSimple -> getResult()[0] -> params -> object_id) !== false)
 			{
-		
 				$this -> logicSuccess($_pDatabase);
 			}
 
@@ -107,21 +107,18 @@ class	controllerLoginForm extends CController
 		{
 			// set data as property
 
-			$object		= json_encode($this -> m_aObject -> params,JSON_HEX_QUOT | JSON_HEX_APOS | JSON_UNESCAPED_UNICODE);
-
-			unset($this -> m_aObject -> params);
-
-			$this -> m_aObject -> params		= json_decode($object);
+			$object = new stdClass;
+			$object -> params		= json_decode($this -> m_aObject -> params);
+			$object -> object_id	= $this -> m_aObject -> object_id;
 
 			// authed check
-			if(CSession::instance() -> isAuthed($this -> m_aObject -> params -> object_id) !== false)
+			if(CSession::instance() -> isAuthed($object -> params -> object_id) !== false)
 			{
 				$this -> logicSuccess($_pDatabase);
 			}
 
-
 			$modelCondition = new CModelCondition();
-			$modelCondition -> where('object_id', $this -> m_aObject -> params -> object_id);
+			$modelCondition -> where('object_id', $object -> params -> object_id);
 			
 			// default view
 
@@ -132,11 +129,13 @@ class	controllerLoginForm extends CController
 							'view',
 							'', 
 							[ 
-								'object' => $this -> m_aObject,
+								'object' => $object,
 								'login_object' => $_pModelLoginObjects -> getResult()[0]
 							]
 							);
 		}
+
+		return true;
 
 	}
 
@@ -186,6 +185,8 @@ class	controllerLoginForm extends CController
 			tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $_bValidationDta);	// contains exit call
 
 		}	
+
+		return true;
 	}
 
 

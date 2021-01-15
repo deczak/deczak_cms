@@ -125,7 +125,7 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 	$_request		 =	[];
 	$_request[] 	 = 	[	"input" => "cms-risa",   	 	"validate" => "strip_tags|strip_whitespaces|lowercase|!empty" ]; 		// requested initial script action
 	$_request[] 	 = 	[	"input" => "cms-tlon",   		"validate" => "strip_tags|strip_whitespaces|!empty", 					"use_default" => true, "default_value" => ''    ]; // target login object name
-	$_request[] 	 = 	[	"input" => "cms-oid",   		"validate" => "strip_tags|strip_whitespaces|!empty", 					"use_default" => true, "default_value" => ''    ]; // object id
+	$_request[] 	 = 	[	"input" => "cms-oid",   		"validate" => "strip_tags|strip_whitespaces|is_digit|!empty", 			"use_default" => true, "default_value" => ''    ]; // object id
 	$_request[] 	 = 	[	"input" => "cms-node-version",	"validate" => "strip_tags|strip_whitespaces|lowercase|is_digit|!empty",	"use_default" => true, "default_value" => false ]; // page_version
 	$_request[] 	 = 	[	"input" => "cms-xhrequest",		"validate" => "strip_tags|strip_whitespaces|!empty",					"use_default" => true, "default_value" => false ]; // request is by xhr function
 	$_request[] 	 = 	[	"input" => "cms-ctrl-action",	"validate" => "strip_tags|strip_whitespaces|lowercase|!empty" ]; 		// requested controller action
@@ -155,7 +155,7 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 						$_pLogin		 = CLogin::instance();
 						if( $_pLogin ->	login($pDBInstance -> getConnection(CFG::GET() -> MYSQL -> PRIMARY_DATABASE), $_pURLVariables -> getValue("cms-tlon")) )
 						{
-							$_rcaTarget[$_pURLVariables -> getValue("cms-oid")] = 'loginSuccess';				
+							$_rcaTarget[$_pURLVariables -> getValue("cms-oid")] = 'loginSuccess';	
 						}
 						else
 						{	##	Missing data for login

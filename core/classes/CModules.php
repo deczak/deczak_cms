@@ -349,6 +349,8 @@ class	CModules extends CSingleton
 		
 		//	Create module Tables
 
+		// TODO :: transaction
+
 		if(property_exists($moduleConfig, 'module_sheme') && is_array($moduleConfig -> module_sheme))
 		{
 			foreach($moduleConfig -> module_sheme as $shemeItem)
@@ -371,15 +373,24 @@ class	CModules extends CSingleton
 			}
 		}
 
+/*
+
+	TODO
+
+	backend ist ein modul, eine seite
+
+	hier wird jetzt eine seite erstellt mit einem modul dem dieser zugwiesen wird
+
+
+
+	modelBackend bekommt eine funktion mit der eine Seite erstellt werden kann und die auch gleichzeitig ein object einfügt
+
+*/
+
+
 		if($moduleConfig -> module_frontend == 0)
 		{
-			$backendObjFilepath = CMS_SERVER_ROOT . DIR_DATA .'/backend/backend-id.json';
-			$backendObjectId	= file_get_contents($backendObjFilepath);
-			$backendObjectId	= json_decode($backendObjectId);
-
-			$backendFilepath 	= CMS_SERVER_ROOT . DIR_DATA .'/backend/backend.json';
-			$backendPages		= file_get_contents($backendFilepath);
-			$backendPages		= json_decode($backendPages, true);
+	
 
 /*
 			foreach($backendPages as $pageIndex => $page)
@@ -390,43 +401,100 @@ class	CModules extends CSingleton
 					break;
 				}
 			}
+		"page_name"	:"Pages",
+		"page_title":"Pages",
+		"page_description":"",
+		"page_path"	:"pages",
+		"node_id"	:"5",
+		"page_auth"	:"ABKND",
+		"objects"	:[
+						{
+							"module_id"	:"3",
+							"content_id":"1",
+							"object_id"	:"1981",
+							"body"		:"",
+							"params"	:""
+						}		
+					 ],
+		"menu_group":"1",
+		"menu_order":"0"
+
+
 */
 
-			$backendPages[]		= 	[
-										"page_name"			=> $moduleConfig -> module_name,
-										"page_title"		=> $moduleConfig -> module_name,
-										"page_description"	=> "",
-										"page_path"			=> $moduleConfig -> module_path,
-										"node_id"			=> $backendObjectId -> next_node_id,
-										"page_auth"			=> "ABKND",
-										"menu_group"		=> $moduleConfig -> module_menu_group,
-										"menu_order"		=> "0",
-										"objects"			=> [
-																	[
-																		"module_id"	=> strval($moduleData['module_id']),
-																		"object_id"	=> "0",     					
-																		"body"		=> "",
-																		"params"	=> ""
-																	]
-																]
-									];
+
+			$createTime		= time();
+			$creatyBy		= CSession::instance() -> getValue('user_id');
+
+
+
+			$page			= 	[
+									"page_name"			=> $moduleConfig -> module_name,
+									"page_title"		=> $moduleConfig -> module_name,
+									"page_description"	=> "",
+									"page_path"			=> $moduleConfig -> module_path,
+									"page_auth"			=> "ABKND",
+									"menu_group"		=> $moduleConfig -> module_menu_group,
+									"menu_order"		=> "0",
+
+									"cms-edit-page-lang"=> "en",	// atm en only
+									"cms-edit-page-node"=> "1",		// child for root node
+
+									"create_time"	=> $createTime,
+									"create_by"	=> $creatyBy
+								];
+
+
+// TODO :: Die node id wird benötigt
+
+
+// TODO :: Handling wenn ein Modul ein bestehendes Modul ist aber die module id nicht verwendet werden darf (suchen nach modul)
+
+
+			$pageObject		=	[
+									"module_id"	=> $moduleData['module_id'],
+									"node_id"	=> "0",     					
+									"object_order_by"		=> "1",
+
+									"create_time"	=> $createTime,
+									"create_by"	=> $creatyBy
+
+
+								];
 
 
 
 
 
-			$backendPages		= json_encode($backendPages);
 
-			file_put_contents($backendFilepath, $backendPages);
+		$modelBackendPage = new modelBackendPage();
 
-			$backendObjectId -> next_node_id = $backendObjectId -> next_node_id + 1;
+		$modelBackendPage -> insert($_dbConnection, $backendPage);
+		
 
-			$backendObjectId		= json_encode($backendObjectId);
 
-			file_put_contents($backendObjFilepath, $backendObjectId);
+
+		$modelBackendPageObject = new modelBackendPageObject;
+		$modelBackendPageObject -> insert($_dbConnection, $backendPageObject);
+
+
+// TODO :: handling wenn modul ein simple sheme verwenden wird		
+
+
+
+
+		#	$backendPages		= json_encode($backendPages);
+
+		#	file_put_contents($backendFilepath, $backendPages);
+
+		#	$backendObjectId -> next_node_id = $backendObjectId -> next_node_id + 1;
+
+		#	$backendObjectId		= json_encode($backendObjectId);
+
+		#	file_put_contents($backendObjFilepath, $backendObjectId);
 
 			$this -> modelModules	->	load($_dbConnection);
-			$this -> modulesList 	 =	$this -> modelModules -> getREsult();
+			$this -> modulesList 	 =	$this -> modelModules -> getResult();
 
 			$_pHTAccess  = new CHTAccess();
 			$_pHTAccess -> generatePart4Backend($_dbConnection);
@@ -454,6 +522,14 @@ class	CModules extends CSingleton
 
 		if(empty($moduleData))
 			return false;
+
+
+/*
+TODO
+
+	hier wird das modul gelöscht, das objekt in der seite gelöscht, und die seite gelöscht
+
+*/
 
 		##	Read backend pages, delete page if module is backend
 

@@ -25,7 +25,7 @@ class	CHTAccess
 
 		$_hFile 	 = fopen($this -> m_dataLocation . $_targetFile, "a");
 
-		if (flock($_hFile, LOCK_EX))
+		if(flock($_hFile, LOCK_EX))
 		{
 			ftruncate($_hFile, 0);
 

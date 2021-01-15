@@ -31,6 +31,10 @@ class 	modelSitemap extends CModel
 										-> condition($_pCondition);
 
 		$nodeResult = $dbQuery -> exec($_execFlags);
+
+
+		if(empty($nodeResult))
+			return false;
 		
 		$_sqlNode 			= $nodeResult[0];
 		$_mainpageNodeID 	= $_sqlNode -> node_id;

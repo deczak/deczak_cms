@@ -93,6 +93,7 @@ class	CImperator extends CBasic
 			return;
 		}
 
+
 		##	XHR call
 
 		if($_pPageRequest -> xhRequest !== false)
@@ -155,7 +156,6 @@ class	CImperator extends CBasic
 							$objectData -> $key = $value;
 						}
 
-// insert liefert die id zurück, nicht das result object
 
 
 					$_logicResult 	  = [];

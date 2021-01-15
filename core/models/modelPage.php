@@ -1,6 +1,12 @@
 <?php
 
+include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SHEME.'shemePageHeader.php';
+include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SHEME.'shemePagePath.php';
 include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SHEME.'shemePage.php';
+
+include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SHEME.'shemeBackendPageHeader.php';
+include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SHEME.'shemeBackendPagePath.php';
+include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SHEME.'shemeBackendPage.php';
 
 include_once 'modelPagePath.php';		
 include_once 'modelPageHeader.php';
@@ -11,9 +17,9 @@ include_once 'modelSimple.php';
 
 class 	modelPage extends CModel
 {
-	private	$m_shemePageHeader;
-	private	$m_shemePagePath;
-	private	$m_shemePage;
+	protected	$m_shemePageHeader;
+	protected	$m_shemePagePath;
+	protected	$m_shemePage;
 
 	public function
 	__construct()
@@ -315,7 +321,6 @@ class 	modelPage extends CModel
 
 		$modelPagePath 	 		= new modelPagePath();
 		$_insertData['node_id'] = $modelPagePath -> insert($_pDatabase, $_insertData, $_execFlags);
-
 
 		##	Get page_auth from parent node and append dataset data
 
@@ -669,8 +674,9 @@ class 	modelBackendPage extends modelPage
 	{
 		parent::__construct();
 	
-		$this -> setSheme('shemeBackendPage');
-		$this -> setObjectName('backendPage');
+		$this -> m_shemePageHeader 	= new shemeBackendPageHeader();
+		$this -> m_shemePagePath 	= new shemeBackendPagePath();
+		$this -> m_shemePage	 	= new shemeBackendPage();
 	}
 }
 

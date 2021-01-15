@@ -1,6 +1,6 @@
 <?php
 
-class shemeBackendPageObjectSimple extends shemeSimple
+class shemeBackendSimple extends shemeSimple
 {
 	public function
 	__construct()

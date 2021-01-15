@@ -1,7 +1,5 @@
 <?php
 
-
-include_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelBackend.php';	
 include_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelPage.php';	
 include_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelPageObject.php';	
 include_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelSitemap.php';	
@@ -27,6 +25,7 @@ class CPageRequest extends CSingleton
 	init(CDatabaseConnection &$_pDatabase, $_nodeId, $_language, $_version, $_xhRequest)
 	{
 
+		// TODO refactor because of double source
 
 		if($_pDatabase === null)
 			return false; 
@@ -37,34 +36,46 @@ class CPageRequest extends CSingleton
 		$this -> objectsList 		= [];
 		$this -> crumbsList 		= [];
 										
+		if(!CMS_BACKEND || (CMS_BACKEND && $this -> isEditMode))
+		{
+			$sitemapCondition = new CModelCondition();
+			$sitemapCondition -> where('page_language', $_language);	
+			$sitemapCondition -> where('page_path', '/');	
 
-		$sitemapCondition = new CModelCondition();
-		$sitemapCondition -> where('page_language', $_language);	
-		$sitemapCondition -> where('page_path', '/');			
+			$modelSitemap = new modelSitemap();
+			$modelSitemap -> load($_pDatabase, $sitemapCondition);
+			$this -> sitemap = &$modelSitemap -> getResult();
+		}
+		else
+		{
+			$sitemapCondition = new CModelCondition();
+			$sitemapCondition -> where('page_language', 'en');	
+			$sitemapCondition -> where('page_path', '/');	
 
-		$modelSitemap = new modelSitemap();
-		$modelSitemap -> load($_pDatabase, $sitemapCondition);
-		$this -> sitemap = &$modelSitemap -> getResult();
+			$modelBackendSitemap = new modelBackendSitemap();
+			$modelBackendSitemap -> load($_pDatabase, $sitemapCondition);
+			$this -> sitemap = &$modelBackendSitemap -> getResult();
+
+		}
 
 
 		if($_nodeId === false && (!CMS_BACKEND || (CMS_BACKEND && $this -> isEditMode)))
 		{	##	Node-ID not set, get start page node-id by language
 
-				foreach($this -> sitemap as $_mapIndex =>  $_mapItem)
+			foreach($this -> sitemap as $_mapIndex =>  $_mapItem)
+			{
+				if( $_mapItem -> level == 1)
 				{
-					if( $_mapItem -> level == 1)
-					{
-						$_nodeId = $_mapItem -> node_id;
-						break;
-					}
+					$_nodeId = $_mapItem -> node_id;
+					break;
 				}
-
-			
+			}			
 		}
 		elseif($_nodeId === false)
 		{
 			$_nodeId = 2;
 		}
+
 
 		## Checking internal redirect settings
 
@@ -95,9 +106,7 @@ class CPageRequest extends CSingleton
 		elseif(!empty($redirectList) && CMS_BACKEND)
 		{
 			$redirectTarget = $redirectList[0] -> redirect_target;
-		
 			$this -> page_redirect = $redirectTarget;
-
 		}
 
 		##	
@@ -107,15 +116,8 @@ class CPageRequest extends CSingleton
 		$this -> page_version 		= $_version;
 		$this -> xhRequest 			= $_xhRequest;
 
-
-
 		$this -> page_title			= '';
 		$this -> page_description	= '';
-
-		$sqlWhere['node_id']		= $this -> node_id;
-		$sqlWhere['page_version']	= $this -> page_version;
-
-
 
 		$pageCondition = new CModelCondition();
 		$pageCondition -> where('tb_page_path.node_id', $this -> node_id);				
@@ -133,7 +135,6 @@ class CPageRequest extends CSingleton
 
 		if(!CMS_BACKEND || (CMS_BACKEND && $this -> isEditMode))
 		{
-
 			##	Frontend handling
 			##
 
@@ -190,26 +191,16 @@ class CPageRequest extends CSingleton
 				$this -> $property = $value;
 			}
 
-			// fällt später weg beim umbau vom backend
-			#$sqlWhere['node_id']		= $this -> node_id;
-			#$sqlWhere['page_version']	= $this -> page_version;
-
-
 
 			$modelCondition = new CModelCondition();
 			$modelCondition -> where('node_id', $this -> node_id);
 			$modelCondition -> where('page_version', $this -> page_version);
 			$modelCondition -> orderBy('object_order_by');
 
-
-
 			$modelPageObject = new modelPageObject();
 			$modelPageObject -> load($_pDatabase, $modelCondition);
 			$this -> objectsList = &$modelPageObject -> getResult();
 		
-
-
-
 			foreach($this -> sitemap as $_mapIndex =>  $_mapItem)
 			{
 				if($_mapItem -> node_id === $this -> node_id)
@@ -221,7 +212,6 @@ class CPageRequest extends CSingleton
 
 			if(isset($_pageIndex))
 			{
-
 				##	Loop Array back to start page and grab the pages for crumb path
 
 				$_level = $this -> sitemap[$_pageIndex] -> level;
@@ -252,60 +242,101 @@ class CPageRequest extends CSingleton
 			else
 				$this -> languageInfo = NULL;
 
-
-
-	}
-	else
-	{
-
-
-		$modelPage = new modelBackend();
-		if(!$modelPage -> loadOld($_pDatabase, $sqlWhere['node_id']))
-		{
-			$this -> setResponseCode(404);
-			return false;
 		}
-
-
-		$page = &$modelPage -> getResult();
-
-
-		$page  -> page_language 	= $_language;
-
-		foreach((array)$page as $property => $value)
+		else
 		{
-			$this -> $property = $value;
-		}
+	
+			$modelCondition = new CModelCondition();
+			$modelCondition -> where('tb_backend_page.node_id', $this -> node_id);
+
+			$modelBackendPage = new modelBackendPage;
+
+			if(!$modelBackendPage -> load($_pDatabase, $modelCondition))
+			{
+				$this -> setResponseCode(404);
+				return false;
+			}
+
+			$page  = reset($modelBackendPage -> getResult());
+			$page -> page_language 	= $_language;
 
 
-		$sqlWhere['node_id']		= $this -> node_id;
-		$sqlWhere['page_version']	= $this -> page_version;
+			if(!empty($page -> page_auth))
+			{
+				if(CSession::instance() -> isAuthed($page -> page_auth) === false)
+				{
+					header("Location: ". CMS_SERVER_URL_BACKEND ); 			
+					exit;		
+				}
+			}
 
-/*
-	page enthält einen object array, eventuell der das selben datenobject hat, eventuell braucht es den loop nicht .. checken wenn backend angepasst wird
+			$timestamp = time();
 
-*/
+			if(		 $page -> hidden_state === 0
+				||	 $page -> hidden_state === 2
+				||	($page -> hidden_state === 4)
+				||	(	($page -> hidden_state == 5 &&  $page -> publish_from  < $timestamp && $page -> publish_expired == 0)
+					&&	($page -> hidden_state == 5 && ($page -> publish_until > $timestamp || $page -> publish_expired == 0) && $page -> publish_until != 0)
+					)	
+				||	CMS_BACKEND			
+			  ); else
+			{		
+				$this -> setResponseCode(403);
+				return false;			
+			}
 
+			if(	
+				($page -> hidden_state === 4)
+			  )
+			{
+				$this -> setResponseCode(404);
+				return false;			
+			}
+
+			foreach((array)$page as $property => $value)
+			{
+				$this -> $property = $value;
+			}
+
+			$modelCondition = new CModelCondition();
+			$modelCondition -> where('node_id', $this -> node_id);
+			$modelCondition -> where('page_version', $this -> page_version);
+			$modelCondition -> orderBy('object_order_by');
+
+			$modelBackendPageObject  = new modelBackendPageObject;
+			$modelBackendPageObject -> load($_pDatabase, $modelCondition);
+			$page -> objects = $modelBackendPageObject -> getResult();
+			
 			$this -> addCrumb($page -> page_name, $page -> page_path .'/');
 
-			$shemePage		= new shemePage();
-
+			$shemeBackendPageObject		= new shemeBackendPageObject();
 
 			$modelPageObject = new modelPageObject();
 
-			$_className		=	$modelPageObject -> createClass();
+			$_className = $modelPageObject -> createClass();
 
 			foreach($page -> objects as $_objectKey =>  $_objectData)
 			{
-				$this -> objectsList[] = new $_className($_objectData, $shemePage -> getColumns());
+				$pageObject = new $_className($_objectData, $shemeBackendPageObject -> getColumns());
+
+				$modelCondition = new CModelCondition();
+				$modelCondition -> where('object_id', $pageObject -> object_id);
+
+				$modelBackendSimple  = new modelBackendSimple;
+				if($modelBackendSimple -> load($_pDatabase, $modelCondition))
+				{
+					$simpleObject = reset($modelBackendSimple -> getResult());
+
+					$pageObject -> body = $simpleObject -> body;
+					$pageObject -> params = $simpleObject -> params;
+				}
+
+				$this -> objectsList[] = $pageObject;		
 			}
 
+
+		}
 	}
-
-
-	}
-
-
 
 	public	function
 	addCrumb($_name, $_urlPart, $_nodeId = 0, $_language = '', $_level = false)
