@@ -551,19 +551,22 @@ class 	modelPage extends CModel
 	private function
 	getAlternatePaths(CDatabaseConnection &$_pDatabase, $_pageID)
 	{
+		$tablePagePath			=	$this -> m_shemePagePath 	-> getTableName();
+		$tablePage				=	$this -> m_shemePage 		-> getTableName();
+
 		$timestamp 		= 	time();
 		$_returnArray	=	[];
 		
 		$nodePageRelCond = new CModelCondition();
-		$nodePageRelCond-> where('tb_page.node_id', 'tb_page_path.node_id');
-		$nodePathRel	 = new CModelRelations('join', 'tb_page', $nodePageRelCond);
+		$nodePageRelCond-> where($tablePage.'.node_id', $tablePagePath.'.node_id');
+		$nodePathRel	 = new CModelRelations('join', $tablePage, $nodePageRelCond);
 
 		$nodePageCond	 = new CModelCondition();
-		$nodePageCond	-> where('tb_page_path.page_id', $_pageID);
+		$nodePageCond	-> where($tablePagePath.'.page_id', $_pageID);
 
 		$sqlPagesRes 	 = $_pDatabase		-> query(DB_SELECT) 
-											-> table('tb_page_path') 
-											-> selectColumns(['tb_page_path.node_id', 'tb_page_path.page_language', 'tb_page.hidden_state', 'tb_page.page_auth', 'tb_page.publish_from', 'tb_page.publish_until'])
+											-> table($tablePagePath) 
+											-> selectColumns([$tablePagePath.'.node_id', $tablePagePath.'.page_language', $tablePage.'.hidden_state', $tablePage.'.page_auth', $tablePage.'.publish_from', $tablePage.'.publish_until'])
 											-> condition($nodePageCond)
 											-> relations([$nodePathRel])
 											-> exec();
@@ -587,8 +590,8 @@ class 	modelPage extends CModel
 							-> orderBy('p.node_lft');
 
 			$sqlPgHeadRes	 = $_pDatabase	-> query(DB_SELECT) 
-											-> table('tb_page_path', 'n') 
-											-> table('tb_page_path', 'p') 
+											-> table($tablePagePath, 'n') 
+											-> table($tablePagePath, 'p') 
 											-> selectColumns(['p.node_id', 'p.page_path', 'p.page_id', 'p.page_language'])
 											-> condition($nodePathCond)
 											-> exec();
