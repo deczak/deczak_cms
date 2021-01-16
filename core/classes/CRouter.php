@@ -322,9 +322,16 @@ class CRouter extends CSingleton
 	}
 
 	public function
-	route(string $_requestedURI) : CRouteRequest
+	route(string $_requestedURI)
 	{
+		if(!file_exists($this -> routesFilepah))
+			return false;
+
 		$this -> nodesList = file_get_contents($this -> routesFilepah);
+
+		if($this -> nodesList === false)
+			return false;
+
 		$this -> nodesList = json_decode($this -> nodesList);
 
 		$routeRequest  = new CRouteRequest;
@@ -348,6 +355,12 @@ class CRouter extends CSingleton
 
 		$nodeInstance = &$this-> nodesList;
 
+		if(CMS_BACKEND)
+		{
+			$routeRequest -> language == 'en';
+		}
+
+
 		for($sIndex = 0; $sIndex < count($buffer); $sIndex++)
 		{
 			## if error documents request
@@ -368,7 +381,7 @@ class CRouter extends CSingleton
 
 			##	>>> Language
 
-			if($sIndex == 0)
+			if($sIndex == 0 && !CMS_BACKEND)
 			{
 				$langFound 		 = false;
 				$defaultLanguage = null;
@@ -397,6 +410,7 @@ class CRouter extends CSingleton
 					$buffer = array_merge([$defaultLanguage -> lang_key], $buffer);
 				}
 			}
+			
 
 			if($sIndex == 0 && count($buffer) == 1 && empty($buffer[$sIndex]))
 			{
@@ -404,7 +418,7 @@ class CRouter extends CSingleton
 			}
 
 			## <<< Language
-		
+
 			$nodeFound = false;
 
 			foreach($nodeInstance -> childNodesList as $childNode)
@@ -415,15 +429,22 @@ class CRouter extends CSingleton
 					&& 	$childNode -> language == $routeRequest -> language 
 					&& 	$buffer[$sIndex] != CMS_BACKEND_PUBLIC)
 				{
-					$nodeInstance = &$childNode;
+					$nodeInstance = &$childNode;					
+					
 					$nodeFound = true;
 					break;
 				}
 
 				if($childNode -> uriSegmentName == $buffer[$sIndex] && ( (!CMS_BACKEND && $childNode -> language == $routeRequest -> language ) || CMS_BACKEND)  )
 				{
-					$nodeInstance = &$childNode;
+
+					if($sIndex == 0 && $buffer[$sIndex] === CMS_BACKEND_PUBLIC)
+						$nodeInstance = reset($childNode -> childNodesList);
+					else
+						$nodeInstance = &$childNode;
+
 					$nodeFound = true;
+
 
 					if($childNode -> queryVar !== false)
 					{
@@ -446,11 +467,14 @@ class CRouter extends CSingleton
 				}
 			}
 
+
 			if(!$nodeFound)
 			{
+			
 				if(!CMS_BACKEND)
 				{
 					header("Location: ". CMS_SERVER_URL ."404"); 	
+
 				}
 				else
 				{
@@ -461,6 +485,8 @@ class CRouter extends CSingleton
 
 			$routeRequest -> nodeId = $nodeInstance -> nodeId;
 		}
+
+
 
 		return $routeRequest;
 	}

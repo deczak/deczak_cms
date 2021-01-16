@@ -46,7 +46,7 @@
 							if(!$modules -> existsRights($moduleId, 'index'))
 								continue;
 
-							echo '<a  class="menu-group-item" href="'. CMS_SERVER_URL_BACKEND . $menuItem -> page_path .'">'. $menuItem -> page_name .'</a>';
+							echo '<a  class="menu-group-item" href="'. CMS_SERVER_URL_BACKEND . substr($menuItem -> page_path, 1) .'">'. $menuItem -> page_name .'</a>';
 						}
 
 						echo '</div>';
@@ -98,7 +98,7 @@
 				<?php
 				foreach($pageRequest -> subs as $sub)
 				{
-					echo '<a class="darkblue" href="'. CMS_SERVER_URL_BACKEND . $pageRequest -> page_path .'/'. $sub['page_path'] .'">'. $sub['menu_name'] .'</a>';
+					echo '<a class="darkblue" href="'. CMS_SERVER_URL_BACKEND . $pageRequest -> page_path .''. $sub['page_path'] .'">'. $sub['menu_name'] .'</a>';
 				}
 				?>
 			</div>

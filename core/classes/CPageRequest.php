@@ -307,7 +307,7 @@ class CPageRequest extends CSingleton
 			$modelBackendPageObject -> load($_pDatabase, $modelCondition);
 			$page -> objects = $modelBackendPageObject -> getResult();
 			
-			$this -> addCrumb($page -> page_name, $page -> page_path .'/');
+			$this -> addCrumb($page -> page_name, $page -> page_path .'');
 
 			$shemeBackendPageObject		= new shemeBackendPageObject();
 

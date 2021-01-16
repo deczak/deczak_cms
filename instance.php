@@ -98,6 +98,13 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 	
 	$pRouteRequest = $pRouter -> route($_SERVER['REQUEST_URI']);
 
+	if($pRouteRequest === false)
+	{
+		$pRouter -> createRoutes($pDBInstance -> getConnection(CFG::GET() -> MYSQL -> PRIMARY_DATABASE));
+		header("Location: ". $_SERVER['REQUEST_URI']); 	
+		exit;
+	}
+
 	$_GET['cms-node'] = $pRouteRequest -> nodeId;
 	$_GET['cms-lang'] = $pRouteRequest -> language;
 

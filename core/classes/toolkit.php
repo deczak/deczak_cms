@@ -76,7 +76,7 @@ class	TK
 					$backendCondition	 = new CModelCondition();
 					$backendCondition 	-> where('user_id', strval($_userId));
 					$modelUsersBackend 	 = new modelUsersBackend();
-					$modelUsersBackend 	-> load($_pDatabase, $modelCondition);
+					$modelUsersBackend 	-> load($_pDatabase, $backendCondition);
 
 					if(empty($modelUsersBackend -> getResult()))
 						return '';

@@ -205,7 +205,7 @@ class	CImperator extends CBasic
 
 		}
 
-		$_pPageRequest -> urlPath		=	$_pPageRequest -> page_path .'/';
+		$_pPageRequest -> urlPath		=	$_pPageRequest -> page_path .'';
 
 
 		##	Looping objects
@@ -244,7 +244,7 @@ class	CImperator extends CBasic
 		
 		##
 
-		$_pPageRequest -> urlPath		=	$_pPageRequest -> page_path .'/';
+		$_pPageRequest -> urlPath		=	$_pPageRequest -> page_path .'';
 
 		$this -> pageRequest = &$_pPageRequest;
 	}
