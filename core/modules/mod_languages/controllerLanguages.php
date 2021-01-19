@@ -229,10 +229,8 @@ class	controllerLanguages extends CController
 					$rootPage['create_time']	=	time();
 					$rootPage['create_by']		= CSession::instance() -> getValue('user_id');
 
-					$nodeId = 0;
-
 					$modelPage  = new modelPage();
-					$modelPage -> insert($_pDatabase, $rootPage, $nodeId);
+					$modelPage -> insert($_pDatabase, $rootPage);
 
 					## Update .htacces and sitemap.xml
 

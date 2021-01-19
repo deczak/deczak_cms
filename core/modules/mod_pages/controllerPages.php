@@ -436,9 +436,7 @@ class	controllerPages extends CController
 
 		$this -> m_modelPage  = new modelPage();
 
-		$nodeId = 0;
-
-		if($this -> m_modelPage -> insert($_pDatabase, $_aFormData, $nodeId))
+		if($this -> m_modelPage -> insert($_pDatabase, $_aFormData))
 		{
 			$_pHTAccess  = new CHTAccess();
 			$_pHTAccess -> generatePart4Frontend($_pDatabase);
