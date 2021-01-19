@@ -3,7 +3,7 @@
 class shemeSimple extends CSheme
 {
 	public function
-	__construct()
+	__construct(bool $_applyConstraint = true)
 	{
 		parent::__construct('tb_page_object_simple');		
 		
@@ -12,7 +12,8 @@ class shemeSimple extends CSheme
 		$this -> addColumn('body', DB_COLUMN_TYPE_TEXT);
 		$this -> addColumn('params', DB_COLUMN_TYPE_TEXT);
 
-		$this -> addConstraing('simple_object_id', 'object_id', 'tb_page_object', 'object_id', 'CASCADE', 'CASCADE');
+		if($_applyConstraint)
+			$this -> addConstraint('simple_object_id', 'object_id', 'tb_page_object', 'object_id', 'CASCADE', 'CASCADE');
 	}
 }
 

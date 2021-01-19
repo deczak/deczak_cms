@@ -3,7 +3,7 @@
 class shemePageObject extends CSheme
 {
 	public function
-	__construct()
+	__construct(bool $_applyConstraint = true)
 	{
 		parent::__construct('tb_page_object');
 		
@@ -26,7 +26,8 @@ class shemePageObject extends CSheme
 		$this -> addColumn('body', DB_COLUMN_TYPE_STRING) -> setVirtual();
 		$this -> addColumn('params'	, 0) -> setVirtual();
 
-		$this -> addConstraing('object_node_id', 'node_id', 'tb_page', 'node_id', 'CASCADE', 'CASCADE');
+		if($_applyConstraint)
+			$this -> addConstraint('object_node_id', 'node_id', 'tb_page', 'node_id', 'CASCADE', 'CASCADE');
 	}
 }
 

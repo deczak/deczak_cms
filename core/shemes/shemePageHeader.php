@@ -3,7 +3,7 @@
 class shemePageHeader extends CSheme
 {
 	public function
-	__construct()
+	__construct(bool $_applyConstraint = true)
 	{
 		parent::__construct('tb_page_header');	
 		
@@ -17,7 +17,8 @@ class shemePageHeader extends CSheme
 		$this -> addColumn('page_description', DB_COLUMN_TYPE_STRING) -> setLength(160);
 		$this -> addColumn('page_version'	, DB_COLUMN_TYPE_MEDIUMINT) -> setAttribute(DB_COLUMN_ATTR_UNSIGNED);
 
-		$this -> addConstraing('header_node_id', 'node_id', 'tb_page', 'node_id', 'CASCADE', 'CASCADE');
+		if($_applyConstraint)
+			$this -> addConstraint('header_node_id', 'node_id', 'tb_page', 'node_id', 'CASCADE', 'CASCADE');
 	}
 }
 
