@@ -35,6 +35,33 @@ class CDatabaseConnection
 	{
 		return $this -> m_connection;
 	}
+
+	public function
+	beginTransaction() : ?bool
+	{
+		if($this -> m_connection === NULL)
+			return null;
+
+		return $this -> m_connection -> beginTransaction();
+	}
+
+	public function
+	rollBack() : ?bool
+	{
+		if($this -> m_connection === NULL)
+			return null;
+
+		return $this -> m_connection -> rollBack();
+	}
+
+	public function
+	commit() : ?bool
+	{
+		if($this -> m_connection === NULL)
+			return null;
+
+		return $this -> m_connection -> commit();
+	}
 }
 
 class	CDatabase extends CSingleton

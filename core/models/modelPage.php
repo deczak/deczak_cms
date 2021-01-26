@@ -22,13 +22,16 @@ class 	modelPage extends CModel
 	protected	$m_shemePage;
 
 	public function
-	__construct()
+	__construct(string $_shemeName = 'shemePage', string $_dataObjectName = 'page')
 	{
-		parent::__construct('shemePage', 'page');
+		parent::__construct($_shemeName, $_dataObjectName);
 
 		$this -> m_shemePageHeader 	= new shemePageHeader();
 		$this -> m_shemePagePath 	= new shemePagePath();
 		$this -> m_shemePage	 	= new shemePage();
+
+		$this -> m_modelPageHeader	= 'modelPageHeader';
+		$this -> m_modelPagePath	= 'modelPagePath';
 	}	
 	
 	public function
@@ -270,11 +273,13 @@ class 	modelPage extends CModel
 	public function
 	insert(CDatabaseConnection &$_pDatabase, array $_insertData, $_execFlags = NULL)
 	{
-		$_bQueryResult = true;
 
 		$_tablePageHeader		=	$this -> m_shemePageHeader 	-> getTableName();
 		$_tablePagePath			=	$this -> m_shemePagePath 	-> getTableName();
 		$_tablePage				=	$this -> m_shemePage 		-> getTableName();
+
+		$m_modelPageHeader		=	$this -> m_modelPageHeader;
+		$m_modelPagePath		=	$this -> m_modelPagePath;
 		
 		##	add required data
 
@@ -301,7 +306,7 @@ class 	modelPage extends CModel
 			trigger_error('modelPage::insert() - Node does not exists');
 			return false;
 		}
-
+		
 		$pagePathCond	 = new CModelCondition();
 		$pagePathCond	-> whereGreaterEven('node_rgt', $_parentNode -> node_rgt);
 		$dtaObject 		 = new stdClass();
@@ -319,7 +324,7 @@ class 	modelPage extends CModel
 		$_insertData['node_lft'] = $_parentNode -> node_rgt;
 		$_insertData['node_rgt'] = $_parentNode -> node_rgt + 1;
 
-		$modelPagePath 	 		= new modelPagePath();
+		$modelPagePath 	 		= new $m_modelPagePath();
 		$_insertData['node_id'] = $modelPagePath -> insert($_pDatabase, $_insertData, $_execFlags);
 
 		##	Get page_auth from parent node and append dataset data
@@ -334,6 +339,7 @@ class 	modelPage extends CModel
 
 		$queryRes = $dbQuery -> exec();
 
+
 		$_dataset['page_auth'] = $queryRes[0] -> page_auth;
 
 		##	Table tb_page
@@ -342,10 +348,10 @@ class 	modelPage extends CModel
 
 		##	Table tb_page_header
 		
-		$modelPageHeader 	 = new modelPageHeader();
+		$modelPageHeader 	 = new $m_modelPageHeader();
 		$modelPageHeader 	-> insert($_pDatabase, $_insertData, $_execFlags);
 
-		return $_bQueryResult;
+		return $_insertData['node_id'];
 	}
 	
 	public function
@@ -675,11 +681,15 @@ class 	modelBackendPage extends modelPage
 	public function
 	__construct()
 	{
-		parent::__construct();
+		parent::__construct('shemeBackendPage');
 	
 		$this -> m_shemePageHeader 	= new shemeBackendPageHeader();
 		$this -> m_shemePagePath 	= new shemeBackendPagePath();
 		$this -> m_shemePage	 	= new shemeBackendPage();
+
+
+		$this -> m_modelPageHeader	= 'modelBackendPageHeader';
+		$this -> m_modelPagePath	= 'modelBackendPagePath';
 	}
 }
 
