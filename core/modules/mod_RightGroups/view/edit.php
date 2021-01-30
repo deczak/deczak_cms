@@ -96,13 +96,31 @@ $activeModulesList = CModules::instance() -> getModules();
 									$_moduleData = file_get_contents($_modLocation .'/module.json');
 									$_moduleData = json_decode($_moduleData);
 
+
+
+
+
+		$pModulesInstall = new CModulesInstall;
+
+		$moduleData = $pModulesInstall -> getMmoduleData($_moduleData, $_module -> module_location, $_module -> module_type);
+
+		if($moduleData === false)
+		{
+			continue;
+		}
+
+		$moduleData = json_decode(json_encode($moduleData));
+
+
+
+
 									?>
 									<tr>
 										<td><?php echo $_module -> module_name; ?></td>
 										<td>
 											<div style="display:flex;">
 											<?php
-											foreach($_moduleData -> module_rights as $_right)
+											foreach($moduleData -> rights as $_right)
 											{
 												?>
 												<div class="ui pick-item">
