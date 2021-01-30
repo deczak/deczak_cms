@@ -263,8 +263,6 @@ class	CModules extends CSingleton
 
 
 
-
-
 		// Determine Sheme
 
 		$pModulesInstall = new CModulesInstall;
@@ -277,11 +275,7 @@ class	CModules extends CSingleton
 			continue;
 		}
 
-
 		$moduleData = json_decode(json_encode($moduleData));
-
-
-
 
 
 
@@ -332,7 +326,7 @@ class	CModules extends CSingleton
 		$pModulesInstall = new CModulesInstall;
 
 
-		$moduleData = $pModulesInstall -> getMmoduleData($moduleConfig, $directory, 'core');
+		$moduleData = $pModulesInstall -> getMmoduleData($moduleConfig, $directory, 'mantle');
 
 		if($moduleData === false)
 		{
@@ -423,6 +417,14 @@ class	CModules extends CSingleton
 		}
 
 		$_dbConnection -> commit();
+
+		$this -> modelModules	->	load($_dbConnection);
+		$this -> modulesList 	 =	$this -> modelModules -> getResult();
+
+		$_pHTAccess  = new CHTAccess();
+		$_pHTAccess -> generatePart4Backend($_dbConnection);
+		$_pHTAccess -> writeHTAccess($_dbConnection);
+
 		return true;
 	}
 
@@ -503,7 +505,11 @@ class CModulesInstall
 				$modelModules -> update($_dbConnection, $updateParent, $parentCondition);
 			}
 
-			$moduleData['module']['module_id'] = $modelModules -> insert($_dbConnection, $moduleData);
+
+
+
+
+			$moduleData['module']['module_id'] = $modelModules -> insert($_dbConnection, $moduleData['module']);
 
 			if($moduleData['module']['shemes'] !== false)
 			{
@@ -615,13 +621,6 @@ class CModulesInstall
 				}
 			}
 		}
-
-		$this -> modelModules	->	load($_dbConnection);
-		$this -> modulesList 	 =	$this -> modelModules -> getResult();
-
-		$_pHTAccess  = new CHTAccess();
-		$_pHTAccess -> generatePart4Backend($_dbConnection);
-		$_pHTAccess -> writeHTAccess($_dbConnection);
 
 		return true;
 	}
@@ -752,6 +751,8 @@ class CModulesInstall
 		if(!property_exists($_moduleConfig, 'sheme'))
 			$_moduleConfig -> sheme = 1;
 
+
+
 		switch($_moduleConfig -> sheme)
 		{
 			case 1:
@@ -788,6 +789,7 @@ class CModulesInstallS1 // Module Sheme 1
 
 		if(!property_exists($_moduleConfig, 'module_controller') || empty($_moduleConfig -> module_controller))
 			return false;
+
 
 		$moduleData		= [];
 
@@ -845,6 +847,11 @@ class CModulesInstallS1 // Module Sheme 1
 				'create_by'			=>	$userId
 
 			];
+		}
+		else
+		{
+			$moduleData['page'] = false;
+			$moduleData['objects'] = false;
 		}
 
 		if(property_exists($_moduleConfig, 'module_rights'))
