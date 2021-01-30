@@ -1,5 +1,12 @@
 {
 	"module_controller" : "controllerSimpleSitemap",
+	"module_name"		: "Sitemap",
+	"module_desc"		: "",
+	"module_path" 		: "",
+	"module_group"		: "Simple Modules",
+	"module_icon"		: "&#xf0e8;",
+	"module_frontend"	: 1,
+	"module_menu_group"	: "0",
 	"module_rights"		:[
 							{"name":"view",		"desc":"VIEW"},
 							{"name":"create",	"desc":"CREATE"},

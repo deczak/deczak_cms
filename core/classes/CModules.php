@@ -36,6 +36,8 @@ class	CModules extends CSingleton
 		$moduleInstance = NULL;
 		$moduleIndex = false;
 
+
+
 		if(!$this -> getModule($_moduleId, $moduleInstance, $moduleIndex))
 		{
 			return false;
@@ -69,8 +71,40 @@ class	CModules extends CSingleton
 			case 'core'   :	include CMS_SERVER_ROOT.DIR_CORE.DIR_MODULES. $moduleInstance -> module_location .'/'. $moduleInstance -> module_controller .'.php';
 
 							$moduleConfig 	= file_get_contents( CMS_SERVER_ROOT.DIR_CORE.DIR_MODULES. $moduleInstance -> module_location .'/module.json');
+
+
+
 							$moduleConfig 	= ($moduleConfig !== false ? json_decode($moduleConfig) : [] );	
-							$this -> modulesList[$moduleIndex] = (object)array_merge((array)$moduleInstance, (array)$moduleConfig);
+
+
+
+
+
+
+
+		$pModulesInstall = new CModulesInstall;
+
+		$moduleData = $pModulesInstall -> getMmoduleData($moduleConfig, $moduleInstance -> module_location, $moduleInstance -> module_type);
+
+
+
+
+		if($moduleData === false)
+		{
+			return false;
+		}
+
+
+		$moduleData = json_decode(json_encode($moduleData));
+
+
+
+
+
+
+
+
+							$this -> modulesList[$moduleIndex] = (object)array_merge((array)$moduleInstance, (array)$moduleData);
 							$this -> modulesList[$moduleIndex] -> user_rights = $this -> m_pUserRights -> getModuleRights($_moduleId);
 
 							$_modLocation	= CMS_SERVER_ROOT . DIR_CORE . DIR_MODULES . $moduleInstance -> module_location .'/';	
@@ -85,10 +119,41 @@ class	CModules extends CSingleton
 							$moduleConfig 	= file_get_contents( CMS_SERVER_ROOT.DIR_MANTLE.DIR_MODULES. $moduleInstance -> module_location .'/module.json');
 							$moduleConfig 	= ($moduleConfig !== false ? json_decode($moduleConfig) : [] );	
 
+
+
+
+
+
+
+
+
+
+		$pModulesInstall = new CModulesInstall;
+
+		$moduleData = $pModulesInstall -> getMmoduleData($moduleConfig, $moduleInstance -> module_location, $moduleInstance -> module_type);
+
+		if($moduleData === false)
+		{
+			return false;
+		}
+
+
+		$moduleData = json_decode(json_encode($moduleData));
+
+
+
+
+
+
+
+
+
+
+
 							$_modLocation	= CMS_SERVER_ROOT . DIR_MANTLE . DIR_MODULES . $moduleInstance -> module_location .'/';
 							CLanguage::instance() -> loadLanguageFile($_modLocation.'lang/', $_pageLanguage);
 
-							$this -> modulesList[$moduleIndex] = (object)array_merge((array)$moduleInstance, (array)$moduleConfig);
+							$this -> modulesList[$moduleIndex] = (object)array_merge((array)$moduleInstance, (array)$moduleData);
 
 							$this -> modulesList[$moduleIndex] -> user_rights = $this -> m_pUserRights -> getModuleRights($_moduleId);
 
@@ -96,10 +161,6 @@ class	CModules extends CSingleton
 							$this -> loadedList[] = $this -> modulesList[$moduleIndex];
 							return $this -> modulesList[$moduleIndex];
 		}
-
-
-
-
 
 		return false;
 	}
@@ -152,24 +213,17 @@ class	CModules extends CSingleton
 
 			foreach($this -> modulesList as $module)
 			{
-
 				if(!$module -> is_frontend)
 					continue;
 
-
 				if(!property_exists($module, 'user_rights'))
 					$module -> user_rights = $this -> m_pUserRights -> getModuleRights($module -> module_id);
-
-
 
 				if(!$this -> m_pUserRights -> existsRight($module -> module_id, 'create'))
 					continue;
 
 				$modulesList[] = $module;
-
 			}
-
-
 
 			return $modulesList;
 		}
@@ -206,9 +260,35 @@ class	CModules extends CSingleton
 					continue;
 
 				$moduleConfig = json_decode($moduleConfig);
-				$moduleConfig -> module_location = $directory;
 
-				$moduleList_core[]	= $moduleConfig;
+
+
+
+
+		// Determine Sheme
+
+		$pModulesInstall = new CModulesInstall;
+
+
+		$moduleData = $pModulesInstall -> getMmoduleData($moduleConfig, $directory, 'core');
+
+		if($moduleData === false)
+		{
+			continue;
+		}
+
+
+		$moduleData = json_decode(json_encode($moduleData));
+
+
+
+
+
+
+
+				$moduleData -> module -> module_location = $directory;
+
+				$moduleList_core[]	= $moduleData;
 			}
 		}
 
@@ -230,34 +310,68 @@ class	CModules extends CSingleton
 
 				$moduleFilepath = $procPath . $directory .'/module.json'; 
 
+
+
+
 				$moduleConfig	= file_get_contents($moduleFilepath);
 
 				if($moduleConfig === false)
 					continue;
 
 				$moduleConfig = json_decode($moduleConfig);
-				$moduleConfig -> module_location = $directory;
 
-				$moduleList_mantle[]	= $moduleConfig;
+
+
+
+
+
+
+
+		// Determine Sheme
+
+		$pModulesInstall = new CModulesInstall;
+
+
+		$moduleData = $pModulesInstall -> getMmoduleData($moduleConfig, $directory, 'core');
+
+		if($moduleData === false)
+		{
+			continue;
+		}
+
+
+		$moduleData = json_decode(json_encode($moduleData));
+
+
+
+
+
+
+
+
+				$moduleData -> module -> module_location = $directory;
+
+				$moduleList_mantle[]	= $moduleData;
 			}
 		}
 
 		$availableList = [];
-
 
 		foreach($moduleList_core as $dirModuleKey => $dirModuleItem)
 		{
 			$moduleInstalled = false;
 
 
-			if(!isset($dirModuleItem -> module_controller))
+			if(!isset($dirModuleItem -> module -> module_controller))
 			{
 				tk::dbug($dirModuleItem);
+
+				// aaaooohhh well ...
 			}
 
 			foreach($this -> modulesList as $listItem)
 			{
-				if($listItem -> module_controller === $dirModuleItem -> module_controller)
+				if($listItem -> module_controller === $dirModuleItem -> module -> module_controller)
 				{
 					$moduleInstalled = true;
 					break;
@@ -267,7 +381,7 @@ class	CModules extends CSingleton
 			if($moduleInstalled)
 				continue;
 
-			$dirModuleItem -> module_type = "core";
+		#	$dirModuleItem -> module_type = "core";
 
 			$availableList[] = $dirModuleItem;
 		}
@@ -278,7 +392,7 @@ class	CModules extends CSingleton
 
 			foreach($this -> modulesList as $listItem)
 			{
-				if($listItem -> module_controller === $dirModuleItem -> module_controller)
+				if($listItem -> module_controller === $dirModuleItem -> module -> module_controller)
 				{
 					$moduleInstalled = true;
 					break;
@@ -287,10 +401,11 @@ class	CModules extends CSingleton
 			if($moduleInstalled)
 				continue;
 
-			$dirModuleItem -> module_type 		= "mantle";
+		#	$dirModuleItem -> module_type 		= "mantle";
 
 			$availableList[] = $dirModuleItem;
 		}
+
 
 		return $availableList;
 	}
@@ -334,7 +449,6 @@ class	CModules extends CSingleton
 	}
 }
 
-
 class CModulesInstall 
 {
 	public function
@@ -352,31 +466,16 @@ class CModulesInstall
 		$moduleConfig	= file_get_contents($moduleFilepath);
 
 		if($moduleConfig === false)
+		{
+			$errorMsg = 'Could not find module config';
 			return false;
+		}
 
 		$moduleConfig = json_decode($moduleConfig);
 
 		// Determine Sheme
 
-		if(!property_exists($moduleConfig, 'sheme'))
-			$moduleConfig -> sheme = 1;
-
-		switch($moduleConfig -> sheme)
-		{
-			case 1:
-
-				$pModulesInstallS1 = new CModulesInstallS1;
-				$moduleData = $pModulesInstallS1 -> install($moduleConfig, $moduleLocation, $moduleType);
-
-				break;
-
-			case 2:
-
-				$pModulesInstallS2 = new CModulesInstallS2;
-				$moduleData = $pModulesInstallS2 -> install($moduleConfig, $moduleLocation, $moduleType);
-			
-				break;
-		}
+		$moduleData = $this -> getMmoduleData($moduleConfig, $moduleLocation, $moduleType);
 
 		if($moduleData === false)
 		{
@@ -421,12 +520,17 @@ class CModulesInstall
 					
 					$sheme  = new $sheme -> filename();
 
-					if(!$sheme -> createTable($_dbConnection, $errorMsg))
+					if(!$sheme -> createTable($_dbConnection))
 					{
 						return false;
 					}
 				}
 			}
+		}
+		else
+		{
+			$errorMsg = 'Could not find module information';
+			return false;
 		}
 
 		## insert page if requested
@@ -488,7 +592,7 @@ class CModulesInstall
 
 						if(count($modulesList) !== 1)
 						{
-							continue;
+							continue 2;
 						}
 						else
 						{
@@ -520,9 +624,7 @@ class CModulesInstall
 		$_pHTAccess -> writeHTAccess($_dbConnection);
 
 		return true;
-
 	}
-
 
 	public function
 	uninstall(CDatabaseConnection &$_dbConnection, $_moduleId, &$errorMsg)
@@ -544,6 +646,30 @@ class CModulesInstall
 		}	
 							
 		$moduleInfo = reset($modulesList); 
+
+		// Read module.json
+
+		$moduleFilepath 	= CMS_SERVER_ROOT . $moduleInfo -> module_type .'/'. DIR_MODULES . $moduleInfo -> module_location .'/module.json';
+
+		$moduleConfig	= file_get_contents($moduleFilepath);
+
+		if($moduleConfig === false)
+		{
+			$errorMsg = 'Could not find module config';
+			return false;
+		}
+
+		$moduleConfig = json_decode($moduleConfig);
+
+		// Determine Sheme
+
+		$moduleData = $this -> getMmoduleData($moduleConfig, $moduleInfo -> module_location, $moduleInfo -> module_type);
+
+		if($moduleData === false)
+		{
+			$errorMsg = 'Invalid module config format';
+			return false;
+		}
 
 		##	delete pages/object
 
@@ -587,11 +713,65 @@ class CModulesInstall
 			$errorMsg = 'content deletion failed';
 			return false;
 		}
+
+		## insert module, shemes
+
+		if($moduleData['module'] !== false)
+		{
+			if($moduleData['module']['shemes'] !== false)
+			{
+				foreach($moduleData['module']['shemes'] as $sheme)
+				{
+					$shemeFilepath = CMS_SERVER_ROOT . $moduleInfo -> module_type .'/'. DIR_MODULES . $moduleInfo -> module_location .'/'. $sheme -> filename .'.php';
+
+					if(!file_exists($shemeFilepath))
+					{
+						$shemeFilepath = CMS_SERVER_ROOT . $moduleInfo -> module_type .'/'. DIR_SHEME . $sheme -> filename .'.php';
+					}
+
+					include $shemeFilepath;
+					
+					$sheme  = new $sheme -> filename();
+
+					if(!$sheme -> dropTable($_dbConnection))
+					{
+						return false;
+					}
+				}
+			}
+		}
 			
 		return $modelModules -> delete($_dbConnection, $moduleCondition);
 	}
-}
 
+	public function
+	getMmoduleData(stdClass $_moduleConfig, $moduleLocation, $moduleType)
+	{
+		$moduleData = false;
+
+		if(!property_exists($_moduleConfig, 'sheme'))
+			$_moduleConfig -> sheme = 1;
+
+		switch($_moduleConfig -> sheme)
+		{
+			case 1:
+
+				$pModulesInstallS1 = new CModulesInstallS1;
+				$moduleData = $pModulesInstallS1 -> getMmoduleData($_moduleConfig, $moduleLocation, $moduleType);
+
+				break;
+
+			case 2:
+
+				$pModulesInstallS2 = new CModulesInstallS2;
+				$moduleData = $pModulesInstallS2 -> getMmoduleData($_moduleConfig, $moduleLocation, $moduleType);
+			
+				break;
+		}
+
+		return $moduleData;
+	}
+}
 
 class CModulesInstallS1 // Module Sheme 1
 {
@@ -601,7 +781,7 @@ class CModulesInstallS1 // Module Sheme 1
 	}
 
 	public function
-	install(stdClass $_moduleConfig, $moduleLocation, $moduleType)
+	getMmoduleData(stdClass $_moduleConfig, $moduleLocation, $moduleType)
 	{
 		$timestamp		= time();
 		$userId			= CSession::instance() -> getValue('user_id');
@@ -667,6 +847,24 @@ class CModulesInstallS1 // Module Sheme 1
 			];
 		}
 
+		if(property_exists($_moduleConfig, 'module_rights'))
+		{
+			$moduleData['rights'] = $_moduleConfig -> module_rights;
+		}
+		else
+		{
+			$moduleData['rights'] = [];
+		}
+
+		if(property_exists($_moduleConfig, 'module_subs'))
+		{
+			$moduleData['sections'] = $_moduleConfig -> module_subs;
+		}
+		else
+		{
+			$moduleData['sections'] = [];
+		}
+
 		return $moduleData;
 	}
 }
@@ -679,7 +877,7 @@ class CModulesInstallS2 // Module Sheme 2
 	}
 
 	public function
-	install(stdClass $_moduleConfig, $moduleLocation, $moduleType)
+	getMmoduleData(stdClass $_moduleConfig, $moduleLocation, $moduleType)
 	{
 		$timestamp		= time();
 		$userId			= CSession::instance() -> getValue('user_id');
@@ -761,6 +959,25 @@ class CModulesInstallS2 // Module Sheme 2
 				];
 			}
 		}
+
+		if(property_exists($_moduleConfig, 'rights'))
+		{
+			$moduleData['rights'] = $_moduleConfig -> rights;
+		}
+		else
+		{
+			$moduleData['rights'] = [];
+		}
+
+		if(property_exists($_moduleConfig, 'sections'))
+		{
+			$moduleData['sections'] = $_moduleConfig -> sections;
+		}
+		else
+		{
+			$moduleData['sections'] = [];
+		}
+
 
 		return $moduleData;
 	}

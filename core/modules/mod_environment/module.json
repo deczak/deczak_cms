@@ -1,5 +1,12 @@
 {
 	"module_controller" : "controllerEnvironment",
+	"module_name"		: "Environment",
+	"module_desc"		: "",
+	"module_path" 		: "environment",
+	"module_group"		: "backend",
+	"module_icon"		: "",
+	"module_frontend"	: 0,
+	"module_menu_group"	: "2",
 	"module_rights"		:[
 							{"name":"index",	"desc":"OVERVIEW"},
 							{"name":"edit",		"desc":"EDIT"}

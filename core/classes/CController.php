@@ -47,8 +47,7 @@ class	CController
 	private function
 	_getModulePath(string $_controllerAction)
 	{
-
-		foreach($this -> m_aModule -> module_subs as $path)
+		foreach($this -> m_aModule -> sections as $path)
 		{
 			if($path -> ctl_target === $_controllerAction)
 				return $path;
@@ -59,7 +58,7 @@ class	CController
 	private function
 	_existsModuleRight(string $_rightId)
 	{
-		foreach($this -> m_aModule -> module_rights as $right)
+		foreach($this -> m_aModule -> rights as $right)
 		{
 			if($right -> name === $_rightId)
 				return true;
@@ -95,13 +94,13 @@ class	CController
 	{
 		$_aSections = [];
 
-		if(empty($this -> m_aModule -> module_subs))
+		if(empty($this -> m_aModule -> sections))
 			return $_aSections;	
 
-		usort($this -> m_aModule -> module_subs, function($a, $b) { return $a -> menu_order <=> $b -> menu_order; });
+		usort($this -> m_aModule -> sections, function($a, $b) { return $a -> menu_order <=> $b -> menu_order; });
 
-		if(!isset($this -> m_aModule -> module_subs)) return $_aSections;
-		foreach($this -> m_aModule -> module_subs as $_sub)
+		if(!isset($this -> m_aModule -> sections)) return $_aSections;
+		foreach($this -> m_aModule -> sections as $_sub)
 		{
 			if(empty($_sub -> url_name) || empty($_sub -> menu_name))
 				continue;
@@ -115,13 +114,13 @@ class	CController
 	protected function
 	setCrumbData(string $_ctrlTarget, string $_customMenuName = '', bool $_noLink = false)
 	{
-		$_sectionIndex = array_search($_ctrlTarget, array_column($this -> m_aModule -> module_subs, 'ctl_target'));
+		$_sectionIndex = array_search($_ctrlTarget, array_column($this -> m_aModule -> sections, 'ctl_target'));
 		if($_sectionIndex !== false)
 		{		
 
 			CPageRequest::instance() -> addCrumb(
-													(!empty($_customMenuName) ? $_customMenuName : CLanguage::get() -> string($this -> m_aModule -> module_subs[$_sectionIndex] -> menu_name)),
-													(!$_noLink ? $this -> m_aModule -> module_subs[$_sectionIndex] -> url_name .'/' : false)
+													(!empty($_customMenuName) ? $_customMenuName : CLanguage::get() -> string($this -> m_aModule -> sections[$_sectionIndex] -> menu_name)),
+													(!$_noLink ? $this -> m_aModule -> sections[$_sectionIndex] -> url_name .'/' : false)
 												);
 		}
 	}
