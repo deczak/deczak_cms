@@ -228,8 +228,23 @@ class CRouter extends CSingleton
 				}
 			}
 
+
+
+
+		$pModulesInstall = new CModulesInstall;
+
+		$moduleData = $pModulesInstall -> getMmoduleData($moduleConfig, $module -> module_location, $module -> module_type);
+
+		if($moduleData === false)
+		{
+			continue;
+		}
+
+		$moduleData = json_decode(json_encode($moduleData));
+
+
 			##	looping sub section of module thats used by object		
-			if(property_exists($moduleConfig, 'module_subs')  && !empty($moduleConfig  -> module_subs) && is_array($moduleConfig  -> module_subs))
+			if(property_exists($moduleData, 'sections')  && !empty($moduleData  -> sections) && is_array($moduleData  -> sections))
 			{
 				$objectRes	=	$sqlDB -> query("	SELECT		DISTINCT $tbPageObject.node_id,
 																$tbPageObject.object_id,
@@ -273,7 +288,7 @@ class CRouter extends CSingleton
 					if($node == null)
 						continue;
 					
-					foreach($moduleConfig -> module_subs as $_moduleSub)
+					foreach($moduleData -> sections as $_moduleSub)
 					{	
 						if(empty($_moduleSub -> url_name))
 						{
