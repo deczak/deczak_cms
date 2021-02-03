@@ -1,6 +1,10 @@
 <?php
 
 require_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelModules.php';	
+require_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelPage.php';	
+require_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelPageObject.php';	
+require_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelPagePath.php';	
+require_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelPageHeader.php';	
 
 require_once 'CSingleton.php';
 
@@ -263,19 +267,19 @@ class	CModules extends CSingleton
 
 
 
-		// Determine Sheme
+				// Determine Sheme
 
-		$pModulesInstall = new CModulesInstall;
+				$pModulesInstall = new CModulesInstall;
 
 
-		$moduleData = $pModulesInstall -> getMmoduleData($moduleConfig, $directory, 'core');
+				$moduleData = $pModulesInstall -> getMmoduleData($moduleConfig, $directory, 'core');
 
-		if($moduleData === false)
-		{
-			continue;
-		}
+				if($moduleData === false)
+				{
+					continue;
+				}
 
-		$moduleData = json_decode(json_encode($moduleData));
+				$moduleData = json_decode(json_encode($moduleData));
 
 
 
@@ -321,20 +325,20 @@ class	CModules extends CSingleton
 
 
 
-		// Determine Sheme
+				// Determine Sheme
 
-		$pModulesInstall = new CModulesInstall;
-
-
-		$moduleData = $pModulesInstall -> getMmoduleData($moduleConfig, $directory, 'mantle');
-
-		if($moduleData === false)
-		{
-			continue;
-		}
+				$pModulesInstall = new CModulesInstall;
 
 
-		$moduleData = json_decode(json_encode($moduleData));
+				$moduleData = $pModulesInstall -> getMmoduleData($moduleConfig, $directory, 'mantle');
+
+				if($moduleData === false)
+				{
+					continue;
+				}
+
+
+				$moduleData = json_decode(json_encode($moduleData));
 
 
 
@@ -405,7 +409,7 @@ class	CModules extends CSingleton
 	}
 
 	public function
-	install(CDatabaseConnection &$_dbConnection, $moduleLocation, $moduleType, &$errorMsg)
+	install(CDatabaseConnection &$_dbConnection, $moduleLocation, $moduleType, &$errorMsg, bool $updateRoutes = true)
 	{
 		$_dbConnection -> beginTransaction();
 
@@ -421,10 +425,12 @@ class	CModules extends CSingleton
 		$this -> modelModules	->	load($_dbConnection);
 		$this -> modulesList 	 =	$this -> modelModules -> getResult();
 
-		$_pHTAccess  = new CHTAccess();
-		$_pHTAccess -> generatePart4Backend($_dbConnection);
-		$_pHTAccess -> writeHTAccess($_dbConnection);
-
+		if($updateRoutes)
+		{
+			$_pHTAccess  = new CHTAccess();
+			$_pHTAccess -> generatePart4Backend($_dbConnection);
+			$_pHTAccess -> writeHTAccess($_dbConnection);
+		}
 		return true;
 	}
 
@@ -505,10 +511,6 @@ class CModulesInstall
 				$modelModules -> update($_dbConnection, $updateParent, $parentCondition);
 			}
 
-
-
-
-
 			$moduleData['module']['module_id'] = $modelModules -> insert($_dbConnection, $moduleData['module']);
 
 			if($moduleData['module']['shemes'] !== false)
@@ -543,7 +545,8 @@ class CModulesInstall
 
 		if($moduleData['page'] !== false)
 		{
-			if(!empty($moduleData['module']['is_frontend']) && $moduleData['module']['is_frontend'] === '0')
+			
+			if(isset($moduleData['module']['is_frontend']) && $moduleData['module']['is_frontend'] === '0')
 			{
 				$modelBackendPage  = new modelBackendPage;
 				$nodeId = $modelBackendPage -> insert($_dbConnection, $moduleData['page']);
@@ -571,7 +574,7 @@ class CModulesInstall
 			}
 		}
 
-		if($moduleData['objects'] !== false)
+		if(isset($moduleData['objects']) && $moduleData['objects'] !== false)
 		{
 			foreach($moduleData['objects'] as $object)
 			{
@@ -589,7 +592,7 @@ class CModulesInstall
 						$object['node_id']		= $moduleData['page']['node_id'];
 
 						$moduleCondition  = new CModelCondition();
-						$moduleCondition -> where('module_controller', $moduleData['module']['controller']);
+						$moduleCondition -> where('module_controller', $object['controller']);
 
 						$modelModules  = new modelModules;
 						$modelModules -> load($_dbConnection, $moduleCondition);
@@ -609,7 +612,7 @@ class CModulesInstall
 						break;
 				}
 
-				if(!empty($moduleData['module']['is_frontend']) && $moduleData['module']['is_frontend'] === '0')
+				if(isset($moduleData['module']['is_frontend']) && $moduleData['module']['is_frontend'] === '0')
 				{
 					$modelBackendPageObject = new modelBackendPageObject;
 					$modelBackendPageObject -> insert($_dbConnection, $object);

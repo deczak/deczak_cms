@@ -1,5 +1,7 @@
 <?php
 
+include_once 'shemePage.php';
+
 class shemeBackendPage extends shemePage 
 {
 	public function

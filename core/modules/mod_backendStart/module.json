@@ -1,0 +1,27 @@
+{
+	"sheme"				: 2,
+	"version"			: 1,
+	"module"			: {
+		"controller"	: "",
+		"name"			: "Backend Login",
+		"desc"			: "",
+		"group"			: "backend",
+		"icon"			: "",
+		"frontend"		: 0
+	},
+	"page"				: {
+		"path"			: "",
+		"name"			: "Start",
+		"menu_group"	: "0"
+	},
+	"objectList" 		: [
+							{
+								"controller": "controllerLoginForm",
+								"body"		: "backend/dashboard/",
+								"param"		: {"object_id":"ABKND","labels":["Username","Password"]}
+							}
+	
+	],
+	"rights"			: [],
+	"sections"			: []
+}

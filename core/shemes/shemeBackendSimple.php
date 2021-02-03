@@ -1,5 +1,7 @@
 <?php
 
+include_once 'shemeSimple.php';
+
 class shemeBackendSimple extends shemeSimple
 {
 	public function

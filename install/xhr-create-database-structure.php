@@ -55,7 +55,7 @@
 		if($_dirItem -> isDot() || $_dirItem -> getType() === 'dir')
 			continue;
 
-		include	'../core/shemes/'. $_dirItem -> getFilename();
+		include_once	'../core/shemes/'. $_dirItem -> getFilename();
 
 		$shemeList[] = explode('.',$_dirItem -> getFilename())[0];
 	}
