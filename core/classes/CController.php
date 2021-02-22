@@ -41,7 +41,7 @@ class	CController
 	protected function
 	existsUserRight(string $_rightId)
 	{
-		return in_array($_rightId, $this -> m_aModule -> user_rights, true);
+		return in_array($_rightId, $this -> m_aModule -> rights, true);
 	}
 
 	private function
@@ -139,8 +139,8 @@ class	CController
 	protected function
 	setView(string $_view, string $_moduleTarget,  array $_dataInstances = [])
 	{
-		$moduleType 	= $this -> m_aModule -> module_type;
-		$moduleLocation = $this -> m_aModule -> module_location;
+		$moduleType 	= $this -> m_aModule -> module -> module_type;
+		$moduleLocation = $this -> m_aModule -> module -> module_location;
 
 		switch($moduleType)
 		{

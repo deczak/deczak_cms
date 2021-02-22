@@ -16,9 +16,12 @@
 	},
 	"objectList" 		: [
 							{
-								"controller": "controllerLoginForm",
-								"body"		: "backend/dashboard/",
-								"param"		: {"object_id":"ABKND","labels":["Username","Password"]}
+								"controller": "controllerLoginForm", 
+								"data": {
+									"login-object-id":"ABKND",
+									"login-object-redirect":"backend/dashboard/",
+									"field_label":["Username","Password"]
+								}
 							}
 	
 	],

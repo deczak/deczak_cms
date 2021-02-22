@@ -5,6 +5,7 @@ require_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelPage.php';
 require_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelPageObject.php';	
 require_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelPagePath.php';	
 require_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelPageHeader.php';	
+require_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelPageHeader.php';	
 
 require_once 'CSingleton.php';
 
@@ -413,12 +414,18 @@ class	CModules extends CSingleton
 	{
 		$_dbConnection -> beginTransaction();
 
+
+			echo "\r\n ". $moduleLocation ." INSTALL";		
+
 		$pModulesInstall = new CModulesInstall;
 		if(!$pModulesInstall -> install($_dbConnection, $moduleLocation, $moduleType, $errorMsg))
 		{
+			echo "\r\n = FAILED";
 			$_dbConnection -> rollBack();
 			return false;
 		}
+
+		echo "\r\n = SUCCESS";
 
 		$_dbConnection -> commit();
 
@@ -490,6 +497,9 @@ class CModulesInstall
 			$errorMsg = 'Invalid module config format';
 			return false;
 		}
+
+
+
 
 		## insert module, shemes
 
@@ -574,9 +584,13 @@ class CModulesInstall
 			}
 		}
 
+		## insert objects
+
 		if(isset($moduleData['objects']) && $moduleData['objects'] !== false)
 		{
-			foreach($moduleData['objects'] as $object)
+
+
+			foreach($moduleData['objects'] as $index => $object)
 			{
 				switch($moduleConfig -> sheme)
 				{
@@ -599,6 +613,11 @@ class CModulesInstall
 
 						$modulesList = $modelModules -> getResult();
 
+
+
+
+
+
 						if(count($modulesList) !== 1)
 						{
 							continue 2;
@@ -612,16 +631,112 @@ class CModulesInstall
 						break;
 				}
 
+
+
+
+
+				$moduleCondition  = new CModelCondition();
+				$moduleCondition -> where('module_id', $object['module_id']);
+
+				$modelModules  = new modelModules;
+				$modelModules -> load($_dbConnection, $moduleCondition);
+
+				$modulesList = $modelModules -> getResult();
+
+				$moduleInfo = reset($modulesList); 
+
+
+
+
+	$moduleABC = json_decode(json_encode($moduleData));
+
+
+
+
+
+
+
+				$contentId = 0;
+
 				if(isset($moduleData['module']['is_frontend']) && $moduleData['module']['is_frontend'] === '0')
 				{
 					$modelBackendPageObject = new modelBackendPageObject;
-					$modelBackendPageObject -> insert($_dbConnection, $object);
+					$contentId = $modelBackendPageObject -> insert($_dbConnection, $object);
 				}
 				else
 				{
 					$modelPageObject = new modelPageObject;
-					$modelPageObject -> insert($_dbConnection, $object);
+					$contentId = $modelPageObject -> insert($_dbConnection, $object);
 				}
+
+
+echo "\r\n Module_group ". $moduleInfo -> module_group;	
+
+
+
+if($moduleInfo -> module_group === 'backend')
+	continue;
+
+
+
+				$objectData = new stdClass();
+				$objectData -> page_version 	= '1';
+				$objectData -> module_id 		= $object['module_id'];
+				$objectData -> object_id 		= $contentId;
+				#$objectData -> content_id 		= $contentId;
+				$objectData -> object_order_by 	= $index + 1;
+				$objectData -> node_id 			= $moduleData['page']['node_id'];
+				$objectData -> create_time 		= time();
+				$objectData -> create_by 		= CSession::instance() -> getValue('user_id');
+
+ 				$controller = $moduleInfo -> module_controller;
+				$controllerFilepath = CMS_SERVER_ROOT . $moduleInfo -> module_type .'/'. DIR_MODULES . $moduleInfo -> module_location .'/'. $controller .'.php';
+
+
+echo "\r\n ControllerFilepath ". $controllerFilepath;	
+
+
+				if(!file_exists($controllerFilepath))
+				{
+					continue;
+				}
+
+				require_once $controllerFilepath;
+				$objectInstance = new $controller($moduleABC, $objectData);
+
+				$logicResult = [];
+
+echo "\r\n Call Logic create";				
+
+				$objectInstance -> logic(
+											$_dbConnection, 
+											[ $objectData -> object_id => 'create' ],
+											'cms-insert-module', 
+											$logicResult, 
+											true
+											);
+
+				$_POST = [];
+				$_POST['cms-object-id'] = $contentId;
+
+				if(is_array($object['data']) && !empty($object['data']))
+				foreach($object['data'] as $dataKey => $dataValue)
+				{
+					$_POST[$dataKey] = $dataValue;
+				}
+
+
+echo "\r\n Call Logic create";	
+
+
+				$objectInstance -> logic(
+											$_dbConnection, 
+											[ $objectData -> object_id => 'edit' ],
+											'edit', 
+											$logicResult, 
+											true
+											);
+
 			}
 		}
 

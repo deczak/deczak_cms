@@ -1,7 +1,6 @@
 <?php
 
-include_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelSimple.php';	
-
+require_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelSimple.php';	
 require_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelLoginObjects.php';
 
 class	controllerLoginForm extends CController
@@ -189,7 +188,6 @@ class	controllerLoginForm extends CController
 		return true;
 	}
 
-
 	public function
 	logicEdit(CDatabaseConnection &$_pDatabase, $_isXHRequest, &$_logicResult)
 	{
@@ -234,8 +232,8 @@ class	controllerLoginForm extends CController
 
 
 
-								$modelCondition = new CModelCondition();
-								$modelCondition -> where('object_id', $_aFormData['object_id']);
+									$modelCondition = new CModelCondition();
+									$modelCondition -> where('object_id', $_aFormData['object_id']);
 
 									if($this -> m_modelSimple -> update($_pDatabase, $_aFormData, $modelCondition))
 									{
@@ -290,7 +288,6 @@ class	controllerLoginForm extends CController
 
 
 	}
-
 
 	public function
 	logicDelete(CDatabaseConnection &$_pDatabase, $_isXHRequest, &$_logicResult)
@@ -360,8 +357,6 @@ class	controllerLoginForm extends CController
 		header("Location: ". $_redirectTarget ); 
 		exit;
 	}
-
-			
 }
 
 ?>
