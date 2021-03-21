@@ -4,22 +4,41 @@ class	CController
 {
 	protected	$m_aModule;
 	protected	$m_aObject;
+	protected 	$m_bBackendCall;
+	protected	$m_bInstallMode;
 
 	protected	$m_pModel;
 	protected 	$m_pView;
 
 	public function
-	__construct($_module, &$_object)
+	__construct($_module, &$_object, bool $_backendCall = false)
 	{
 		$this -> m_aModule	= $_module;
-		$this -> m_aObject	= $_object;		
+		$this -> m_aObject	= $_object;	
+		$this -> m_bBackendCall = $_backendCall;
+		$this -> m_bInstallMode = false;
 	}	
+
+	public function isBackendCall()
+	{
+		return $this -> m_bBackendCall;
+	}
+
+	public function setInstallMode($_installMode = true)
+	{
+		$this -> m_bInstallMode = $_installMode;
+	}
+
+	public function getInstallMode()
+	{
+		return $this -> m_bInstallMode;
+	}
 
 	protected function
 	detectRights(string $_controllerAction)
 	{
 		##	get requested inner module path by controller action
-
+		
 		$modulePath = $this -> _getModulePath($_controllerAction);
 
 		if($modulePath === false)
@@ -41,7 +60,11 @@ class	CController
 	protected function
 	existsUserRight(string $_rightId)
 	{
-		return in_array($_rightId, $this -> m_aModule -> rights, true);
+		foreach($this -> m_aModule -> rights as $rightInfo)
+			if($rightInfo -> name === $_rightId)
+				return true;
+		return false;
+		//return in_array($_rightId, $this -> m_aModule -> rights, true);
 	}
 
 	private function

@@ -6,10 +6,15 @@ require_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelLoginObjects.php';
 class	controllerLoginForm extends CController
 {
 	public function
-	__construct($_module, &$_object)
+	__construct($_module, &$_object, bool $_backendCall = false)
 	{		
-		$this -> m_modelSimple = new modelSimple();
-		parent::__construct($_module, $_object);
+		parent::__construct($_module, $_object, $_backendCall);
+
+		if($this -> isBackendCall())
+			$this -> m_modelSimple = new modelBackendSimple();
+		else
+			$this -> m_modelSimple = new modelSimple();
+
 
 		$this -> m_aModule -> user_rights[] = 'view';			// add view right as default for everyone
 	}
@@ -157,7 +162,6 @@ class	controllerLoginForm extends CController
 
 			$_dataset['params'] = json_encode($_dataset['params'], JSON_HEX_QUOT | JSON_HEX_APOS | JSON_UNESCAPED_UNICODE);
 
-
 			if(!$this -> m_modelSimple -> insert($_pDatabase, $_dataset, MODEL_RESULT_APPEND_DTAOBJECT))
 			{
 				$_bValidationErr =	true;
@@ -165,6 +169,9 @@ class	controllerLoginForm extends CController
 			}
 			else
 			{
+
+				if($this -> getInstallMode())
+					return true;
 
 				$_pModelLoginObjects	 =	new modelLoginObjects();
 				$_pModelLoginObjects	->	load($_pDatabase);	
@@ -191,8 +198,6 @@ class	controllerLoginForm extends CController
 	public function
 	logicEdit(CDatabaseConnection &$_pDatabase, $_isXHRequest, &$_logicResult)
 	{
-
-
 		##	XHR Function call
 
 		if($_isXHRequest !== false)
@@ -237,6 +242,11 @@ class	controllerLoginForm extends CController
 
 									if($this -> m_modelSimple -> update($_pDatabase, $_aFormData, $modelCondition))
 									{
+
+
+										if($this -> getInstallMode())
+											return true;
+					
 										$_bValidationMsg = 'Object updated';
 
 										$this -> m_modelPageObject = new modelPageObject();

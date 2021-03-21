@@ -553,6 +553,24 @@ class CModulesInstall
 
 		## insert page if requested
 
+
+
+// TODO .. startseite fügt seite start/ hinzu was falsch ist. 
+/*
+path ist leer, aber page_name enthält Start
+
+
+
+echo "\r\n";
+print_r($moduleData['page']);
+echo "\r\n";
+
+
+*/
+
+
+
+
 		if($moduleData['page'] !== false)
 		{
 			
@@ -648,13 +666,6 @@ class CModulesInstall
 
 
 
-	$moduleABC = json_decode(json_encode($moduleData));
-
-
-
-
-
-
 
 				$contentId = 0;
 
@@ -670,12 +681,9 @@ class CModulesInstall
 				}
 
 
-echo "\r\n Module_group ". $moduleInfo -> module_group;	
 
-
-
-if($moduleInfo -> module_group === 'backend')
-	continue;
+				if($moduleInfo -> module_group === 'backend')
+					continue;
 
 
 
@@ -693,20 +701,59 @@ if($moduleInfo -> module_group === 'backend')
 				$controllerFilepath = CMS_SERVER_ROOT . $moduleInfo -> module_type .'/'. DIR_MODULES . $moduleInfo -> module_location .'/'. $controller .'.php';
 
 
-echo "\r\n ControllerFilepath ". $controllerFilepath;	
-
 
 				if(!file_exists($controllerFilepath))
 				{
 					continue;
 				}
 
+
+
+
+
+
+
+		$objectModuleFilepath 	= CMS_SERVER_ROOT . $moduleInfo -> module_type .'/'. DIR_MODULES . $moduleInfo -> module_location .'/module.json';
+
+		$objectModuleConfig	= file_get_contents($objectModuleFilepath);
+
+		if($objectModuleConfig === false)
+		{
+			continue;
+		}
+
+		$objectModuleConfig = json_decode($objectModuleConfig);
+
+		// Determine Sheme
+
+		$objectModuleData = $this -> getMmoduleData($objectModuleConfig, $moduleInfo -> module_location, $moduleInfo -> module_type);
+
+		if($objectModuleData === false)
+		{
+			continue;
+		}
+
+
+
+	$moduleABC = json_decode(json_encode($objectModuleData));
+
+
+
+				$isBackendCall = false;
+				if($moduleData['module']['module_group'] === 'backend')
+					$isBackendCall  = true;
+
+
+
+
+
+
 				require_once $controllerFilepath;
-				$objectInstance = new $controller($moduleABC, $objectData);
+				$objectInstance = new $controller($moduleABC, $objectData, $isBackendCall);
+
+				$objectInstance -> setInstallMode();
 
 				$logicResult = [];
-
-echo "\r\n Call Logic create";				
 
 				$objectInstance -> logic(
 											$_dbConnection, 
@@ -719,15 +766,13 @@ echo "\r\n Call Logic create";
 				$_POST = [];
 				$_POST['cms-object-id'] = $contentId;
 
+				$object['data'] = (array)$object['data'];
+
 				if(is_array($object['data']) && !empty($object['data']))
 				foreach($object['data'] as $dataKey => $dataValue)
 				{
 					$_POST[$dataKey] = $dataValue;
 				}
-
-
-echo "\r\n Call Logic create";	
-
 
 				$objectInstance -> logic(
 											$_dbConnection, 
@@ -1075,8 +1120,7 @@ class CModulesInstallS2 // Module Sheme 2
 				$moduleData['objects'][] = [
 
 					'controller'		=>	$object -> controller,
-					'body'				=>	$object -> body ?? '',
-					'param'				=>	$object -> param ?? '',
+					'data'				=>	$object -> data ?? '',
 					'object_order_by'	=>	'1',
 					'create_time'		=>	$timestamp,
 					'create_by'			=>	$userId

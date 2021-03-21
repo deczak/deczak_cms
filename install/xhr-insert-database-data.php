@@ -8,8 +8,10 @@
 	include_once '../config/standard.php';
 	include_once '../core/classes/CDatabase.php';
 	include_once '../core/classes/CMessages.php';
+	include_once '../core/classes/CURLVariables.php';
 	include_once '../core/classes/CSheme.php';
 	include_once '../core/classes/CModel.php';
+	include_once '../core/classes/CView.php';
 	include_once '../core/classes/CController.php';
 	include_once '../core/classes/CPageRequest.php';
 	include_once '../core/classes/CSession.php';

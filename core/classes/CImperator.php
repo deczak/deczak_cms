@@ -107,7 +107,7 @@ class	CImperator extends CBasic
 			##	Insert Module
 
 			if($_pURLVariables -> getValue("cms-insert-module") !== false)
-			{	
+			{
 				##	XHR Function call
 
 				$_request[] 	 = 	[	"input" => "cms-insert-after",  	"validate" => "strip_tags|!empty" ,	"use_default" => true, "default_value" => 0 ]; 		
@@ -223,7 +223,7 @@ class	CImperator extends CBasic
 			##	Create object and call logic
 
 			$_logicResult =	false;
-			$_pPageRequest -> objectsList[$_objectKey] -> instance 	 = 	new $module -> module_controller($module, $_object);
+			$_pPageRequest -> objectsList[$_objectKey] -> instance 	 = 	new $module -> module_controller($module, $_object, true);
 			$_pPageRequest -> objectsList[$_objectKey] -> instance	->	logic($this -> m_dbConnection, $_rcaTarget, $_pPageRequest -> xhRequest, $_logicResult, false);
 
 			if($_logicResult !== false && $_logicResult['state'] === 1)
