@@ -415,17 +415,14 @@ class	CModules extends CSingleton
 		$_dbConnection -> beginTransaction();
 
 
-			echo "\r\n ". $moduleLocation ." INSTALL";		
 
 		$pModulesInstall = new CModulesInstall;
 		if(!$pModulesInstall -> install($_dbConnection, $moduleLocation, $moduleType, $errorMsg))
 		{
-			echo "\r\n = FAILED";
 			$_dbConnection -> rollBack();
 			return false;
 		}
 
-		echo "\r\n = SUCCESS";
 
 		$_dbConnection -> commit();
 
@@ -555,50 +552,114 @@ class CModulesInstall
 
 
 
-// TODO .. startseite fügt seite start/ hinzu was falsch ist. 
-/*
-path ist leer, aber page_name enthält Start
-
-
-
-echo "\r\n";
-print_r($moduleData['page']);
-echo "\r\n";
-
-
-*/
-
 
 
 
 		if($moduleData['page'] !== false)
 		{
-			
+
+
 			if(isset($moduleData['module']['is_frontend']) && $moduleData['module']['is_frontend'] === '0')
 			{
-				$modelBackendPage  = new modelBackendPage;
-				$nodeId = $modelBackendPage -> insert($_dbConnection, $moduleData['page']);
 
-				if($nodeId === false)
+
+
+
+
+
+
+
+
+				## Check if page is start page
+
+				if(empty($moduleData['page']['page_path']))
 				{
-					$errorMsg = 'Error on insert page for module';
-					return false;
-				}
+					## Check if page exists, otherwise break instead of create startpage
 
-				$moduleData['page']['node_id'] = $nodeId;
+					$modelCondition = new CModelCondition;
+					$modelCondition -> where('page_path', '/');
+					$modelCondition -> where('page_language', 'en');
+
+					$modelBackendPagePath = new modelBackendPagePath;
+					$modelBackendPagePath -> load($_dbConnection, $modelCondition);
+
+
+					if(count($modelBackendPagePath -> getResult()) !== 1)
+					{
+						return false;
+					}
+
+					$moduleData['page']['node_id'] = reset($modelBackendPagePath -> getResult()) -> node_id;
+
+
+				}
+				else
+				{
+				
+
+					$modelBackendPage  = new modelBackendPage;
+					$nodeId = $modelBackendPage -> insert($_dbConnection, $moduleData['page']);
+
+					if($nodeId === false)
+					{
+						$errorMsg = 'Error on insert page for module';
+						return false;
+					}
+
+					$moduleData['page']['node_id'] = $nodeId;
+				}
 			}
 			else
 			{
-				$modelPage  = new modelPage;
-				$nodeId = $modelPage -> insert($_dbConnection, $moduleData['page']);
 
-				if($nodeId === false)
+
+
+
+
+				## Check if page is start page
+
+				if(empty($moduleData['page']['path']))
 				{
-					$errorMsg = 'Error on insert page for module';
-					return false;
-				}
+					## Check if page exists, otherwise break instead of create startpage
 
-				$moduleData['page']['node_id'] = $nodeId;
+					/*
+						lang does not exists
+					*/
+
+					$modelCondition = new CModelCondition;
+					$modelCondition -> where('page_path', $moduleData['page']['page_path']);
+					$modelCondition -> where('page_language', $moduleData['page']['page_language'] );
+
+					$modelPagePath = new modelPagePath;
+					$modelPagePath -> load($_dbConnection, $modelCondition);
+
+
+					if(count($modelPagePath -> getResult()) !== 1)
+					{
+						return false;
+					}
+
+
+					$moduleData['page']['node_id'] = reset($modelBackendPagePath -> getResult()) -> node_id;
+
+
+				}
+				else
+				{
+				
+
+
+					$modelPage  = new modelPage;
+					$nodeId = $modelPage -> insert($_dbConnection, $moduleData['page']);
+
+					if($nodeId === false)
+					{
+						$errorMsg = 'Error on insert page for module';
+						return false;
+					}
+
+					$moduleData['page']['node_id'] = $nodeId;
+				}
 			}
 		}
 
@@ -996,6 +1057,7 @@ class CModulesInstallS1 // Module Sheme 1
 			$moduleData['page']['publish_until']	= '0';
 			$moduleData['page']['publish_expired']	= '0';
 			$moduleData['page']['page_template']	= 'backend';
+			$moduleData['page']['page_language']	= 'en';
 
 			$moduleData['page']['cms-edit-page-lang']	= 'en';	// atm en only
 			$moduleData['page']['cms-edit-page-node']	= '2';	// child for en start node
@@ -1099,6 +1161,7 @@ class CModulesInstallS2 // Module Sheme 2
 			$moduleData['page']['publish_until']	= '0';
 			$moduleData['page']['publish_expired']	= '0';
 			$moduleData['page']['page_template']	= 'backend';
+			$moduleData['page']['page_language']	= 'en';
 
 			$moduleData['page']['cms-edit-page-lang']	= 'en';	// atm en only
 			$moduleData['page']['cms-edit-page-node']	= '2';	// child for en start node
