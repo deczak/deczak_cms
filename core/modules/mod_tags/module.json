@@ -2,7 +2,7 @@
 	"module_controller" : "controllerTags",
 	"module_name"		: "Tags",
 	"module_desc"		: "",
-	"module_path" 		: "",
+	"module_path" 		: "tags",
 	"module_group"		: "backend",
 	"module_icon"		: "&#xf02b",
 	"module_frontend"	: 0,
