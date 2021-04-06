@@ -3,7 +3,7 @@ INSERT INTO `tb_backend_page_path` (`node_id`, `page_id`, `page_language`, `page
 (2, 1, 'en', '/', 3, 2);
 
 INSERT INTO `tb_backend_page` (`data_id`, `node_id`, `page_id`, `page_version`, `page_template`, `update_reason`, `hidden_state`, `cache_disabled`, `crawler_index`, `crawler_follow`, `menu_follow`, `publish_from`, `publish_until`, `publish_expired`, `page_auth`, `create_time`, `create_by`, `update_time`, `update_by`) VALUES
-(1, 2, 1, 1, 'default', '', 0, 0, 1, 1, 1, 0, 0, 0, NULL, %TIMESTAMP%, 1, 0, 0);
+(1, 2, 1, 1, 'backend', '', 0, 0, 1, 1, 1, 0, 0, 0, NULL, %TIMESTAMP%, 1, 0, 0);
 
 INSERT INTO `tb_backend_page_header` (`data_id`, `node_id`, `page_id`, `page_language`, `page_title`, `page_name`, `page_description`, `page_version`) VALUES
 (1, 2, 1, 'en', 'Home', 'Home ', 'Home Description', 1);

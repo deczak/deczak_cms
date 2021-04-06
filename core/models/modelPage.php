@@ -273,7 +273,6 @@ class 	modelPage extends CModel
 	public function
 	insert(CDatabaseConnection &$_pDatabase, array $_insertData, $_execFlags = NULL)
 	{
-
 		$_tablePageHeader		=	$this -> m_shemePageHeader 	-> getTableName();
 		$_tablePagePath			=	$this -> m_shemePagePath 	-> getTableName();
 		$_tablePage				=	$this -> m_shemePage 		-> getTableName();
@@ -299,7 +298,6 @@ class 	modelPage extends CModel
 			
 		##	Table tb_page_path
 		
-
 		$_parentNode = [];
 		if(!$this -> getNodeData($_pDatabase, $_insertData['cms-edit-page-node'], $_parentNode))
 		{
@@ -461,12 +459,13 @@ class 	modelPage extends CModel
 	private function
 	getNodeData(CDatabaseConnection &$_pDatabase, int $_nodeID, array &$_nodeData)
 	{
+		$tablePagePath	 =	$this -> m_shemePagePath 	-> getTableName();
 		$condition		 = new CModelCondition();
 		$condition		-> where('node_id', $_nodeID);
 
 		$dbQuery = $_pDatabase		-> query(DB_SELECT) 
-										-> table('tb_page_path') 
-										-> condition($condition);
+									-> table($tablePagePath) 
+									-> condition($condition);
 
 		$queryRes = $dbQuery -> exec();
 

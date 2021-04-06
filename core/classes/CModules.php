@@ -363,9 +363,10 @@ class	CModules extends CSingleton
 
 			if(!isset($dirModuleItem -> module -> module_controller))
 			{
-				tk::dbug($dirModuleItem);
+				#tk::dbug($dirModuleItem);
 
-				// aaaooohhh well ...
+				// aaaooohhh well ... this should not be
+				continue;
 			}
 
 			foreach($this -> modulesList as $listItem)
