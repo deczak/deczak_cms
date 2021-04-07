@@ -24,8 +24,7 @@ INSERT INTO `tb_page_path` (`node_id`, `page_id`, `page_language`, `page_path`, 
 (2, 1, 'en', '/', 3, 2);
 
 INSERT INTO `tb_languages` (`data_id`, `lang_key`, `lang_name`, `lang_name_native`, `lang_hidden`, `lang_locked`, `lang_default`, `lang_frontend`, `lang_backend`, `create_time`, `create_by`, `update_time`, `update_by`) VALUES
-(1, 'en', 'English', 'English', 0, 0, 1, 1, 1, %TIMESTAMP%, 1, 0, 0),
-(2, 'de', 'German', 'Deutsch', 1, 0, 0, 1, 1, %TIMESTAMP%, 1, 0, 0);
+(1, 'en', 'English', 'English', 0, 0, 1, 1, 1, %TIMESTAMP%, 1, 0, 0);
 
 INSERT INTO `tb_login_objects` (`data_id`, `object_id`, `object_databases`, `object_fields`, `object_session_ext`, `object_description`, `is_disabled`, `is_protected`, `create_time`, `create_by`, `update_time`, `update_by`) VALUES
 (12, 'ABKND', '["primary"]', '[{"name":"login_name","data_prc":"crypt","type":"text","is_username":"0","query_type":"compare","table":"tb_users_backend"},{"name":"login_pass","data_prc":"hash","type":"password","is_username":"1","query_type":"compare","table":"tb_users_backend"}]', '{"1":{"name":"user_name_last","data_prc":"crypt","table":"tb_users_backend","query_type":"compare"},"2":{"name":"language","data_prc":"text","table":"tb_users_backend","query_type":"compare"}}', 'Backend Access', 0, 1, %TIMESTAMP%, 1, 0, 0);
