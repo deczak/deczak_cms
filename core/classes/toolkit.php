@@ -196,9 +196,6 @@ class	TK
 		}
 		return null;
 	}
-
-
-
 }
 
 class	CRYPT
@@ -206,32 +203,31 @@ class	CRYPT
 	private static function
 	CRYPTKEY(string $_key, bool $_appendKey )
 	{
-		$_CryptKey	=	CFG::GET() -> ENCRYPTION -> BASEKEY;
-		if( !empty($_key) AND !$_appendKey)
+		$cryptKey	=	CFG::GET() -> ENCRYPTION -> BASEKEY;
+		if(!empty($_key) AND !$_appendKey)
 		{
-			$_CryptKey	=	$_key;
+			$cryptKey	=	$_key;
 		}
-		else if(!empty($_key) AND $_appendKey)
+		elseif(!empty($_key) AND $_appendKey)
 		{
-			$_CryptKey	= $_CryptKey . $_key;
-		
+			$cryptKey	= $cryptKey . $_key;
 		}
-		return	hash( 'sha256', $_CryptKey );
+		return $cryptKey;
 	}
 
 	private static function
 	CRYPTVECTOR(string $_key, bool $_appendKey )
 	{
-		$_CryptKey		=	CFG::GET() -> ENCRYPTION -> BASEKEY;
+		$cryptKey		=	CFG::GET() -> ENCRYPTION -> BASEKEY;
 		if( !empty($_key) AND !$_appendKey)
 		{
-			$_CryptKey	=	$_key;
+			$cryptKey	=	$_key;
 		}
 		else if(!empty($_key) AND $_appendKey)
 		{
-			$_CryptKey	= $_CryptKey . $_key;
+			$cryptKey	= $cryptKey . $_key;
 		}
-		return	substr( hash( 'sha256', $_CryptKey ), 0, 16 );
+		return	substr( hash( 'sha256', $cryptKey ), 0, 16 );
 	}
 
 	public static function
@@ -249,20 +245,20 @@ class	CRYPT
 	public static function
 	CHECKSUM(string $_string)
 	{
-		$_checksum 		= 9999;
-		$_stringSize	= strlen($_string);
-		for($i = 0; $i < $_stringSize; $i++)
+		$checksum 		= 9999;
+		$stringSize	= strlen($_string);
+		for($i = 0; $i < $stringSize; $i++)
 		{
 			if(ctype_digit($_string[$i]))
 			{
-				$_checksum = $_checksum + $_string[$i];
+				$checksum = $checksum + $_string[$i];
 			}
 			else
 			{
-				$_checksum = $_checksum + ord($_string[$i]);
+				$checksum = $checksum + ord($_string[$i]);
 			}
 		}
-		return substr($_checksum,strlen($_checksum) - 4,4);
+		return substr($checksum,strlen($checksum) - 4,4);
 	}
 
 	public static function
