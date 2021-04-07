@@ -111,7 +111,8 @@ $activeModulesList = CModules::instance() -> getModules();
 
 		$moduleData = json_decode(json_encode($moduleData));
 
-
+		if(empty($moduleData -> rights))
+			continue;
 
 
 									?>
