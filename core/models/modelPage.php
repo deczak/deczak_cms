@@ -325,6 +325,7 @@ class 	modelPage extends CModel
 
 		$_insertData['node_lft'] = $_parentNode -> node_rgt;
 		$_insertData['node_rgt'] = $_parentNode -> node_rgt + 1;
+		$_insertData['node_level'] = $_parentNode -> node_level + 1;
 
 		$modelPagePath 	 		= new $m_modelPagePath();
 		$_insertData['node_id'] = $modelPagePath -> insert($_pDatabase, $_insertData, $_execFlags);
@@ -384,6 +385,8 @@ class 	modelPage extends CModel
 		$dtaObject 		 = new stdClass();
 		$dtaObject 		-> node_lft 		= 'node_lft-1';
 		$dtaObject 		-> node_rgt 		= 'node_rgt-1';
+		$dtaObject 		-> node_level 		= 'node_level-1';
+
 		$dtaObject 		-> prepareMode 		= false;
 		$_pDatabase		-> query(DB_UPDATE) -> table($_tablePagePath) -> dtaObject($dtaObject) -> condition($pagePathCond) -> exec();
 
@@ -414,7 +417,7 @@ class 	modelPage extends CModel
 		$_nodeData = [];
 		if(!$nodeId || !$this -> getNodeData($_pDatabase, $nodeId, $_nodeData))
 		{
-			trigger_error('modelPage::delete() - Node does not exists');
+			trigger_error('modelPage::deleteTree() - Node does not exists');
 			return false;
 		}
 
@@ -443,7 +446,7 @@ class 	modelPage extends CModel
 						-> exec();
 
 		$pagePathCond	 = new CModelCondition();
-		$pagePathCond	-> where('node_lft', $_nodeData -> node_rgt);
+		$pagePathCond	-> whereGreater('node_lft', $_nodeData -> node_rgt);
 		$dtaObject 		 = new stdClass();
 		$dtaObject 		-> node_lft 		= 'node_lft-ROUND('. ( $_nodeData -> node_rgt - $_nodeData -> node_lft + 1 ) .')';
 		$dtaObject 		-> prepareMode 		= false;
@@ -451,7 +454,7 @@ class 	modelPage extends CModel
 
 
 		$pagePathCond	 = new CModelCondition();
-		$pagePathCond	-> where('node_rgt', $_nodeData -> node_rgt);
+		$pagePathCond	-> whereGreater('node_rgt', $_nodeData -> node_rgt);
 		$dtaObject 		 = new stdClass();
 		$dtaObject 		-> node_rgt 		= 'node_rgt-ROUND('. ( $_nodeData -> node_rgt - $_nodeData -> node_lft + 1 ) .')';
 		$dtaObject 		-> prepareMode 		= false;

@@ -62,6 +62,7 @@ class 	modelSitemap extends CModel
 											-> table($this -> tbPagePath, 'o') 
 											-> selectColumns([	'o.node_id',
 																'o.page_id',
+																'o.node_level',
 																'o.page_language',
 																'COUNT(p.node_id)-1 AS level',
 																'ROUND ((o.node_rgt - o.node_lft - 1) / 2) AS offspring',
