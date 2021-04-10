@@ -76,45 +76,23 @@ class	CModules extends CSingleton
 			case 'core'   :	include CMS_SERVER_ROOT.DIR_CORE.DIR_MODULES. $moduleInstance -> module_location .'/'. $moduleInstance -> module_controller .'.php';
 
 							$moduleConfig 	= file_get_contents( CMS_SERVER_ROOT.DIR_CORE.DIR_MODULES. $moduleInstance -> module_location .'/module.json');
-
-
-
 							$moduleConfig 	= ($moduleConfig !== false ? json_decode($moduleConfig) : [] );	
 
+							$pModulesInstall = new CModulesInstall;
+							$moduleData = $pModulesInstall -> getMmoduleData($moduleConfig, $moduleInstance -> module_location, $moduleInstance -> module_type);
 
+							if($moduleData === false)
+							{
+								return false;
+							}
 
-
-
-
-
-		$pModulesInstall = new CModulesInstall;
-
-		$moduleData = $pModulesInstall -> getMmoduleData($moduleConfig, $moduleInstance -> module_location, $moduleInstance -> module_type);
-
-
-
-
-		if($moduleData === false)
-		{
-			return false;
-		}
-
-
-		$moduleData = json_decode(json_encode($moduleData));
-
-
-
-
-
-
-
+							$moduleData = json_decode(json_encode($moduleData));
 
 							$this -> modulesList[$moduleIndex] = (object)array_merge((array)$moduleInstance, (array)$moduleData);
 							$this -> modulesList[$moduleIndex] -> user_rights = $this -> m_pUserRights -> getModuleRights($_moduleId);
 
 							$_modLocation	= CMS_SERVER_ROOT . DIR_CORE . DIR_MODULES . $moduleInstance -> module_location .'/';	
 							CLanguage::instance() -> loadLanguageFile($_modLocation.'lang/', $_pageLanguage);
-
 
 							$this -> loadedList[] = $this -> modulesList[$moduleIndex];
 							return $this -> modulesList[$moduleIndex];
@@ -124,44 +102,21 @@ class	CModules extends CSingleton
 							$moduleConfig 	= file_get_contents( CMS_SERVER_ROOT.DIR_MANTLE.DIR_MODULES. $moduleInstance -> module_location .'/module.json');
 							$moduleConfig 	= ($moduleConfig !== false ? json_decode($moduleConfig) : [] );	
 
+							$pModulesInstall = new CModulesInstall;
+							$moduleData = $pModulesInstall -> getMmoduleData($moduleConfig, $moduleInstance -> module_location, $moduleInstance -> module_type);
 
+							if($moduleData === false)
+							{
+								return false;
+							}
 
+							$moduleData = json_decode(json_encode($moduleData));
 
-
-
-
-
-
-
-		$pModulesInstall = new CModulesInstall;
-
-		$moduleData = $pModulesInstall -> getMmoduleData($moduleConfig, $moduleInstance -> module_location, $moduleInstance -> module_type);
-
-		if($moduleData === false)
-		{
-			return false;
-		}
-
-
-		$moduleData = json_decode(json_encode($moduleData));
-
-
-
-
-
-
-
-
-
-
+							$this -> modulesList[$moduleIndex] = (object)array_merge((array)$moduleInstance, (array)$moduleData);
+							$this -> modulesList[$moduleIndex] -> user_rights = $this -> m_pUserRights -> getModuleRights($_moduleId);
 
 							$_modLocation	= CMS_SERVER_ROOT . DIR_MANTLE . DIR_MODULES . $moduleInstance -> module_location .'/';
 							CLanguage::instance() -> loadLanguageFile($_modLocation.'lang/', $_pageLanguage);
-
-							$this -> modulesList[$moduleIndex] = (object)array_merge((array)$moduleInstance, (array)$moduleData);
-
-							$this -> modulesList[$moduleIndex] -> user_rights = $this -> m_pUserRights -> getModuleRights($_moduleId);
-
 
 							$this -> loadedList[] = $this -> modulesList[$moduleIndex];
 							return $this -> modulesList[$moduleIndex];
@@ -1098,6 +1053,15 @@ class CModulesInstallS1 // Module Sheme 1
 			$moduleData['sections'] = [];
 		}
 
+		if(property_exists($_moduleConfig, 'include'))
+		{
+			$moduleData['includes'] = $_moduleConfig -> include;
+		}
+		else
+		{
+			$moduleData['includes'] = [];
+		}
+
 		return $moduleData;
 	}
 }
@@ -1211,6 +1175,14 @@ class CModulesInstallS2 // Module Sheme 2
 			$moduleData['sections'] = [];
 		}
 
+		if(property_exists($_moduleConfig, 'includes'))
+		{
+			$moduleData['includes'] = $_moduleConfig -> includes;
+		}
+		else
+		{
+			$moduleData['includes'] = [];
+		}
 
 		return $moduleData;
 	}

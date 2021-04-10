@@ -120,9 +120,9 @@ class	CHTML extends CBasic
 		echo '<script>';
 		foreach($modules -> loadedList as $loadedModule)
 		{
-			if(property_exists($loadedModule, 'include'))
+			if(property_exists($loadedModule, 'includes'))
 			{
-				foreach($loadedModule -> include as $includeFile)
+				foreach($loadedModule -> includes as $includeFile)
 				{
 					switch($loadedModule -> module_type)
 					{
