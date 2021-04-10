@@ -291,8 +291,12 @@ class 	modelPage extends CModel
 		if(!isset($_insertData['page_id']))
 			$_insertData['page_id'] 		= 	$this -> getFreePageID($_pDatabase);
 
+
+		if(empty($_insertData['page_path']))
+			$_insertData['page_path'] = $_insertData['page_name'];
+
 		if($_insertData['page_id'] !== '1')		
-			$_insertData['page_path']		=	$this -> getValidPath($_pDatabase, $_insertData['cms-edit-page-node'], $_insertData['page_name']) .'/';
+			$_insertData['page_path']		=	$this -> getValidPath($_pDatabase, $_insertData['cms-edit-page-node'], $_insertData['page_path']) .'/';
 		else
 			$_insertData['page_path']		= '/';
 			

@@ -81,7 +81,6 @@ class	CImperator extends CBasic
 		else
 			$_pPageRequest -> urlPath .= $_pPageRequest -> page_language .'/'. $_pPageRequest -> node_id;
 
-
 		$this -> pageRequest = &$_pPageRequest;
 	}
 
@@ -207,7 +206,6 @@ class	CImperator extends CBasic
 
 		$_pPageRequest -> urlPath		=	$_pPageRequest -> page_path .'';
 
-
 		##	Looping objects
 
 		foreach($_pPageRequest -> objectsList as $_objectKey =>  $_object)
@@ -233,7 +231,7 @@ class	CImperator extends CBasic
 				$_pPageRequest -> page_language	=	$_logicResult['page_language'];
 				$_pPageRequest -> page_version	=	$_logicResult['page_version'];
 				$_pPageRequest -> isEditMode	=	true;
-				$_pPageRequest -> urlPath		=	$_pPageRequest -> page_path .'/'.$_rcaTarget[ $_pPageRequest -> objectsList[$_objectKey] -> object_id ] .'/';
+				$_pPageRequest -> urlPath		=	$_pPageRequest -> page_path .''.$_rcaTarget[ $_pPageRequest -> objectsList[$_objectKey] -> object_id ] .'/';
 
 				$_pPageRequest -> enablePageEdit	=	$_logicResult['enablePageEdit'];
 

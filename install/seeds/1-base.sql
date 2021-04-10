@@ -19,9 +19,9 @@ INSERT INTO `tb_page` (`data_id`, `node_id`, `page_id`, `page_version`, `page_te
 INSERT INTO `tb_page_header` (`data_id`, `node_id`, `page_id`, `page_language`, `page_title`, `page_name`, `page_description`, `page_version`) VALUES
 (1, 2, 1, 'en', 'Home', 'Home ', 'Home Description', 1);
 
-INSERT INTO `tb_page_path` (`node_id`, `page_id`, `page_language`, `page_path`, `node_rgt`, `node_lft`) VALUES
-(1, 0, '0', '', 6, 1),
-(2, 1, 'en', '/', 3, 2);
+INSERT INTO `tb_page_path` (`node_id`, `page_id`, `page_language`, `page_path`, `node_lft`, `node_rgt`) VALUES
+(1, 0, '0', '', 1, 4),
+(2, 1, 'en', '/', 2, 3);
 
 INSERT INTO `tb_languages` (`data_id`, `lang_key`, `lang_name`, `lang_name_native`, `lang_hidden`, `lang_locked`, `lang_default`, `lang_frontend`, `lang_backend`, `create_time`, `create_by`, `update_time`, `update_by`) VALUES
 (1, 'en', 'English', 'English', 0, 0, 1, 1, 1, %TIMESTAMP%, 1, 0, 0);
