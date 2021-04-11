@@ -1062,6 +1062,21 @@ class CModulesInstallS1 // Module Sheme 1
 			$moduleData['includes'] = [];
 		}
 
+		if(property_exists($_moduleConfig, 'query_url_name'))
+		{
+			$moduleData['query_url_name'] = $_moduleConfig -> query_url_name;
+		}
+
+		if(property_exists($_moduleConfig, 'query_url_var'))
+		{
+			$moduleData['query_url_var'] = $_moduleConfig -> query_url_var;
+		}
+
+		if(property_exists($_moduleConfig, 'query_value_var'))
+		{
+			$moduleData['query_value_var'] = $_moduleConfig -> query_value_var;
+		}
+
 		return $moduleData;
 	}
 }

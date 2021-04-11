@@ -53,7 +53,7 @@ class CRouter extends CSingleton
 
 		##	special module nodes
 
-#		$this -> _appendSpecialModuleRoutes($_dbConnection, $this -> nodesList, true); // there are no modules that use this feature
+		$this -> _appendSpecialModuleRoutes($_dbConnection, $this -> nodesList, true);
 
 		##	backend nodes
 
@@ -124,7 +124,6 @@ class CRouter extends CSingleton
 	private function
 	_appendSpecialModuleRoutes(CDatabaseConnection &$_dbConnection, &$_nodesList, bool $_isFrontend)
 	{
-
 		if($_isFrontend)
 		{
 			$tbPageObject 		= 'tb_page_object';
@@ -144,7 +143,6 @@ class CRouter extends CSingleton
 							-> where('is_active', 1);	
 		}
 
-
 		$modulesList 	 = $_dbConnection	-> query(DB_SELECT) 
 											-> table('tb_modules') 
 											-> condition($condModules)
@@ -154,6 +152,7 @@ class CRouter extends CSingleton
 
 		foreach($modulesList as $module)
 		{
+
 			switch($module -> module_type) 
 			{
 				case 'core'   :	
@@ -169,11 +168,26 @@ class CRouter extends CSingleton
 								break;
 			}
 
-			if( 	property_exists($moduleConfig, 'query_url_name')  && !empty($moduleConfig  -> query_url_name)
-				&&	property_exists($moduleConfig, 'query_url_var')   && !empty($moduleConfig  -> query_url_var)
-				&&	property_exists($moduleConfig, 'query_value_var') && !empty($moduleConfig  -> query_value_var)
+			$pModulesInstall = new CModulesInstall;
+			$moduleData = $pModulesInstall -> getMmoduleData($moduleConfig, $module -> module_location, $module -> module_type);
+
+
+			if($moduleData === false)
+			{
+				continue;
+			}
+
+			$moduleData = json_decode(json_encode($moduleData));
+
+			// How to handle that better
+
+			if( 	property_exists($moduleData, 'query_url_name')  && !empty($moduleData  -> query_url_name)
+				&&	property_exists($moduleData, 'query_url_var')   && !empty($moduleData  -> query_url_var)
+				&&	property_exists($moduleData, 'query_value_var') && !empty($moduleData  -> query_value_var)
 			  )
 			{
+
+
 				$objectRes	=	$sqlDB -> query("	SELECT		$tbPageObject.node_id,
 																$tbPageObjectSimple.params
 													FROM		tb_modules
@@ -215,33 +229,18 @@ class CRouter extends CSingleton
 
 					$node -> childNodesList[$index] = new CRouteNode(	$node -> nodeId, 
 																		$node -> language, 
-																		$moduleConfig  -> query_url_name,
-																		$moduleConfig  -> query_url_var
+																		$moduleData  -> query_url_name,
+																		$moduleData  -> query_url_var
 																		);
 
 					$node -> childNodesList[$index] -> childNodesList[] = new CRouteNode(	$node -> nodeId, 
 																							$node -> language, 
 																							false,
-																							$moduleConfig  -> query_value_var
+																							$moduleData  -> query_value_var
 																							);
 
 				}
 			}
-
-
-
-
-		$pModulesInstall = new CModulesInstall;
-
-		$moduleData = $pModulesInstall -> getMmoduleData($moduleConfig, $module -> module_location, $module -> module_type);
-
-		if($moduleData === false)
-		{
-			continue;
-		}
-
-		$moduleData = json_decode(json_encode($moduleData));
-
 
 			##	looping sub section of module thats used by object		
 			if(property_exists($moduleData, 'sections')  && !empty($moduleData  -> sections) && is_array($moduleData  -> sections))
@@ -370,6 +369,7 @@ class CRouter extends CSingleton
 
 		$nodeInstance = &$this-> nodesList;
 
+
 		if(CMS_BACKEND)
 		{
 			$routeRequest -> language == 'en';
@@ -482,10 +482,8 @@ class CRouter extends CSingleton
 				}
 			}
 
-
 			if(!$nodeFound)
 			{
-			
 				if(!CMS_BACKEND)
 				{
 					header("Location: ". CMS_SERVER_URL ."404"); 	
