@@ -342,8 +342,8 @@ class 	modelPage extends CModel
 
 		$queryRes = $dbQuery -> exec();
 
-
-		$_dataset['page_auth'] = $queryRes[0] -> page_auth;
+		if(count($queryRes) !== 0)
+			$_insertData['page_auth'] = reset($queryRes) -> page_auth;
 
 		##	Table tb_page
 		

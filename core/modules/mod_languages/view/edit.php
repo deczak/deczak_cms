@@ -35,7 +35,7 @@ else
 	</div>
 	<div>
 		
-		<fieldset class="ui fieldset submit-able" id="lang-data" data-xhr-target="language" data-xhr-overwrite-target="edit/<?php echo $dataset -> lang_key; ?>">
+		<fieldset class="ui fieldset submit-able" id="lang-data" data-xhr-target="language" <?= ($dataset ? 'data-xhr-overwrite-target="edit/'. $dataset -> lang_key .'"' : ''); ?>>
 
 
 			<legend><?php echo $language -> string('LANGUAGE'); ?></legend>
@@ -47,8 +47,8 @@ else
 
 					<div class="input width-25">
 						<label><?php echo $language -> string('M_BELANG_NAMENKEY'); ?></label>
-						<input type="text" name="lang_key" disabled value="">
-						<i class="fas fa-lock"></i>
+						<input type="text" name="lang_key" <?= ($dataset ? 'disabled' : ''); ?> value="">
+						<?= ($dataset ? '<i class="fas fa-lock"></i>' : ''); ?>
 					</div>
 					
 					<div class="input width-25">
