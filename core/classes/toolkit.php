@@ -196,6 +196,12 @@ class	TK
 		}
 		return null;
 	}
+
+	public static function
+	getRandomId($length = 40)
+	{
+    	return substr(str_shuffle(str_repeat($x='0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.:_-$&/?=!@+*#', ceil($length/strlen($x)) )), 1, $length);
+	}
 }
 
 class	CRYPT
