@@ -55,7 +55,7 @@ else
 
 					<div class="input width-25">
 						<label><?php echo CLanguage::get() -> string('MOD_BEUSER_FM_CREATEDAT'); ?></label>
-						<input type="text" disabled name="time_create" value="">
+						<input type="text" disabled name="create_time" value="">
 						<i class="fas fa-lock"></i>
 					</div>
 

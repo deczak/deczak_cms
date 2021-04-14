@@ -109,40 +109,27 @@
 	$pUserRights = new CUserRights;
 
 	$pModules = CModules::instance();
-
 	$pModules -> initialize($db, $pUserRights);
 
-
 	$avaiableModules = $pModules -> getAvailableModules();
-
-
 	$retryInstallList = [];
 	foreach($avaiableModules as $module)
 	{
 		if($module -> module -> module_type == 'core')
 		{
-
-
-
 			$installModule  = new stdClass;
 			$installModule -> location 	= $module -> module -> module_location;
 			$installModule -> type		= $module -> module -> module_type;
 	
-
-
 			if(property_exists($module, 'objects') && $module -> objects !== false)
 			{
 				foreach($module -> objects as $object)
 				{
-
-
 					if(!property_exists($object, 'controller'))
 						continue;
 
 					if(empty($object -> controller))
 						break; 
-
-
 
 					$moduleCondition  = new CModelCondition();
 					$moduleCondition -> where('module_controller', $object -> controller);
@@ -150,84 +137,107 @@
 					$modelModules  = new modelModules;
 					$modelModules -> load($db, $moduleCondition);
 
-
-
 					$modulesList = $modelModules -> getResult();
 
 					if(count($modulesList) === 0)
 					{
-
-
-
 						$retryInstallList[] = $installModule;
-
 						continue 2;
-
 					}
-
-
-
-
 				}
 			}
-
-
-
-
-
 
 			$errMessage = '';
 
 			$pModules -> install($db, $installModule -> location, $installModule -> type, $errMessage, false);
-
-			
 		}
 	}
 
 	foreach($retryInstallList as $module)
 	{
-
 		$errMessage = '';
 		$pModules -> install($db, $module -> location, $module -> type, $errMessage, false);
-		
 	}
 
-
-
-
-
 	##	Example Data
-
-
 
 	$sqlDump = file_get_contents($seedDir.'/2-example.sql');
 
 	if(!empty(trim($sqlDump)))
 	{
 
-	$db -> beginTransaction();
+		$db -> beginTransaction();
 
-	$sqlDump = str_replace('%USER_NAME%',$_POST['user-user'], $sqlDump);
-	$sqlDump = str_replace('%USER_PASSWORD%',$_POST['user-pass'], $sqlDump);
-	$sqlDump = str_replace('%USER_FIRST_NAME%',$_POST['user-first-name'], $sqlDump);
-	$sqlDump = str_replace('%USER_LAST_NAME%',$_POST['user-last-name'], $sqlDump);
-	$sqlDump = str_replace('%USER_MAIL%',$_POST['user-mail'], $sqlDump);
+		$sqlDump = str_replace('%USER_NAME%',$_POST['user-user'], $sqlDump);
+		$sqlDump = str_replace('%USER_PASSWORD%',$_POST['user-pass'], $sqlDump);
+		$sqlDump = str_replace('%USER_FIRST_NAME%',$_POST['user-first-name'], $sqlDump);
+		$sqlDump = str_replace('%USER_LAST_NAME%',$_POST['user-last-name'], $sqlDump);
+		$sqlDump = str_replace('%USER_MAIL%',$_POST['user-mail'], $sqlDump);
 
-	$sqlDump = str_replace('%TIMESTAMP%',time(), $sqlDump);
+		$sqlDump = str_replace('%TIMESTAMP%',time(), $sqlDump);
 
-	try
+		try
+		{
+			$db -> getConnection() -> exec($sqlDump);
+		}
+		catch (PDOException $exception)
+		{
+			$db -> rollBack();
+			tk::xhrResult(1, 'SQL error on query - '. $exception -> getMessage());
+		}
+
+		$db -> commit();
+
+	}
+
+	##	Add administrator base rights
+
+	$modelModules  = new modelModules;
+	$modelModules -> load($db, $moduleCondition);
+	$modulesList = $modelModules -> getResult();
+
+	$adminRights = [];
+
+	foreach($modulesList as $module)
 	{
-		$db -> getConnection() -> exec($sqlDump);
-	}
-	catch (PDOException $exception)
-	{
-		$db -> rollBack();
-		tk::xhrResult(1, 'SQL error on query - '. $exception -> getMessage());
+		//
+
+
+
+
+		$moduleFilepath 	= CMS_SERVER_ROOT . $module -> module_type .'/'. DIR_MODULES . $module -> module_location .'/module.json';
+
+		$moduleJSON	= file_get_contents($moduleFilepath);
+
+		if($moduleJSON === false)
+			continue;
+		
+		$moduleJSON = json_decode($moduleJSON);
+
+
+		$moduleData = $this -> getMmoduleData($moduleJSON, $module -> module_location, $module -> module_type);
+
+// !?! $right obj oder array
+
+		foreach($moduleData['rights'] as $right)
+		{
+
+			$adminRights[ $module -> module_id ][] = $right -> name;
+
+
+
+		}
+
 	}
 
-	$db -> commit();
+	$adminDataset['group_name'] 	= 'Administrator';
+	$adminDataset['group_rights'] 	= json_encode($adminRights);
+	$adminDataset['create_time'] 	= time();
+	$adminDataset['create_by'] 		= 0;
 
-	}
+	$modelRightGroups = new modelRightGroups;
+	$modelRightGroups -> insert($db, $adminDataset);
+	
 
 	##	finish
 

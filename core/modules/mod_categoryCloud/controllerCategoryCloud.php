@@ -356,6 +356,10 @@ class	controllerCategoryCloud extends CController
 								);
 
 				$_bValidationDta['html'] = $this -> m_pView -> getHTML($pageRequest);
+
+
+				$pRouter  = CRouter::instance();
+				$pRouter -> createRoutes($_pDatabase);
 			}
 
 			tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $_bValidationDta);	// contains exit call
@@ -408,6 +412,10 @@ class	controllerCategoryCloud extends CController
 										$_bValidationMsg .= 'Data validation failed - object was not updated';
 										$_bValidationErr = true;
 									}
+
+
+									$pRouter  = CRouter::instance();
+									$pRouter -> createRoutes($_pDatabase);
 
 									break;
 			}

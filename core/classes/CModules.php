@@ -752,7 +752,7 @@ class CModulesInstall
 
 
 
-	$moduleABC = json_decode(json_encode($objectModuleData));
+			$moduleABC = json_decode(json_encode($objectModuleData));
 
 
 

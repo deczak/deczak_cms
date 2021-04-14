@@ -287,6 +287,9 @@ class	controllerSearch extends CController
 								);
 
 				$_bValidationDta['html'] = $this -> m_pView -> getHTML();
+
+				$pRouter  = CRouter::instance();
+				$pRouter -> createRoutes($_pDatabase);
 			}
 
 			tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $_bValidationDta);	// contains exit call
@@ -340,6 +343,9 @@ class	controllerSearch extends CController
 										$_bValidationErr = true;
 									}
 
+									$pRouter  = CRouter::instance();
+									$pRouter -> createRoutes($_pDatabase);
+									
 									break;
 			}
 			
