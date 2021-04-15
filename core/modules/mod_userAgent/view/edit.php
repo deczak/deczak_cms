@@ -107,7 +107,7 @@ else
 <script>
 
 	let	requestURL	= CMS.SERVER_URL_BACKEND + CMS.PAGE_PATH +'ping/<?= $dataset -> data_id; ?>';
-	let pingId		= cmstk.getRandomId();
+	let pingId		= cmsTabInstance.getId();
 	
 	cmstk.ping(requestURL, <?= CFG::GET() -> USER_SYSTEM -> MODULE_LOCKING -> PING_TIMEOUT; ?>, pingId);
 
