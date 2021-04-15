@@ -306,6 +306,7 @@ class	controllerBlog extends CController
 		
 			$this -> appendAdditionNodeData($_pDatabase, $nodeList);
 
+		
 			##
 
 			$timestamp = time();
@@ -344,6 +345,8 @@ class	controllerBlog extends CController
 				if(empty($node -> text))
 					unset($nodeList[$nodeIndex]);
 			}
+
+			$createTime = [];
 
 			foreach ($nodeList as $key => $node)
 				$createTime[$key] = $node -> create_time;

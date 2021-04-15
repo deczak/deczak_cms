@@ -177,7 +177,7 @@ class 	modelSitemap extends CModel
 		return $_returnArray;
 	}
 	
-	private function
+	public function
 	getPagePath(CDatabaseConnection &$_pDatabase, int $_nodeID, string $_language) : string
 	{
 		$condNode		 = new CModelCondition();

@@ -14,6 +14,7 @@ include_once 'modelPageHeader.php';
 include_once 'modelCategories.php';	
 include_once 'modelTags.php';	
 include_once 'modelSimple.php';
+include_once 'modelSitemap.php';
 
 class 	modelPage extends CModel
 {
@@ -85,11 +86,14 @@ class 	modelPage extends CModel
 
 		$queryResult = $dbQuery -> exec($_execFlags);
 
+		$modelSitemap = new modelSitemap;
+
 		foreach($queryResult as $page)
 		{
 			$page -> alternate_path  = $this -> getAlternatePaths($_pDatabase, $page -> page_id);
 			$page -> page_categories = $this -> getCategories($_pDatabase, $page -> node_id);
 			$page -> page_tags 		 = $this -> getTags($_pDatabase, $page -> node_id);
+			$page -> page_url 		 = $modelSitemap -> getPagePath($_pDatabase, $page -> node_id, $page -> page_language);
 		
 			$this -> m_resultList[] = new $className($page, $this -> m_shemePage -> getColumns());
 		}

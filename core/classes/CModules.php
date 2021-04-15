@@ -369,12 +369,12 @@ class	CModules extends CSingleton
 	install(CDatabaseConnection &$_dbConnection, $moduleLocation, $moduleType, &$errorMsg, bool $updateRoutes = true)
 	{
 		$_dbConnection -> beginTransaction();
-
-
-
+		
+		
 		$pModulesInstall = new CModulesInstall;
 		if(!$pModulesInstall -> install($_dbConnection, $moduleLocation, $moduleType, $errorMsg))
 		{
+			
 			$_dbConnection -> rollBack();
 			return false;
 		}
@@ -435,6 +435,10 @@ class CModulesInstall
 
 		if($moduleConfig === false)
 		{
+
+
+
+
 			$errorMsg = 'Could not find module config';
 			return false;
 		}
@@ -447,6 +451,9 @@ class CModulesInstall
 
 		if($moduleData === false)
 		{
+
+
+
 			$errorMsg = 'Invalid module config format';
 			return false;
 		}
@@ -493,6 +500,10 @@ class CModulesInstall
 
 					if(!$sheme -> createTable($_dbConnection))
 					{
+
+
+
+
 						return false;
 					}
 				}
@@ -500,6 +511,8 @@ class CModulesInstall
 		}
 		else
 		{
+
+
 			$errorMsg = 'Could not find module information';
 			return false;
 		}
@@ -542,6 +555,9 @@ class CModulesInstall
 
 					if(count($modelBackendPagePath -> getResult()) !== 1)
 					{
+
+
+
 						return false;
 					}
 
@@ -558,6 +574,8 @@ class CModulesInstall
 
 					if($nodeId === false)
 					{
+
+
 						$errorMsg = 'Error on insert page for module';
 						return false;
 					}
@@ -592,6 +610,10 @@ class CModulesInstall
 
 					if(count($modelPagePath -> getResult()) !== 1)
 					{
+
+						$errorMsg = 'Could not find node for requested page path';
+
+
 						return false;
 					}
 
@@ -610,6 +632,8 @@ class CModulesInstall
 
 					if($nodeId === false)
 					{
+
+
 						$errorMsg = 'Error on insert page for module';
 						return false;
 					}
