@@ -8,7 +8,93 @@ The version number is the release date. A letter as suffix indicates fixes on sa
 
 (the versions handling may get changed later)
 
-## Version history	  
+
+## Version history	 
+
+### 202104XX
+
+**Changes**
+- Moved Backend pages into database instead of file based
+- Added Module Versions System
+- Various small changes and fixes
+
+### 20201004
+
+**Modules**
+- Added frontent search field modul
+
+### 20200929
+
+**Modules**
+- Added frontend module to display tags as list (not complete)
+- Added frontend module to display categories as list (not complete)
+
+**Changes**
+- various fixes
+
+
+### 20200827
+
+**Changes**
+- various fixes
+- removed comments
+- changed old mysql queries to pdo wrapper
+
+
+### 20200703
+
+**Changes**
+- various fixes
+
+
+### 20200617
+
+**Changes**
+- added edit lock for modules module
+- fixed cronjobs
+- added handling for denied remote if htaccess is not supported
+
+
+### 20200531
+
+**Changes**
+- updated handling of edit lock for data if multiple users are working with them
+- added edit lock for tags module
+- added edit lock for categories module
+- added edit lock for language module
+- added edit lock for users module
+- added edit lock for backend users module
+- added option in configuration.json to disable denied remote system
+
+
+### 20200507
+
+**Changes**
+- Switched from myslqi to pdo, still only mysql as supported DB. Old mysqli connection class removed.
+- Created a wrapper for all database calls, some modules/classes are still on todo for this wrapper.
+- Refactored model system for the new wrapper.
+
+**Notes**
+- Maybe some parts still broken
+
+
+### 20200414
+
+**Modules**
+- Added frontend sitemap module for child pages, early version, templates are stored in data/modules
+
+**Changes**
+- Added test of edit lock to modules user-agent and denied-remote
+- Moved some settings from static config to dynamic config, some of them are no in environment module
+- Added prototype (first step) of multiple content sections per page page
+
+
+### 20200326
+
+**Changes**
+- Removed print_r in user-agent module that leads in non valid xhr result
+- Various changes on module handling for module overloading
+- Various changes on Login-Objects and handling
 
 
 ### 20200225
@@ -17,6 +103,12 @@ The version number is the release date. A letter as suffix indicates fixes on sa
 - Changed backend module for login-objects to add additional databases to the backend login-object
 - Added cron job file for remote users
 - Added settings to environment module to set remote users configuration
+
+
+### 20200223
+
+**Changes**
+- Fixed reading of nested set structure thats returned in wrong order and resulted in wrong urls
 
 
 ### 20200219

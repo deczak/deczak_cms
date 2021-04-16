@@ -1,8 +1,7 @@
 <?php
 
-$dataSet 	= &$usersList[0];
-$user 		= $dataSet['user'];
-
+$dataset 	= &$usersList[0];
+$user 		= $dataset['user'];
 
 function
 isActiveGroup($group_id, &$groups)
@@ -23,6 +22,9 @@ isActiveGroup($group_id, &$groups)
 			<ul>
 			<li><a class="darkblue" href="#user"><?= $language -> string('MOD_BEREMOTEU_USERRIGHTS'); ?></a></li>
 			</ul>
+			<hr>
+
+			<div class="ui result-box ping-result lower-font-size" id="ping-lock-result" data-error=""></div>
 		</div>
 	</div>
 	<div>
@@ -41,7 +43,7 @@ isActiveGroup($group_id, &$groups)
 
 					<div class="input width-25">
 						<label><?php echo CLanguage::get() -> string('MOD_BEREMOTEU_USERORIGIN'); ?></label>
-						<input type="text" disabled value="<?= $dataSet['db_name']; ?> (<?= $dataSet['db_server']; ?>)">
+						<input type="text" disabled value="<?= $dataset['db_name']; ?> (<?= $dataset['db_server']; ?>)">
 						<i class="fas fa-lock"></i>
 					</div>
 
@@ -59,7 +61,7 @@ isActiveGroup($group_id, &$groups)
 
 
 		
-		<fieldset class="ui fieldset submit-able" id="user" data-xhr-target="edit-user" data-xhr-overwrite-target="edit/<?= $dataSet[id]; ?>">
+		<fieldset class="ui fieldset submit-able" id="user" data-xhr-target="edit-user" data-xhr-overwrite-target="edit/<?= $dataset['id']; ?>">
 
 			<legend><?= $language -> string('MOD_BEREMOTEU_USERRIGHTS'); ?></legend>
 			<div>
@@ -67,7 +69,7 @@ isActiveGroup($group_id, &$groups)
 				<div class="group width-100">
 					<div class="group-head width-100"><?php echo CLanguage::get() -> string('MOD_BEREMOTEU_RIGTHGROUPS'); ?></div>
 					<div class="input width-100">
-						<div style="display:flex;flex-wrap:wrap;">
+						<div style="display:flex;flex-wrap:wrap;" id="container-group-rights">
 							<input type="hidden" name="groups" value="">
 							<?php 						
 							foreach($right_groups as $_group)
@@ -109,8 +111,52 @@ isActiveGroup($group_id, &$groups)
 	</div>
 </div>
 
-<?php
+<?php if($agentsList !== false) { ?>
+<script src="<?php echo CMS_SERVER_URL_BACKEND; ?>js/classes/cms-request-data-index.js"></script>
+<script src="<?php echo CMS_SERVER_URL_BACKEND; ?>js/classes/cms-request-data-item.js"></script>
+<script>
 
-#tk::dbug($dataSet);
+	let	requestURL	= CMS.SERVER_URL_BACKEND + CMS.PAGE_PATH +'ping/<?= $dataset['id']; ?>';
+	let pingId		= cmsTabInstance.getId();
+	
+	cmstk.ping(requestURL, <?= CFG::GET() -> USER_SYSTEM -> MODULE_LOCKING -> PING_TIMEOUT; ?>, pingId);
 
-?>
+	document.addEventListener("DOMContentLoaded", function(){
+
+		document.dataInstance = new cmsRequestDataItem('', '<?= CFG::GET() -> BACKEND -> TIME_FORMAT; ?>', '<?= $dataset['id']; ?>', extendedReplace);
+		document.dataInstance.requestData();
+
+		let fieldsets = document.querySelectorAll('fieldset[data-xhr-target]');
+		for(let i = 0; i < fieldsets.length; i++)
+		{
+			fieldsets[i].setAttribute('data-ping-id', pingId);
+		}
+	});	
+
+	function extendedReplace(prop, propContent)
+	{
+		switch(prop)
+		{
+			case   'userGroups':
+
+					let rightsTable = document.getElementById('container-group-rights');
+
+					let groupItemAll = rightsTable.querySelectorAll('input[name="groups[]"]');
+
+					for(let item in groupItemAll)
+						groupItemAll[item].checked = false;
+
+					for(var group in propContent)
+					{	
+						let groupItem = rightsTable.querySelector('input[id="group-'+ propContent[group].group_id +'"]');
+						if(groupItem !== null)
+							groupItem.checked = true;
+					}
+
+					break;
+		}
+		
+	}
+
+</script>
+<?php } ?>

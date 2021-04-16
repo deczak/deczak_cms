@@ -1,5 +1,12 @@
 {
 	"module_controller" : "controllerUsersBackend",
+	"module_name"		: "Backend Users",
+	"module_desc"		: "Backend Users",
+	"module_path" 		: "backend-users",
+	"module_group"		: "backend",
+	"module_icon"		: "",
+	"module_frontend"	: 0,
+	"module_menu_group"	: "2",
 	"module_rights"		:[
 							{"name":"index",	"desc":"OVERVIEW"},
 							{"name":"view",		"desc":"VIEW"},
@@ -11,43 +18,64 @@
 								"ctl_target":"index",
 								"menu_name"	:"OVERVIEW",
 								"menu_order":"0",
-								"use_right" :"index"
+								"use_right" :"index",
+								"query_var" :"cms-ctrl-action"
 							},
 							{
 								"url_name"	:"create",
 								"ctl_target":"create",
 								"menu_name"	:"MOD_BEUSER_SEC_CREATE_NAME",
 								"menu_order":"0",
-								"use_right" :"edit"
+								"use_right" :"edit",
+								"query_var" :"cms-ctrl-action"
 							},
 							{
 								"url_name"	:"user",
 								"ctl_target":"view",
 								"menu_name"	:"",
 								"menu_order":"0",
-								"use_right" :"view"
+								"use_right" :"view",
+								"query_var" :"cms-ctrl-action",
+								"subSection":{
+												"url_name"	:false,
+												"query_var" :"cms-system-id"
+											 }
 							},
 							{
 								"url_name"	:"edit",
 								"ctl_target":"edit",
 								"menu_name"	:"",
 								"menu_order":"0",
-								"use_right" :"edit"
+								"use_right" :"edit",
+								"query_var" :"cms-ctrl-action",
+								"subSection":{
+												"url_name"	:false,
+												"query_var" :"cms-system-id"
+											 }
 							},
 							{
 								"url_name"	:"delete",
 								"ctl_target":"delete",
 								"menu_name"	:"",
 								"menu_order":"0",
-								"use_right" :"edit"
+								"use_right" :"edit",
+								"query_var" :"cms-ctrl-action",
+								"subSection":{
+												"url_name"	:false,
+												"query_var" :"cms-system-id"
+											 }
+							},
+							{
+								"url_name"	:"ping",
+								"ctl_target":"ping",
+								"menu_name"	:"",
+								"menu_order":"0",
+								"use_right" :"edit",
+								"query_var" :"cms-ctrl-action",
+								"subSection":{
+												"url_name"	:false,
+												"query_var" :"cms-system-id"
+											 }
 							}
-						],
-	"htaccess"			:{
-							"variables"		:[
-												{
-													"key" 		: "cms-system-id",
-													"wildcard"	:"(.*)"
-												}
-											]
-						}
+						]
 }

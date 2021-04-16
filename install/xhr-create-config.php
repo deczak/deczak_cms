@@ -1,9 +1,10 @@
 <?php
 
-	include '../core/toolkit.php';
+	include '../core/classes/toolkit.php';
 
 	if(empty($_POST['server-root'])) 		tk::xhrResult(1, 'Document root not set');				else $_POST['server-root'] 		 = trim(strip_tags($_POST['server-root']));
 	if(empty($_POST['server-url'])) 		tk::xhrResult(1, 'Web URL address not set');			else $_POST['server-url'] 		 = trim(strip_tags($_POST['server-url']));
+	if(empty($_POST['server-subpath'])) 		;			else $_POST['server-subpath'] 		 = trim(strip_tags($_POST['server-subpath']));
 	if(empty($_POST['crypt-basekey'])) 		tk::xhrResult(1, 'Base encryption key not set');		else $_POST['crypt-basekey'] 	 = trim(strip_tags($_POST['crypt-basekey']));
 
 	if(empty($_POST['database-server'])) 	tk::xhrResult(1, 'Database server address not set');	else $_POST['database-server'] 	 = trim(strip_tags($_POST['database-server']));
@@ -14,19 +15,22 @@
 	if($_POST['server-root'][ strlen($_POST['server-root']) - 1] !== '/') $_POST['server-root'] .= '/';
 	if($_POST['server-url'][ strlen($_POST['server-url']) - 1] !== '/') $_POST['server-url'] .= '/';
 
+	if(empty($_POST['server-subpath'])) $_POST['server-subpath'] = 'false'; else $_POST['server-subpath'] = "'". $_POST['server-subpath'] ."'";
+
 	##	standard.php
 	$configFile = file_get_contents('template-config.php');
 
 	$configFile = str_replace('%SERVER_ROOT%',$_POST['server-root'], $configFile);
 	$configFile = str_replace('%SERVER_URL%', $_POST['server-url'], $configFile);
 
+	$configFile = str_replace('%SERVER_SUBDIR%', $_POST['server-subpath'], $configFile);
+
+	$configFile = str_replace('%SERVER_URL%', $_POST['server-url'], $configFile);
+
 	$configFile = str_replace('%DATABASE_SERVER%',$_POST['database-server'], $configFile);
 	$configFile = str_replace('%DATABASE_USER%',$_POST['database-user'], $configFile);
 	$configFile = str_replace('%DATABASE_PASSWORD%',$_POST['database-pass'], $configFile);
 	$configFile = str_replace('%DATABASE_DATABASE%',$_POST['database-database'], $configFile);
-
-	$configFile = str_replace('%SYSMAIL_NAME%',$_POST['mail-name'], $configFile);
-	$configFile = str_replace('%SYSMAIL_MAIL%',$_POST['mail-mail'], $configFile);
 
 	$configFile = str_replace('%BASEKEY%',$_POST['crypt-basekey'], $configFile);
 
@@ -36,8 +40,13 @@
 
 
 	##	configuration.json
-	copy('configuration.json', '../data/configuration.json');
 
+	$configFile = file_get_contents('configuration.json');
+
+	$configFile = str_replace('%SYSMAIL_NAME%',$_POST['mail-name'], $configFile);
+	$configFile = str_replace('%SYSMAIL_MAIL%',$_POST['mail-mail'], $configFile);
+
+	file_put_contents('../data/configuration.json', $configFile);
 
 	tk::xhrResult(0, 'OK');
 ?>

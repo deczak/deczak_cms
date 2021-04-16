@@ -19,6 +19,7 @@
 	BUTTON_DELETE		=	Delete
 	BUTTON_EDIT			=	Edit
 	BUTTON_CREATE		=	Create
+	BUTTON_REFRESH		=	Refresh
 	
 	YES					=	Yes
 	NO					=	No
@@ -52,8 +53,23 @@
 	LOCKED				=	Locked
 	DEFAULT				=	Default
 	NOTE				=	Note
+	UNKNOWN				=	unknown
 
 	USERNAME			=	Username
+	LOGIN				= 	Login
+	
+	January				= January
+	February			= February
+	March				= March
+	April				= April
+	May					= May
+	June				= June
+	July				= July
+	August				= August
+	September			= September
+	October				= October
+	November			= November
+	December			= December
 	
 ##	Messages
 
@@ -68,3 +84,11 @@
 	WAS_NOT_CREATED		=	has been not created
 	
 	IS_UNKNOWN			=	is unknown
+
+	LOCK_IS_LOCKED		=	This dataset is locked by user 
+	LOCK_IS_NOT_LOCKED	=	This dataset can be edited
+	LOCK_NO_RIGHTS		=	You have no rights to edit
+
+	LOCK_IS_MISMATCH_ID = 	Editing is blocked by another instance
+
+

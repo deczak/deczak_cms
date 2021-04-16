@@ -6,16 +6,20 @@
 			<div class="right" style="display:flex;">
 
 				<?php
-
 				if($session -> isAuthed(LOGIN_OBJECT_BACKEND) !== false)
 				{
-					$backendMenuGroups	= file_get_contents(CMS_SERVER_ROOT.DIR_DATA.'backend/backend-menu.json');
-					$backendMenuGroups	= json_decode($backendMenuGroups);
+					include_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelBackendMenu.php';	
+					include_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelBackendSitemap.php';	
 
-					$backendMenu	= file_get_contents(CMS_SERVER_ROOT.DIR_DATA.'backend/backend.json');
-					$backendMenu	= json_decode($backendMenu);
+					$pDatabase = CDatabase::instance() -> getConnection(CFG::GET() -> MYSQL -> PRIMARY_DATABASE);;
 
-					foreach($backendMenuGroups as $menuGroup)
+					$modelBackendMenu		 = new modelBackendMenu();
+					$modelBackendMenu		-> load($pDatabase);
+					
+					$modelBackendSitemap	 = new modelBackendSitemap();
+					$modelBackendSitemap	-> load($pDatabase, null, SITEMAP_BACKEND_EXTDATA);
+
+					foreach($modelBackendMenu -> getResult() as $menuGroup)
 					{
 						echo '<div class="menu-group-container">';
 
@@ -27,26 +31,22 @@
 
 						echo '<div class="menu-group-subs">';
 
-						foreach($backendMenu as $menuItem)
+						foreach($modelBackendSitemap -> getResult() as $menuItem)
 						{
-
 							if(empty($menuItem -> page_path))
 								continue;
 
-							if($menuItem -> menu_group !== $menuGroup -> menu_group)
+							if((int)$menuItem -> menu_group !== (int)$menuGroup -> menu_group)
 								continue;
-
+						
 							if(empty($menuItem -> objects) || !is_array($menuItem -> objects))
 								continue;
 
 							$moduleId = current($menuItem -> objects) -> module_id;
-						
 							if(!$modules -> existsRights($moduleId, 'index'))
 								continue;
 
-
-
-							echo '<a  class="menu-group-item" href="'. CMS_SERVER_URL_BACKEND . $menuItem -> page_path .'/">'. $menuItem -> page_name .'</a>';
+							echo '<a  class="menu-group-item" href="'. CMS_SERVER_URL_BACKEND . substr($menuItem -> page_path, 1) .'">'. $menuItem -> page_name .'</a>';
 						}
 
 						echo '</div>';
@@ -98,7 +98,7 @@
 				<?php
 				foreach($pageRequest -> subs as $sub)
 				{
-					echo '<a class="darkblue" href="'. CMS_SERVER_URL_BACKEND . $pageRequest -> page_path .'/'. $sub['page_path'] .'">'. $sub['menu_name'] .'</a>';
+					echo '<a class="darkblue" href="'. CMS_SERVER_URL_BACKEND . $pageRequest -> page_path .''. $sub['page_path'] .'">'. $sub['menu_name'] .'</a>';
 				}
 				?>
 			</div>

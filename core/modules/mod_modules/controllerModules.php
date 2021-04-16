@@ -16,7 +16,7 @@ class	controllerModules extends CController
 	}
 	
 	public function
-	logic(&$_sqlConnection, array $_rcaTarget, $_isXHRequest)
+	logic(CDatabaseConnection &$_pDatabase, array $_rcaTarget, $_isXHRequest)
 	{
 		##	Set default target if not exists
 
@@ -44,28 +44,26 @@ class	controllerModules extends CController
 		$enableEdit 	= $this -> existsUserRight('edit');
 		$enableDelete	= $this -> existsUserRight('delete');
 
-		$_logicResults = false;
+		$logicResults = false;
 		switch($_controllerAction)
 		{
-			case 'view'		: $_logicResults = $this -> logicView(	$_sqlConnection, $_isXHRequest, $enableEdit, $enableDelete);	break;
-			case 'edit'		: $_logicResults = $this -> logicEdit(	$_sqlConnection, $_isXHRequest);	break;	
-			case 'create'	: $_logicResults = $this -> logicCreate($_sqlConnection, $_isXHRequest);	break;
-			case 'delete'	: $_logicResults = $this -> logicDelete($_sqlConnection, $_isXHRequest);	break;	
+			case 'view'		: $logicResults = $this -> logicView(	$_pDatabase, $_isXHRequest, $enableEdit, $enableDelete);	break;
+			case 'ping'		: $logicResults = $this -> logicPing(	$_pDatabase, $_isXHRequest, $enableEdit, $enableDelete);	break;
+			case 'edit'		: $logicResults = $this -> logicEdit(	$_pDatabase, $_isXHRequest);	break;	
+			case 'delete'	: $logicResults = $this -> logicDelete(	$_pDatabase, $_isXHRequest);	break;	
 		}
 
-		if(!$_logicResults)
+		if(!$logicResults)
 		{
 			##	Default View
-			$this -> logicIndex($_sqlConnection, $_isXHRequest, $enableEdit, $enableDelete);	
+			$this -> logicIndex($_pDatabase, $_isXHRequest, $enableEdit, $enableDelete);	
 		}
 	}
 
 	private function
-	logicIndex(&$_sqlConnection, $_isXHRequest, $_enableEdit = false, $_enableDelete = false)
+	logicIndex(CDatabaseConnection &$_pDatabase, $_isXHRequest, $_enableEdit = false, $_enableDelete = false)
 	{
 		##	XHR request
-
-		
 
 		if($_isXHRequest !== false)
 		{	
@@ -77,16 +75,17 @@ class	controllerModules extends CController
 			{
 				case 'raw-data'  :	// Request raw data
 
-									$_pURLVariables	 =	new CURLVariables();
-									$_request		 =	[];
-									$_request[] 	 = 	[	"input" => "cms-system-id",  	"validate" => "strip_tags|!empty" ,	"use_default" => true, "default_value" => false ]; 		
-									$_pURLVariables -> 	retrieve($_request, true, false); // POST 
+
+
+									
+									$systemId = $this -> querySystemId();
+
 
 									$modelCondition  = 	new CModelCondition();
 
-									if($_pURLVariables -> getValue("cms-system-id") !== false)
+									if($systemId !== false)
 									{	
-										$modelCondition -> where('module_id', $_pURLVariables -> getValue("cms-system-id"));
+										$modelCondition -> where('module_id', $systemId);
 									}
 
 
@@ -94,19 +93,102 @@ class	controllerModules extends CController
 									$modelCondition -> orderBy('is_frontend');
 									$modelCondition -> orderBy('module_name');
 
-									if(!$this -> m_pModel -> load($_sqlConnection, $modelCondition))
+									if(!$this -> m_pModel -> load($_pDatabase, $modelCondition))
 									{
 										$_bValidationMsg .= CLanguage::get() -> string('ERR_SQL_ERROR');
 										$_bValidationErr = true;
 									}											
 						
-										$data['installed'] = $this -> m_pModel -> getDataInstance();
+										$data['installed'] = $this -> m_pModel -> getResult();
+										$data['available'] = CModules::instance() -> getAvailableModules();
+
+
+
+						/*
+
+									$_pURLVariables	 =	new CURLVariables();
+									$_request		 =	[];
+									$_request[] 	 = 	[	"input" => 'q',  	"validate" => "strip_tags|!empty" ,	"use_default" => true, "default_value" => false ]; 		
+									$_pURLVariables -> retrieve($_request, false, true);	
+					
+									$modelCondition  = 	new CModelCondition();
+
+									if($_pURLVariables -> getValue("q") !== false)
+									{	
+										$conditionSource = 	explode(' ', $_pURLVariables -> getValue("q"));
+										foreach($conditionSource as $conditionItem)
+										{
+											$itemParts = explode(':', $conditionItem);
+
+											if(count($itemParts) == 1)
+											{
+												$modelCondition -> whereLike('module_name', $itemParts[0]);
+												$modelCondition -> whereLike('module_desc', $itemParts[0]);
+											}
+											else
+											{
+												if( $itemParts[0] == 'cms-system-id' )
+													$itemParts[0] = 'module_id';
+												
+												$modelCondition -> where($itemParts[0], $itemParts[1]);
+											}
+										}										
+									}
+
+									if(!$this -> m_pModel -> load($_pDatabase, $modelCondition))
+									{
+										$_bValidationMsg .= CLanguage::get() -> string('ERR_SQL_ERROR');
+										$_bValidationErr = true;
+									}											
+						
+									$data = $this -> m_pModel -> getResult();
+
+									foreach($data as &$item)
+									{
+										$item -> creaty_by_name = tk::getBackendUserName($_pDatabase, $item -> create_by);
+										$item -> update_by_name = tk::getBackendUserName($_pDatabase, $item -> update_by);
+									}
+									*/
+
+									break;
+
+				/*
+				case 'raw-data'  :	// Request raw data
+
+									
+									$systemId = $this -> querySystemId();
+
+
+									$modelCondition  = 	new CModelCondition();
+
+									if($systemId !== false)
+									{	
+										$modelCondition -> where('module_id', $systemId);
+									}
+
+
+
+									$modelCondition -> orderBy('is_frontend');
+									$modelCondition -> orderBy('module_name');
+
+									if(!$this -> m_pModel -> load($_pDatabase, $modelCondition))
+									{
+										$_bValidationMsg .= CLanguage::get() -> string('ERR_SQL_ERROR');
+										$_bValidationErr = true;
+									}											
+						
+										$data['installed'] = $this -> m_pModel -> getResult();
 										$data['available'] = CModules::instance() -> getAvailableModules();
 
 
 									break;
+									*/
 
 				case 'install'  :	// Install
+
+
+
+
 
 									$_pURLVariables	 =	new CURLVariables();
 									$_request		 =	[];
@@ -116,7 +198,7 @@ class	controllerModules extends CController
 
 									$errorMsg = '';
 
-									if(!CModules::instance() -> install($_sqlConnection, $_pURLVariables -> getValue("module"), $_pURLVariables -> getValue("type"), $errorMsg))
+									if(!CModules::instance() -> install($_pDatabase, $_pURLVariables -> getValue("module"), $_pURLVariables -> getValue("type"), $errorMsg))
 									{
 										$_bValidationErr =	true;
 										$_bValidationMsg =	$errorMsg;
@@ -132,14 +214,10 @@ class	controllerModules extends CController
 
 		##	Non XHR request
 		
-		$modelCondition = new CModelCondition();
-
-		$this -> m_pModel -> load($_sqlConnection, $modelCondition);	
 		$this -> setView(	
 						'index',	
 						'',
 						[
-							'modulesList' 	=> $this -> m_pModel -> getDataInstance(),
 							'enableEdit'	=> $_enableEdit,
 							'enableDelete'	=> $_enableDelete
 						]
@@ -148,98 +226,27 @@ class	controllerModules extends CController
 	}
 
 	private function
-	logicCreate(&$_sqlConnection, $_isXHRequest)
-	{
-		/*
-		if($_isXHRequest !== false)
-		{
-			$_bValidationErr =	false;
-			$_bValidationMsg =	'';
-			$_bValidationDta = 	[];
-
-			$_pURLVariables	 =	new CURLVariables();
-			$_request		 =	[];
-			$_request[] 	 = 	[	"input" => "denied_ip",  	"validate" => "strip_tags|strip_whitespaces|!empty" ]; 	
-			$_request[] 	 = 	[	"input" => "denied_desc",  	"validate" => "strip_tags|!empty" ]; 	
-			$_pURLVariables -> retrieve($_request, false, true); // POST 
-			$_aFormData		 = $_pURLVariables ->getArray();
-
-			if(empty($_aFormData['denied_ip'])) { 	$_bValidationErr = true; 	$_bValidationDta[] = 'denied_ip'; 	}
-
-			if(!$_bValidationErr)	// Validation OK (by pre check)
-			{		
-				if(!$this -> m_pModel -> isUnique($_sqlConnection, ['denied_ip' => $_aFormData['denied_ip']]))
-				{
-					$_bValidationMsg .= CLanguage::get() -> string('M_BERMADDR_MSG_DENIEDEXIST');
-					$_bValidationErr = true;
-				}
-			}
-			else	// Validation Failed 
-			{
-				$_bValidationMsg .= CLanguage::get() -> string('ERR_VALIDATIONFAIL');
-			}
-
-			if(!$_bValidationErr)	// Validation OK
-			{
-
-				$_aFormData['create_by'] 	= CSession::instance() -> getValue('user_id');
-				$_aFormData['create_time'] 	= time();
-
-				$dataId = 0;
-
-				if($this -> m_pModel -> insert($_sqlConnection, $_aFormData, $dataId))
-				{
-					$_bValidationMsg = CLanguage::get() -> string('M_BERMADDR_MSG_ISCREATED') .' - '. CLanguage::get() -> string('WAIT_FOR_REDIRECT');
-					$_bValidationDta['redirect'] = CMS_SERVER_URL_BACKEND . CPageRequest::instance() -> urlPath .'address/'.$dataId;
-
-					$_pHTAccess  = new CHTAccess();
-					$_pHTAccess -> generatePart4DeniedAddress($_sqlConnection);
-					$_pHTAccess -> writeHTAccess();
-				}
-				else
-				{
-					$_bValidationMsg .= CLanguage::get() -> string('ERR_SQL_ERROR');
-				}
-			}
-
-
-			tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $_bValidationDta);	// contains exit call
-		}
-
-		$this -> setCrumbData('create');
-		$this -> setView(
-						'create',
-						'create/'
-						);
-		*/
-		return true;
-	}
-
-	private function
-	logicView(&$_sqlConnection, $_isXHRequest = false, $_enableEdit = false, $_enableDelete = false)
+	logicView(CDatabaseConnection &$_pDatabase, $_isXHRequest = false, $_enableEdit = false, $_enableDelete = false)
 	{	
-		$_pURLVariables	 =	new CURLVariables();
-		$_request		 =	[];
-		$_request[] 	 = 	[	"input" => "cms-system-id",  	"validate" => "strip_tags|!empty" ,	"use_default" => true, "default_value" => false ]; 		
-		$_pURLVariables -> retrieve($_request, true, false); // POST 
+		$systemId = $this -> querySystemId();
 
-		if($_pURLVariables -> getValue("cms-system-id") !== false)
+		if($systemId !== false)
 		{	
 			$modelCondition = new CModelCondition();
-			$modelCondition -> where('module_id', $_pURLVariables -> getValue("cms-system-id"));
+			$modelCondition -> where('module_id', $systemId);
 
-			if($this -> m_pModel -> load($_sqlConnection, $modelCondition))
+			if($this -> m_pModel -> load($_pDatabase, $modelCondition))
 			{
 				##	Gathering additional data
 
-				$_crumbName	 = $this -> m_pModel -> searchValue(intval($_pURLVariables -> getValue("cms-system-id")),'module_id','module_name');
+				$_crumbName	 = $this -> m_pModel -> getResultItem('module_id',intval($systemId),'module_name');
 
 				$this -> setCrumbData('edit', $_crumbName, true);
 				$this -> setView(
 								'edit',
-								'module/'. $_pURLVariables -> getValue("cms-system-id"),								
+								'module/'. $systemId,								
 								[
-									'modulesList' 	=> $this -> m_pModel -> getDataInstance(),
+									'modulesList' 	=> $this -> m_pModel -> getResult(),
 									'enableEdit'	=> $_enableEdit,
 									'enableDelete'	=> $_enableDelete
 								]								
@@ -253,15 +260,12 @@ class	controllerModules extends CController
 	}
 
 	private function
-	logicEdit(&$_sqlConnection, $_isXHRequest = false)
+	logicEdit(CDatabaseConnection &$_pDatabase, $_isXHRequest = false)
 	{	
 		
-		$_pURLVariables	 =	new CURLVariables();
-		$_request		 =	[];
-		$_request[] 	 = 	[	"input" => "cms-system-id",  	"validate" => "strip_tags|!empty" ,	"use_default" => true, "default_value" => false ]; 		
-		$_pURLVariables -> retrieve($_request, true, false); // POST 
 
-		if($_pURLVariables -> getValue("cms-system-id") !== false && $_isXHRequest !== false)
+		$systemId = $this -> querySystemId();
+		if($systemId !== false && $_isXHRequest !== false)
 		{	
 			
 			$_bValidationErr =	false;
@@ -294,9 +298,9 @@ class	controllerModules extends CController
 												$_aFormData['update_time'] 	= time();
 
 												$modelCondition = new CModelCondition();
-												$modelCondition -> where('module_id', $_pURLVariables -> getValue("cms-system-id"));
+												$modelCondition -> where('module_id', $systemId);
 												
-												if($this -> m_pModel -> update($_sqlConnection, $_aFormData, $modelCondition))
+												if($this -> m_pModel -> update($_pDatabase, $_aFormData, $modelCondition))
 												{
 													$_bValidationMsg = CLanguage::get() -> string('M_BEMOULE_MSG_MODULE') .' '. CLanguage::get() -> string('WAS_UPDATED');
 												}
@@ -322,14 +326,12 @@ class	controllerModules extends CController
 	}
 
 	private function
-	logicDelete(&$_sqlConnection, $_isXHRequest = false)
+	logicDelete(CDatabaseConnection &$_pDatabase, $_isXHRequest = false)
 	{	
-		$_pURLVariables	 =	new CURLVariables();
-		$_request		 =	[];
-		$_request[] 	 = 	[	"input" => "cms-system-id",  	"validate" => "strip_tags|!empty" ,	"use_default" => true, "default_value" => false ]; 		
-		$_pURLVariables -> retrieve($_request, true, false); // POST 
 
-		if($_pURLVariables -> getValue("cms-system-id") !== false && $_isXHRequest !== false)
+		$systemId = $this -> querySystemId();
+
+		if($systemId !== false && $_isXHRequest !== false)
 		{	
 			$_bValidationErr =	false;
 			$_bValidationMsg =	'';
@@ -339,7 +341,7 @@ class	controllerModules extends CController
 			{
 				case 'uninstall':	//	Uninstall
 							
-									CModules::instance() -> uninstall($_sqlConnection, $_pURLVariables -> getValue("cms-system-id"));
+									CModules::instance() -> uninstall($_pDatabase, $systemId, $_bValidationMsg);
 
 									$_bValidationMsg = CLanguage::get() -> string('M_BEMOULE_MSG_REMOVED') .' - '. CLanguage::get() -> string('WAIT_FOR_REDIRECT');
 									$_bValidationDta['redirect'] = CMS_SERVER_URL_BACKEND . CPageRequest::instance() -> urlPath;
@@ -351,6 +353,31 @@ class	controllerModules extends CController
 		}			
 
 		return false;
+	}
+
+	public function
+	logicPing(CDatabaseConnection &$_pDatabase, $_isXHRequest = false, $_enableEdit = false, $_enableDelete = false)
+	{
+		$systemId 	= $this -> querySystemId();
+		$pingId 	= $this -> querySystemId('cms-ping-id', true);
+
+		if($systemId !== false && $_isXHRequest !== false)
+		{	
+			$_bValidationErr =	false;
+			$_bValidationMsg =	'';
+			$_bValidationDta = 	[];
+
+			switch($_isXHRequest)
+			{
+				case 'lockState':	
+				
+					$locked	= $this -> m_pModel -> ping($_pDatabase, CSession::instance() -> getValue('user_id'), $systemId, $pingId, MODEL_LOCK_UPDATE);
+					tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $locked);
+					break;
+			}
+
+			tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $_bValidationDta);
+		}
 	}
 
 }

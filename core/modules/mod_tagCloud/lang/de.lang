@@ -1,0 +1,17 @@
+
+##	
+
+	MOD_BETAGS_TAG			= 	Tag
+
+	MOD_BETAGS_ERR_USERID_UK	=	Tag ist unbekannt
+
+	MOD_BETAGS_CREATE			=	Tag erstellen
+	MOD_BETAGS_EDIT				=	Tag
+
+	MOD_BETAGS_NAME				=	Name
+	MOD_BETAGS_URLAPPENDIX		=	Name in URL
+	MOD_BETAGS_HIDDEN			=	Sichtbar in Wolke
+	MOD_BETAGS_DISABLED			=	Anwendbar
+	MOD_BETAGS_ALLOCATION		=	Anzahl Zuweisungen
+
+	MOD_BETAGS_INFO				=	Tag Informationen

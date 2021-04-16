@@ -1,9 +1,3 @@
-<?php
-
-	#tk::dbug($tagsList);
-	
-?>
-
 <div class="be-module-container">
 
 	<table class="table-overview">
@@ -18,36 +12,8 @@
 				<td class="bach-item-menu"></td>
 			</tr>
 		</thead>
-		<tbody>
-		<?php
-		foreach($tagsList as $dataKey => $dataSet)
-		{
-			?>
-
-			<tr class="trigger-batch-item">
-				<td class="batch-selection-item"><input type="checkbox" class="trigger-batch-item-checkbox" name="group-id[]" value="<?= $dataSet -> tag_id; ?>" id="item-<?= $dataKey; ?>"><label for="item-<?= $dataKey; ?>"></label></td>
-				<td><?= $dataSet -> tag_name; ?></td>
-				<td>/<?= $dataSet -> tag_url; ?>/</td>
-				<td><div class="color-indicator negative" data-state="<?= $dataSet -> tag_hidden; ?>"></div></td>
-				<td><div class="color-indicator negative" data-state="<?= $dataSet -> tag_disabled; ?>"></div></td>
-				<td style="text-align:center;"><?= $dataSet -> allocation; ?></td>
-				<td class="bach-item-menu"><span>&equiv;</span><div class="dropdown-content"><div></div><a href="<?= CMS_SERVER_URL_BACKEND . $pageRequest -> urlPath; ?>tag/<?= $dataSet -> tag_id; ?>"><?= $language -> string('BUTTON_EDIT'); ?></a></div></td>
-			</tr>
-
-			<?php
-		}
-		?>
-		</tbody>
+		<tbody id="table-body-overview"><!-- javascript injection --></tbody>
 		<tfoot>
-			<tr>
-				<td></td>
-				<td></td>
-				<td></td>
-				<td></td>
-				<td></td>
-				<td></td>
-				<td></td>
-			</tr>
 			<tr>
 				<td class="batch-selection-item"><input type="checkbox" class="trigger-batch-item-all-checkbox" id="item-all"><label for="item-all"></label></td>
 				<td><?= $language -> string('SELECT_ALL'); ?></td>
@@ -62,11 +28,25 @@
 
 </div>
 
-<style>
+<template id="template-table-row">
 
-	div.be-module-container table.table-overview td.assignments { text-align:center; }
-</style>
+	<td class="batch-selection-item"><input type="checkbox" class="trigger-batch-item-checkbox" name="group-id[]" value="%tag_id%" id="item-%tag_id%"><label for="item-%tag_id%"></label></td>
+	<td>%tag_name%</td>
+	<td>%tag_url%</td>
+	<td><div class="color-indicator negative" data-state="%tag_hidden%"></div></td>
+	<td><div class="color-indicator negative" data-state="%tag_disabled%"></div></td>
+	<td style="text-align:center;">%allocation%</td>
+	<td class="bach-item-menu"><span>&equiv;</span><div class="dropdown-content"><div></div><a href="<?php echo CMS_SERVER_URL_BACKEND . $pageRequest -> urlPath; ?>tag/%tag_id%"><?php echo $language -> string('BUTTON_EDIT'); ?></a></div></td>
 
+</template>
 
+<script src="<?php echo CMS_SERVER_URL_BACKEND; ?>js/classes/cms-request-data-index.js"></script>
+<script src="<?php echo CMS_SERVER_URL_BACKEND; ?>js/classes/cms-request-data-item.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function(){
 
-
+	let	indexList = new cmsRequestDataIndex('template-table-row', '<?= CFG::GET() -> BACKEND -> TIME_FORMAT; ?>');
+		indexList.init();
+		
+});	
+</script>

@@ -1,344 +1,427 @@
 <?php
 
-include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SHEME.'shemePageHeader.php';	
-include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SHEME.'shemePagePath.php';	
-include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SHEME.'shemePage.php';	
+include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SHEME.'shemePageHeader.php';
+include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SHEME.'shemePagePath.php';
+include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SHEME.'shemePage.php';
+
+include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SHEME.'shemeBackendPageHeader.php';
+include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SHEME.'shemeBackendPagePath.php';
+include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SHEME.'shemeBackendPage.php';
+
+include_once 'modelPagePath.php';		
+include_once 'modelPageHeader.php';
+
+include_once 'modelCategories.php';	
+include_once 'modelTags.php';	
+include_once 'modelSimple.php';
+include_once 'modelSitemap.php';
 
 class 	modelPage extends CModel
 {
-	private	$m_shemePageHeader;
-	private	$m_shemePagePath;
-	private	$m_shemePage;
+	protected	$m_shemePageHeader;
+	protected	$m_shemePagePath;
+	protected	$m_shemePage;
 
 	public function
-	__construct()
-	{		
-		parent::__construct();		
+	__construct(string $_shemeName = 'shemePage', string $_dataObjectName = 'page')
+	{
+		parent::__construct($_shemeName, $_dataObjectName);
 
 		$this -> m_shemePageHeader 	= new shemePageHeader();
 		$this -> m_shemePagePath 	= new shemePagePath();
 		$this -> m_shemePage	 	= new shemePage();
+
+		$this -> m_modelPageHeader	= 'modelPageHeader';
+		$this -> m_modelPagePath	= 'modelPagePath';
 	}	
 	
 	public function
-	loadOld(&$_sqlConnection, CModelCondition $_condition = NULL)
+	load(CDatabaseConnection &$_pDatabase, CModelCondition $_pCondition = NULL, $_execFlags = NULL)
 	{
-		if($_sqlConnection === false)
+		if($_pDatabase === null)
 			return false;
 
 		$_tablePageHeader		=	$this -> m_shemePageHeader 	-> getTableName();
 		$_tablePagePath			=	$this -> m_shemePagePath 	-> getTableName();
 		$_tablePage				=	$this -> m_shemePage 		-> getTableName();
-		
-		$_className		=	$this -> createClass($this -> m_shemePage, 'page');
 
-		$_sqlString		=	"	SELECT		$_tablePagePath.page_path,
-											$_tablePagePath.node_id,
-											$_tablePageHeader.page_title,
-											$_tablePageHeader.page_name,
-											$_tablePageHeader.page_description,
-											$_tablePageHeader.page_language,
-											$_tablePage.page_id,
-											$_tablePage.create_time,
-											$_tablePage.update_time,
-											$_tablePage.publish_from,
-											$_tablePage.publish_until,
-											$_tablePage.publish_expired,
-											$_tablePage.create_by,
-											$_tablePage.update_by,
-											$_tablePage.page_version,
-											$_tablePage.page_template,
-											$_tablePage.hidden_state,
-											$_tablePage.crawler_index,
-											$_tablePage.crawler_follow,
-											$_tablePage.page_auth
-								FROM 		$_tablePagePath
-								LEFT JOIN	$_tablePageHeader
-									ON		$_tablePageHeader.node_id 	= $_tablePagePath.node_id
-								LEFT JOIN	$_tablePage
-									ON		$_tablePage.node_id 		= $_tablePagePath.node_id
-							".	($_condition != NULL ? $_condition -> getConditions($_sqlConnection, $_condition) : '');
+		$className 	= $this -> createPrototype();
 
-					
+		$condition	 = new CModelCondition();
+		$condition	-> where("$_tablePageHeader.node_id", "$_tablePagePath.node_id");
+		$this  		-> addRelation('LEFT JOIN', $_tablePageHeader, $condition);
 
-		$_sqlPageRes		=	 $_sqlConnection -> query($_sqlString) or die($_sqlConnection -> error);
+		$condition	 = new CModelCondition();
+		$condition	-> where("$_tablePage.node_id", "$_tablePagePath.node_id");
+		$this  		-> addRelation('LEFT JOIN', $_tablePage, $condition);
 
-		while($_sqlPageRes !== false && $_sqlPage = $_sqlPageRes -> fetch_assoc())
+		$this 		 -> addSelectColumns(	"$_tablePagePath.page_path", 
+											"$_tablePagePath.node_id", 
+											"$_tablePageHeader.page_title",
+											"$_tablePageHeader.page_name",
+											"$_tablePageHeader.page_description",
+											"$_tablePageHeader.page_language",
+											"$_tablePage.page_id",
+											"$_tablePage.create_time",
+											"$_tablePage.update_time",
+											"$_tablePage.publish_from",
+											"$_tablePage.publish_until",
+											"$_tablePage.publish_expired",
+											"$_tablePage.create_by",
+											"$_tablePage.update_by",
+											"$_tablePage.page_version",
+											"$_tablePage.page_template",
+											"$_tablePage.hidden_state",
+											"$_tablePage.crawler_index",
+											"$_tablePage.crawler_follow",
+											"$_tablePage.page_auth"
+											);
+
+		$dbQuery 	= $_pDatabase		-> query(DB_SELECT) 
+										-> table($_tablePagePath) 
+										-> selectColumns($this -> m_selectList)
+										-> dtaObjectName($className)
+										-> condition($_pCondition)
+										-> relations($this -> m_relationsList);
+
+		$queryResult = $dbQuery -> exec($_execFlags);
+
+		$modelSitemap = new modelSitemap;
+
+		foreach($queryResult as $page)
 		{
-			$_sqlPage['alternate_path']  = $this -> getAlternatePaths($_sqlConnection, $_sqlPage['page_id']);
-			$_sqlPage['page_categories'] = $this -> getCategories($_sqlConnection, $_sqlPage['node_id']);
-			$_sqlPage['page_tags'] 		 = $this -> getTags($_sqlConnection, $_sqlPage['node_id']);
+			$page -> alternate_path  = $this -> getAlternatePaths($_pDatabase, $page -> page_id);
+			$page -> page_categories = $this -> getCategories($_pDatabase, $page -> node_id);
+			$page -> page_tags 		 = $this -> getTags($_pDatabase, $page -> node_id);
+			$page -> page_url 		 = $modelSitemap -> getPagePath($_pDatabase, $page -> node_id, $page -> page_language);
 		
-			$this -> m_storage[] = new $_className($_sqlPage, $this -> m_shemePage -> getColumns());
+			$this -> m_resultList[] = new $className($page, $this -> m_shemePage -> getColumns());
 		}
 
-		if($_sqlPageRes -> num_rows !== 0)
-			return true;
-		
-		return false;
+		if(count($this -> m_resultList) == 0)
+			return false;
+
+		return true;
+	}
+
+	public function
+	loadByNodeSearch(CDatabaseConnection &$_pDatabase, CNodesSearch $_nodesSearch, int $_rootNodeId = 0)
+	{
+		$nodeIdList = [];
+
+		switch($_nodesSearch -> getType())
+		{
+			case 'tag':
+
+					$tagAllocCondition  = new CModelCondition();
+					$tagAllocCondition -> where('tag_url', urldecode($_nodesSearch -> getValue()));		
+
+					$conditionPages  = new CModelCondition();
+					$conditionPages -> where('tb_tags_allocation.tag_id', 'tb_tags.tag_id');	
+
+					$modelTagsAllocation  = new modelTagsAllocation();
+					$modelTagsAllocation -> addSelectColumns('tb_tags.*', 'tb_tags_allocation.*');
+					$modelTagsAllocation -> addRelation('join', 'tb_tags', $conditionPages);
+					$modelTagsAllocation -> load($_pDatabase, $tagAllocCondition);
+
+					foreach($modelTagsAllocation -> getResult() as $node)
+						$nodeIdList[] = $node -> node_id;
+
+					break;
+
+			case 'category':
+			
+					$categorieAllocCondition  = new CModelCondition();
+					$categorieAllocCondition -> where('category_url', urldecode($_nodesSearch -> getValue()));		
+
+					$conditionPages  = new CModelCondition();
+					$conditionPages -> where('tb_categories_allocation.category_id', 'tb_categories.category_id');	
+
+					$modelCategoriesAllocation  = new modelCategoriesAllocation();
+					$modelCategoriesAllocation -> addSelectColumns('tb_categories.*', 'tb_categories_allocation.*');
+					$modelCategoriesAllocation -> addRelation('join', 'tb_categories', $conditionPages);
+					$modelCategoriesAllocation -> load($_pDatabase, $categorieAllocCondition);
+
+					foreach($modelCategoriesAllocation -> getResult() as $node)
+						$nodeIdList[] = $node -> node_id;
+
+					break;
+
+			case 'search':
+
+					if($_rootNodeId == 0)
+						return false;
+
+					$whereInList = [];
+
+					$sitemapCondition = new CModelCondition();
+					$sitemapCondition -> where('node_id', $_rootNodeId);
+
+					$modelSitemap = new modelSitemap();
+					$modelSitemap -> load($_pDatabase, $sitemapCondition);
+
+					foreach($modelSitemap -> getResult() as $node)
+						$whereInList[] = $node -> node_id;
+
+					$searchValues = urldecode($_nodesSearch -> getValue());
+					$searchValues = explode(' ', $searchValues);
+					$searchValues = array_filter($searchValues, 'strlen');
+
+					$condSimple  = new CModelCondition();
+
+					foreach($searchValues as $value)
+					{
+						if($value[0] === '-')
+						{
+							$condSimple -> whereNotLike('tb_page_object_simple.body', '%'. substr($value, 1) .'%');
+						}
+						else
+						{
+							$condSimple -> whereLike('tb_page_object_simple.body', '%'. $value .'%');
+						}
+					}
+
+					$condSimple -> whereIn('tb_page_object.node_id', implode(',', $whereInList));
+
+					$condObject  = new CModelCondition();
+					$condObject -> where('tb_page_object.object_id', 'tb_page_object_simple.object_id');	
+
+					$modelSimple  = new modelSimple();
+					$modelSimple -> addSelectColumns('tb_page_object_simple.*', 'tb_page_object.*');
+					$modelSimple -> addRelation('join', 'tb_page_object', $condObject);
+					$modelSimple -> load($_pDatabase, $condSimple);
+
+					foreach($modelSimple -> getResult() as $node)
+						$nodeIdList[] = $node -> node_id;
+
+					$nodeIdList = array_unique($nodeIdList);
+
+					break;
+		}
+
+		$_tablePage				=	$this -> m_shemePage 		-> getTableName();
+
+		$condition	 = new CModelCondition();
+		$condition	-> whereIn("$_tablePage.node_id", implode(',', $nodeIdList));
+		$condition  -> orderBy('create_time', 'DESC'); 
+
+		$this -> load($_pDatabase, $condition);
+
+		return true;
 	}
 	
 	public function
-	updateOld(&$_sqlConnection, $_dataset)
+	update(CDatabaseConnection &$_pDatabase, array $_insertData, CModelCondition &$_pCondition, $_execFlags = NULL)
 	{	
+		$updateResult = true;
 
-		$_tablePageHeader		=	$this -> m_shemePageHeader 	-> getTableName();
-		$_tablePagePath			=	$this -> m_shemePagePath 	-> getTableName();
-		$_tablePage				=	$this -> m_shemePage 		-> getTableName();
-		
-		$_bQueryResult = true;
-
-		if($this -> m_storage[0] -> page_path != '/')			
-			$_dataset['page_path']		=	$this -> getValidPath($_sqlConnection, $_dataset['node_id'], $_dataset['page_name']) .'/';
+		if($this -> m_resultList[0] -> page_path != '/')			
+			$_insertData['page_path']		=	$this -> getValidPath($_pDatabase, $_insertData['node_id'], $_insertData['page_name']) .'/';
 			#parent node id funktion erstellen
-
 
 		##	tb_page
 
-		$_sqlString		 =	"UPDATE $_tablePage SET ";
-		$_loopCounter 	= 0;
-		foreach($_dataset as $_column => $_value)
-		{	
-			if(!$this -> m_shemePage -> columnExists(true, $_column)) continue;
-			$_sqlString  .= ($_loopCounter != 0 ? ', ':'') . "`". $_sqlConnection -> real_escape_string($_column) ."` = '". $_sqlConnection -> real_escape_string($_value) ."'";
-			$_loopCounter++;
-		}
-		$_sqlString 	 .= 	"	WHERE 		node_id 		= '". $_sqlConnection -> real_escape_string($_dataset['node_id']) ."'
-										AND		page_version 	= '". $_sqlConnection -> real_escape_string($_dataset['page_version']) ."'		
-								";
 
-		if($_bQueryResult && $_sqlConnection -> query($_sqlString) === false) $_bQueryResult = false;
+
+		$condition 			 = new CModelCondition();
+		$condition 			-> where('node_id', $_insertData['node_id'])
+							-> where('page_version', $_insertData['page_version']);
+
+		$updateResult 		 = parent::update($_pDatabase, $_insertData, $condition, $_execFlags);
 
 		##	tb_page_header
 
-		$_sqlString		 =	"UPDATE $_tablePageHeader SET ";
-		$_loopCounter 	= 0;
-		foreach($_dataset as $_column => $_value)
-		{	
-			if(!$this -> m_shemePageHeader -> columnExists(true, $_column)) continue;
-			$_sqlString  .= ($_loopCounter != 0 ? ', ':'') . "`". $_sqlConnection -> real_escape_string($_column) ."` = '". $_sqlConnection -> real_escape_string($_value) ."'";
-			$_loopCounter++;
-		}
-		$_sqlString 	 .= 	"	WHERE 		node_id 		= '". $_sqlConnection -> real_escape_string($_dataset['node_id']) ."'
-										AND		page_version 	= '". $_sqlConnection -> real_escape_string($_dataset['page_version']) ."'
-										AND		page_language 	= '". $_sqlConnection -> real_escape_string($_dataset['page_language']) ."'	
-								";
+		$condition 			 = new CModelCondition();
+		$condition 			-> where('node_id', $_insertData['node_id'])
+							-> where('page_version', $_insertData['page_version'])
+							-> where('page_language', $_insertData['page_language']);	
 
-		if($_bQueryResult && $_sqlConnection -> query($_sqlString) === false) $_bQueryResult = false;
+		$modelPageHeader 	 = new modelPageHeader();
+		$modelPageHeader 	-> update($_pDatabase, $_insertData, $condition, $_execFlags);
 
 		##	tb_page_path
 
-		$_sqlString		 =	"UPDATE $_tablePagePath SET ";
-		$_loopCounter 	= 0;
-		foreach($_dataset as $_column => $_value)
-		{	
-			if(!$this -> m_shemePagePath -> columnExists(true, $_column)) continue;
-			$_sqlString  .= ($_loopCounter != 0 ? ', ':'') . "`". $_sqlConnection -> real_escape_string($_column) ."` = '". $_sqlConnection -> real_escape_string($_value) ."'";
-			$_loopCounter++;
-		}
-		$_sqlString 	 .= 	"	WHERE 		node_id 		= '". $_sqlConnection -> real_escape_string($_dataset['node_id']) ."'
-										AND		page_language 	= '". $_sqlConnection -> real_escape_string($_dataset['page_language']) ."'	
-								";
+		$condition 			 = new CModelCondition();
+		$condition 			-> where('node_id', $_insertData['node_id'])
+							-> where('page_language', $_insertData['page_language']);	
 
-		if($_bQueryResult && $_sqlConnection -> query($_sqlString) === false) $_bQueryResult = false;
+		$modelPagePath 		 = new modelPagePath();
+		$modelPagePath 		-> update($_pDatabase, $_insertData, $condition, $_execFlags);
 
 		##	return
 
-		return $_bQueryResult;
+		return $updateResult;
 	}	
 
-	/**
-	 * 	This function updates target node and all child nodes
-	 */
 	public function
-	updateChilds(&$_sqlConnection, $_dataset, CModelCondition $_condition = NULL)
+	updateChilds(CDatabaseConnection &$_pDatabase, $_insertData, CModelCondition $_condition = NULL)
 	{
 		if($_condition === NULL || !$_condition -> isSet()) return false;
 
 		$childNodesList = [];
 		$nodeId 		= $_condition -> getConditionListValue('node_id');
-		$tableNamePage	=	$this -> m_shemePage -> getTableName();
-			
-		$this -> getNodeTree($_sqlConnection, $nodeId, $childNodesList);
+					
+		$this -> getNodeTree($_pDatabase, $nodeId, $childNodesList);
 
 		foreach($childNodesList as $node)
 		{
-			$updateCondition = new CModelCondition();
-			$updateCondition -> where('node_id', $node['node_id'] );
+			$condition = new CModelCondition();
+			$condition -> where('node_id', $node -> node_id );
 
-			$sqlString		 =	"UPDATE $tableNamePage SET ";
-			$loopCounter 	= 0;
-			foreach($_dataset as $_column => $_value)
-			{	
-				if(!$this -> m_shemePage -> columnExists(true, $_column)) continue;
-				$sqlString  .= ($loopCounter != 0 ? ', ':'') . "`". $_sqlConnection -> real_escape_string($_column) ."` = '". $_sqlConnection -> real_escape_string($_value) ."'";
-				$loopCounter++;
-			}
-			$sqlString	 .= $updateCondition -> getConditions($_sqlConnection, $updateCondition);
-
-			$_sqlConnection -> query($sqlString);
+			parent::update($_pDatabase, $_insertData, $condition);
 		}
 
 		return true;
 	}
 
 	public function
-	insert(&$_sqlConnection, &$_dataset, &$_insertID)
+	insert(CDatabaseConnection &$_pDatabase, array $_insertData, $_execFlags = NULL)
 	{
-		$_bQueryResult = true;
-
 		$_tablePageHeader		=	$this -> m_shemePageHeader 	-> getTableName();
 		$_tablePagePath			=	$this -> m_shemePagePath 	-> getTableName();
 		$_tablePage				=	$this -> m_shemePage 		-> getTableName();
+
+		$m_modelPageHeader		=	$this -> m_modelPageHeader;
+		$m_modelPagePath		=	$this -> m_modelPagePath;
 		
 		##	add required data
 
-		$_dataset['page_version'] 	= 	1;
-		$_dataset['page_language']	=	$_dataset['cms-edit-page-lang'];
+		$_insertData['page_version'] 	= 	1;
+		$_insertData['page_language']	=	$_insertData['cms-edit-page-lang'];
 
-		if(empty($_dataset['page_title']))
-			$_dataset['page_title'] = $_dataset['page_name'];
+		if(empty($_insertData['page_title']))
+			$_insertData['page_title'] = $_insertData['page_name'];
 
-		if(!isset($_dataset['page_id']))
-			$_dataset['page_id'] 		= 	$this -> getFreePageID($_sqlConnection);
+		if(!isset($_insertData['page_id']))
+			$_insertData['page_id'] 		= 	$this -> getFreePageID($_pDatabase);
 
-		if($_dataset['page_id'] !== '1')		
-			$_dataset['page_path']		=	$this -> getValidPath($_sqlConnection, $_dataset['cms-edit-page-node'], $_dataset['page_name']) .'/';
+
+		if(empty($_insertData['page_path']))
+			$_insertData['page_path'] = $_insertData['page_name'];
+
+		if($_insertData['page_id'] !== '1')		
+			$_insertData['page_path']		=	$this -> getValidPath($_pDatabase, $_insertData['cms-edit-page-node'], $_insertData['page_path']) .'/';
 		else
-			$_dataset['page_path']		= '/';
+			$_insertData['page_path']		= '/';
 			
 		##	Table tb_page_path
-	
+		
 		$_parentNode = [];
-		if(!$this -> getNodeData($_sqlConnection, $_dataset['cms-edit-page-node'], $_parentNode))
+		if(!$this -> getNodeData($_pDatabase, $_insertData['cms-edit-page-node'], $_parentNode))
 		{
-			trigger_error('modelPage::delete() - Node does not exists');
+			trigger_error('modelPage::insert() - Node does not exists');
 			return false;
 		}
-
-		$_sqlConnection -> query("UPDATE $_tablePagePath SET node_rgt=node_rgt+2 WHERE node_rgt >= ". $_parentNode['node_rgt']);
-		$_sqlConnection -> query("UPDATE $_tablePagePath SET node_lft=node_lft+2 WHERE node_lft >  ". $_parentNode['node_rgt']);
-
-		$_dataset['node_lft'] = $_parentNode['node_rgt'];
-		$_dataset['node_rgt'] = $_parentNode['node_rgt'] + 1;
-
-
-
-
-		$_className		=	$this -> createClass($this -> m_shemePagePath, 'page_path');
-		$_model 		= 	new $_className($_dataset, $this -> m_shemePagePath -> getColumns());
-		$_sqlString		=	"INSERT INTO $_tablePagePath SET ";
-
-		$_loopCounter = 0;
-		foreach($this -> m_shemePagePath -> getColumns() as $_column)
-		{
-			if($_column -> name === 'data_id') continue;
-			if($_column -> isVirtual) continue;
-			if(!property_exists($_model, $_column -> name)) continue;
-
-			$_tmp		 = $_column -> name;
-			$_sqlString .= ($_loopCounter != 0 ? ', ':'');
-			$_sqlString .= "`".$_column -> name ."` = '". $_model -> $_tmp ."'";
-			$_loopCounter++;
-		}
 		
-		if($_bQueryResult && $_sqlConnection -> query($_sqlString) === false) $_bQueryResult = false;
+		$pagePathCond	 = new CModelCondition();
+		$pagePathCond	-> whereGreaterEven('node_rgt', $_parentNode -> node_rgt);
+		$dtaObject 		 = new stdClass();
+		$dtaObject 		-> node_rgt 		= 'node_rgt+2';
+		$dtaObject 		-> prepareMode 		= false;
+		$_pDatabase		-> query(DB_UPDATE) -> table($_tablePagePath) -> dtaObject($dtaObject) -> condition($pagePathCond) -> exec();
 
-		$_dataset['node_id'] = $_sqlConnection -> insert_id;
-		$_insertID			 = $_dataset['node_id'];
+		$pagePathCond	 = new CModelCondition();
+		$pagePathCond	-> whereGreater('node_lft', $_parentNode -> node_rgt);
+		$dtaObject 		 = new stdClass();
+		$dtaObject 		-> node_lft 		= 'node_lft+2';
+		$dtaObject 		-> prepareMode 		= false;
+		$_pDatabase		-> query(DB_UPDATE) -> table($_tablePagePath) -> dtaObject($dtaObject) -> condition($pagePathCond) -> exec();
+
+		$_insertData['node_lft'] = $_parentNode -> node_rgt;
+		$_insertData['node_rgt'] = $_parentNode -> node_rgt + 1;
+		$_insertData['node_level'] = $_parentNode -> node_level + 1;
+
+		$modelPagePath 	 		= new $m_modelPagePath();
+		$_insertData['node_id'] = $modelPagePath -> insert($_pDatabase, $_insertData, $_execFlags);
 
 		##	Get page_auth from parent node and append dataset data
 
-		$parentNodePage = $_sqlConnection -> query("SELECT page_auth FROM $_tablePage WHERE node_id = ". $_parentNode['node_id']);
-		$_dataset['page_auth'] = $parentNodePage = $parentNodePage -> fetch_assoc()['page_auth'];
+		$condition		 = new CModelCondition();
+		$condition		-> where('node_id', $_parentNode -> node_id);
+
+		$dbQuery 	= $_pDatabase		-> query(DB_SELECT) 
+										-> table($_tablePage) 
+										-> selectColumns(['page_auth'])
+										-> condition($condition);
+
+		$queryRes = $dbQuery -> exec();
+
+		if(count($queryRes) !== 0)
+			$_insertData['page_auth'] = reset($queryRes) -> page_auth;
 
 		##	Table tb_page
 		
-		$_className		=	$this -> createClass($this -> m_shemePage, 'page');
-		$_model 		= 	new $_className($_dataset, $this -> m_shemePage -> getColumns());
-
-		$_sqlString		=	"INSERT INTO $_tablePage SET ";
-
-		$_loopCounter = 0;
-		foreach($this -> m_shemePage -> getColumns() as $_column)
-		{
-			if($_column -> name === 'data_id') continue;
-			if($_column -> isVirtual) continue;
-			if(!property_exists($_model, $_column -> name)) continue;
-
-			$_tmp		 = $_column -> name;
-			$_sqlString .= ($_loopCounter != 0 ? ', ':'');
-			$_sqlString .= "`".$_column -> name ."` = '". $_model -> $_tmp ."'";
-			$_loopCounter++;
-		}
-
-		if($_bQueryResult && $_sqlConnection -> query($_sqlString) === false) $_bQueryResult = false;
+		parent::insert($_pDatabase, $_insertData, $_execFlags);
 
 		##	Table tb_page_header
+		
+		$modelPageHeader 	 = new $m_modelPageHeader();
+		$modelPageHeader 	-> insert($_pDatabase, $_insertData, $_execFlags);
 
-		$_className		=	$this -> createClass($this -> m_shemePageHeader,'page_header');
-		$_model 		= 	new $_className($_dataset, $this -> m_shemePageHeader -> getColumns());
-
-		$_sqlString		=	"INSERT INTO $_tablePageHeader SET ";
-
-		$_loopCounter = 0;
-		foreach($this -> m_shemePageHeader -> getColumns() as $_column)
-		{
-			if($_column -> name === 'data_id') continue;
-			if($_column -> isVirtual) continue;
-			if(!property_exists($_model, $_column -> name)) continue;
-
-			$_tmp		 = $_column -> name;
-			$_sqlString .= ($_loopCounter != 0 ? ', ':'');
-			$_sqlString .= "`".$_column -> name ."` = '". $_model -> $_tmp ."'";
-			$_loopCounter++;
-		}
-
-		if($_bQueryResult && $_sqlConnection -> query($_sqlString) === false) $_bQueryResult = false;
-
-		return $_bQueryResult;
+		return $_insertData['node_id'];
 	}
 	
 	public function
-	delete( &$_sqlConnection, CModelCondition $_condition = NULL)
+	delete(CDatabaseConnection &$_pDatabase, CModelCondition &$_pCondition, $_execFlags = NULL)
 	{
-		if($_condition === NULL || !$_condition -> isSet()) return false;
+		if($_pCondition === NULL || !$_pCondition -> isSet()) return false;
 		
-		$nodeId = $_condition -> getConditionListValue('node_id');
+		$nodeId = $_pCondition -> getConditionListValue('node_id');
 
 		$_nodeData = [];
-		if(!$nodeId || !$this -> getNodeData($_sqlConnection, $nodeId, $_nodeData))
+		if(!$nodeId || !$this -> getNodeData($_pDatabase, $nodeId, $_nodeData))
 		{
 			trigger_error('modelPage::delete() - Node does not exists');
 			return false;
 		}
 
-		#$_tablePageHeader		=	$this -> m_shemePageHeader 	-> getTableName();
 		$_tablePagePath			=	$this -> m_shemePagePath 	-> getTableName();
 		$_tablePage				=	$this -> m_shemePage 		-> getTableName();
 
-		$_sqlConnection -> query("DELETE FROM $_tablePage 		". $_condition -> getConditions($_sqlConnection, $_condition));
-		#$_sqlConnection -> query("DELETE FROM $_tablePageHeader ". $_condition -> getConditions($_sqlConnection, $_condition));
+		$_pDatabase		-> query(DB_DELETE) -> table($_tablePage) -> condition($_pCondition) -> exec();
 
-		$_sqlConnection -> query("DELETE FROM $_tablePagePath WHERE node_lft = ". $_nodeData['node_lft']);
-		$_sqlConnection -> query("UPDATE 	  $_tablePagePath SET node_lft=node_lft-1, node_rgt=node_rgt-1 WHERE node_lft BETWEEN ". $_nodeData['node_lft'] ." AND ". $_nodeData['node_rgt']);
-		$_sqlConnection -> query("UPDATE 	  $_tablePagePath SET node_lft=node_lft-2 WHERE node_lft > ". $_nodeData['node_rgt']);
-		$_sqlConnection -> query("UPDATE 	  $_tablePagePath SET node_rgt=node_rgt-2 WHERE node_rgt > ". $_nodeData['node_rgt']);
+		$pagePathCond	 = new CModelCondition();
+		$pagePathCond	-> where('node_lft', $_nodeData -> node_lft);
+		$_pDatabase		-> query(DB_DELETE) -> table($_tablePagePath) -> condition($pagePathCond) -> exec();
+
+		$pagePathCond	 = new CModelCondition();
+		$pagePathCond	-> whereBetween('node_lft', $_nodeData -> node_lft, $_nodeData -> node_rgt);
+		$dtaObject 		 = new stdClass();
+		$dtaObject 		-> node_lft 		= 'node_lft-1';
+		$dtaObject 		-> node_rgt 		= 'node_rgt-1';
+		$dtaObject 		-> node_level 		= 'node_level-1';
+
+		$dtaObject 		-> prepareMode 		= false;
+		$_pDatabase		-> query(DB_UPDATE) -> table($_tablePagePath) -> dtaObject($dtaObject) -> condition($pagePathCond) -> exec();
+
+		$pagePathCond	 = new CModelCondition();
+		$pagePathCond	-> whereGreater('node_lft', $_nodeData -> node_rgt);
+		$dtaObject 		 = new stdClass();
+		$dtaObject 		-> node_lft 		= 'node_lft-2';
+		$dtaObject 		-> prepareMode 		= false;
+		$_pDatabase		-> query(DB_UPDATE) -> table($_tablePagePath) -> dtaObject($dtaObject) -> condition($pagePathCond) -> exec();
+
+		$pagePathCond	 = new CModelCondition();
+		$pagePathCond	-> whereGreater('node_rgt', $_nodeData -> node_rgt);
+		$dtaObject 		 = new stdClass();
+		$dtaObject 		-> node_rgt 		= 'node_rgt-2';
+		$dtaObject 		-> prepareMode 		= false;
+		$_pDatabase		-> query(DB_UPDATE) -> table($_tablePagePath) -> dtaObject($dtaObject) -> condition($pagePathCond) -> exec();
 
 		return true;
 	}	
 
 	public function
-	deleteTree(&$_sqlConnection, CModelCondition $_condition = NULL)
+	deleteTree(CDatabaseConnection &$_pDatabase, CModelCondition $_condition = NULL)
 	{
 		if($_condition === NULL || !$_condition -> isSet()) return false;
 
 		$nodeId = $_condition -> getConditionListValue('node_id');
 
 		$_nodeData = [];
-		if(!$nodeId || !$this -> getNodeData($_sqlConnection, $nodeId, $_nodeData))
+		if(!$nodeId || !$this -> getNodeData($_pDatabase, $nodeId, $_nodeData))
 		{
-			trigger_error('modelPage::delete() - Node does not exists');
+			trigger_error('modelPage::deleteTree() - Node does not exists');
 			return false;
 		}
 
@@ -346,82 +429,116 @@ class 	modelPage extends CModel
 		$_tablePage				=	$this -> m_shemePage 		-> getTableName();
 
 		$_nodeTree 	= [];
-		$this -> getNodeTree($_sqlConnection, $nodeId, $_nodeTree);
+		$this -> getNodeTree($_pDatabase, $nodeId, $_nodeTree);
 		foreach($_nodeTree as $_node)
 		{
-			$_sqlConnection -> query("DELETE FROM $_tablePage 		WHERE node_id = '". $_node['node_id'] ."'");
+			$condition		 = new CModelCondition();
+			$condition		-> where('node_id', $_node -> node_id);
+
+			$_pDatabase		-> query(DB_DELETE) 
+							-> table($_tablePage) 
+							-> condition($condition)
+							-> exec();
 		}
 
-		$_sqlConnection -> query("DELETE FROM $_tablePagePath WHERE node_lft BETWEEN ". $_nodeData['node_lft'] ." AND ". $_nodeData['node_rgt']);
-		$_sqlConnection -> query("UPDATE 	  $_tablePagePath SET node_lft=node_lft-ROUND(". ( $_nodeData['node_rgt'] - $_nodeData['node_lft'] + 1 ). ") WHERE node_lft > ". $_nodeData['node_rgt']);
-		$_sqlConnection -> query("UPDATE 	  $_tablePagePath SET node_rgt=node_rgt-ROUND(". ( $_nodeData['node_rgt'] - $_nodeData['node_lft'] + 1 ) .") WHERE node_rgt > ". $_nodeData['node_rgt']);
+		$condition		 = new CModelCondition();
+		$condition		-> whereBetween('node_lft', $_nodeData -> node_lft, $_nodeData -> node_rgt);
 
+		$_pDatabase		-> query(DB_DELETE) 
+						-> table($_tablePagePath) 
+						-> condition($condition)
+						-> exec();
+
+		$pagePathCond	 = new CModelCondition();
+		$pagePathCond	-> whereGreater('node_lft', $_nodeData -> node_rgt);
+		$dtaObject 		 = new stdClass();
+		$dtaObject 		-> node_lft 		= 'node_lft-ROUND('. ( $_nodeData -> node_rgt - $_nodeData -> node_lft + 1 ) .')';
+		$dtaObject 		-> prepareMode 		= false;
+		$_pDatabase		-> query(DB_UPDATE) -> table($_tablePagePath) -> dtaObject($dtaObject) -> condition($pagePathCond) -> exec();
+
+
+		$pagePathCond	 = new CModelCondition();
+		$pagePathCond	-> whereGreater('node_rgt', $_nodeData -> node_rgt);
+		$dtaObject 		 = new stdClass();
+		$dtaObject 		-> node_rgt 		= 'node_rgt-ROUND('. ( $_nodeData -> node_rgt - $_nodeData -> node_lft + 1 ) .')';
+		$dtaObject 		-> prepareMode 		= false;
+		$_pDatabase		-> query(DB_UPDATE) -> table($_tablePagePath) -> dtaObject($dtaObject) -> condition($pagePathCond) -> exec();
 
 		return true;
 	}
 			
 	private function
-	getNodeData(&$_sqlConnection, int $_nodeID, array &$_nodeData)
+	getNodeData(CDatabaseConnection &$_pDatabase, int $_nodeID, array &$_nodeData)
 	{
-		$_sqlParentNodeRes	= 	$_sqlConnection -> query("SELECT * FROM tb_page_path WHERE node_id = '". $_sqlConnection -> real_escape_string($_nodeID) ."'");
+		$tablePagePath	 =	$this -> m_shemePagePath 	-> getTableName();
+		$condition		 = new CModelCondition();
+		$condition		-> where('node_id', $_nodeID);
 
-		if($_sqlParentNodeRes === false || !$_sqlParentNodeRes -> num_rows)
+		$dbQuery = $_pDatabase		-> query(DB_SELECT) 
+									-> table($tablePagePath) 
+									-> condition($condition);
+
+		$queryRes = $dbQuery -> exec();
+
+
+		if($queryRes === false || !count($queryRes))
 			return false;
 
-		$_nodeData		=	$_sqlParentNodeRes -> fetch_assoc();
+		$_nodeData		=	$queryRes[0];
 		return true;
 	}
 
 	private function
-	getNodeTree(&$_sqlConnection, int $_nodeID, array &$_nodeData)
+	getNodeTree(CDatabaseConnection &$_pDatabase, int $_nodeID, array &$_nodeData)
 	{
 		$_tablePagePath	=	$this -> m_shemePagePath 	-> getTableName();
 
-		$_sqlString 	=	"	SELECT 		o.page_path,
-											o.node_id,
-											COUNT(p.node_id)-1 AS level
-								FROM 		$_tablePagePath AS n,
-											$_tablePagePath AS p,
-											$_tablePagePath AS o
-								WHERE 		o.node_lft BETWEEN p.node_lft AND p.node_rgt
-								AND 		o.node_lft BETWEEN n.node_lft AND n.node_rgt
-								AND 		n.node_id = '". $_sqlConnection -> real_escape_string($_nodeID) ."'
-								GROUP BY	o.node_lft
-								ORDER BY 	o.node_lft
-							";
+		/*
+			the directUse paramter is not a good practice
 
-		$_sqlNodeRes = $_sqlConnection -> query($_sqlString);
+			but this between condition with table names needs to be outside of execute-input-parameters
+		*/
 
-		if($_sqlNodeRes === false || !$_sqlNodeRes -> num_rows)
-		{
-			trigger_error('CNestedSets::getNodeChilds() - Node does not exists');
-			return;
-		}
 
-		$_nodeData 	    = [];
-		while($_sqlNode = $_sqlNodeRes -> fetch_assoc())
-			$_nodeData[]  = $_sqlNode;		
+		$nodeTreeCond	 = new CModelCondition();
+		$nodeTreeCond	-> whereBetween('o.node_lft', 'p.node_lft', 'p.node_rgt', true)
+						-> whereBetween('o.node_lft', 'n.node_lft', 'n.node_rgt', true)
+						-> where('n.node_id', $_nodeID)
+						-> groupBy('o.node_lft')
+						-> orderBy('o.node_lft');
+
+		$accessRes 		 = $_pDatabase		-> query(DB_SELECT) 
+											-> table($_tablePagePath, 'n') 
+											-> table($_tablePagePath, 'p') 
+											-> table($_tablePagePath, 'o') 
+											-> selectColumns(['o.page_path', 'o.node_id', 'COUNT(p.node_id)-1 AS level'])
+											-> condition($nodeTreeCond)
+											-> exec();
+
+		$_nodeData = $accessRes;
 	}
 
 	private function
-	getFreePageID(&$_sqlConnection)
+	getFreePageID(CDatabaseConnection &$_pDatabase)
 	{
-		$_tablePage		=	$this -> m_shemePage 		-> getTableName();
+		$tableName		=	$this -> m_shemePage 		-> getTableName();
 
-		$_sqlString		=	"	SELECT		$_tablePage.page_id
-								FROM 		$_tablePage
-								ORDER BY 	$_tablePage.page_id DESC
-								LIMIT		1
-							";
+		$condition		 = new CModelCondition();
+		$condition		-> limit(1);
+		$condition		-> orderBy('page_id', 'DESC');
 
-		$_sqlLatestRes	=	$_sqlConnection -> query($_sqlString);
-		$_sqlLatest		=	$_sqlLatestRes -> fetch_assoc();
+		$dbQuery 	= $_pDatabase		-> query(DB_SELECT) 
+										-> table($tableName) 
+										-> selectColumns(['page_id'])
+										-> condition($condition);
 
-		return (intval($_sqlLatest['page_id']) + 1);
+		$queryRes = $dbQuery -> exec();
+
+		return (intval($queryRes[0] -> page_id) + 1);
 	}
 
 	private function
-	getValidPath(&$_sqlConnection, int $_nodeID, string $_path, int $_try = 0)
+	getValidPath(CDatabaseConnection &$_pDatabase, int $_nodeID, string $_path, int $_try = 0)
 	{
 		$_level 	= 0;
 		$_path 		= tk::normalizeFilename($_path, true) ;
@@ -431,15 +548,15 @@ class 	modelPage extends CModel
 		if($_try != 0)
 			$_path2Check =  $_path .'-'. $_try;
 	
-		$this -> getNodeTree($_sqlConnection, $_nodeID, $_nodeTree);
+		$this -> getNodeTree($_pDatabase, $_nodeID, $_nodeTree);
 	
 		foreach($_nodeTree as $_node)
 		{
-			if($_level == 0) $_level = $_node['level'] + 1;
-			if($_node['level'] != $_level) continue;
-			if($_node['page_path'] === $_path2Check .'/')
+			if($_level == 0) $_level = $_node -> level + 1;
+			if($_node -> level != $_level) continue;
+			if($_node -> page_path === $_path2Check .'/')
 			{
-				$_result = $this -> getValidPath($_sqlConnection, $_nodeID, $_path, ($_try + 1));
+				$_result = $this -> getValidPath($_pDatabase, $_nodeID, $_path, ($_try + 1));
 				if($_result !== false)
 					return $_result;
 			}
@@ -448,67 +565,68 @@ class 	modelPage extends CModel
 	}
 
 	private function
-	getAlternatePaths(&$_sqlConnection, $_pageID)
+	getAlternatePaths(CDatabaseConnection &$_pDatabase, $_pageID)
 	{
+		$tablePagePath			=	$this -> m_shemePagePath 	-> getTableName();
+		$tablePage				=	$this -> m_shemePage 		-> getTableName();
 
 		$timestamp 		= 	time();
-
 		$_returnArray	=	[];
-
-		$_sqlString 	=	"	SELECT 		tb_page_path.node_id,
-											tb_page_path.page_language,
-											tb_page.hidden_state,
-											tb_page.page_auth,
-											tb_page.publish_from,
-											tb_page.publish_until
-								FROM 		tb_page_path
-								JOIN		tb_page
-									ON		tb_page.node_id			= tb_page_path.node_id
-								WHERE 		tb_page_path.page_id 	= '". $_pageID ."'
-							";
-
-		$_sqlPagesRes 	= $_sqlConnection -> query($_sqlString);
 		
+		$nodePageRelCond = new CModelCondition();
+		$nodePageRelCond-> where($tablePage.'.node_id', $tablePagePath.'.node_id');
+		$nodePathRel	 = new CModelRelations('join', $tablePage, $nodePageRelCond);
 
-		while($_sqlPagesRes !== false && $_sqlPages = $_sqlPagesRes -> fetch_assoc())
+		$nodePageCond	 = new CModelCondition();
+		$nodePageCond	-> where($tablePagePath.'.page_id', $_pageID);
+
+		$sqlPagesRes 	 = $_pDatabase		-> query(DB_SELECT) 
+											-> table($tablePagePath) 
+											-> selectColumns([$tablePagePath.'.node_id', $tablePagePath.'.page_language', $tablePage.'.hidden_state', $tablePage.'.page_auth', $tablePage.'.publish_from', $tablePage.'.publish_until'])
+											-> condition($nodePageCond)
+											-> relations([$nodePathRel])
+											-> exec();
+
+		if($sqlPagesRes === false)
+			return $_returnArray;
+
+		foreach($sqlPagesRes as $_sqlPages)
 		{
-
 			if(
-					($_sqlPages['hidden_state'] == 0)
-				&&	(empty($_sqlPages['page_auth']) || (!empty($_sqlPages['page_auth']) && CSession::instance() -> isAuthed($_sqlPages['page_auth']) === true))
-				||	(	($_sqlPages['hidden_state'] == 5 && $_sqlPages['publish_from']  < $timestamp)
-					&&	($_sqlPages['hidden_state'] == 5 && $_sqlPages['publish_until'] > $timestamp && $_sqlPages['publish_until'] != 0)
+					($_sqlPages -> hidden_state == 0)
+				&&	(empty($_sqlPages -> page_auth) || (!empty($_sqlPages -> page_auth) && CSession::instance() -> isAuthed($_sqlPages -> page_auth) === true))
+				||	(	($_sqlPages -> hidden_state == 5 && $_sqlPages -> publish_from  < $timestamp)
+					&&	($_sqlPages -> hidden_state == 5 && $_sqlPages -> publish_until > $timestamp && $_sqlPages -> publish_until != 0)
 					)
 			); else continue;
 
+			$nodePathCond	 = new CModelCondition();
+			$nodePathCond	-> whereBetween('n.node_lft', 'p.node_lft', 'p.node_rgt', true)
+							-> where('n.node_id', $_sqlPages -> node_id)
+							-> orderBy('p.node_lft');
 
+			$sqlPgHeadRes	 = $_pDatabase	-> query(DB_SELECT) 
+											-> table($tablePagePath, 'n') 
+											-> table($tablePagePath, 'p') 
+											-> selectColumns(['p.node_id', 'p.page_path', 'p.page_id', 'p.page_language'])
+											-> condition($nodePathCond)
+											-> exec();
 
-			$_sqlString =	"	SELECT 		p.node_id, 
-											p.page_path,
-											p.page_id,
-											p.page_language
-								FROM 		tb_page_path AS n,
-											tb_page_path AS p
-								WHERE 		n.node_lft
-									BETWEEN p.node_lft 
-										AND	p.node_rgt 
-									AND 	n.node_id = '". $_sqlConnection -> real_escape_string($_sqlPages['node_id']) ."'
-								ORDER BY 	n.node_lft
-							";
+			if($sqlPgHeadRes === false)
+				break;
 
-			$_sqlPgHeadRes	=	 $_sqlConnection -> query($_sqlString);
-
-			while($_sqlPgHeadRes !== false && $_sqlPgHead = $_sqlPgHeadRes -> fetch_assoc())
+			foreach($sqlPgHeadRes as $_sqlPgHead)
 			{
-				if($_sqlPgHead['page_language'] == '0') continue;
+				if($_sqlPgHead -> page_language == '0')
+					continue;
 
-				if(!isset($_returnArray[$_sqlPgHead['page_language']]))
-					$_returnArray[$_sqlPgHead['page_language']]['path'] = '';
+				if(!isset($_returnArray[$_sqlPgHead -> page_language]))
+					$_returnArray[$_sqlPgHead -> page_language]['path'] = '';
 
-				$_returnArray[$_sqlPgHead['page_language']]['path'] 	    .= $_sqlPgHead['page_path'];
-				$_returnArray[$_sqlPgHead['page_language']]['node_id'] 		 = $_sqlPgHead['node_id'];
-				$_returnArray[$_sqlPgHead['page_language']]['page_language'] = $_sqlPgHead['page_language'];
-				$_returnArray[$_sqlPgHead['page_language']]['page_id'] 		 = $_sqlPgHead['page_id'];
+				$_returnArray[$_sqlPgHead -> page_language]['path'] 	    .= $_sqlPgHead -> page_path;
+				$_returnArray[$_sqlPgHead -> page_language]['node_id'] 		 = $_sqlPgHead -> node_id;
+				$_returnArray[$_sqlPgHead -> page_language]['page_language'] = $_sqlPgHead -> page_language;
+				$_returnArray[$_sqlPgHead -> page_language]['page_id'] 		 = $_sqlPgHead -> page_id;
 			}	
 		}
 
@@ -516,69 +634,73 @@ class 	modelPage extends CModel
 	}
 
 	private function
-	getCategories(&$_sqlConnection, $_nodeId)
+	getCategories(CDatabaseConnection &$_pDatabase, $_nodeId)
 	{
 		$catArray	=	[];
 
-		$sqlString	=	"	SELECT	tb_categories.*
-							FROM	tb_categories
-							JOIN	tb_categories_allocation
-								ON	tb_categories_allocation.category_id = tb_categories.category_id
-							WHERE	tb_categories_allocation.node_id = $_nodeId
-						";
+		$joinCondition		 = new CModelCondition();
+		$joinCondition		-> where("tb_categories_allocation.category_id", "tb_categories.category_id");
 
-		$sqlCatsRes	=	$_sqlConnection -> query($sqlString);
+		$selectCondition	 = new CModelCondition();
+		$selectCondition	-> where("tb_categories_allocation.node_id", $_nodeId);
 
-		while($sqlCatsRes !== false && $sqlCatsItm = $sqlCatsRes -> fetch_assoc())
+		$modelCategories	 = new modelCategories();
+		$modelCategories  	-> addRelation('JOIN', 'tb_categories_allocation', $joinCondition);
+		$modelCategories 	-> load($_pDatabase, $selectCondition);
+
+		foreach($modelCategories -> getResult() as $sqlCatsItm)
 		{
 			$catArray[] = 	[	
-							"id" 	=> 	$sqlCatsItm['category_id'],
-							"name" 	=>	$sqlCatsItm['category_name']
+							"id" 	=> 	$sqlCatsItm -> category_id,
+							"name" 	=>	$sqlCatsItm -> category_name
 							];
 		}
-		
+	
 		return $catArray;
 	}
 
 	private function
-	getTags(&$_sqlConnection, $_nodeId)
+	getTags(CDatabaseConnection &$_pDatabase, $_nodeId)
 	{
 		$tagArray	=	[];
 
-		$sqlString	=	"	SELECT	tb_tags.*
-							FROM	tb_tags
-							JOIN	tb_tags_allocation
-								ON	tb_tags_allocation.tag_id = tb_tags.tag_id
-							WHERE	tb_tags_allocation.node_id = $_nodeId
-						";
+		$joinCondition		 = new CModelCondition();
+		$joinCondition		-> where("tb_tags_allocation.tag_id", "tb_tags.tag_id");
 
-		$sqlTagRes	=	$_sqlConnection -> query($sqlString);
+		$selectCondition	 = new CModelCondition();
+		$selectCondition	-> where("tb_tags_allocation.node_id", $_nodeId);
 
-		while($sqlTagRes !== false && $sqlTagItm = $sqlTagRes -> fetch_assoc())
+		$modelTags			 = new modelTags();
+		$modelTags 		 	-> addRelation('JOIN', 'tb_tags_allocation', $joinCondition);
+		$modelTags 			-> load($_pDatabase, $selectCondition);
+
+		foreach($modelTags -> getResult() as $sqlTagItm)
 		{
 			$tagArray[] = 	[	
-							"id" 	=> 	$sqlTagItm['tag_id'],
-							"name" 	=>	$sqlTagItm['tag_name']
+							"id" 	=> 	$sqlTagItm -> tag_id,
+							"name" 	=>	$sqlTagItm -> tag_name
 							];
 		}
-		
+
 		return $tagArray;
 	}
 }
 
-/**
- * 	Parent class for the data class with toolkit functions. It get the child instance to access the child properties.
-
-class 	toolkitSite
+class 	modelBackendPage extends modelPage
 {
-	protected	$m_childInstance;
-
 	public function
-	__construct($_instance)
+	__construct()
 	{
-		$this -> m_childInstance = $_instance;
-	}
+		parent::__construct('shemeBackendPage');
+	
+		$this -> m_shemePageHeader 	= new shemeBackendPageHeader();
+		$this -> m_shemePagePath 	= new shemeBackendPagePath();
+		$this -> m_shemePage	 	= new shemeBackendPage();
 
+
+		$this -> m_modelPageHeader	= 'modelBackendPageHeader';
+		$this -> m_modelPagePath	= 'modelBackendPagePath';
+	}
 }
- */
+
 ?>

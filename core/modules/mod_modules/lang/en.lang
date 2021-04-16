@@ -11,6 +11,7 @@
 ##	
 
 	M_BEMOULE_NAME					=	Module name
+	M_BEMOULE_DESC					=	Description
 	M_BEMOULE_SECTION				=	Section
 	M_BEMOULE_STATE					=	Module state
 

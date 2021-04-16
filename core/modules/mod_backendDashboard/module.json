@@ -1,0 +1,20 @@
+{
+	"sheme"				: 2,
+	"version"			: 1,
+	"module"			: {
+		"controller"	: "",
+		"name"			: "Backend Dashboard",
+		"desc"			: "",
+		"group"			: "backend",
+		"icon"			: "",
+		"frontend"		: 0
+	},
+	"page"				: {
+		"path"			: "dashboard",
+		"name"			: "Dashboard",
+		"menu_group"	: "0"
+	},
+	"objectList" 		: [],
+	"rights"			: [],
+	"sections"			: []
+}

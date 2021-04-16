@@ -1,43 +1,40 @@
 <?php
 
+define('MODEL_RIGHTGROUPS_NUM_ASSIGNMENTS',0x101);
+
 include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SHEME.'shemeRightGroups.php';	
+
+include_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelUserGroups.php';	
 
 class 	modelRightGroups extends CModel
 {
 	public function
 	__construct()
 	{		
-		parent::__construct('rightGroup');		
-		$this -> m_sheme = new shemeRightGroups();
+		parent::__construct('shemeRightGroups', 'rightGroup');	
 	}	
 
 	public function
-	load(&$_sqlConnection, CModelCondition $_condition = NULL, CModelComplementary $_complementary = NULL)
+	load(CDatabaseConnection &$_pDatabase, CModelCondition $_pCondition = NULL, $_execFlags = NULL)
 	{
-		$result = parent::load($_sqlConnection, $_condition);
+		$dtaCount = parent::load($_pDatabase, $_pCondition, $_execFlags);
 
-		if($result)
-		foreach($this -> m_storage as $dataset)
-			$dataset -> group_rights = json_decode($dataset -> group_rights);
+		if($_execFlags & MODEL_RIGHTGROUPS_NUM_ASSIGNMENTS) 
+		for($i = 0; $i < $dtaCount; $i++)
+		{
+			$accessCondition  		 = new CModelCondition();
+			$accessCondition		-> where('group_id', $this -> m_resultList[$i] -> group_id);
 
-		return $result;
+			$modelUserGroups 		 = new modelUserGroups();
+			$modelUserGroups		-> load($_pDatabase, $accessCondition);
+
+
+			$this -> m_resultList[$i] -> num_assignments = count($modelUserGroups -> getResult());
+			
+		}
+
+		return $dtaCount;
 	}
 }
-
-/**
- * 	Parent class for the data class with toolkit functions. It get the child instance to access the child properties.
-
-class 	toolkitRightGroups
-{
-	protected	$m_childInstance;
-
-	public function
-	__construct($_instance)
-	{
-		$this -> m_childInstance = $_instance;
-	}
-
-}
- */
 
 ?>

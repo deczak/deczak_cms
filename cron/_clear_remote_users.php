@@ -3,6 +3,7 @@
 require_once CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CModelCondition.php';
 require_once CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CSheme.php';
 require_once CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CModel.php';
+require_once CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CMessages.php';
 
 require_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelRightGroups.php';	
 require_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelUserGroups.php';	
@@ -18,14 +19,14 @@ $registerCondition 	-> whereNotNull('user_hash');
 $registerCondition 	-> whereNot('user_hash','');
 $registerCondition 	-> groupBy('user_id');
 $modelUsersRegister	 = new modelUsersRegister();
-$modelUsersRegister -> load($sqlInstance, $registerCondition);
+$modelUsersRegister -> load($pDatabase, $registerCondition);
 
 $usergroupCondition	 = new CModelCondition();
 $usergroupCondition -> whereNotNull('user_hash');
 $usergroupCondition -> whereNot('user_hash','');
 $usergroupCondition	-> groupBy('user_id');
 $modelUserGroups	 = new modelUserGroups();
-$modelUserGroups	-> load($sqlInstance, $usergroupCondition);
+$modelUserGroups	-> load($pDatabase, $usergroupCondition);
 
 ##	Collect avaiable remote users
 
@@ -36,7 +37,7 @@ foreach(CFG::GET() -> MYSQL -> DATABASE as $database)
 	if($database['name'] === CFG::GET() -> MYSQL -> PRIMARY_DATABASE)
 		continue;
 
-	$remoteSQL = CSQLConnect::GET() -> getConnection($database['name']);
+	$remoteSQL = CDatabase::GET() -> getConnection($database['name']);
 
 	##	condition
 
@@ -49,9 +50,9 @@ foreach(CFG::GET() -> MYSQL -> DATABASE as $database)
 	$modelUsers	  = new modelUsers();
 
 	$modelUsers  -> load($remoteSQL, $remoteCondition);	
-	$modelUsers  -> getDataInstance();
+	$modelUsers  -> getResult();
 
-	foreach($modelUsers -> getDataInstance() as $user)
+	foreach($modelUsers -> getResult() as $user)
 	{
 		$id = hash('sha256', $database['name'] . $database['server'] . $user -> user_id . $user -> login_name);
 
@@ -70,9 +71,9 @@ foreach(CFG::GET() -> MYSQL -> DATABASE as $database)
 
 	$modelUsersBackend	= new modelUsersBackend();
 	$modelUsersBackend  -> load($remoteSQL, $remoteCondition);	
-	$modelUsersBackend -> getDataInstance();
+	$modelUsersBackend -> getResult();
 
-	foreach($modelUsersBackend -> getDataInstance() as $user)
+	foreach($modelUsersBackend -> getResult() as $user)
 	{
 		$id = hash('sha256', $database['name'] . $database['server'] . $user -> user_id . $user -> login_name);
 
@@ -90,25 +91,25 @@ foreach(CFG::GET() -> MYSQL -> DATABASE as $database)
 
 ##	loop through userRegisters
 
-foreach($modelUsersRegister -> getDataInstance() as $user)
+foreach($modelUsersRegister -> getResult() as $user)
 {
 	if(!isset($usersList[$user -> user_hash]))
 	{
 		$removeCondition	 = new CModelCondition();
 		$removeCondition 	-> where('user_hash', $user -> user_hash);
-		$modelUsersRegister -> delete($sqlInstance, $removeCondition);
+		$modelUsersRegister -> delete($pDatabase, $removeCondition);
 	}
 }
 
 ##	loop through userGroups
 
-foreach($modelUserGroups -> getDataInstance() as $user)
+foreach($modelUserGroups -> getResult() as $user)
 {
 	if(!isset($usersList[$user -> user_hash]))
 	{
 		$removeCondition	 = new CModelCondition();
 		$removeCondition 	-> where('user_hash', $user -> user_hash);
-		$modelUserGroups	-> delete($sqlInstance, $removeCondition);
+		$modelUserGroups	-> delete($pDatabase, $removeCondition);
 
 		continue;
 	}
@@ -127,7 +128,7 @@ foreach($modelUserGroups -> getDataInstance() as $user)
 
 		$removeCondition	 = new CModelCondition();
 		$removeCondition 	-> where('user_hash', $user -> user_hash);
-		$modelUserGroups 	-> delete($sqlInstance, $removeCondition);
+		$modelUserGroups 	-> delete($pDatabase, $removeCondition);
 	}
 }
 

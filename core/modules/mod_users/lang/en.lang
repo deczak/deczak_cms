@@ -47,6 +47,11 @@
 	MOD_BEUSER_FM_LOCKED_2_FAILEDLOGIN	=	locked by failed login limit
 
 
+	MOD_BEUSER_FM_REMOTEAUTH		=	Remote user
 	
+	
+	MOD_BEUSER_FM_REMOTEAUTH_0_NOTALLOWED	=	Not allowed
+	MOD_BEUSER_FM_REMOTEAUTH_1_ALLOWED		=	Allowed
+
 	
 	

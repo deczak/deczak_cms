@@ -9,16 +9,11 @@
 	define('CMS_SERVER_URL' , '<protocol>://www.<domain>.<tld>/');
 	define('CMS_SERVER_URL_BACKEND' , '<protocol>://www.<domain>.<tld>/backend/');
 
+	define('CMS_URL_BASE', false);
+
 ##	L O G I N   O B J E C T   N A M E S
 
-	define('LOGIN_OBJECT_USERS','0000');
 	define('LOGIN_OBJECT_BACKEND','ABKND');
-
-##	T I M E   F O R M A T S   F O R   D A T E   F U N C T I O N
-
-	define('TIME_FORMAT_SYSMAIL','Y-m-d @ H:i:s');
-	define('TIME_FORMAT_USERMAIL','Y-m-d @ H:i:s');
-	define('TIME_FORMAT_BACKENDVIEW','Y-m-d @ H:i:s');
 
 ##	E R R O R   R E P O R T I N G   &   D E B U G
 
@@ -41,37 +36,15 @@ class CONFIG_TEMPLATE extends CONFIG_BASE
 	protected 	$DEFAULT_TEMPLATE		=	'default';
 	protected	$ERROR_TEMPLATE			= 	'default';
 }
-
-class CONFIG_SYSTEM_MAILER extends CONFIG_BASE
-{
-	protected	$RECEIVER_NAME			=	'';
-	protected	$RECEIVER_ADDRESS		=	'';
-	protected	$SUBJECT_PREFIX			=	'';
-	protected	$LOCK_TIMEOUT			=	3600;
-	
-	protected	$SMIME_CERT_CRYPT_FILE	=	"";		// PEM (*.crt)
-	protected	$SMIME_CERT_SIGN_FILE	=	"";		// PEM (*.crt)
-	protected	$SMIME_PRIVKEY_FILE		=	"";		// PEM + PKCS#8 (*.pem)
-	protected	$SMIME_PRIVKEY_PASS		=	"";		// Key Pass
-}
 	
 class CONFIG_CRONJOB extends CONFIG_BASE
 {
-	protected	$REPORT_WEEKLYACCESS	=	true;
 	protected	$CRON_DIRECTORY_PUBLIC	= 	true;
 }
 
-class CONFIG_SESSION extends CONFIG_BASE
-{
-	protected	$SPAM_ACCESS_TIMEOUT	=	60;
-	protected	$SPAM_ACCESS_LIMIT		=	5;
-	protected	$COOKIE_HTTPS			=	false;
-	protected	$TIMEOUT				= 	60 * 60 * 4;
-}
-	
 class CONFIG_LOGIN extends CONFIG_BASE
 {
-	protected	$FAIL_LIMIT		=	5;
+	protected	$COOKIE_HTTPS			=	false;			## -> eigener zweig
 }
 	
 class CONFIG_MYSQL extends CONFIG_BASE
@@ -134,14 +107,15 @@ class	CFG extends CSingleton
 	protected	$ENCRYPTION;
 	protected	$MYSQL;
 	protected	$LOGIN;
-	protected	$SESSION;
-	protected	$SYSTEM_MAILER;
 	protected	$TEMPLATE;
 	protected	$CRONJOB;
 	
 	##	configuration file
 	protected	$ERROR_PAGES;
 	protected	$USER_SYSTEM;
+	protected	$BACKEND;
+	protected	$SESSION;
+	protected	$SYSTEM_MAILER;
 
 	public function
 	initialize()
@@ -150,8 +124,6 @@ class	CFG extends CSingleton
 		$this -> ENCRYPTION	 	= new CONFIG_ENCRYPTION();
 		$this -> MYSQL 			= new CONFIG_MYSQL();
 		$this -> LOGIN 			= new CONFIG_LOGIN();
-		$this -> SESSION 		= new CONFIG_SESSION();
-		$this -> SYSTEM_MAILER 	= new CONFIG_SYSTEM_MAILER();
 		$this -> TEMPLATE 		= new CONFIG_TEMPLATE();
 		$this -> CRONJOB 		= new CONFIG_CRONJOB();
 
@@ -160,6 +132,9 @@ class	CFG extends CSingleton
 
 		$this -> ERROR_PAGES	= $configuration -> ERROR_PAGES;
 		$this -> USER_SYSTEM	= $configuration -> USER_SYSTEM;
+		$this -> BACKEND		= $configuration -> BACKEND;
+		$this -> SESSION 		= $configuration -> SESSION;
+		$this -> SYSTEM_MAILER 	= $configuration -> SYSTEM_MAILER;
 	}
 
 	public function
@@ -169,7 +144,6 @@ class	CFG extends CSingleton
 	}
 }
 
-$config 	= CFG::instance();
-$config    -> initialize();	
+CFG::instance() -> initialize();	
 
 ?>

@@ -16,7 +16,7 @@ class	controllerUserAgent extends CController
 	}
 	
 	public function
-	logic(&$_sqlConnection, array $_rcaTarget, $_isXHRequest)
+	logic(CDatabaseConnection &$_pDatabase, array $_rcaTarget, $_isXHRequest)
 	{
 		##	Set default target if not exists
 
@@ -44,34 +44,93 @@ class	controllerUserAgent extends CController
 		$enableEdit 	= $this -> existsUserRight('edit');
 		$enableDelete	= $enableEdit;
 
-		$_logicResults = false;
+		$logicResults = false;
 		switch($_controllerAction)
 		{
-			case 'view'		: $_logicResults = $this -> logicView(	$_sqlConnection, $_isXHRequest, $enableEdit, $enableDelete);	break;
-			case 'edit'		: $_logicResults = $this -> logicEdit(	$_sqlConnection, $_isXHRequest);	break;	
-			case 'create'	: $_logicResults = $this -> logicCreate($_sqlConnection, $_isXHRequest);	break;
-			case 'delete'	: $_logicResults = $this -> logicDelete($_sqlConnection, $_isXHRequest);	break;	
+			case 'view'		: $logicResults = $this -> logicView(	$_pDatabase, $_isXHRequest, $enableEdit, $enableDelete);	break;
+			case 'edit'		: $logicResults = $this -> logicEdit(	$_pDatabase, $_isXHRequest);	break;	
+			case 'create'	: $logicResults = $this -> logicCreate($_pDatabase, $_isXHRequest);	break;
+			case 'delete'	: $_loglogicResultsicResults = $this -> logicDelete($_pDatabase, $_isXHRequest);	break;	
+			case 'ping'		: $logicResults = $this -> logicPing($_pDatabase, $_isXHRequest, $enableEdit, $enableDelete);	break;	
 		}
 
-		if(!$_logicResults)
+		if(!$logicResults)
 		{
 			##	Default View
-			$this -> logicIndex($_sqlConnection, $enableEdit, $enableDelete);	
+			$this -> logicIndex($_pDatabase, $_isXHRequest, $enableEdit, $enableDelete);	
 		}
 	}
 
 	private function
-	logicIndex(&$_sqlConnection, $_enableEdit = false, $_enableDelete = false)
+	logicIndex(CDatabaseConnection &$_pDatabase, $_isXHRequest, $_enableEdit = false, $_enableDelete = false)
 	{
-		#$modelCondition = new CModelCondition();
-		#$modelCondition -> orderBy('data_id', 'DESC');
+		##	XHR request
 
-		$this -> m_pModel -> load($_sqlConnection);	
+		if($_isXHRequest !== false)
+		{	
+			$_bValidationErr =	false;
+			$_bValidationMsg =	'';
+			$_bValidationDta = 	[];
+
+			switch($_isXHRequest)
+			{
+				case 'raw-data'  :	// Request raw data
+
+									$_pURLVariables	 =	new CURLVariables();
+									$_request		 =	[];
+									$_request[] 	 = 	[	"input" => 'q',  	"validate" => "strip_tags|!empty" ,	"use_default" => true, "default_value" => false ]; 		
+									$_pURLVariables -> retrieve($_request, false, true);	
+					
+									$modelCondition  = 	new CModelCondition();
+
+									if($_pURLVariables -> getValue("q") !== false)
+									{	
+										$conditionSource = 	explode(' ', $_pURLVariables -> getValue("q"));
+										foreach($conditionSource as $conditionItem)
+										{
+											$itemParts = explode(':', $conditionItem);
+
+											if(count($itemParts) == 1)
+											{
+												$modelCondition -> whereLike('agent_name', $itemParts[0]);
+												$modelCondition -> whereLike('agent_suffix', $itemParts[0]);
+											}
+											else
+											{
+												if( $itemParts[0] == 'cms-system-id' )
+													$itemParts[0] = 'data_id';
+												
+												$modelCondition -> where($itemParts[0], $itemParts[1]);
+											}
+										}										
+									}
+
+									if(!$this -> m_pModel -> load($_pDatabase, $modelCondition))
+									{
+										$_bValidationMsg .= CLanguage::get() -> string('ERR_SQL_ERROR');
+										$_bValidationErr = true;
+									}											
+						
+									$data = $this -> m_pModel -> getResult();
+
+									foreach($data as &$item)
+									{
+										$item -> creaty_by_name = tk::getBackendUserName($_pDatabase, $item -> create_by);
+										$item -> update_by_name = tk::getBackendUserName($_pDatabase, $item -> update_by);
+									}
+
+									break;
+			}
+
+			tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $data);	// contains exit call
+		}
+
+		##	No XHR request
+
 		$this -> setView(	
 						'index',	
 						'',
 						[
-							'agentsList' 		=> $this -> m_pModel -> getDataInstance(),
 							'enableEdit'	=> $_enableEdit,
 							'enableDelete'	=> $_enableDelete
 						]
@@ -79,7 +138,7 @@ class	controllerUserAgent extends CController
 	}
 
 	private function
-	logicCreate(&$_sqlConnection, $_isXHRequest)
+	logicCreate(CDatabaseConnection &$_pDatabase, $_isXHRequest)
 	{
 		if($_isXHRequest !== false)
 		{
@@ -113,11 +172,9 @@ class	controllerUserAgent extends CController
 				$_aFormData['create_by'] 	= CSession::instance() -> getValue('user_id');
 				$_aFormData['create_time'] 	= time();
 
+				
 
-
-				$dataId = 0;
-
-				if($this -> m_pModel -> insert($_sqlConnection, $_aFormData, $dataId))
+				if($dataId = $this -> m_pModel -> insert($_pDatabase, $_aFormData))
 				{
 					$_bValidationMsg = CLanguage::get() -> string('M_BEUSERAG_USERAGENT') .' '. CLanguage::get() -> string('WAS_CREATED') .' - '. CLanguage::get() -> string('WAIT_FOR_REDIRECT');
 					$_bValidationDta['redirect'] = CMS_SERVER_URL_BACKEND . CPageRequest::instance() -> urlPath .'agent/'.$dataId;
@@ -142,30 +199,27 @@ class	controllerUserAgent extends CController
 	}
 
 	private function
-	logicView(&$_sqlConnection, $_isXHRequest = false, $_enableEdit = false, $_enableDelete = false)
-	{	
-		$_pURLVariables	 =	new CURLVariables();
-		$_request		 =	[];
-		$_request[] 	 = 	[	"input" => "cms-system-id",  	"validate" => "strip_tags|!empty" ,	"use_default" => true, "default_value" => false ]; 		
-		$_pURLVariables -> retrieve($_request, true, false); // POST 
+	logicView(CDatabaseConnection &$_pDatabase, $_isXHRequest = false, $_enableEdit = false, $_enableDelete = false)
+	{
+		$systemId = $this -> querySystemId();
 
-		if($_pURLVariables -> getValue("cms-system-id") !== false )
+		if($systemId !== false )
 		{	
 			$modelCondition = new CModelCondition();
-			$modelCondition -> where('data_id', $_pURLVariables -> getValue("cms-system-id"));
+			$modelCondition -> where('data_id', $systemId);
 
-			if($this -> m_pModel -> load($_sqlConnection, $modelCondition))
+			if($this -> m_pModel -> load($_pDatabase, $modelCondition))
 			{
 				##	Gathering additional data
 
-				$_crumbName	 = $this -> m_pModel -> searchValue(intval($_pURLVariables -> getValue("cms-system-id")),'data_id','agent_name');
+				$_crumbName	 = $this -> m_pModel -> getResultItem('data_id', intval($systemId), 'agent_name');
 
 				$this -> setCrumbData('edit', $_crumbName, true);
 				$this -> setView(
 								'edit',
-								'agent/'. $_pURLVariables -> getValue("cms-system-id"),								
+								'agent/'. $systemId,								
 								[
-									'agentsList' 	=> $this -> m_pModel -> getDataInstance(),
+									'agentsList' 	=> $this -> m_pModel -> getResult(),
 									'enableEdit'	=> $_enableEdit,
 									'enableDelete'	=> $_enableDelete
 								]								
@@ -178,18 +232,20 @@ class	controllerUserAgent extends CController
 	}
 
 	private function
-	logicEdit(&$_sqlConnection, $_isXHRequest = false)
-	{	
-		$_pURLVariables	 =	new CURLVariables();
-		$_request		 =	[];
-		$_request[] 	 = 	[	"input" => "cms-system-id",  	"validate" => "strip_tags|!empty" ,	"use_default" => true, "default_value" => false ]; 		
-		$_pURLVariables -> retrieve($_request, true, false); // POST 
+	logicEdit(CDatabaseConnection &$_pDatabase, $_isXHRequest = false)
+	{
+		$systemId 	= $this -> querySystemId();
 
-		if($_pURLVariables -> getValue("cms-system-id") !== false && $_isXHRequest !== false)
+		if($systemId !== false && $_isXHRequest !== false)
 		{	
 			$_bValidationErr =	false;
 			$_bValidationMsg =	'';
 			$_bValidationDta = 	[];
+
+			$pingId 	= $this -> querySystemId('cms-ping-id', true);
+
+			## check if dataset is locked, call his own xhrResult() 
+			$this -> detectLock($_pDatabase, $systemId, $pingId);
 
 			switch($_isXHRequest)
 			{
@@ -207,20 +263,16 @@ class	controllerUserAgent extends CController
 										if(empty($_aFormData['agent_name'])) 	{ 	$_bValidationErr = true; 	$_bValidationDta[] = 'agent_name'; 	}
 										if(empty($_aFormData['agent_suffix'])) 	{ 	$_bValidationErr = true; 	$_bValidationDta[] = 'agent_suffix'; 	}
 
-										// On edit, we ignore the unique check for the ip 
 
 										if(!$_bValidationErr)
 										{
 											$_aFormData['update_by'] 	= CSession::instance() -> getValue('user_id');
 											$_aFormData['update_time'] 	= time();
 
-											print_r($_aFormData);
-									
-
 											$modelCondition = new CModelCondition();
-											$modelCondition -> where('data_id', $_pURLVariables -> getValue("cms-system-id"));
+											$modelCondition -> where('data_id', $systemId);
 
-											if($this -> m_pModel -> update($_sqlConnection, $_aFormData, $modelCondition))
+											if($this -> m_pModel -> update($_pDatabase, $_aFormData, $modelCondition))
 											{
 												$_bValidationMsg = CLanguage::get() -> string('M_BEUSERAG_USERAGENT') .' '. CLanguage::get() -> string('WAS_UPDATED');
 											}
@@ -246,27 +298,29 @@ class	controllerUserAgent extends CController
 	}
 
 	private function
-	logicDelete(&$_sqlConnection, $_isXHRequest = false)
+	logicDelete(CDatabaseConnection &$_pDatabase, $_isXHRequest = false)
 	{	
-		$_pURLVariables	 =	new CURLVariables();
-		$_request		 =	[];
-		$_request[] 	 = 	[	"input" => "cms-system-id",  	"validate" => "strip_tags|!empty" ,	"use_default" => true, "default_value" => false ]; 		
-		$_pURLVariables -> retrieve($_request, true, false); // POST 
+		$systemId = $this -> querySystemId();
 
-		if($_pURLVariables -> getValue("cms-system-id") !== false && $_isXHRequest !== false)
+		if($systemId !== false && $_isXHRequest !== false)
 		{	
 			$_bValidationErr =	false;
 			$_bValidationMsg =	'';
 			$_bValidationDta = 	[];
+
+			$pingId 	= $this -> querySystemId('cms-ping-id', true);
+
+			## check if dataset is locked, call his own xhrResult() 
+			$this -> detectLock($_pDatabase, $systemId, $pingId);
 
 			switch($_isXHRequest)
 			{
 				case 'agent-delete':
 
 									$modelCondition = new CModelCondition();
-									$modelCondition -> where('data_id', $_pURLVariables -> getValue("cms-system-id"));
+									$modelCondition -> where('data_id', $systemId);
 
-									if($this -> m_pModel -> delete($_sqlConnection, $modelCondition))
+									if($this -> m_pModel -> delete($_pDatabase, $modelCondition))
 									{
 										$_bValidationMsg = CLanguage::get() -> string('M_BEUSERAG_USERAGENT') .' '. CLanguage::get() -> string('WAS_DELETED') .' - '. CLanguage::get() -> string('WAIT_FOR_REDIRECT');
 										$_bValidationDta['redirect'] = CMS_SERVER_URL_BACKEND . CPageRequest::instance() -> urlPath;
@@ -283,6 +337,31 @@ class	controllerUserAgent extends CController
 		}
 
 		return false;
+	}
+
+	public function
+	logicPing(CDatabaseConnection &$_pDatabase, $_isXHRequest = false, $_enableEdit = false, $_enableDelete = false)
+	{
+		$systemId 	= $this -> querySystemId();
+		$pingId 	= $this -> querySystemId('cms-ping-id', true);
+
+		if($systemId !== false && $_isXHRequest !== false)
+		{	
+			$_bValidationErr =	false;
+			$_bValidationMsg =	'';
+			$_bValidationDta = 	[];
+
+			switch($_isXHRequest)
+			{
+				case 'lockState':	
+				
+					$locked	= $this -> m_pModel -> ping($_pDatabase, CSession::instance() -> getValue('user_id'), $systemId, $pingId, MODEL_LOCK_UPDATE);
+					tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $locked);
+					break;
+			}
+
+			tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $_bValidationDta);
+		}
 	}
 }
 

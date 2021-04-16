@@ -14,10 +14,17 @@ class	controllerLoginObjects extends CController
 		parent::__construct($_module, $_object);
 
 		CPageRequest::instance() -> subs = $this -> getSubSection();
+
+		$this -> tablesList['users']		= [];
+		$this -> tablesList['users'][] 		= 'tb_users_backend';
+		$this -> tablesList['users'][] 		= 'tb_users';
+
+		$this -> tablesList['assignment'] 	= [];
+		$this -> tablesList['various'] 		= [];
 	}
 	
 	public function
-	logic(&$_sqlConnection, array $_rcaTarget, $_isXHRequest)
+	logic(CDatabaseConnection &$_pDatabase, array $_rcaTarget, $_isXHRequest)
 	{
 		##	Set default target if not exists
 
@@ -45,34 +52,95 @@ class	controllerLoginObjects extends CController
 		$enableEdit 	= $this -> existsUserRight('edit');
 		$enableDelete	= $enableEdit;
 
-		$_logicResults = false;
+		$logicResults = false;
 		switch($_controllerAction)
 		{
-			case 'view'		: $_logicResults = $this -> logicView(	$_sqlConnection, $_isXHRequest, $enableEdit, $enableDelete);	break;
-			case 'edit'		: $_logicResults = $this -> logicEdit(	$_sqlConnection, $_isXHRequest);	break;	
-			case 'create'	: $_logicResults = $this -> logicCreate($_sqlConnection, $_isXHRequest);	break;
-			case 'delete'	: $_logicResults = $this -> logicDelete($_sqlConnection, $_isXHRequest);	break;	
+			case 'view'		: $logicResults = $this -> logicView(	$_pDatabase, $_isXHRequest, $enableEdit, $enableDelete);	break;
+			case 'ping'		: $logicResults = $this -> logicPing(	$_pDatabase, $_isXHRequest, $enableEdit, $enableDelete);	break;	
+			case 'edit'		: $logicResults = $this -> logicEdit(	$_pDatabase, $_isXHRequest);	break;	
+			case 'create'	: $logicResults = $this -> logicCreate(	$_pDatabase, $_isXHRequest);	break;
+			case 'delete'	: $logicResults = $this -> logicDelete(	$_pDatabase, $_isXHRequest);	break;	
 		}
 
-		if(!$_logicResults)
+		if(!$logicResults)
 		{
 			##	Default View
-			$this -> logicIndex($_sqlConnection, $enableEdit, $enableDelete);
+			$this -> logicIndex($_pDatabase, $_isXHRequest, $enableEdit, $enableDelete);
 		}
 	}
 
 	private function
-	logicIndex(&$_sqlConnection, $_enableEdit = false, $_enableDelete = false)
+	logicIndex(CDatabaseConnection &$_pDatabase, $_isXHRequest, $_enableEdit = false, $_enableDelete = false)
 	{
-		#$modelCondition = new CModelCondition();
-		#$modelCondition -> orderBy('data_id', 'DESC');
+		##	XHR request
 
-		$this -> m_pModel -> load($_sqlConnection);	
+		if($_isXHRequest !== false)
+		{	
+			$_bValidationErr =	false;
+			$_bValidationMsg =	'';
+			$_bValidationDta = 	[];
+
+			switch($_isXHRequest)
+			{
+				case 'raw-data'  :	// Request raw data
+
+									$_pURLVariables	 =	new CURLVariables();
+									$_request		 =	[];
+									$_request[] 	 = 	[	"input" => 'q',  	"validate" => "strip_tags|!empty" ,	"use_default" => true, "default_value" => false ]; 		
+									$_pURLVariables -> retrieve($_request, false, true);	
+					
+									$modelCondition  = 	new CModelCondition();
+
+									if($_pURLVariables -> getValue("q") !== false)
+									{	
+										$conditionSource = 	explode(' ', $_pURLVariables -> getValue("q"));
+										foreach($conditionSource as $conditionItem)
+										{
+											$itemParts = explode(':', $conditionItem);
+
+											if(count($itemParts) == 1)
+											{
+												$modelCondition -> whereLike('object_id', $itemParts[0]);
+												$modelCondition -> whereLike('object_description', $itemParts[0]);
+											}
+											else
+											{
+												if( $itemParts[0] == 'cms-system-id' )
+													$itemParts[0] = 'object_id';
+												
+												$modelCondition -> where($itemParts[0], $itemParts[1]);
+											}
+										}										
+									}
+
+									if(!$this -> m_pModel -> load($_pDatabase, $modelCondition))
+									{
+										$_bValidationMsg .= CLanguage::get() -> string('ERR_SQL_ERROR');
+										$_bValidationErr = true;
+									}											
+						
+									$data = $this -> m_pModel -> getResult();
+
+									foreach($data as &$item)
+									{
+										$item -> creaty_by_name = tk::getBackendUserName($_pDatabase, $item -> create_by);
+										$item -> update_by_name = tk::getBackendUserName($_pDatabase, $item -> update_by);
+									}
+
+									break;
+			}
+
+			tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $data);	// contains exit call
+		}
+
+		##	No XHR request
+
+
+		$this -> m_pModel -> load($_pDatabase);	
 		$this -> setView(	
 						'index',	
 						'',
 						[
-							'login_objects' 		=> $this -> m_pModel -> getDataInstance(),
 							'enableEdit'	=> $_enableEdit,
 							'enableDelete'	=> $_enableDelete
 						]
@@ -80,7 +148,7 @@ class	controllerLoginObjects extends CController
 	}
 
 	private function
-	logicCreate(&$_sqlConnection, $_isXHRequest)
+	logicCreate(CDatabaseConnection &$_pDatabase, $_isXHRequest)
 	{
 	
 		if($_isXHRequest !== false)
@@ -94,8 +162,7 @@ class	controllerLoginObjects extends CController
 			$_request[] 	 = 	[	"input" => "object_id",  				"validate" => "strip_tags|!empty" ]; 	
 			$_request[] 	 = 	[	"input" => "object_description",	   	"validate" => "strip_tags|!empty" ]; 	
 			$_request[] 	 = 	[	"input" => "is_disabled",   			"validate" => "strip_tags|!empty" ]; 	
-			$_request[] 	 = 	[	"input" => "object_databases",  	 	"validate" => "strip_tags|!empty" ]; 	
-			$_request[] 	 = 	[	"input" => "object_table",   			"validate" => "strip_tags|!empty" ]; 	
+			$_request[] 	 = 	[	"input" => "object_databases",  	 	"validate" => "strip_tags|!empty" ]; 		
 			$_request[] 	 = 	[	"input" => "object_fields",   			"validate" => "strip_tags|!empty" ]; 	
 			$_request[] 	 = 	[	"input" => "object_session_ext",   		"validate" => "strip_tags|!empty",	 "use_default" => true, "default_value" => '[]'  ]; 	
 			$_request[] 	 = 	[	"input" => "object_field_is_username",  "validate" => "strip_tags|!empty" ]; 	
@@ -104,12 +171,16 @@ class	controllerLoginObjects extends CController
 
 			if(empty($_aFormData['object_id'])) { 			$_bValidationErr = true; 	$_bValidationDta[] = 'object_id'; 	}
 			if(empty($_aFormData['object_databases'])) { 	$_bValidationErr = true; 	$_bValidationDta[] = 'object_databases'; 	}
-			if(empty($_aFormData['object_table'])) { 		$_bValidationErr = true; 	$_bValidationDta[] = 'object_table'; 	}
 			if(empty($_aFormData['object_fields'])) { 		$_bValidationErr = true; 	$_bValidationDta[] = 'object_fields'; 	}
 
 			if(!$_bValidationErr)	// Validation OK (by pre check)
 			{		
-				if(!$this -> m_pModel -> isUnique($_sqlConnection, ['object_id' => $_aFormData['object_id']]))
+
+
+				$modelCondition = new CModelCondition();
+				$modelCondition -> where('object_id', $_aFormData['object_id']);
+
+				if(!$this -> m_pModel -> unique($_pDatabase, $modelCondition))
 				{
 					$_bValidationMsg .= CLanguage::get() -> string('M_BERMADDR_MSG_OBJEXIST');
 					$_bValidationErr = true;
@@ -122,6 +193,8 @@ class	controllerLoginObjects extends CController
 
 			if(!$_bValidationErr)	// Validation OK
 			{
+
+										
 
 				foreach($_aFormData['object_fields'] as $key => $fields)
 				{
@@ -145,7 +218,7 @@ class	controllerLoginObjects extends CController
 				$_aFormData['create_time'] 	= time();
 
 				$insertedId = '0';
-				if($this -> m_pModel -> insert($_sqlConnection, $_aFormData, $insertedId))
+				if($this -> m_pModel -> insert($_pDatabase, $_aFormData, $insertedId))
 				{
 
 
@@ -168,39 +241,41 @@ class	controllerLoginObjects extends CController
 		$this -> setCrumbData('create');
 		$this -> setView(
 						'create',
-						'create/'
+						'create/',
+						[
+							'tablesList'	=>	$this -> tablesList
+						]
 						);
 
 		return true;
 	}
 
 	private function
-	logicView(&$_sqlConnection, $_isXHRequest = false, $_enableEdit = false, $_enableDelete = false)
+	logicView(CDatabaseConnection &$_pDatabase, $_isXHRequest = false, $_enableEdit = false, $_enableDelete = false)
 	{	
 
-		$_pURLVariables	 =	new CURLVariables();
-		$_request		 =	[];
-		$_request[] 	 = 	[	"input" => "cms-system-id",  	"validate" => "strip_tags|!empty" ,	"use_default" => true, "default_value" => false ]; 		
-		$_pURLVariables -> retrieve($_request, true, false); 
 
-		if($_pURLVariables -> getValue("cms-system-id") !== false)
+		$systemId = $this -> querySystemId();
+
+		if($systemId !== false)
 		{	
 
 			$modelCondition = new CModelCondition();
-			$modelCondition -> where('object_id', $_pURLVariables -> getValue("cms-system-id"));
+			$modelCondition -> where('object_id', $systemId);
 
-			if($this -> m_pModel -> load($_sqlConnection, $modelCondition))
+			if($this -> m_pModel -> load($_pDatabase, $modelCondition))
 			{
 				##	Gathering additional data
 
 				
 
-				$this -> setCrumbData('edit', $_pURLVariables -> getValue("cms-system-id"), true);
+				$this -> setCrumbData('edit', $systemId, true);
 				$this -> setView(
 								'edit',
-								'object/'. $_pURLVariables -> getValue("cms-system-id"),								
+								'object/'. $systemId,								
 								[
-									'login_objects' 	=> $this -> m_pModel -> getDataInstance(),
+									'loginObjectsList'	=> $this -> m_pModel -> getResult(),
+									'tablesList'	=>	$this -> tablesList,
 									'enableEdit'	=> $_enableEdit,
 									'enableDelete'	=> $_enableDelete
 								]								
@@ -214,15 +289,13 @@ class	controllerLoginObjects extends CController
 	}
 
 	private function
-	logicEdit(&$_sqlConnection, $_isXHRequest = false)
+	logicEdit(CDatabaseConnection &$_pDatabase, $_isXHRequest = false)
 	{	
 
-		$_pURLVariables	 =	new CURLVariables();
-		$_request		 =	[];
-		$_request[] 	 = 	[	"input" => "cms-system-id",  	"validate" => "strip_tags|!empty" ,	"use_default" => true, "default_value" => false ]; 		
-		$_pURLVariables -> retrieve($_request, true, false); 
 
-		if($_pURLVariables -> getValue("cms-system-id") !== false && $_isXHRequest !== false)
+		$systemId = $this -> querySystemId();
+
+		if($systemId !== false && $_isXHRequest !== false)
 		{	
 			$_bValidationErr =	false;
 			$_bValidationMsg =	'';
@@ -240,12 +313,13 @@ class	controllerLoginObjects extends CController
 										$_request[] 	 = 	[	"input" => "object_table",   			"validate" => "strip_tags|!empty" ]; 	
 										$_request[] 	 = 	[	"input" => "object_fields",   			"validate" => "strip_tags|!empty" ]; 	
 										$_request[] 	 = 	[	"input" => "object_session_ext",   		"validate" => "strip_tags|!empty" ]; 	
+										#$_request[] 	 = 	[	"input" => "object_auth_assign",   		"validate" => "strip_tags|!empty" ]; 	
+										#$_request[] 	 = 	[	"input" => "object_session_assign",   		"validate" => "strip_tags|!empty" ]; 	
 										$_request[] 	 = 	[	"input" => "object_field_is_username",  "validate" => "strip_tags|!empty" ]; 	
 										$_pFormVariables -> retrieve($_request, false, true);
 										$_aFormData		 = $_pFormVariables ->getArray();
 
 										if(empty($_aFormData['object_databases'])) { 	$_bValidationErr = true; 	$_bValidationDta[] = 'object_databases'; 	}
-									#	if(empty($_aFormData['object_table'])) { 	$_bValidationErr = true; 	$_bValidationDta[] = 'object_table'; 	}
 									#	if(empty($_aFormData['object_fields'])) { 	$_bValidationErr = true; 	$_bValidationDta[] = 'object_fields'; 	}
 
 
@@ -283,13 +357,21 @@ class	controllerLoginObjects extends CController
 											if(!empty($_aFormData['object_session_ext']))
 												$_aFormData['object_session_ext'] 	= json_encode($_aFormData['object_session_ext']);
 
+									#		if(!empty($_aFormData['object_auth_assign']))
+									#			$_aFormData['object_auth_assign'] 	= json_encode($_aFormData['object_auth_assign']);
+
+									#		if(!empty($_aFormData['object_session_assign']))
+									#			$_aFormData['object_session_assign'] = json_encode($_aFormData['object_session_assign']);
+
 											$_aFormData['update_by'] 	= CSession::instance() -> getValue('user_id');
 											$_aFormData['update_time'] 	= time();
 
 											$modelCondition = new CModelCondition();
-											$modelCondition -> where('object_id', $_pURLVariables -> getValue("cms-system-id"));											
+											$modelCondition -> where('object_id', $systemId);	
 
-											if($this -> m_pModel -> update($_sqlConnection, $_aFormData, $modelCondition))
+
+
+											if($this -> m_pModel -> update($_pDatabase, $_aFormData, $modelCondition))
 											{
 												$_bValidationMsg = CLanguage::get() -> string('MOD_LOGINO_OBJECT WAS_UPDATED');
 											}
@@ -317,14 +399,12 @@ class	controllerLoginObjects extends CController
 	}
 
 	private function
-	logicDelete(&$_sqlConnection, $_isXHRequest = false)
+	logicDelete(CDatabaseConnection &$_pDatabase, $_isXHRequest = false)
 	{	
-		$_pURLVariables	 =	new CURLVariables();
-		$_request		 =	[];
-		$_request[] 	 = 	[	"input" => "cms-system-id",  	"validate" => "strip_tags|!empty" ,	"use_default" => true, "default_value" => false ]; 		
-		$_pURLVariables -> retrieve($_request, true, false); // POST 
 
-		if($_pURLVariables -> getValue("cms-system-id") !== false)
+		$systemId = $this -> querySystemId();
+
+		if($systemId !== false)
 		{	
 			if($_isXHRequest !== false)
 			{
@@ -337,9 +417,9 @@ class	controllerLoginObjects extends CController
 					case 'object-delete':
 
 										$modelCondition = new CModelCondition();
-										$modelCondition -> where('object_id', $_pURLVariables -> getValue("cms-system-id"));
+										$modelCondition -> where('object_id', $systemId);
 
-										if($this -> m_pModel -> delete($_sqlConnection, $modelCondition))
+										if($this -> m_pModel -> delete($_pDatabase, $modelCondition))
 										{
 											$_bValidationMsg = CLanguage::get() -> string('MOD_LOGINO_OBJECT WAS_DELETED'). ' - '. CLanguage::get() -> string('WAIT_FOR_REDIRECT');
 											$_bValidationDta['redirect'] = CMS_SERVER_URL_BACKEND . CPageRequest::instance() -> urlPath;
@@ -359,6 +439,31 @@ class	controllerLoginObjects extends CController
 
 		CMessages::instance() -> addMessage(CLanguage::get() -> string('MOD_LOGINO_ERR_OBJECT_ID_UK') , MSG_WARNING);
 		return false;
+	}
+
+	public function
+	logicPing(CDatabaseConnection &$_pDatabase, $_isXHRequest = false, $_enableEdit = false, $_enableDelete = false)
+	{
+		$systemId 	= $this -> querySystemId();
+		$pingId 	= $this -> querySystemId('cms-ping-id', true);
+
+		if($systemId !== false && $_isXHRequest !== false)
+		{	
+			$_bValidationErr =	false;
+			$_bValidationMsg =	'';
+			$_bValidationDta = 	[];
+
+			switch($_isXHRequest)
+			{
+				case 'lockState':	
+				
+					$locked	= $this -> m_pModel -> ping($_pDatabase, CSession::instance() -> getValue('user_id'), $systemId, $pingId, MODEL_LOCK_UPDATE);
+					tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $locked);
+					break;
+			}
+
+			tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $_bValidationDta);
+		}
 	}
 	
 

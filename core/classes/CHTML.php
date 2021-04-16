@@ -29,8 +29,6 @@ class	CHTML extends CBasic
 
 		$sitemap		=	$pageRequest -> sitemap;
 
-		define('URL_LANG_PRREFIX', ((CFG::GET() -> LANGUAGE -> DEFAULT_IN_URL || $pageRequest -> page_language !== CLanguage::instance() -> getDefault()) ? $pageRequest -> page_language .'/' : '') );
-
 		switch($pageRequest -> responseCode)
 		{
 			case 404:	header("HTTP/1.0 404 Not Found");
@@ -122,9 +120,9 @@ class	CHTML extends CBasic
 		echo '<script>';
 		foreach($modules -> loadedList as $loadedModule)
 		{
-			if(property_exists($loadedModule, 'include'))
+			if(property_exists($loadedModule, 'includes'))
 			{
-				foreach($loadedModule -> include as $includeFile)
+				foreach($loadedModule -> includes as $includeFile)
 				{
 					switch($loadedModule -> module_type)
 					{

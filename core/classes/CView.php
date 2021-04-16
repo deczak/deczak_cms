@@ -17,17 +17,16 @@ class	CView
 	public function
 	view()
 	{
-
-		$sqlConnection 	= CSQLConnect::instance() -> getConnection(CFG::GET() -> MYSQL -> PRIMARY_DATABASE);
+		$pDatabase 		= CDatabase::instance() -> getConnection(CFG::GET() -> MYSQL -> PRIMARY_DATABASE);
 		$pageRequest 	= CPageRequest::instance();
 		$language		= CLanguage::instance();
 
 		##	Required for XHR Functions
 
-		if(!empty($this -> m_object['object_target'])) echo ' <script> var MODULE = { "TARGET" : "'. $this -> m_object['object_target'] .'" };</script>';
+		if(!empty($this -> m_object['object_target'])) echo ' <script> CMS.MODULE_TARGET = "'. $this -> m_object['object_target']  .'";</script>';
 
 		##	
-
+		
 		foreach($this -> m_dataInstances as $_dataKey => $_dataInst)
 		{
 			$$_dataKey = $_dataInst;
@@ -37,8 +36,11 @@ class	CView
 	}
 
 	public function
-	getHTML()
+	getHTML($pageRequest = null)
 	{
+		$pDatabase 		= CDatabase::instance() -> getConnection(CFG::GET() -> MYSQL -> PRIMARY_DATABASE);
+		$language		= CLanguage::instance();
+
 		if(is_file($this -> m_templatePath .'.php'))
 		{
 			ob_start();

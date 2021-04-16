@@ -69,7 +69,7 @@ class	CMessages extends CSingleton
 	{
 		foreach($this -> m_aStorage as $_msgType => $_msgSet)
 		{
-			echo '<div class="message-container message-type-'. $_msgType .'">';
+			echo '<div class="ui result-box" data-error="'. $_msgType .'">';
 			foreach($_msgSet as $_msg)
 			{
 				if($_msgTarget !== '' && !$_msg -> isMessageTarget($_msgTarget)) continue;

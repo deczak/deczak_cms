@@ -1,12 +1,13 @@
 <?php
-
-$denied = &$deniedList[0];
-
- ?>
+if(isset($deniedList))
+	$dataset = &$deniedList[0];
+else
+	$deniedList = false;
+?>
 
 <div class="be-module-container forms-view">
 	<div>
-		<div class="inter-menu">
+		<div class="ui inter-menu">
 			<h2><?php echo $language -> string('MENU'); ?></h2>
 			<hr>
 			<ul>
@@ -14,8 +15,8 @@ $denied = &$deniedList[0];
 			</ul>
 			<hr>
 			<div class="delete-box">
-				<?php if($enableDelete) { ?>
-					<fieldset class="ui fieldset" data-xhr-target="address-delete" data-xhr-overwrite-target="delete/<?php echo $denied -> data_id; ?>">	
+				<?php if(isset($enableDelete) && $enableDelete && $deniedList !== false) { ?>	
+					<fieldset class="ui fieldset" data-xhr-target="address-delete" data-xhr-overwrite-target="delete/<?php echo $dataset  -> data_id; ?>">	
 						<div class="submit-container button-only">
 							<button class="ui button icon labeled trigger-submit-fieldset" type="button" disabled><span><i class="fas fa-trash-alt" data-icon="fa-trash-alt"></i></span><?php echo $language -> string('BUTTON_DELETE'); ?></button>
 							<div class="protector"><input type="checkbox" class="trigger-submit-protector" id="protector-address-delete"><label for="protector-address-delete"></label></div>
@@ -24,15 +25,16 @@ $denied = &$deniedList[0];
 					</fieldset>
 				<?php } ?>
 			</div>
+
+			<div class="result-box ping-result lower-font-size" id="ping-lock-result" data-error=""></div>
+			
 		</div>
 	</div>
 	<div>
 		
-		<fieldset class="ui fieldset submit-able" id="denied-address" data-xhr-target="denied-address" data-xhr-overwrite-target="edit/<?php echo $denied -> data_id; ?>">
-
-			<input type="hidden" name="data_id" value="<?php echo $denied -> data_id; ?>">
-
-			<legend><?php echo $language -> string('CREATE'); ?> <?php echo $language -> string('DENIED'); ?> <?php echo $language -> string('ADDRESS'); ?></legend>
+		<fieldset class="ui fieldset submit-able" id="denied-address" data-xhr-target="denied-address" <?= ($deniedList !== false ? 'data-xhr-overwrite-target="edit/'. $dataset -> data_id .'"' : ''); ?>>
+			
+			<legend><?php echo $language -> string('DENIED'); ?> <?php echo $language -> string('ADDRESS'); ?></legend>
 			<div>
 
 				<!-- denied ip -->
@@ -43,18 +45,18 @@ $denied = &$deniedList[0];
 
 					<div class="input width-25">
 						<label>IP <?php echo $language -> string('ADDRESS'); ?></label>
-						<input type="text" name="denied_ip" value="<?php echo $denied -> denied_ip; ?>">
+						<input type="text" name="denied_ip" value="">
 					</div>
 
 					<div class="input width-75">
 						<label><?php echo $language -> string('DESCRIPTION'); ?></label>
-						<input type="text" name="denied_desc" value="<?php echo $denied -> denied_desc; ?>" maxlength="250">
+						<input type="text" name="denied_desc" value="" maxlength="250">
 					</div>
 				</div>
 				
 			</div>
 
-			<?php if($enableEdit) { ?>
+			<?php if(isset($enableEdit) && $enableEdit || $deniedList === false) { ?>
 
 				<div class="result-box" data-error=""></div>
 
@@ -75,3 +77,27 @@ $denied = &$deniedList[0];
 	</div>
 </div>
 
+<?php if($deniedList !== false) { ?>
+<script src="<?php echo CMS_SERVER_URL_BACKEND; ?>js/classes/cms-request-data-index.js"></script>
+<script src="<?php echo CMS_SERVER_URL_BACKEND; ?>js/classes/cms-request-data-item.js"></script>
+<script>
+
+	let	requestURL	= CMS.SERVER_URL_BACKEND + CMS.PAGE_PATH +'ping/<?= $dataset -> data_id; ?>';
+	let pingId		= cmsTabInstance.getId();
+	
+	cmstk.ping(requestURL, <?= CFG::GET() -> USER_SYSTEM -> MODULE_LOCKING -> PING_TIMEOUT; ?>, pingId);
+
+	document.addEventListener("DOMContentLoaded", function(){
+
+		document.dataInstance = new cmsRequestDataItem('', '<?= CFG::GET() -> BACKEND -> TIME_FORMAT; ?>', <?= $dataset -> data_id; ?>);
+		document.dataInstance.requestData();
+
+		let fieldsets = document.querySelectorAll('fieldset[data-xhr-target]');
+		for(let i = 0; i < fieldsets.length; i++)
+		{
+			fieldsets[i].setAttribute('data-ping-id', pingId);
+		}
+	});	
+
+</script>
+<?php } ?>

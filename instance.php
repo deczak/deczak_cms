@@ -20,8 +20,10 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 
 ##	I N C L U D E   C L A S S E S   &   F U N C T O N S	
 
-	require_once	CMS_SERVER_ROOT.DIR_CORE. 'toolkit.php';
+	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'toolkit.php';
 	
+	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CDatabase.php';
+
 	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CView.php';
 	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CModel.php';
 	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CModelCondition.php';
@@ -29,8 +31,8 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CController.php';
 	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CSheme.php';
 
-	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CSQLConnect.php';
 	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CURLVariables.php';
+	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CRouter.php';
 	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CMessages.php';
 	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CSysMailer.php';
 	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CHTAccess.php';
@@ -39,6 +41,7 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CCookie.php';
 	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CLogin.php';
 	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CLanguage.php';
+	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CDirector.php';
 	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CImperator.php';
 	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CBasic.php';
 	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CModules.php';
@@ -46,6 +49,7 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CTemplate.php';
 	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CPageRequest.php';
 	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CUserRights.php';
+	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CNodesSearch.php';
 
 	CBenchmark::instance() -> measurementPoint('initialize and execute system classes');	
 
@@ -69,9 +73,8 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 
 	//	CSQLConnect is a singleton class
 
-	$_pSQLObject 	 =	CSQLConnect::instance();
-	$_pSQLObject 	->	initialize();
-	if(!$_pSQLObject-> 	createConnection())
+	$pDBInstance 	 = CDatabase::instance();
+	if(!$pDBInstance -> connect(CFG::GET() -> MYSQL -> DATABASE))
 	{	##	create connection failed
 		CPageRequest::instance() -> setResponseCode(920);
 	}	
@@ -82,9 +85,32 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 	// 	Loads and manage language files
 
 	$_pLanguage		 = 	CLanguage::instance();		
-	$_pLanguage		-> 	initialize($_pSQLObject -> getConnection(CFG::GET() -> MYSQL -> PRIMARY_DATABASE));	
+	$_pLanguage		-> 	initialize($pDBInstance -> getConnection(CFG::GET() -> MYSQL -> PRIMARY_DATABASE));	
 	$_pLanguage		->	loadLanguageFile(CMS_SERVER_ROOT.DIR_CORE.DIR_LANGUAGES.CLanguage::instance() -> getDefault() .'/');
 
+##	R O U T I N G
+
+	$pRouter  = CRouter::instance();
+	$pRouter -> initialize(CFG::GET() -> LANGUAGE, CLanguage::instance() -> getLanguages());
+
+	if(CMS_URL_BASE !== false)
+		$_SERVER['REQUEST_URI'] = str_replace('/'. CMS_URL_BASE, '', $_SERVER['REQUEST_URI']);
+	
+	$pRouteRequest = $pRouter -> route($_SERVER['REQUEST_URI']);
+
+	if($pRouteRequest === false)
+	{
+		$pRouter -> createRoutes($pDBInstance -> getConnection(CFG::GET() -> MYSQL -> PRIMARY_DATABASE));
+		header("Location: ". $_SERVER['REQUEST_URI']); 	
+		exit;
+	}
+
+	$_GET['cms-node'] = $pRouteRequest -> nodeId;
+	$_GET['cms-lang'] = $pRouteRequest -> language;
+
+	if($pRouteRequest -> responseCode != 200)
+		$_GET['cms-error'] = $pRouteRequest -> responseCode;
+	
 ##	C O O K I E   M A N A G E R
 
 	//	CCookie is a singleton class
@@ -97,7 +123,7 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 
 	$_pURLVariables	 =	new CURLVariables();
 
-	$_request[] 	 = 	[	"input" => "cms-lang", 		  	 	"validate" => "strip_tags|strip_whitespaces|lowercase|!empty",          "use_default" => true, "default_value" => CLanguage::instance() -> getDefault() ]; // language key
+	$_request[] 	 = 	[	"input" => "cms-lang", 		  	"validate" => "strip_tags|strip_whitespaces|lowercase|!empty",      	"use_default" => true, "default_value" => CLanguage::instance() -> getDefault() ]; // language key
 	$_request[] 	 = 	[	"input" => "cms-node",  		"validate" => "strip_tags|strip_whitespaces|lowercase|is_digit|!empty", "use_default" => true, "default_value" => false     ]; // node_id
 	$_request[] 	 = 	[	"input" => "cms-ctrl-action",	"validate" => "strip_tags|strip_whitespaces|lowercase|!empty", 			"use_default" => true, "default_value" => []	]; // requested controller action
 	$_request[] 	 = 	[	"input" => "cms-error",			"validate" => "strip_tags|strip_whitespaces|lowercase|!empty", 			"use_default" => true, "default_value" => false	]; // url rewrite error redirect (eg 403,404)
@@ -106,8 +132,8 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 	$_request		 =	[];
 	$_request[] 	 = 	[	"input" => "cms-risa",   	 	"validate" => "strip_tags|strip_whitespaces|lowercase|!empty" ]; 		// requested initial script action
 	$_request[] 	 = 	[	"input" => "cms-tlon",   		"validate" => "strip_tags|strip_whitespaces|!empty", 					"use_default" => true, "default_value" => ''    ]; // target login object name
-	$_request[] 	 = 	[	"input" => "cms-oid",   		"validate" => "strip_tags|strip_whitespaces|!empty", 					"use_default" => true, "default_value" => ''    ]; // object id
-	$_request[] 	 = 	[	"input" => "version", 			"validate" => "strip_tags|strip_whitespaces|lowercase|is_digit|!empty",	"use_default" => true, "default_value" => false ]; // page_version
+	$_request[] 	 = 	[	"input" => "cms-oid",   		"validate" => "strip_tags|strip_whitespaces|is_digit|!empty", 			"use_default" => true, "default_value" => ''    ]; // object id
+	$_request[] 	 = 	[	"input" => "cms-node-version",	"validate" => "strip_tags|strip_whitespaces|lowercase|is_digit|!empty",	"use_default" => true, "default_value" => false ]; // page_version
 	$_request[] 	 = 	[	"input" => "cms-xhrequest",		"validate" => "strip_tags|strip_whitespaces|!empty",					"use_default" => true, "default_value" => false ]; // request is by xhr function
 	$_request[] 	 = 	[	"input" => "cms-ctrl-action",	"validate" => "strip_tags|strip_whitespaces|lowercase|!empty" ]; 		// requested controller action
 	$_pURLVariables -> retrieve($_request, false, true); // POST 
@@ -133,10 +159,10 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 	{
 		case 'login':	## User login #################################################################################################################
 
-						$_pLogin		 =	new CLogin();
-						if( $_pLogin ->	login($_pSQLObject -> getConnection(CFG::GET() -> MYSQL -> PRIMARY_DATABASE), $_pURLVariables -> getValue("cms-tlon")) )
+						$_pLogin		 = CLogin::instance();
+						if( $_pLogin ->	login($pDBInstance -> getConnection(CFG::GET() -> MYSQL -> PRIMARY_DATABASE), $_pURLVariables -> getValue("cms-tlon")) )
 						{
-							$_rcaTarget[$_pURLVariables -> getValue("cms-oid")] = 'loginSuccess';				
+							$_rcaTarget[$_pURLVariables -> getValue("cms-oid")] = 'loginSuccess';	
 						}
 						else
 						{	##	Missing data for login
@@ -147,8 +173,8 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 
 		case 'logout':	## User logout ################################################################################################################
 
-						$_pLogin	 =	new CLogin();
-						$_pLogin 	->	logout($_pSQLObject -> getConnection(CFG::GET() -> MYSQL -> PRIMARY_DATABASE), $_pURLVariables -> getValue("cms-tlon"));
+						$_pLogin	 =	CLogin::instance();
+						$_pLogin 	->	logout($pDBInstance -> getConnection(CFG::GET() -> MYSQL -> PRIMARY_DATABASE), $_pURLVariables -> getValue("cms-tlon"));
 						break;
 	}
 
@@ -170,26 +196,28 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 	CBenchmark::instance() -> measurementPoint('module loader');	
 
 	$_pModules		 =	CModules::instance();
-	$_pModules		->	init($_pSQLObject -> getConnection(CFG::GET() -> MYSQL -> PRIMARY_DATABASE), $pUserRights);
+	$_pModules		->	initialize($pDBInstance -> getConnection(CFG::GET() -> MYSQL -> PRIMARY_DATABASE), $pUserRights);
 
 ##	I M P E R A T O R
 
 	CBenchmark::instance() -> measurementPoint('call imperator');	
 
-	$_pPageRequest 	 = 	CPageRequest::instance();
-	$_pPageRequest 	-> 	init(
-							$_pSQLObject 		-> getConnection(CFG::GET() -> MYSQL -> PRIMARY_DATABASE),
+	$pageRequest 	 = 	CPageRequest::instance();
+	$pageRequest 	-> 	init(
+							$pDBInstance 		-> getConnection(CFG::GET() -> MYSQL -> PRIMARY_DATABASE),
 							$_pURLVariables 	-> getValue("cms-node"),
 							$_pLanguage			-> getActiveLanguage(),
-							$_pURLVariables 	-> getValue("version"),
+							$_pURLVariables 	-> getValue("cms-node-version"),
 							$_pURLVariables 	-> getValue("cms-xhrequest")
-							);
+							);				
 
 	if($_pURLVariables -> getValue("cms-error") !== false)
 		CPageRequest::instance() -> setResponseCode($_pURLVariables -> getValue("cms-error"));
 			
-	$_pImperator	 =	new CImperator( $_pSQLObject -> getConnection(CFG::GET() -> MYSQL -> PRIMARY_DATABASE) );
-	$_pImperator	->	logic($_pSQLObject -> getConnection(CFG::GET() -> MYSQL -> PRIMARY_DATABASE), $_pPageRequest , $_pModules, $_rcaTarget, CMS_BACKEND, $pUserRights);
+	define('URL_LANG_PRREFIX', ((CFG::GET() -> LANGUAGE -> DEFAULT_IN_URL || $pageRequest -> page_language !== CLanguage::instance() -> getDefault()) ? $pageRequest -> page_language .'/' : '') );
+
+	$_pImperator	 =	new CImperator( $pDBInstance -> getConnection(CFG::GET() -> MYSQL -> PRIMARY_DATABASE) );
+	$_pImperator	->	logic($pDBInstance -> getConnection(CFG::GET() -> MYSQL -> PRIMARY_DATABASE), $pageRequest , $_pModules, $_rcaTarget, CMS_BACKEND, $pUserRights);
 
 ##	H T M L   D O C U M E N T
 
@@ -199,7 +227,6 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 
 ##	V I E W 
 
-	$_pHTML -> openDocument($_pImperator -> m_page, $_pImperator, $_pPageRequest);
-
+	$_pHTML -> openDocument($_pImperator -> m_page, $_pImperator, $pageRequest);
 
 ?>

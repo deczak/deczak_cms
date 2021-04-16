@@ -25,7 +25,7 @@ class	controllerPages extends CController
 	}
 	
 	public function
-	logic(&$_sqlConnection, array $_rcaTarget, $_isXHRequest, &$_logicResult)
+	logic(CDatabaseConnection &$_pDatabase, array $_rcaTarget, $_isXHRequest, &$_logicResult)
 	{
 		##	Set default target if not exists
 	
@@ -55,22 +55,23 @@ class	controllerPages extends CController
 
 		switch($_controllerAction)
 		{
-			case 'view'			: $_logicResults = $this -> logicView($_sqlConnection, $_isXHRequest, $_logicResult, $enableEdit, $enableDelete); break;
-			case 'edit'			: $_logicResults = $this -> logicEdit($_sqlConnection, $_isXHRequest); break;	
-			case 'create'		: $_logicResults = $this -> logicCreate($_sqlConnection, $_isXHRequest); break;
-			case 'delete'		: $_logicResults = $this -> logicDelete($_sqlConnection, $_isXHRequest); break;	
-			case 'deletetree'	: $_logicResults = $this -> logicDeleteTree($_sqlConnection, $_isXHRequest); break;	
+			case 'view'			: $logicResults = $this -> logicView($_pDatabase, $_isXHRequest, $_logicResult, $enableEdit, $enableDelete); break;
+			case 'edit'			: $logicResults = $this -> logicEdit($_pDatabase, $_isXHRequest); break;	
+			case 'create'		: $logicResults = $this -> logicCreate($_pDatabase, $_isXHRequest); break;
+			case 'delete'		: $logicResults = $this -> logicDelete($_pDatabase, $_isXHRequest); break;	
+			case 'deletetree'	: $logicResults = $this -> logicDeleteTree($_pDatabase, $_isXHRequest); break;	
 		}
 
-		if(!$_logicResults)
+
+		if(!$logicResults)
 		{
 			##	Default View
-			$this -> logicIndex($_sqlConnection, $_isXHRequest, $enableEdit, $enableDelete);
+			$this -> logicIndex($_pDatabase, $_isXHRequest, $enableEdit, $enableDelete);
 		}
 	}
 
 	private function
-	logicIndex(&$_sqlConnection, $_isXHRequest, $_enableEdit = false, $_enableDelete = false)
+	logicIndex(CDatabaseConnection &$_pDatabase, $_isXHRequest, $_enableEdit = false, $_enableDelete = false)
 	{
 		##	XHR request
 	
@@ -95,13 +96,13 @@ class	controllerPages extends CController
 									$modelCondition -> where('page_path', '/');		
 
 									$this -> m_modelSitemap  = new modelSitemap();
-									if(!$this -> m_modelSitemap -> load($_sqlConnection, $modelCondition))
+									if(!$this -> m_modelSitemap -> load($_pDatabase, $modelCondition))
 									{
 										$_bValidationMsg .= CLanguage::get() -> string('ERR_SQL_ERROR');
 										$_bValidationErr = true;
 									}											
 						
-									$data = $this -> m_modelSitemap -> getDataInstance();
+									$data = $this -> m_modelSitemap -> getResult();
 
 									break;
 
@@ -117,13 +118,13 @@ class	controllerPages extends CController
 									$modelCondition -> where('tb_page.page_id', $_aFormData['page_id']);		
 
 									$modelPage  = new modelPage();
-									if(!$modelPage -> loadOld($_sqlConnection, $modelCondition))
+									if(!$modelPage -> load($_pDatabase, $modelCondition))
 									{
 										$_bValidationMsg .= CLanguage::get() -> string('ERR_SQL_ERROR');
 										$_bValidationErr = true;
 									}											
 						
-									$data = $modelPage -> getDataInstance();
+									$data = $modelPage -> getResult();
 
 									break;
 			}
@@ -151,7 +152,7 @@ class	controllerPages extends CController
 	}
 
 	private function
-	logicView(&$_sqlConnection, $_isXHRequest, &$_logicResult, $_enableEdit = false, $_enableDelete = false)
+	logicView(CDatabaseConnection &$_pDatabase, $_isXHRequest, &$_logicResult, $_enableEdit = false, $_enableDelete = false)
 	{
 		$_pURLVariables	 =	new CURLVariables();
 		$_request		 =	[];
@@ -172,12 +173,16 @@ class	controllerPages extends CController
 			$modelCondition -> limit(1);		
 
 			$this -> m_modelPage  = new modelPage();
-			$this -> m_modelPage -> loadOld($_sqlConnection, $modelCondition);
+			$this -> m_modelPage -> load($_pDatabase, $modelCondition);
+
+
+			if(empty($this -> m_modelPage -> getResult()))
+				return false;
 
 			$_logicResult['state']			=	1;
-			$_logicResult['node_id']		=	$this -> m_modelPage -> getDataInstance()[0] -> node_id;
-			$_logicResult['page_version']	=	$this -> m_modelPage -> getDataInstance()[0] -> page_version;
-			$_logicResult['page_language']	=	$this -> m_modelPage -> getDataInstance()[0] -> page_language;
+			$_logicResult['node_id']		=	$this -> m_modelPage -> getResult()[0] -> node_id;
+			$_logicResult['page_version']	=	$this -> m_modelPage -> getResult()[0] -> page_version;
+			$_logicResult['page_language']	=	$this -> m_modelPage -> getResult()[0] -> page_language;
 			$_logicResult['enablePageEdit']	=	$_enableEdit;
 
 			return true;
@@ -187,7 +192,7 @@ class	controllerPages extends CController
 	}
 
 	private function
-	logicEdit(&$_sqlConnection, $_isXHRequest)
+	logicEdit(CDatabaseConnection &$_pDatabase, $_isXHRequest)
 	{
 		$_pURLVariables	 =	new CURLVariables();
 		$_request		 =	[];
@@ -206,12 +211,12 @@ class	controllerPages extends CController
 			$modelCondition -> where('tb_page_path.node_id', $nodeId);		
 
 			$this -> m_modelPage  = new modelPage();
-			$this -> m_modelPage -> loadOld($_sqlConnection, $modelCondition);
+			$this -> m_modelPage -> load($_pDatabase, $modelCondition);
 
 			$_logicResult['state']			=	1;
-			$_logicResult['node_id']		=	$this -> m_modelPage -> getDataInstance()[0] -> node_id;
-			$_logicResult['page_version']	=	$this -> m_modelPage -> getDataInstance()[0] -> page_version;
-			$_logicResult['page_language']	=	$this -> m_modelPage -> getDataInstance()[0] -> page_language;
+			$_logicResult['node_id']		=	$this -> m_modelPage -> getResult()[0] -> node_id;
+			$_logicResult['page_version']	=	$this -> m_modelPage -> getResult()[0] -> page_version;
+			$_logicResult['page_language']	=	$this -> m_modelPage -> getResult()[0] -> page_language;
 
 
 
@@ -287,9 +292,9 @@ class	controllerPages extends CController
 											$pageCondition 	-> where('tb_page_path.page_id', $_aFormData['page_id']);		
 
 											$pageCheck  	 = new modelPage();
-											$pageCheck 		-> loadOld($_sqlConnection, $pageCondition);
+											$pageCheck 		-> load($_pDatabase, $pageCondition);
 
-											foreach($pageCheck -> getDataInstance() as $pageItm)
+											foreach($pageCheck -> getResult() as $pageItm)
 											{
 												if($pageItm -> page_language === $_logicResult['page_language'])
 												{
@@ -327,12 +332,14 @@ class	controllerPages extends CController
 
 												$authCondition = new CModelCondition();
 												$authCondition -> where('node_id', $nodeId );	
-												$this -> m_modelPage -> updateChilds($_sqlConnection, $authFields, $authCondition);
+												$this -> m_modelPage -> updateChilds($_pDatabase, $authFields, $authCondition);
 											}
 
 											unset($_aFormData['apply_childs_auth']);
 
-											if($this -> m_modelPage -> updateOld($_sqlConnection, $_aFormData))
+											$condition 			 = new CModelCondition(); // Null Condition, model creates own instances
+
+											if($this -> m_modelPage -> update($_pDatabase, $_aFormData, $condition))
 											{
 												## update categorie allocations
 
@@ -340,13 +347,13 @@ class	controllerPages extends CController
 												$categorieAllocCondition 	-> where('node_id', $nodeId);		
 
 												$modelCategoriesAllocation	 = new modelCategoriesAllocation();
-												$modelCategoriesAllocation	-> delete($_sqlConnection, $categorieAllocCondition);
+												$modelCategoriesAllocation	-> delete($_pDatabase, $categorieAllocCondition);
 
 												foreach($_aFormData['page_categories'] as $categorie)
 												{
 													$alloc_id = 0;
 													$newAlloc = ["category_id" => $categorie, "node_id" => $nodeId];
-													$modelCategoriesAllocation	-> insert($_sqlConnection, $newAlloc, $alloc_id);
+													$modelCategoriesAllocation	-> insert($_pDatabase, $newAlloc, $alloc_id);
 												}
 
 												## update tag allocations
@@ -355,13 +362,13 @@ class	controllerPages extends CController
 												$tagAllocCondition 	-> where('node_id', $nodeId);		
 
 												$modelTagsAllocation	 = new modelTagsAllocation();
-												$modelTagsAllocation	-> delete($_sqlConnection, $tagAllocCondition);
+												$modelTagsAllocation	-> delete($_pDatabase, $tagAllocCondition);
 
 												foreach($_aFormData['page_tags'] as $tag)
 												{
 													$alloc_id = 0;
 													$newAlloc = ["tag_id" => $tag, "node_id" => $nodeId];
-													$modelTagsAllocation	-> insert($_sqlConnection, $newAlloc, $alloc_id);
+													$modelTagsAllocation	-> insert($_pDatabase, $newAlloc, $alloc_id);
 												}
 
 												## update redirection
@@ -370,7 +377,7 @@ class	controllerPages extends CController
 												$redirectCondition 	-> where('node_id', $nodeId);	
 
 												$modelRedirect	 = new modelRedirect();
-												$modelRedirect	-> delete($_sqlConnection, $redirectCondition);
+												$modelRedirect	-> delete($_pDatabase, $redirectCondition);
 
 												if(!empty($_aFormData['page_redirect']))
 												{
@@ -379,17 +386,17 @@ class	controllerPages extends CController
 													$newRedirect["redirect_target"]	= $_aFormData['page_redirect'];
 													$newRedirect["create_time"] 	= time();
 													$newRedirect["create_by"]	 	= CSession::instance() -> getValue('user_id');
-													$modelRedirect				   -> insert($_sqlConnection, $newRedirect, $redirect_id);
+													$modelRedirect				   -> insert($_pDatabase, $newRedirect, $redirect_id);
 												}
 
 												## update htaccess and sitemap
 
 												$_pHTAccess  = new CHTAccess();
-												$_pHTAccess -> generatePart4Frontend($_sqlConnection);
-												$_pHTAccess -> writeHTAccess();
+												$_pHTAccess -> generatePart4Frontend($_pDatabase);
+												$_pHTAccess -> writeHTAccess($_pDatabase);
 
 												$sitemap  	 = new CXMLSitemap();
-												$sitemap 	-> generate($_sqlConnection);												
+												$sitemap 	-> generate($_pDatabase);												
 											}
 											else
 											{
@@ -414,7 +421,7 @@ class	controllerPages extends CController
 	}
 
 	private function
-	logicCreate(&$_sqlConnection, $_isXHRequest)
+	logicCreate(CDatabaseConnection &$_pDatabase, $_isXHRequest)
 	{
 		$_pURLVariables	 =	new CURLVariables();
 		$_request		 =	[];
@@ -433,16 +440,14 @@ class	controllerPages extends CController
 
 		$this -> m_modelPage  = new modelPage();
 
-		$nodeId = 0;
-
-		if($this -> m_modelPage -> insert($_sqlConnection, $_aFormData, $nodeId))
+		if($this -> m_modelPage -> insert($_pDatabase, $_aFormData))
 		{
 			$_pHTAccess  = new CHTAccess();
-			$_pHTAccess -> generatePart4Frontend($_sqlConnection);
-			$_pHTAccess -> writeHTAccess();
+			$_pHTAccess -> generatePart4Frontend($_pDatabase);
+			$_pHTAccess -> writeHTAccess($_pDatabase);
 
 			$sitemap  	 = new CXMLSitemap();
-			$sitemap 	-> generate($_sqlConnection);	
+			$sitemap 	-> generate($_pDatabase);	
 
 			CMessages::instance() -> addMessage(CLanguage::instance() -> getString('MOD_SITES_PAGECREATED') , MSG_OK);
 		}
@@ -454,7 +459,7 @@ class	controllerPages extends CController
 	}
 
 	private function
-	logicDelete(&$_sqlConnection, $_isXHRequest)
+	logicDelete(CDatabaseConnection &$_pDatabase, $_isXHRequest)
 	{
 		$_pURLVariables	 =	new CURLVariables();
 		$_request		 =	[];
@@ -466,14 +471,14 @@ class	controllerPages extends CController
 		$modelCondition -> where('node_id', $_aFormData['cms-edit-page-node']);		
 		
 		$this -> m_modelPage  = new modelPage();
-		if($this -> m_modelPage -> delete($_sqlConnection, $modelCondition))
+		if($this -> m_modelPage -> delete($_pDatabase, $modelCondition))
 		{
 			$_pHTAccess  = new CHTAccess();
-			$_pHTAccess -> generatePart4Frontend($_sqlConnection);
-			$_pHTAccess -> writeHTAccess();
+			$_pHTAccess -> generatePart4Frontend($_pDatabase);
+			$_pHTAccess -> writeHTAccess($_pDatabase);
 
 			$sitemap  	 = new CXMLSitemap();
-			$sitemap 	-> generate($_sqlConnection);	
+			$sitemap 	-> generate($_pDatabase);	
 
 			CMessages::instance() -> addMessage(CLanguage::instance() -> getString('MOD_SITES_PAGEDELETED') , MSG_OK);
 		}
@@ -485,7 +490,7 @@ class	controllerPages extends CController
 	}	
 
 	private function
-	logicDeleteTree(&$_sqlConnection, $_isXHRequest)
+	logicDeleteTree(CDatabaseConnection &$_pDatabase, $_isXHRequest)
 	{
 		$_pURLVariables	 =	new CURLVariables();
 		$_request		 =	[];
@@ -497,14 +502,14 @@ class	controllerPages extends CController
 		$modelCondition -> where('node_id', $_aFormData['cms-edit-page-node']);	
 
 		$this -> m_modelPage  = new modelPage();
-		if($this -> m_modelPage -> deleteTree($_sqlConnection, $modelCondition))
+		if($this -> m_modelPage -> deleteTree($_pDatabase, $modelCondition))
 		{
 			$_pHTAccess  = new CHTAccess();
-			$_pHTAccess -> generatePart4Frontend($_sqlConnection);
-			$_pHTAccess -> writeHTAccess();
+			$_pHTAccess -> generatePart4Frontend($_pDatabase);
+			$_pHTAccess -> writeHTAccess($_pDatabase);
 
 			$sitemap  	 = new CXMLSitemap();
-			$sitemap 	-> generate($_sqlConnection);	
+			$sitemap 	-> generate($_pDatabase);	
 			
 			CMessages::instance() -> addMessage(CLanguage::instance() -> getString('MOD_SITES_PAGEDELETED') , MSG_OK);
 		}

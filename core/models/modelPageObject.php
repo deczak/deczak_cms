@@ -7,24 +7,29 @@ class 	modelPageObject extends CModel
 	public function
 	__construct()
 	{		
-		parent::__construct('pageObject');		
-		$this -> m_sheme = new shemePageObject();
+		parent::__construct('shemePageObject', 'pageObject');	
 	}	
-}
-
-/**
- * 	Parent class for the data class with toolkit functions. It get the child instance to access the child properties.
-
-class 	toolkitPageObject
-{
-	protected	$m_childInstance;
 
 	public function
-	__construct($_instance)
+	createClass()
 	{
-		$this -> m_childInstance = $_instance;
+		return $this -> createPrototype();
 	}
-
 }
- */
+
+class 	modelBackendPageObject extends CModel
+{
+	public function
+	__construct()
+	{		
+		parent::__construct('shemeBackendPageObject', 'backendPageObject');	
+	}	
+
+	public function
+	createClass()
+	{
+		return $this -> createPrototype();
+	}
+}
+
 ?>

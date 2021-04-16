@@ -7,7 +7,7 @@
 	$pAvaiableTemplates	=	new CTemplates(CMS_SERVER_ROOT . DIR_TEMPLATES);
 	$avaiableTemplates 	= 	$pAvaiableTemplates -> searchTemplates(true);
 
-	$sqlConnection = CSQLConnect::instance() -> getConnection(CFG::GET() -> MYSQL -> PRIMARY_DATABASE);
+	$pDatabase = CDatabase::instance() -> getConnection(CFG::GET() -> MYSQL -> PRIMARY_DATABASE);
 
 	##	get edit right ... language > page-module > frontend-module
 
@@ -235,8 +235,8 @@
 							<option value="0" <?= ($pageRequest -> page_auth == 0 ? 'selected' : ''); ?>><?= CLanguage::GET() -> STRING('BEPE_PANEL_AUTHOBJECT_0_NONE'); ?></option>
 							<?php
 							$modelLoginObjects	 = new modelLoginObjects();
-							$modelLoginObjects	-> load($sqlConnection);
-							$loginObjectsList 	 = $modelLoginObjects -> getDataInstance();
+							$modelLoginObjects	-> load($pDatabase);
+							$loginObjectsList 	 = $modelLoginObjects -> getResult();
 							foreach($loginObjectsList as $loginObject)
 								echo '<option value="'. $loginObject-> object_id .'" '. ($pageRequest -> page_auth == $loginObject-> object_id ? 'selected' : '') .'>'. $loginObject-> object_id .'</option>';
 							?>
@@ -309,8 +309,8 @@
 							<option value=""></option>
 							<?php
 							$modelCategories	 = new modelCategories();
-							$modelCategories	-> load($sqlConnection);
-							$categoriesList 	 = $modelCategories -> getDataInstance();
+							$modelCategories	-> load($pDatabase);
+							$categoriesList 	 = $modelCategories -> getResult();
 							foreach($categoriesList as $category)
 								echo '<option value="'. $category -> category_id .'">'. $category -> category_name .'</option>';
 							?>
@@ -331,8 +331,8 @@
 							<option value=""></option>
 							<?php
 							$modelTags	 = new modelTags();
-							$modelTags	-> load($sqlConnection);
-							$tagsList 	 = $modelTags -> getDataInstance();
+							$modelTags	-> load($pDatabase);
+							$tagsList 	 = $modelTags -> getResult();
 							foreach($tagsList as $tag)
 								echo '<option value="'. $tag -> tag_id .'">'. $tag -> tag_name .'</option>';
 							?>

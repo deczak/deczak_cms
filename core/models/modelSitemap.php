@@ -1,194 +1,211 @@
 <?php
 
+define('SITEMAP_OWN_CHILDS_ONLY',0x1);
+
 include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SHEME.'shemeSitemap.php';	
 
 class 	modelSitemap extends CModel
 {
-	private	$m_shemeSitemap;
+	protected $tbPage;
+	protected $tbPagePath;
+	protected $tbPageHeader;
 
 	public function
 	__construct()
 	{		
-		parent::__construct();		
+        parent::__construct('shemeSitemap', 'sitemap');
 
-		$this -> m_shemeSitemap = new shemeSitemap();
+		$this -> tbPage		 	= 'tb_page';
+		$this -> tbPagePath 	= 'tb_page_path';
+		$this -> tbPageHeader 	= 'tb_page_header';
 	}	
-				
+		
 	public function
-	load(&$_sqlConnection, CModelCondition $_condition = NULL, CModelComplementary $_complementary = NULL)
+	load(CDatabaseConnection &$_pDatabase, CModelCondition $_pCondition = NULL, $_execFlags = NULL) : bool
 	{
 		$_mainpageNodeID = 1;
 
-		#$_condition -> where('page_path', $_sqlConnection -> real_escape_string('/'));
+		$dbQuery 	= $_pDatabase		-> query(DB_SELECT) 
+										-> table($this -> tbPagePath) 
+										-> selectColumns(['*'])
+										-> condition($_pCondition);
 
-		##
+		$nodeResult = $dbQuery -> exec($_execFlags);
 
-#		$_sqlString =	"	SELECT 		tb_page_path.node_id
-		$_sqlString =	"	SELECT 		*
-							FROM 		tb_page_path
-						".	($_condition != NULL ? $_condition -> getConditions($_sqlConnection, $_condition) : '');
 
-		$_sqlNodeRes = $_sqlConnection -> query($_sqlString);
-
-		if($_sqlNodeRes !== false && $_sqlNodeRes -> num_rows == 1)
-		{
-			$_sqlNode 			= $_sqlNodeRes -> fetch_assoc();
-			$_mainpageNodeID 	= $_sqlNode['node_id'];
-		}
+		if(empty($nodeResult))
+			return false;
+		
+		$_sqlNode 			= $nodeResult[0];
+		$_mainpageNodeID 	= $_sqlNode -> node_id;
 
 		##	Get node and children
+					
+		$relCondPgHead	 = new CModelCondition();
+		$relCondPgHead	-> where($this -> tbPageHeader .'.node_id', 'o.node_id');
+		$relPgHead		 = new CModelRelations('join', $this -> tbPageHeader, $relCondPgHead);
+					
+		$relCondPg		 = new CModelCondition();
+		$relCondPg		-> where($this -> tbPage .'.node_id', 'o.node_id');
+		$relPg			 = new CModelRelations('join', $this -> tbPage, $relCondPg);
 
-		$_sqlString =	"	SELECT 		o.node_id,
-										o.page_id,
-										o.page_language,
-										COUNT(p.node_id)-1 AS level,
-										ROUND ((o.node_rgt - o.node_lft - 1) / 2) AS offspring,
-										tb_page_header.page_title,
-										tb_page_header.page_name,
-										tb_page_header.page_version,
-										tb_page.create_time,
-										tb_page.update_time,
-										tb_page.page_auth,
-										tb_page.publish_from,
-										tb_page.publish_until,
-										tb_page.publish_expired,
-										tb_page.hidden_state,
-										tb_page.menu_follow
-							FROM 		tb_page_path AS n,
-										tb_page_path AS p,
-										tb_page_path AS o
-							LEFT JOIN	tb_page_header
-								ON		tb_page_header.node_id 			= o.node_id
-							LEFT JOIN	tb_page
-								ON		tb_page.node_id 				= o.node_id
-							WHERE 		o.node_lft BETWEEN p.node_lft AND p.node_rgt
-							AND 		o.node_lft BETWEEN n.node_lft AND n.node_rgt
-							AND 		n.node_id = '". $_sqlConnection -> real_escape_string($_mainpageNodeID) ."'
-							GROUP BY	o.node_lft
-							ORDER BY 	o.node_lft
-						";
-			
-		$_sqlNodeRes = $_sqlConnection -> query($_sqlString) or die($_sqlConnection -> error);
+		$condPgPath	 	 = new CModelCondition();
+		$condPgPath		-> whereBetween('o.node_lft', 'p.node_lft', 'p.node_rgt', true)
+						-> whereBetween('o.node_lft', 'n.node_lft', 'n.node_rgt', true)
+						-> where('n.node_id', $_mainpageNodeID)
+						-> groupBy('o.node_lft')
+						-> orderBy('o.node_lft');
 
-		if($_sqlNodeRes === false || !$_sqlNodeRes -> num_rows)
+		$sqlNodeRes 	 = $_pDatabase		-> query(DB_SELECT) 
+											-> table($this -> tbPagePath, 'n') 
+											-> table($this -> tbPagePath, 'p') 
+											-> table($this -> tbPagePath, 'o') 
+											-> selectColumns([	'o.node_id',
+																'o.page_id',
+																'o.node_level',
+																'o.page_language',
+																'COUNT(p.node_id)-1 AS level',
+																'ROUND ((o.node_rgt - o.node_lft - 1) / 2) AS offspring',
+																$this -> tbPageHeader .'.page_title',
+																$this -> tbPageHeader .'.page_name',
+																$this -> tbPageHeader .'.page_version',
+																$this -> tbPage .'.create_time',
+																$this -> tbPage .'.update_time',
+																$this -> tbPage .'.page_auth',
+																$this -> tbPage .'.publish_from',
+																$this -> tbPage .'.publish_until',
+																$this -> tbPage .'.publish_expired',
+																$this -> tbPage .'.hidden_state',
+																$this -> tbPage .'.menu_follow',
+																'o.page_path AS page_path_segment'])
+											-> condition($condPgPath)
+											-> relations([$relPgHead, $relPg])
+											-> exec();
+		
+		if($sqlNodeRes === false || !count($sqlNodeRes))
 		{
 			trigger_error('modelSitemap::load() - Node does not exists');
 			return false;
 		}
 
 		##	Loop node result and add page path by parents
-
+		$childsLevel = NULL;
 		$_pages = [];
-		while($_sqlNode = $_sqlNodeRes -> fetch_assoc())
+		foreach($sqlNodeRes as $_sqlNode)
 		{
-			$_sqlNode['page_path'] = $this -> getPagePath($_sqlConnection, $_sqlNode['node_id'], $_sqlNode['page_language']);
+			if($_execFlags & SITEMAP_OWN_CHILDS_ONLY)
+			{
+				if($childsLevel === NULL)
+				{
+					$childsLevel = intval($_sqlNode -> level);
+					$childsLevel++;
+					continue;
+				}
+
+				if($childsLevel !== intval($_sqlNode -> level))
+				{
+					continue;
+				}
+			}
+
+			$_sqlNode -> page_path = $this -> getPagePath($_pDatabase, $_sqlNode -> node_id, $_sqlNode -> page_language);
+			$_sqlNode -> page_path_segment = trim($_sqlNode -> page_path_segment, '/');
+	
 			$_pages[]  = $_sqlNode;
 		}
 
 		##	Create data objects and get alternate pages
 
-		$_className		=	$this -> createClass($this -> m_shemeSitemap);
+		$_className		=	$this -> createPrototype();
 
 		foreach($_pages as $_pageIndex => $_page)
 		{
-			$_page['alternate_path'] = $this -> getAlternatePaths($_sqlConnection, $_page['page_id']);
-			$this -> m_storage[] = new $_className($_page, $this -> m_shemeSitemap -> getColumns());
+			$_page -> alternate_path = $this -> getAlternatePaths($_pDatabase, $_page -> page_id);
+
+			$this -> m_resultList[] = new $_className($_page, $this -> m_pSheme -> getColumns());
 		}	
 
 		return true;
 	}
 
 	private function
-	getAlternatePaths(&$_sqlConnection, $_pageID)
+	getAlternatePaths(CDatabaseConnection &$_pDatabase, $_pageID) : array
 	{
 		$_returnArray	=	[];
+					
+		$condPage = new CModelCondition();
+		$condPage-> where('page_id', $_pageID);
 
-		$_sqlString 	=	"	SELECT 		tb_page_path.node_id,
-											tb_page_path.page_language
-								FROM 		tb_page_path
-								WHERE 		tb_page_path.page_id 		= '". $_pageID ."'
-							";
+		$sqlPagesRes 	 = $_pDatabase		-> query(DB_SELECT) 
+											-> table($this -> tbPagePath) 
+											-> selectColumns(['node_id', 'page_language'])
+											-> condition($condPage)
+											-> exec();
 
-		$_sqlPagesRes 	= $_sqlConnection -> query($_sqlString);
+		if($sqlPagesRes === false)
+			return $_returnArray;
 
-		while($_sqlPagesRes !== false && $_sqlPages = $_sqlPagesRes -> fetch_assoc())
+		foreach($sqlPagesRes as $_sqlPages)
 		{
-			$_sqlString =	"	SELECT 		p.node_id, 
-											p.page_path,
-											p.page_language
-								FROM 		tb_page_path AS n,
-											tb_page_path AS p
-								WHERE 		n.node_lft
-									BETWEEN p.node_lft 
-										AND	p.node_rgt 
-									AND 	n.node_id = '". $_sqlConnection -> real_escape_string($_sqlPages['node_id']) ."'
-								ORDER BY 	n.node_lft
-							";
+			$condPgHead		 = new CModelCondition();
+			$condPgHead		-> whereBetween('n.node_lft', 'p.node_lft', 'p.node_rgt', true)
+							-> where('n.node_id', $_sqlPages -> node_id)
+							-> orderBy('p.node_lft');
 
-			$_sqlPgHeadRes	=	 $_sqlConnection -> query($_sqlString);
+			$sqlPgHeadRes	 = $_pDatabase		-> query(DB_SELECT) 
+												-> table($this -> tbPagePath, 'n') 
+												-> table($this -> tbPagePath, 'p') 
+												-> selectColumns(['p.node_id', 'p.page_path', 'p.page_language'])
+												-> condition($condPgHead)
+												-> exec();
+		
+			if($sqlPgHeadRes === false)
+				break;
 
-			while($_sqlPgHeadRes !== false && $_sqlPgHead = $_sqlPgHeadRes -> fetch_assoc())
+			foreach($sqlPgHeadRes as $_sqlPgHead)
 			{
-				if($_sqlPgHead['page_language'] == '0') continue;
+				if($_sqlPgHead -> page_language == '0') continue;
 
-				if(!isset($_returnArray[$_sqlPgHead['page_language']]))
-					$_returnArray[$_sqlPgHead['page_language']]['path'] = '';
+				if(!isset($_returnArray[$_sqlPgHead -> page_language]))
+					$_returnArray[$_sqlPgHead -> page_language]['path'] = '';
 
-				$_returnArray[$_sqlPgHead['page_language']]['path'] 	.= $_sqlPgHead['page_path'];
-				$_returnArray[$_sqlPgHead['page_language']]['node_id']   = $_sqlPgHead['node_id'];
+				$_returnArray[$_sqlPgHead -> page_language]['path'] 	.= $_sqlPgHead -> page_path;
+				$_returnArray[$_sqlPgHead -> page_language]['node_id']   = $_sqlPgHead -> node_id;
 			}	
 		}
 
 		return $_returnArray;
 	}
 	
-	private function
-	getPagePath(&$_sqlConnection, int $_nodeID, string $_language)
+	public function
+	getPagePath(CDatabaseConnection &$_pDatabase, int $_nodeID, string $_language) : string
 	{
-		$_sqlString =	"	SELECT 		p.node_id, 
-										p.page_path
-							FROM 		tb_page_path n,
-										tb_page_path p
-							WHERE 		n.node_lft
-								BETWEEN p.node_lft 
-									AND	p.node_rgt 
-								AND 	n.node_id 		= '". $_sqlConnection -> real_escape_string($_nodeID) ."'
-								AND 	p.page_language = '". $_sqlConnection -> real_escape_string($_language) ."'
-							ORDER BY 	p.node_lft ASC
-						";
+		$condNode		 = new CModelCondition();
+		$condNode		-> whereBetween('n.node_lft', 'p.node_lft', 'p.node_rgt', true)
+						-> where('n.node_id', $_nodeID)
+						-> where('p.page_language', $_language)
+						-> orderBy('p.node_lft');
 
-		$_sqlNodeRes = $_sqlConnection -> query($_sqlString);
+		$sqlNodeRes 	 = $_pDatabase		-> query(DB_SELECT) 
+											-> table($this -> tbPagePath, 'n') 
+											-> table($this -> tbPagePath, 'p') 
+											-> selectColumns(['p.node_id', 'p.page_path'])
+											-> condition($condNode)
+											-> exec();
 
-		if($_sqlNodeRes === false || !$_sqlNodeRes -> num_rows)
+		if($sqlNodeRes === false || !count($sqlNodeRes))
 		{
 			return '/';
 		}
 
 		$_pagePath = '';
 		
-		while($_sqlNode = $_sqlNodeRes -> fetch_assoc())
+		foreach($sqlNodeRes as $_sqlNode)
 		{
-			$_pagePath .= $_sqlNode['page_path'];
+			$_pagePath .= $_sqlNode -> page_path;
 		}
 		return $_pagePath;
 	}
-	
 }
 
-
-/**
- * 	Parent class for the data class with toolkit functions. It get the child instance to access the child properties.
-
-class 	toolkitSitemap
-{
-	protected	$m_childInstance;
-
-	public function
-	__construct($_instance)
-	{
-		$this -> m_childInstance = $_instance;
-	}
-
-}
-*/
 ?>

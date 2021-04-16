@@ -1,5 +1,8 @@
 <?php
 
+
+
+/*
 class CModelComplementaryItm
 {
 	public	$propertyName;
@@ -32,5 +35,5 @@ class CModelComplementary
 		return $this;
 	}
 }
-
+*/
 ?>

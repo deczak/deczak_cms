@@ -1,8 +1,3 @@
-<?php
-
-	$_pPageRequest 	= CPageRequest::instance();
-
-?>
 <div class="be-module-container">
 
 	<table class="table-overview">
@@ -17,43 +12,11 @@
 				<td class="bach-item-menu"></td>
 			</tr>
 		</thead>
-		<tbody>
-		<?php
-		foreach($usersList as $_dataKey => $_dataSet)
-		{
-			$_dataSet -> time_login 	= ($_dataSet -> time_login == 0 ? '-' : date(TIME_FORMAT_BACKENDVIEW, $_dataSet -> time_login) );
-			$_dataSet -> create_time 	= ($_dataSet -> create_time == 0 ? '-' : date(TIME_FORMAT_BACKENDVIEW, $_dataSet -> create_time) );
-
-			?>
-
-			<tr class="trigger-batch-item">
-				<td class="batch-selection-item"><input type="checkbox" class="trigger-batch-item-checkbox" name="user-id[]" value="<?php echo $_dataSet -> user_id; ?>" id="item-<?php echo $_dataKey; ?>"><label for="item-<?php echo $_dataKey; ?>"></label></td>
-				<td class="user-id"><?php echo $_dataSet -> user_id; ?></td>
-				<td><?php echo $_dataSet -> user_name_first .' '. $_dataSet -> user_name_last; ?></td>
-				<td class="time-create"><?php echo $_dataSet -> create_time; ?></td>
-				<td class="last-login"><?php echo $_dataSet -> time_login; ?></td>
-				<td class="num-of-logins"><?php echo $_dataSet -> login_count; ?></td>
-				<td class="bach-item-menu"><span>&equiv;</span><div class="dropdown-content"><div></div><a href="<?php echo CMS_SERVER_URL_BACKEND . $_pPageRequest -> urlPath; ?>user/<?php echo $_dataSet -> user_id; ?>"><?php echo CLanguage::get() -> string('BUTTON_EDIT'); ?></a></div></td>
-			</tr>
-
-			<?php
-		}
-		?>
-		</tbody>
+		<tbody id="table-body-overview"><!-- javascript injection --></tbody>
 		<tfoot>
 			<tr>
-				<td></td>
-				<td></td>
-				<td></td>
-				<td></td>
-				<td></td>
-				<td></td>
-				<td></td>
-			</tr>
-			<tr>
 				<td class="batch-selection-item"><input type="checkbox" class="trigger-batch-item-all-checkbox" id="item-all"><label for="item-all"></label></td>
-				<td><?php echo CLanguage::get() -> string('SELECT_ALL'); ?></td>
-				<td></td>
+				<td colspan="2"><?php echo CLanguage::get() -> string('SELECT_ALL'); ?></td>
 				<td></td>
 				<td></td>
 				<td></td>
@@ -74,5 +37,27 @@
 </style>
 
 
+<template id="template-table-row">
+
+	<td class="batch-selection-item"><input type="checkbox" class="trigger-batch-item-checkbox" name="group-id[]" value="%user_id%" id="item-%user_id%"><label for="item-%user_id%"></label></td>
+	<td class="user-id">%user_id%</td>
+	<td>%user_name_first% %user_name_last%</td>
+	<td class="time-create">%create_time%</td>
+	<td class="last-login">%time_login%</td>
+	<td class="num-of-logins">%login_count%</td>
+	<td class="bach-item-menu"><span>&equiv;</span><div class="dropdown-content"><div></div><a href="<?php echo CMS_SERVER_URL_BACKEND . $pageRequest -> urlPath; ?>user/%user_id%"><?php echo $language -> string('BUTTON_EDIT'); ?></a></div></td>
+	
+</template>
+
+<script src="<?php echo CMS_SERVER_URL_BACKEND; ?>js/classes/cms-request-data-index.js"></script>
+<script src="<?php echo CMS_SERVER_URL_BACKEND; ?>js/classes/cms-request-data-item.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function(){
+
+	let	indexList = new cmsRequestDataIndex('template-table-row', '<?= CFG::GET() -> BACKEND -> TIME_FORMAT; ?>');
+		indexList.init();
+		
+});	
+</script>
 
 

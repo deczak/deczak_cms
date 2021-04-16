@@ -1,22 +1,26 @@
 <?php
 
-include_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelSimple.php';	
-
+require_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelSimple.php';	
 require_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelLoginObjects.php';
 
 class	controllerLoginForm extends CController
 {
 	public function
-	__construct($_module, &$_object)
+	__construct($_module, &$_object, bool $_backendCall = false)
 	{		
-		$this -> m_modelSimple = new modelSimple();
-		parent::__construct($_module, $_object);
+		parent::__construct($_module, $_object, $_backendCall);
+
+		if($this -> isBackendCall())
+			$this -> m_modelSimple = new modelBackendSimple();
+		else
+			$this -> m_modelSimple = new modelSimple();
+
 
 		$this -> m_aModule -> user_rights[] = 'view';			// add view right as default for everyone
 	}
 	
 	public function
-	logic(&$_sqlConnection, array $_rcaTarget, $_isXHRequest, &$_logicResult, bool $_bEditMode)
+	logic(CDatabaseConnection &$_pDatabase, array $_rcaTarget, $_isXHRequest, &$_logicResult, bool $_bEditMode)
 	{
 		$_controllerAction = $this -> getControllerAction($_rcaTarget, 'view');
 
@@ -45,60 +49,60 @@ class	controllerLoginForm extends CController
 		$enableEdit 	= $this -> existsUserRight('edit');
 		$enableDelete	= $enableEdit;
 
-		$_logicResults = false;
+		$logicResults = false;
 		switch($_controllerAction)
 		{
-			case 'loginSuccess'	: $_logicResults = $this -> logicSuccess();	break;
-			case 'view'			: $_logicResults = $this -> logicView(	$_sqlConnection, $_isXHRequest, $_logicResult);	break;
-			case 'edit'			: $_logicResults = $this -> logicEdit(	$_sqlConnection, $_isXHRequest, $_logicResult);	break;	
-			case 'create'		: $_logicResults = $this -> logicCreate($_sqlConnection, $_isXHRequest, $_logicResult);	break;
-			case 'delete'		: $_logicResults = $this -> logicDelete($_sqlConnection, $_isXHRequest, $_logicResult);	break;	
+			case 'loginSuccess'	: $logicResults = $this -> logicSuccess($_pDatabase);	break;
+			case 'view'			: $logicResults = $this -> logicView(	$_pDatabase, $_isXHRequest, $_logicResult);	break;
+			case 'edit'			: $logicResults = $this -> logicEdit(	$_pDatabase, $_isXHRequest, $_logicResult);	break;	
+			case 'create'		: $logicResults = $this -> logicCreate($_pDatabase, $_isXHRequest, $_logicResult);	break;
+			case 'delete'		: $logicResults = $this -> logicDelete($_pDatabase, $_isXHRequest, $_logicResult);	break;	
 		}
 
-		if(!$_logicResults)
+
+		if(!$logicResults)
 		{
 			##	Default View
-			$_logicResults = $this -> logicView($_sqlConnection, $_isXHRequest, $_logicResult);	
+			$logicResults = $this -> logicView($_pDatabase, $_isXHRequest, $_logicResult);	
 		}
 
 	}
 
 	public function
-	logicView(&$_sqlConnection, $_isXHRequest, &$_logicResult)
+	logicView(CDatabaseConnection &$_pDatabase, $_isXHRequest, &$_logicResult)
 	{
-		if(!isset($this -> m_aObject -> params))
+		if(empty($this -> m_aObject -> params))
 		{
 			$modelCondition = new CModelCondition();
 			$modelCondition -> where('object_id', $this -> m_aObject -> object_id);
 
-			$this -> m_modelSimple -> load($_sqlConnection, $modelCondition);
+			$this -> m_modelSimple -> load($_pDatabase, $modelCondition);
 
 
-			$this -> m_modelSimple -> getDataInstance()[0] -> params = json_decode($this -> m_modelSimple -> getDataInstance()[0] -> params);
+			$this -> m_modelSimple -> getResult()[0] -> params = json_decode($this -> m_modelSimple -> getResult()[0] -> params);
 
-$this -> m_aObject -> params = $this -> m_modelSimple -> getDataInstance()[0] -> params;
-$this -> m_aObject -> body = $this -> m_modelSimple -> getDataInstance()[0] -> body;
+			$this -> m_aObject -> params = $this -> m_modelSimple -> getResult()[0] -> params;
+			$this -> m_aObject -> body = $this -> m_modelSimple -> getResult()[0] -> body;
 
-			if(CSession::instance() -> isAuthed($this -> m_modelSimple -> getDataInstance()[0] -> params -> object_id) !== false)
+			if(CSession::instance() -> isAuthed($this -> m_modelSimple -> getResult()[0] -> params -> object_id) !== false)
 			{
-		
-				$this -> logicSuccess();
+				$this -> logicSuccess($_pDatabase);
 			}
 
 
 
 			$modelCondition = new CModelCondition();
-			$modelCondition -> where('object_id', $this -> m_modelSimple -> getDataInstance()[0] -> params -> object_id);
+			$modelCondition -> where('object_id', $this -> m_modelSimple -> getResult()[0] -> params -> object_id);
 			
 			$_pModelLoginObjects	 =	new modelLoginObjects();
-			$_pModelLoginObjects	->	load($_sqlConnection, $modelCondition);	
+			$_pModelLoginObjects	->	load($_pDatabase, $modelCondition);	
 
 			$this -> setView(	
 							'view',	
 							'',
 							[
-								'object' 	=> $this -> m_modelSimple -> getDataInstance()[0],
-								'login_objects' => $_pModelLoginObjects -> getDataInstance()
+								'object' 	=> $this -> m_modelSimple -> getResult()[0],
+								'login_object' => $_pModelLoginObjects -> getResult()[0]
 							]
 							);
 
@@ -107,41 +111,40 @@ $this -> m_aObject -> body = $this -> m_modelSimple -> getDataInstance()[0] -> b
 		{
 			// set data as property
 
-			$object		= json_encode($this -> m_aObject -> params,JSON_HEX_QUOT | JSON_HEX_APOS | JSON_UNESCAPED_UNICODE);
-
-			unset($this -> m_aObject -> params);
-
-			$this -> m_aObject -> params		= json_decode($object);
+			$object = new stdClass;
+			$object -> params		= json_decode($this -> m_aObject -> params);
+			$object -> object_id	= $this -> m_aObject -> object_id;
 
 			// authed check
-			if(CSession::instance() -> isAuthed($this -> m_aObject -> params -> object_id) !== false)
+			if(CSession::instance() -> isAuthed($object -> params -> object_id) !== false)
 			{
-				$this -> logicSuccess();
+				$this -> logicSuccess($_pDatabase);
 			}
 
-
 			$modelCondition = new CModelCondition();
-			$modelCondition -> where('object_id', $this -> m_aObject -> params -> object_id);
+			$modelCondition -> where('object_id', $object -> params -> object_id);
 			
 			// default view
 
 			$_pModelLoginObjects	 =	new modelLoginObjects();
-			$_pModelLoginObjects	->	load($_sqlConnection, $modelCondition);	
+			$_pModelLoginObjects	->	load($_pDatabase, $modelCondition);	
 
 			$this -> setView(
 							'view',
 							'', 
 							[ 
-								'object' => $this -> m_aObject,
-								'login_objects' => $_pModelLoginObjects -> getDataInstance()
+								'object' => $object,
+								'login_object' => $_pModelLoginObjects -> getResult()[0]
 							]
 							);
 		}
 
+		return true;
+
 	}
 
 	public function
-	logicCreate(&$_sqlConnection, $_isXHRequest, &$_logicResult)
+	logicCreate(CDatabaseConnection &$_pDatabase, $_isXHRequest, &$_logicResult)
 	{
 		##	XHR Function call
 
@@ -159,9 +162,7 @@ $this -> m_aObject -> body = $this -> m_modelSimple -> getDataInstance()[0] -> b
 
 			$_dataset['params'] = json_encode($_dataset['params'], JSON_HEX_QUOT | JSON_HEX_APOS | JSON_UNESCAPED_UNICODE);
 
-			$insertedId = 0;
-
-			if(!$this -> m_modelSimple -> insert($_sqlConnection, $_dataset, $insertedId))
+			if(!$this -> m_modelSimple -> insert($_pDatabase, $_dataset, MODEL_RESULT_APPEND_DTAOBJECT))
 			{
 				$_bValidationErr =	true;
 				$_bValidationMsg =	'sql insert failed';
@@ -169,15 +170,18 @@ $this -> m_aObject -> body = $this -> m_modelSimple -> getDataInstance()[0] -> b
 			else
 			{
 
+				if($this -> getInstallMode())
+					return true;
+
 				$_pModelLoginObjects	 =	new modelLoginObjects();
-				$_pModelLoginObjects	->	load($_sqlConnection);	
+				$_pModelLoginObjects	->	load($_pDatabase);	
 
 				$this -> setView(	
 								'edit',	
 								'',
 								[
-									'object' 	=> $this -> m_modelSimple -> getDataInstance()[0],
-									'login_objects' => $_pModelLoginObjects -> getDataInstance()
+									'object' 	=> $this -> m_modelSimple -> getResult()[0],
+									'login_objects' => $_pModelLoginObjects -> getResult()
 								]
 								);
 
@@ -187,14 +191,13 @@ $this -> m_aObject -> body = $this -> m_modelSimple -> getDataInstance()[0] -> b
 			tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $_bValidationDta);	// contains exit call
 
 		}	
+
+		return true;
 	}
 
-
 	public function
-	logicEdit(&$_sqlConnection, $_isXHRequest, &$_logicResult)
+	logicEdit(CDatabaseConnection &$_pDatabase, $_isXHRequest, &$_logicResult)
 	{
-
-
 		##	XHR Function call
 
 		if($_isXHRequest !== false)
@@ -234,11 +237,16 @@ $this -> m_aObject -> body = $this -> m_modelSimple -> getDataInstance()[0] -> b
 
 
 
-								$modelCondition = new CModelCondition();
-								$modelCondition -> where('object_id', $_aFormData['object_id']);
+									$modelCondition = new CModelCondition();
+									$modelCondition -> where('object_id', $_aFormData['object_id']);
 
-									if($this -> m_modelSimple -> update($_sqlConnection, $_aFormData, $modelCondition))
+									if($this -> m_modelSimple -> update($_pDatabase, $_aFormData, $modelCondition))
 									{
+
+
+										if($this -> getInstallMode())
+											return true;
+					
 										$_bValidationMsg = 'Object updated';
 
 										$this -> m_modelPageObject = new modelPageObject();
@@ -247,7 +255,7 @@ $this -> m_aObject -> body = $this -> m_modelSimple -> getDataInstance()[0] -> b
 										$_objectUpdate['update_by']			=	0;
 										$_objectUpdate['update_reason']		=	'';
 
-										$this -> m_modelPageObject -> update($_sqlConnection, $_objectUpdate, $modelCondition);
+										$this -> m_modelPageObject -> update($_pDatabase, $_objectUpdate, $modelCondition);
 									
 									}
 									else
@@ -272,17 +280,17 @@ $this -> m_aObject -> body = $this -> m_modelSimple -> getDataInstance()[0] -> b
 		$modelCondition = new CModelCondition();
 		$modelCondition -> where('object_id', $this -> m_aObject -> object_id);
 
-		$this -> m_modelSimple -> load($_sqlConnection, $modelCondition);
+		$this -> m_modelSimple -> load($_pDatabase, $modelCondition);
 
 		$_pModelLoginObjects	 =	new modelLoginObjects();
-		$_pModelLoginObjects	->	load($_sqlConnection);	
+		$_pModelLoginObjects	->	load($_pDatabase);	
 
 		$this -> setView(	
 						'edit',	
 						'',
 						[
-							'object' 		=> $this -> m_modelSimple -> getDataInstance()[0],
-							'login_objects' => $_pModelLoginObjects -> getDataInstance()
+							'object' 		=> $this -> m_modelSimple -> getResult()[0],
+							'login_objects' => $_pModelLoginObjects -> getResult()
 						]
 						);
 
@@ -291,9 +299,8 @@ $this -> m_aObject -> body = $this -> m_modelSimple -> getDataInstance()[0] -> b
 
 	}
 
-
 	public function
-	logicDelete(&$_sqlConnection, $_isXHRequest, &$_logicResult)
+	logicDelete(CDatabaseConnection &$_pDatabase, $_isXHRequest, &$_logicResult)
 	{
 
 		##	XHR Function call
@@ -321,10 +328,10 @@ $this -> m_aObject -> body = $this -> m_modelSimple -> getDataInstance()[0] -> b
 										$modelCondition = new CModelCondition();
 										$modelCondition -> where('object_id', $_aFormData['object_id']);
 
-										if($this -> m_modelSimple -> delete($_sqlConnection, $modelCondition))
+										if($this -> m_modelSimple -> delete($_pDatabase, $modelCondition))
 										{
 											$_objectModel  	 = new modelPageObject();
-											$_objectModel	-> delete($_sqlConnection, $modelCondition);
+											$_objectModel	-> delete($_pDatabase, $modelCondition);
 
 											$_bValidationMsg = 'Object deleted';
 										
@@ -352,7 +359,7 @@ $this -> m_aObject -> body = $this -> m_modelSimple -> getDataInstance()[0] -> b
 	}
 
 	public function
-	logicSuccess()
+	logicSuccess(CDatabaseConnection &$_pDatabase)
 	{
 	
 		$_redirectTarget = (empty($this -> m_aObject -> body) ? $_SERVER['REQUEST_URI'] : CMS_SERVER_URL . $this -> m_aObject -> body );
@@ -360,8 +367,6 @@ $this -> m_aObject -> body = $this -> m_modelSimple -> getDataInstance()[0] -> b
 		header("Location: ". $_redirectTarget ); 
 		exit;
 	}
-
-			
 }
 
 ?>

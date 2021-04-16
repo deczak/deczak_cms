@@ -7,8 +7,7 @@ class 	modelDeniedRemote extends CModel
 	public function
 	__construct()
 	{		
-		parent::__construct('deniedRemote');		
-		$this -> m_sheme = new shemeDeniedRemote();
+		parent::__construct('shemeDeniedRemote', 'deniedRemote');	
 	}	
 }
 

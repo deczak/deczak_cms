@@ -9,6 +9,7 @@
 			<h2><?php echo $language -> string('MENU'); ?></h2>
 			<hr>
 			<ul>
+				<li><a class="darkblue" href="#backend"><?php echo $language -> string('M_BEENV_BACKENDGENERAL'); ?></a></li>
 				<li><a class="darkblue" href="#remote-system"><?php echo $language -> string('M_BEENV_REMOTEUSER'); ?></a></li>
 				<li><a class="darkblue" href="#update-sitemap"><?php echo $language -> string('M_BEENV_GENERATE'); ?></a></li>
 			</ul>
@@ -18,62 +19,94 @@
 	<div>
 
 
+
+
+
+		<fieldset class="ui fieldset submit-able" id="backend" data-xhr-target="set-backend" data-xhr-overwrite-target="edit/1">
+		
+			<div>
+
+				<div class="group width-100">
+
+					<div class="group-head width-100" style="margin-bottom:15px;"><?= $language -> string('M_BEENV_BACKENDGENERAL'); ?></div>
+
+					<div style="display:flex; align-items:center; margin-bottom:15px; width:100%;">
+						<div  class="input" style="width:221px; flex-shrink:0;">
+							<input type="text" name="backend_timeformat" <?= (!$enableEdit ? 'disabled' : ''); ?> value="<?= CFG::GET() -> BACKEND -> TIME_FORMAT; ?>" style="width:100%;">
+								<?= (!$enableEdit ? '<i class="fas fa-lock"></i>' : ''); ?>
+						</div>
+						<div style="font-weight:500; margin-left:20px; width:100%; padding-bottom:8px;">
+							<?= $language -> string('M_BEENV_BACKGEN_TIMEFORMAT'); ?>
+						</div>
+					</div>
+
+				</div>
+
+			</div>
+
+			<?php if($enableEdit) { ?>
+
+			<div class="result-box" data-error=""></div>
+
+			<!-- Submit button - beware of fieldset name -->
+
+			<div class="submit-container" style="">
+				<button class="ui button icon labeled trigger-submit-fieldset" type="button" disabled><span><i class="fas fa-save" data-icon="fa-save"></i></span><?php echo CLanguage::instance() -> getString('BUTTON_SAVE'); ?></button>
+				<div class="protector"><input type="checkbox" class="trigger-submit-protector" id="protector-backend-settings"><label for="protector-backend-settings"></label></div>
+			</div>
+
+
+			<?php } ?>
+
+		</fieldset>
+
+
+
 		<fieldset class="ui fieldset submit-able" id="remote-system" data-xhr-target="set-remoteuser" data-xhr-overwrite-target="edit/1">
 
 			<div>
 
 				<div class="group width-100">
 
-					<div class="group-head width-100"><?= $language -> string('M_BEENV_REMOTEUSER'); ?></div>
+					<div class="group-head width-100" style="margin-bottom:15px;"><?= $language -> string('M_BEENV_REMOTEUSER'); ?></div>
 
-					
-
-
-						<div style="display:flex; align-items:center; margin-bottom:15px;  margin-top:15px;  width:100%;">
-							<div class="input" style="width:221px; flex-shrink:0;">
-								<div class="select-wrapper">
-								<select name="remote_enable" style="width:100%;" <?= (!$enableEdit ? 'disabled' : ''); ?>>
-									<option value="0" <?= (!CFG::GET() -> USER_SYSTEM -> REMOTE_USER -> ENABLED ? 'selected' : ''); ?>><?php echo CLanguage::get() -> string('NO'); ?></option>
-									<option value="1" <?= (CFG::GET() -> USER_SYSTEM -> REMOTE_USER -> ENABLED ? 'selected' : ''); ?>><?php echo CLanguage::get() -> string('YES'); ?></option>
-								</select>	
-								</div>
-							</div>
-							<div style="font-weight:500; margin-left:20px; width:100%; padding-bottom:8px;">
-								<?= $language -> string('M_BEENV_REMOTEUSER_ENABLE'); ?>
+					<div style="display:flex; align-items:center; margin-bottom:15px;  width:100%;">
+						<div class="input" style="width:221px; flex-shrink:0;">
+							<div class="select-wrapper">
+							<select name="remote_enable" style="width:100%;" <?= (!$enableEdit ? 'disabled' : ''); ?>>
+								<option value="0" <?= (!CFG::GET() -> USER_SYSTEM -> REMOTE_USER -> ENABLED ? 'selected' : ''); ?>><?php echo CLanguage::get() -> string('NO'); ?></option>
+								<option value="1" <?= (CFG::GET() -> USER_SYSTEM -> REMOTE_USER -> ENABLED ? 'selected' : ''); ?>><?php echo CLanguage::get() -> string('YES'); ?></option>
+							</select>	
 							</div>
 						</div>
+						<div style="font-weight:500; margin-left:20px; width:100%; padding-bottom:8px;">
+							<?= $language -> string('M_BEENV_REMOTEUSER_ENABLE'); ?>
+						</div>
+					</div>
 
-						<div style="display:flex; align-items:center; margin-bottom:15px; width:100%;">
-							<div  class="input" style="width:221px; flex-shrink:0;">
-								<input type="text" name="remote_timeout" <?= (!$enableEdit ? 'disabled' : ''); ?> value="<?= CFG::GET() -> USER_SYSTEM -> REMOTE_USER -> REVOKE_RIGHTS; ?>" style="width:100%;">
-								 <?= (!$enableEdit ? '<i class="fas fa-lock"></i>' : ''); ?>
-							</div>
-							<div style="font-weight:500; margin-left:20px; width:100%; padding-bottom:8px;">
-								<?= $language -> string('M_BEENV_REMOTEUSER_TIMEOUT'); ?>
+					<div style="display:flex; align-items:center; margin-bottom:15px; width:100%;">
+						<div  class="input" style="width:221px; flex-shrink:0;">
+							<input type="text" name="remote_timeout" <?= (!$enableEdit ? 'disabled' : ''); ?> value="<?= CFG::GET() -> USER_SYSTEM -> REMOTE_USER -> REVOKE_RIGHTS; ?>" style="width:100%;">
+								<?= (!$enableEdit ? '<i class="fas fa-lock"></i>' : ''); ?>
+						</div>
+						<div style="font-weight:500; margin-left:20px; width:100%; padding-bottom:8px;">
+							<?= $language -> string('M_BEENV_REMOTEUSER_TIMEOUT'); ?>
+						</div>
+					</div>
+
+					<div style="display:flex; align-items:center; margin-bottom:15px; width:100%;">
+						<div class="input" style="width:221px; flex-shrink:0;">
+							<div class="select-wrapper">
+							<select name="remote_report" style="width:100%;" <?= (!$enableEdit ? 'disabled' : ''); ?>>
+								<option value="0" <?= (!CFG::GET() -> USER_SYSTEM -> REMOTE_USER -> REPORT_REVOKE ? 'selected' : ''); ?>><?php echo CLanguage::get() -> string('NO'); ?></option>
+								<option value="1" <?= (CFG::GET() -> USER_SYSTEM -> REMOTE_USER -> REPORT_REVOKE ? 'selected' : ''); ?>><?php echo CLanguage::get() -> string('YES'); ?></option>
+							</select>	
 							</div>
 						</div>
-
-						<div style="display:flex; align-items:center; margin-bottom:15px; width:100%;">
-							<div class="input" style="width:221px; flex-shrink:0;">
-								<div class="select-wrapper">
-								<select name="remote_report" style="width:100%;" <?= (!$enableEdit ? 'disabled' : ''); ?>>
-									<option value="0" <?= (!CFG::GET() -> USER_SYSTEM -> REMOTE_USER -> REPORT_REVOKE ? 'selected' : ''); ?>><?php echo CLanguage::get() -> string('NO'); ?></option>
-									<option value="1" <?= (CFG::GET() -> USER_SYSTEM -> REMOTE_USER -> REPORT_REVOKE ? 'selected' : ''); ?>><?php echo CLanguage::get() -> string('YES'); ?></option>
-								</select>	
-								</div>
-							</div>
-							<div style="font-weight:500; margin-left:20px; width:100%; padding-bottom:8px;">
-								<?= $language -> string('M_BEENV_REMOTEUSER_REPORT'); ?>
-							</div>
+						<div style="font-weight:500; margin-left:20px; width:100%; padding-bottom:8px;">
+							<?= $language -> string('M_BEENV_REMOTEUSER_REPORT'); ?>
 						</div>
-
-
-
-
-
-
-
-
+					</div>
 
 				</div>
 

@@ -1,4 +1,8 @@
-<!DOCTYPE html>
+<?php
+
+	include_once '../core/classes/toolkit.php';
+
+?><!DOCTYPE html>
 <html lang="en">
 	<head>
 		<meta charset="UTF-8">
@@ -111,6 +115,7 @@
 								var	formData = new FormData();
 									formData.append("server-root", document.querySelector('input[name="server-root"]').value);
 									formData.append("server-url", document.querySelector('input[name="server-url"]').value);
+									formData.append("server-subpath", document.querySelector('input[name="server-sub"]').value);
 									formData.append("database-server", document.querySelector('input[name="database-server"]').value);
 									formData.append("database-user", document.querySelector('input[name="database-user"]').value);
 									formData.append("database-pass", document.querySelector('input[name="database-pass"]').value);
@@ -421,7 +426,7 @@
 							<tbody>
 								<tr>
 									<td>Basekey</td>
-									<td><input type="text" name="crypt-basekey" value="<?= hash('md5', time() . rand(999,9999999)); ?>"></td>
+									<td><input type="text" name="crypt-basekey" value="<?= tk::getRandomId(); ?>"></td>
 								</tr>
 							</tbody>
 						</table>

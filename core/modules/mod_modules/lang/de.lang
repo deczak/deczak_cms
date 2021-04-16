@@ -12,6 +12,7 @@
 ##	
 
 	M_BEMOULE_NAME					=	Modul Name
+	M_BEMOULE_DESC					=	Beschreibung
 	M_BEMOULE_SECTION				=	Bereich
 	M_BEMOULE_STATE					=	Status
 

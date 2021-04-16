@@ -1,24 +1,19 @@
 <?php
 
-	$users = &$usersList[0];
- 
-	$users -> time_login 	= ($users -> time_login == 0 ? '-' : date(TIME_FORMAT_BACKENDVIEW, $users -> time_login) );
-	$users -> time_create 	= ($users -> time_create == 0 ? '-' : date(TIME_FORMAT_BACKENDVIEW, $users -> time_create) );
-
-	function
-	isActiveGroup($group_id, &$groups)
-	{
-		foreach($groups as $group)
-			if($group -> group_id === $group_id)
-				return true;
-		return false;
-	}
+if(isset($usersList))
+{
+	$dataset = &$usersList[0];
+}
+else
+{
+	$usersList = false;
+}
 
 ?>
 
 <div class="be-module-container forms-view">
 	<div>
-		<div class="inter-menu">
+		<div class="ui inter-menu">
 			<h2><?= CLanguage::get() -> string('MENU'); ?></h2>
 			<hr>
 			<ul>
@@ -28,20 +23,25 @@
 			</ul>
 			<hr>
 			<div class="delete-box">	
-				<fieldset class="ui fieldset" data-xhr-target="user-delete" data-xhr-overwrite-target="delete/<?= $users -> user_id; ?>">	
-					<div class="submit-container button-only">
-						<button class="ui button icon labeled trigger-submit-fieldset" type="button" disabled><span><i class="fas fa-trash-alt" data-icon="fa-trash-alt"></i></span><?= CLanguage::get() -> string('BUTTON_DELETE'); ?></button>
-						<div class="protector"><input type="checkbox" class="trigger-submit-protector" id="protector-user-delete"><label for="protector-user-delete"></label></div>
-					</div>
-					<div class="result-box" data-error=""></div>
-				</fieldset>
+				<?php if(isset($enableDelete) && $enableDelete && $usersList !== false) { ?>	
+					<fieldset class="ui fieldset" data-xhr-target="user-delete" data-xhr-overwrite-target="delete/<?= $dataset -> user_id; ?>">	
+						<div class="submit-container button-only">
+							<button class="ui button icon labeled trigger-submit-fieldset" type="button" disabled><span><i class="fas fa-trash-alt" data-icon="fa-trash-alt"></i></span><?= CLanguage::get() -> string('BUTTON_DELETE'); ?></button>
+							<div class="protector"><input type="checkbox" class="trigger-submit-protector" id="protector-user-delete"><label for="protector-user-delete"></label></div>
+						</div>
+						<div class="result-box" data-error=""></div>
+					</fieldset>
+				<?php } ?>
 			</div>
+
+			<div class="result-box ping-result lower-font-size" id="ping-lock-result" data-error=""></div>
+
 		</div>
 	</div>
 	<div>
 
 		
-		<fieldset class="ui fieldset submit-able" id="user-data" data-xhr-target="user-data" data-xhr-overwrite-target="edit/<?= $users -> user_id; ?>">
+		<fieldset class="ui fieldset submit-able" id="user-data" data-xhr-target="user-data" data-xhr-overwrite-target="edit/<?= $dataset -> user_id; ?>">
 			<legend><?= CLanguage::get() -> string('MOD_BEUSER_FM_USERINFO'); ?></legend>
 			<div>
 				<!-- group -->
@@ -50,25 +50,25 @@
 
 					<div class="input width-25">
 						<label><?= CLanguage::get() -> string('MOD_BEUSER_FM_USERID'); ?></label>
-						<input type="text" disabled value="<?= $users -> user_id; ?>">
+						<input type="text" disabled name="user_id" value="">
 						<i class="fas fa-lock"></i>
 					</div>
 
 					<div class="input width-25">
 						<label><?= CLanguage::get() -> string('MOD_BEUSER_FM_CREATEDAT'); ?></label>
-						<input type="text" disabled value="<?= $users -> time_create; ?>">
+						<input type="text" disabled name="create_time" value="">
 						<i class="fas fa-lock"></i>
 					</div>
 
 					<div class="input width-25">
 						<label><?= CLanguage::get() -> string('MOD_BEUSER_FM_LASTLOGIN'); ?></label>
-						<input type="text" disabled value="<?= $users -> time_login; ?>">
+						<input type="text" disabled name="time_login" value="">
 						<i class="fas fa-lock"></i>
 					</div>
 
 					<div class="input width-25">
 						<label><?= CLanguage::get() -> string('MOD_BEUSER_FM_LOGINCOUNT'); ?></label>
-						<input type="text" disabled value="<?= $users -> login_count; ?>">
+						<input type="text" disabled name="login_count" value="">
 						<i class="fas fa-lock"></i>
 					</div>
 				</div>
@@ -80,17 +80,17 @@
 
 					<div class="input width-25">
 						<label><?= CLanguage::get() -> string('MOD_BEUSER_FM_FIRSTNAME'); ?></label>
-						<input type="text" name="user_name_first" value="<?= $users -> user_name_first; ?>">
+						<input type="text" name="user_name_first" value="">
 					</div>
 
 					<div class="input width-25">
 						<label><?= CLanguage::get() -> string('MOD_BEUSER_FM_LASTNAME'); ?></label>
-						<input type="text" name="user_name_last" value="<?= $users -> user_name_last; ?>">
+						<input type="text" name="user_name_last" value="">
 					</div>
 
 					<div class="input width-50">
 						<label><?= CLanguage::get() -> string('MOD_BEUSER_FM_MAILADDRESS'); ?></label>
-						<input type="text" name="user_mail" value="<?= $users -> user_mail; ?>">
+						<input type="text" name="user_mail" value="">
 					</div>
 
 				</div>
@@ -104,8 +104,8 @@
 						<label><?= $language -> string('LANGUAGE'); ?></label>
 						<div class="select-wrapper">
 						<select name="language">
-							<option value="en" <?= ($users -> language === 'en' ? 'selected' : ''); ?>>English</option>
-							<option value="de" <?= ($users -> language === 'de' ? 'selected' : ''); ?>>Deutsch</option>
+							<option value="en">English</option>
+							<option value="de">Deutsch</option>
 						</select>	
 						</div>
 					</div>
@@ -115,8 +115,8 @@
 						<label><?= $language -> string('MOD_BEUSER_FM_REMOTEAUTH'); ?></label>
 						<div class="select-wrapper">
 						<select name="allow_remote">
-							<option value="0" <?= (!$users -> allow_remote ? 'selected' : ''); ?>><?= $language -> string('MOD_BEUSER_FM_REMOTEAUTH_0_NOTALLOWED'); ?></option>
-							<option value="1" <?= ($users -> allow_remote ? 'selected' : ''); ?>><?= $language -> string('MOD_BEUSER_FM_REMOTEAUTH_1_ALLOWED'); ?></option>
+							<option value="0"><?= $language -> string('MOD_BEUSER_FM_REMOTEAUTH_0_NOTALLOWED'); ?></option>
+							<option value="1"><?= $language -> string('MOD_BEUSER_FM_REMOTEAUTH_1_ALLOWED'); ?></option>
 						</select>	
 						</div>
 						<?php } ?>
@@ -144,7 +144,7 @@
 
 
 
-		<fieldset class="ui fieldset submit-able" id="user-auth" data-xhr-target="user-auth" data-xhr-overwrite-target="edit/<?= $users -> user_id; ?>">
+		<fieldset class="ui fieldset submit-able" id="user-auth" data-xhr-target="user-auth" data-xhr-overwrite-target="edit/<?= $dataset -> user_id; ?>">
 			<legend><?= CLanguage::get() -> string('MOD_BEUSER_FM_USERAUTH'); ?></legend>
 
 			<div>
@@ -185,7 +185,7 @@
 		</fieldset>
 
 
-		<fieldset class="ui fieldset submit-able" id="user-rights" data-xhr-target="user-rights" data-xhr-overwrite-target="edit/<?= $users -> user_id; ?>">
+		<fieldset class="ui fieldset submit-able" id="user-rights" data-xhr-target="user-rights" data-xhr-overwrite-target="edit/<?= $dataset -> user_id; ?>">
 			<legend><?= CLanguage::get() -> string('MOD_BEUSER_FM_USERRIGHTS'); ?></legend>
 			<div>
 
@@ -198,10 +198,9 @@
 							<?php 						
 							foreach($right_groups as $_group)
 							{
-								$isActiveGroup  = isActiveGroup($_group -> group_id, $user_groups);
 								?>
 								<div class="ui pick-item">
-									<input type="checkbox" id="group-<?= $_group -> group_id; ?>" name="groups[]" value="<?= $_group -> group_id; ?>"  <?= ($isActiveGroup ? 'checked' : ''); ?>>
+									<input type="checkbox" data-input-checkbox="user_groups" id="group-<?= $_group -> group_id; ?>" name="groups[]" value="<?= $_group -> group_id; ?>">
 									<label for="group-<?= $_group -> group_id; ?>">
 										<?= ucfirst($_group -> group_name); ?>
 									</label>
@@ -218,9 +217,9 @@
 					<div class="group-head width-100"><?= CLanguage::get() -> string('MOD_BEUSER_FM_LOCKEDSTATE'); ?></div>
 					<div class="input width-100">
 						<select name="is_locked">
-							<option value="0" <?= ($users -> is_locked === 0 ? 'selected' : ''); ?>><?= CLanguage::get() -> string('MOD_BEUSER_FM_LOCKED_0_NOTLOCKED'); ?></option>
-							<option value="1" <?= ($users -> is_locked === 1 ? 'selected' : ''); ?>><?= CLanguage::get() -> string('MOD_BEUSER_FM_LOCKED_1_NOTVERIFIED'); ?></option>
-							<option value="2" <?= ($users -> is_locked === 2 ? 'selected' : ''); ?>><?= CLanguage::get() -> string('MOD_BEUSER_FM_LOCKED_2_FAILEDLOGIN'); ?></option>
+							<option value="0"><?= CLanguage::get() -> string('MOD_BEUSER_FM_LOCKED_0_NOTLOCKED'); ?></option>
+							<option value="1"><?= CLanguage::get() -> string('MOD_BEUSER_FM_LOCKED_1_NOTVERIFIED'); ?></option>
+							<option value="2"><?= CLanguage::get() -> string('MOD_BEUSER_FM_LOCKED_2_FAILEDLOGIN'); ?></option>
 						<select>
 					</div>
 				</div>			
@@ -244,3 +243,29 @@
 
 	</div>
 </div>
+
+
+<?php if($usersList !== false) { ?>
+<script src="<?php echo CMS_SERVER_URL_BACKEND; ?>js/classes/cms-request-data-index.js"></script>
+<script src="<?php echo CMS_SERVER_URL_BACKEND; ?>js/classes/cms-request-data-item.js"></script>
+<script>
+
+	let	requestURL	= CMS.SERVER_URL_BACKEND + CMS.PAGE_PATH +'ping/<?= $dataset -> user_id; ?>';
+	let pingId		= cmsTabInstance.getId();
+	
+	cmstk.ping(requestURL, <?= CFG::GET() -> USER_SYSTEM -> MODULE_LOCKING -> PING_TIMEOUT; ?>, pingId);
+
+	document.addEventListener("DOMContentLoaded", function(){
+
+		document.dataInstance = new cmsRequestDataItem('', '<?= CFG::GET() -> BACKEND -> TIME_FORMAT; ?>', <?= $dataset -> user_id; ?>);
+		document.dataInstance.requestData();
+
+		let fieldsets = document.querySelectorAll('fieldset[data-xhr-target]');
+		for(let i = 0; i < fieldsets.length; i++)
+		{
+			fieldsets[i].setAttribute('data-ping-id', pingId);
+		}
+	});	
+
+</script>
+<?php } ?>

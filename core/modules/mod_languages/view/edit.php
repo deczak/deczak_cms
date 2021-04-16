@@ -1,14 +1,17 @@
 <?php
-
-$data = &$languagesList[0];
-
-
+if(isset($languagesList))
+{
+	$dataset = &$languagesList[0];
+}
+else
+{
+	$languagesList = false;
+}
 ?>
-
 
 <div class="be-module-container forms-view">
 	<div>
-		<div class="inter-menu">
+		<div class="ui inter-menu">
 			<h2><?php echo $language -> string('MENU'); ?></h2>
 			<hr>
 			<ul>
@@ -16,8 +19,8 @@ $data = &$languagesList[0];
 			</ul>
 			<hr>
 			<div class="delete-box">
-				<?php if($enableDelete && !$data -> lang_default) { ?>
-					<fieldset class="ui fieldset" data-xhr-target="delete" data-xhr-overwrite-target="delete/<?php echo $data -> lang_key; ?>">	
+				<?php if(isset($enableDelete) && $enableDelete && $languagesList !== false && !$dataset -> lang_default) { ?>	
+					<fieldset class="ui fieldset" data-xhr-target="delete" data-xhr-overwrite-target="delete/<?php echo $dataset -> lang_key; ?>">	
 						<div class="submit-container button-only">
 							<button class="ui button icon labeled trigger-submit-fieldset" type="button" disabled><span><i class="fas fa-trash-alt" data-icon="fa-trash-alt"></i></span><?php echo $language -> string('BUTTON_DELETE'); ?></button>
 							<div class="protector"><input type="checkbox" class="trigger-submit-protector" id="protector-language-delete"><label for="protector-language-delete"></label></div>
@@ -26,13 +29,14 @@ $data = &$languagesList[0];
 					</fieldset>
 				<?php } ?>
 			</div>
+
+			<div class="result-box ping-result lower-font-size" id="ping-lock-result" data-error=""></div>
 		</div>
 	</div>
 	<div>
 		
-		<fieldset class="ui fieldset submit-able" id="lang-data" data-xhr-target="language" data-xhr-overwrite-target="edit/<?php echo $data -> lang_key; ?>">
+		<fieldset class="ui fieldset submit-able" id="lang-data" data-xhr-target="language" <?= ($dataset ? 'data-xhr-overwrite-target="edit/'. $dataset -> lang_key .'"' : ''); ?>>
 
-			<input type="hidden" name="data_id" value="<?php echo $data -> data_id; ?>">
 
 			<legend><?php echo $language -> string('LANGUAGE'); ?></legend>
 			<div>
@@ -43,29 +47,29 @@ $data = &$languagesList[0];
 
 					<div class="input width-25">
 						<label><?php echo $language -> string('M_BELANG_NAMENKEY'); ?></label>
-						<input type="text" name="" disabled value="<?php echo strtoupper($data -> lang_key); ?>">
-						<i class="fas fa-lock"></i>
+						<input type="text" name="lang_key" <?= ($dataset ? 'disabled' : ''); ?> value="">
+						<?= ($dataset ? '<i class="fas fa-lock"></i>' : ''); ?>
 					</div>
 					
 					<div class="input width-25">
 						<label><?php echo $language -> string('LANGUAGE'); ?></label>
-						<input type="text" name="lang_name" value="<?= $data -> lang_name; ?>" maxlength="25">
+						<input type="text" name="lang_name" value="" maxlength="25">
 					</div>
 
 					<div class="input width-25">
 						<label><?php echo $language -> string('M_BELANG_NAMENATIVE'); ?></label>
-						<input type="text" name="lang_name_native" value="<?php echo $data -> lang_name_native; ?>" maxlength="25">
+						<input type="text" name="lang_name_native" value="" maxlength="25">
 					</div>
 
 					<div class="input width-25">
 						<label><?php echo CLanguage::instance() -> getString('M_BELANG_DEFAULT'); ?></label>
-						<div class="select-wrapper <?= ($data -> lang_default ? 'select-disabled' : ''); ?>">
-						<select name="lang_default" <?= ($data -> lang_default ? 'disabled' : ''); ?>>
-							<option value="0" <?php echo ($data -> lang_default ? 'selected' : ''); ?>><?php echo CLanguage::get() -> string('NO'); ?></option>
-							<option value="1" <?php echo ($data -> lang_default ? 'selected' : ''); ?>><?php echo CLanguage::get() -> string('YES'); ?></option>
+						<div class="select-wrapper <?= ($dataset -> lang_default ? 'select-disabled' : ''); ?>">
+						<select name="lang_default" <?= ($dataset -> lang_default ? 'disabled' : ''); ?>>
+							<option value="0"><?php echo CLanguage::get() -> string('NO'); ?></option>
+							<option value="1"><?php echo CLanguage::get() -> string('YES'); ?></option>
 						</select>	
 						</div>
-						<?= ($data -> lang_default ? '<i class="fas fa-lock"></i>' : ''); ?>
+						<?= ($dataset -> lang_default ? '<i class="fas fa-lock"></i>' : ''); ?>
 					</div>
 					
 				</div>
@@ -78,8 +82,8 @@ $data = &$languagesList[0];
 						<label><?php echo CLanguage::instance() -> getString('M_BELANG_HIDDEN'); ?></label>
 						<div class="select-wrapper">
 						<select name="lang_hidden">
-							<option value="0" <?php echo ($data -> lang_hidden ? 'selected' : ''); ?>><?php echo CLanguage::get() -> string('YES'); ?></option>
-							<option value="1" <?php echo ($data -> lang_hidden ? 'selected' : ''); ?>><?php echo CLanguage::get() -> string('NO'); ?></option>
+							<option value="0"><?php echo CLanguage::get() -> string('YES'); ?></option>
+							<option value="1"><?php echo CLanguage::get() -> string('NO'); ?></option>
 						</select>	
 						</div>
 					</div>
@@ -88,8 +92,8 @@ $data = &$languagesList[0];
 						<label><?php echo CLanguage::instance() -> getString('M_BELANG_LOCKED'); ?></label>
 						<div class="select-wrapper">
 						<select name="lang_locked">
-							<option value="0" <?php echo ($data -> lang_locked ? 'selected' : ''); ?>><?php echo CLanguage::get() -> string('YES'); ?></option>
-							<option value="1" <?php echo ($data -> lang_locked ? 'selected' : ''); ?>><?php echo CLanguage::get() -> string('NO'); ?></option>
+							<option value="0"><?php echo CLanguage::get() -> string('YES'); ?></option>
+							<option value="1"><?php echo CLanguage::get() -> string('NO'); ?></option>
 						</select>	
 						</div>
 					</div>
@@ -104,7 +108,7 @@ $data = &$languagesList[0];
 			
 			</div>
 
-			<?php if($enableEdit) { ?>
+			<?php if(isset($enableEdit) && $enableEdit || $languagesList === false) { ?>
 
 				<div class="result-box" data-error=""></div>
 
@@ -136,3 +140,28 @@ $data = &$languagesList[0];
 	</div>
 </div>
 
+
+<?php if($languagesList !== false) { ?>
+<script src="<?php echo CMS_SERVER_URL_BACKEND; ?>js/classes/cms-request-data-index.js"></script>
+<script src="<?php echo CMS_SERVER_URL_BACKEND; ?>js/classes/cms-request-data-item.js"></script>
+<script>
+
+	let	requestURL	= CMS.SERVER_URL_BACKEND + CMS.PAGE_PATH +'ping/<?= $dataset -> lang_key; ?>';
+	let pingId		= cmsTabInstance.getId();
+	
+	cmstk.ping(requestURL, <?= CFG::GET() -> USER_SYSTEM -> MODULE_LOCKING -> PING_TIMEOUT; ?>, pingId);
+
+	document.addEventListener("DOMContentLoaded", function(){
+
+		document.dataInstance = new cmsRequestDataItem('', '<?= CFG::GET() -> BACKEND -> TIME_FORMAT; ?>', '<?= $dataset -> lang_key; ?>');
+		document.dataInstance.requestData();
+
+		let fieldsets = document.querySelectorAll('fieldset[data-xhr-target]');
+		for(let i = 0; i < fieldsets.length; i++)
+		{
+			fieldsets[i].setAttribute('data-ping-id', pingId);
+		}
+	});	
+
+</script>
+<?php } ?>

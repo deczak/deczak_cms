@@ -3,13 +3,11 @@
 include_once CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CHTAccess.php';	
 include_once CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CXMLSitemap.php';	
 
-
 require_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelUserGroups.php';	
 require_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelUsersRegister.php';	
 
 class	controllerEnvironment extends CController
 {
-
 	public function
 	__construct($_module, &$_object)
 	{		
@@ -19,7 +17,7 @@ class	controllerEnvironment extends CController
 	}
 	
 	public function
-	logic(&$_sqlConnection, array $_rcaTarget, $_isXHRequest)
+	logic(CDatabaseConnection &$_dbConnection, array $_rcaTarget, $_isXHRequest)
 	{
 		##	Set default target if not exists
 
@@ -50,18 +48,18 @@ class	controllerEnvironment extends CController
 		$_logicResults = false;
 		switch($_controllerAction)
 		{
-			case 'edit'		: $_logicResults = $this -> logicEdit(	$_sqlConnection, $_isXHRequest);	break;	
+			case 'edit'		: $_logicResults = $this -> logicEdit($_dbConnection, $_isXHRequest); break;	
 		}
 
 		if(!$_logicResults)
 		{
 			##	Default View
-			$this -> logicIndex($_sqlConnection, $_isXHRequest, $enableEdit, $enableDelete);	
+			$this -> logicIndex($_dbConnection, $_isXHRequest, $enableEdit, $enableDelete);	
 		}
 	}
 
 	private function
-	logicIndex(&$_sqlConnection, $_isXHRequest, $_enableEdit = false, $_enableDelete = false)
+	logicIndex(CDatabaseConnection &$_dbConnection, $_isXHRequest, $_enableEdit = false, $_enableDelete = false)
 	{
 		##	Non XHR request
 		
@@ -78,14 +76,12 @@ class	controllerEnvironment extends CController
 	}
 
 	private function
-	logicEdit(&$_sqlConnection, $_isXHRequest = false)
+	logicEdit(CDatabaseConnection &$_dbConnection, $_isXHRequest = false)
 	{	
-		$_pURLVariables	 =	new CURLVariables();
-		$_request		 =	[];
-		$_request[] 	 = 	[	"input" => "cms-system-id",  	"validate" => "strip_tags|!empty" ,	"use_default" => true, "default_value" => false ]; 		
-		$_pURLVariables -> retrieve($_request, true, false); // POST 
 
-		if($_pURLVariables -> getValue("cms-system-id") !== false && $_isXHRequest !== false)
+		$systemId = $this -> querySystemId();
+
+		if($systemId !== false && $_isXHRequest !== false)
 		{	
 			$_bValidationErr =	false;
 			$_bValidationMsg =	'';
@@ -119,31 +115,49 @@ class	controllerEnvironment extends CController
 											$registerCondition 	-> whereNotNull('user_hash');
 											$registerCondition 	-> whereNot('user_hash','');
 											$modelUsersRegister	 = new modelUsersRegister();
-											$modelUsersRegister -> delete($_sqlConnection, $registerCondition);
+											$modelUsersRegister -> delete($_dbConnection, $registerCondition);
 
 											$usergroupCondition	 = new CModelCondition();
 											$usergroupCondition -> whereNotNull('user_hash');
 											$usergroupCondition -> whereNot('user_hash','');
 											$modelUserGroups	 = new modelUserGroups();
-											$modelUserGroups	-> delete($_sqlConnection, $usergroupCondition);
+											$modelUserGroups	-> delete($_dbConnection, $usergroupCondition);
 										}
+
+										break;
+
+				case 'set-backend':		// Set backend settings
+
+										$_pFormVariables	 =	new CURLVariables();
+										$_request		 =	[];
+										$_request[] 	 = 	[	"input" => "backend_timeformat",   	"validate" => "strip_tags|strip_quote|trim|!empty",	 "use_default" => true, "default_value" => ''  ];
+										$_pFormVariables -> retrieve($_request, false, true);
+										$_aFormData		 = $_pFormVariables ->getArray();
+
+										$configuration = file_get_contents(CMS_SERVER_ROOT.DIR_DATA.'configuration.json');
+										$configuration = json_decode($configuration);
+
+										$configuration -> BACKEND -> TIME_FORMAT	= $_aFormData['backend_timeformat'];
+
+										$configuration = json_encode($configuration, JSON_FORCE_OBJECT | JSON_UNESCAPED_UNICODE | JSON_HEX_QUOT);
+										file_put_contents(CMS_SERVER_ROOT.DIR_DATA.'configuration.json', $configuration);
 
 										break;
 				
 				case 'update-htaccess':	// Update htaccess
 
 										$_pHTAccess  = new CHTAccess();
-										$_pHTAccess -> generatePart4Backend();
-										$_pHTAccess -> generatePart4Frontend($_sqlConnection);
-										$_pHTAccess -> generatePart4DeniedAddress($_sqlConnection);
-										$_pHTAccess -> writeHTAccess();
+										$_pHTAccess -> generatePart4Backend($_dbConnection);
+										$_pHTAccess -> generatePart4Frontend($_dbConnection);
+										$_pHTAccess -> generatePart4DeniedAddress($_dbConnection);
+										$_pHTAccess -> writeHTAccess($_dbConnection);
 									
 										break;
 
 				case 'update-sitemap':	// Update sitemap
 
 										$sitemap  	 = new CXMLSitemap();
-										$sitemap 	-> generate($_sqlConnection);
+										$sitemap 	-> generate($_dbConnection);
 									
 										break;
 

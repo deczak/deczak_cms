@@ -6,9 +6,8 @@ class 	modelUserAgent extends CModel
 {
 	public function
 	__construct()
-	{		
-		parent::__construct('UserAgent');		
-		$this -> m_sheme = new shemeUserAgent();
+	{
+		parent::__construct('shemeUserAgent', 'userAgent');
 	}	
 }
 

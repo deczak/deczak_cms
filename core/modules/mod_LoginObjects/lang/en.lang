@@ -23,3 +23,16 @@
 	MOD_LOGINO_OBJECT_DATABASE			=	Authentication database
 	MOD_LOGINO_OBJECT_SESS_EXTENT		=	Session extended data 
 	MOD_LOGINO_OBJECT_DISABLED			=	Object Disabled
+
+
+	MODULE_LOGOBJ_LFORMTABLE			=	Form option table
+	MODULE_LOGOBJ_LFORMTEXT				=	Form option text
+	MODULE_LOGOBJ_LFORMVALUE			=	Form option value
+	MODULE_LOGOBJ_LASSIGNTABLE			=	Assignment table
+	MODULE_LOGOBJ_LASSIGNCOLUMN			=	Assignment column
+
+
+	MODULE_LOGOBJ_ASSIGNCOLUMN			=	Assignment column
+	MODULE_LOGOBJ_SOURCETABLE			=	Data table
+	MODULE_LOGOBJ_SOURCECOLUMN			=	Data column
+	MODULE_LOGOBJ_SOURCECOLUMN2			=	Data assign column

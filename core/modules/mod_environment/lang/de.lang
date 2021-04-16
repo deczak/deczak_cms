@@ -9,3 +9,10 @@ M_BEENV_REMOTEUSER_ENABLE	= Remote Benutzer System aktivieren und Nutzern aus an
 M_BEENV_REMOTEUSER_TIMEOUT	= Laufzeit Gültigkeit der zugewiesenen Rechte in Tage, 0 Tage gleich unbefristet.
 M_BEENV_REMOTEUSER_REPORT	= System Benachrichtung versenden wenn die Laufzeit eines Rechtes für einen Remote Benutzer abgelaufen ist.
 	
+M_BEENV_BACKENDGENERAL		= Backend Einstellungen
+M_BEENV_BACKGEN_TIMEFORMAT	= Anzeige des Zeitformats, Angaben entsprechen der date Funktion.
+
+M_BEENV_SESSION				= Session Einstellungen
+M_BEENV_SESSION_SPAMTIMEOUT	= Zeitlimit des Zugriffsschutz gegen Massenzugriff in Sekunden
+M_BEENV_SESSION_SPAMLIMIT	= Session Anzahl des Zugriffsschutz gegen Massenzugriff
+M_BEENV_SESSION_TIMEOUT		= Gültigkeitsdauer der Session in Sekunden

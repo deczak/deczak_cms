@@ -14,16 +14,16 @@ class	CLanguage extends CSingleton
 	private		$languagesList;
 
 	public function
-	initialize(&$_sqlConnection, string $_activeLanguage = '')
+	initialize(CDatabaseConnection &$_dbConnection, string $_activeLanguage = '')
 	{
-		if($_sqlConnection === false)
+		if($_dbConnection === false)
 		return false;
 
 		$this -> languagesList = [];
 
 		$modelLanguages = new modelLanguages();
-		$modelLanguages -> load($_sqlConnection);
-		$srcLanguages = $modelLanguages -> getDataInstance();
+		$modelLanguages -> load($_dbConnection);
+		$srcLanguages = &$modelLanguages -> getResult();
 
 		foreach($srcLanguages as $lang)
 		{

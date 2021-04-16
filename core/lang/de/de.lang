@@ -19,6 +19,7 @@
 	BUTTON_DELETE		=	Löschen
 	BUTTON_EDIT			=	Bearbeiten
 	BUTTON_CREATE		=	Erstellen
+	BUTTON_REFRESH		=	Aktualisieren
 	
 	YES					=	Ja
 	NO					=	Nein
@@ -52,9 +53,24 @@
 	LOCKED				=	Gesperrt
 	DEFAULT				=	Standard
 	NOTE				=	Hinweis
+	UNKNOWN				=	unbekannt
 
 	USERNAME			=	Benutzername
+	LOGIN				= 	Anmelden
 	
+	January				= Januar
+	February			= Februar
+	March				= März
+	April				= April
+	May					= Mai
+	June				= Juni
+	July				= Juli
+	August				= August
+	September			= September
+	October				= Oktober
+	November			= November
+	December			= Dezember
+
 ##	Messages
 
 	WAIT_FOR_REDIRECT	=	bitte warten für Weiterleitung
@@ -68,5 +84,10 @@
 	WAS_NOT_CREATED		=	wurde nicht erstellt
 	
 	IS_UNKNOWN			=	ist unbekannt
+
+	LOCK_IS_LOCKED		=	Dieser Datensatz ist gesperrt durch Benutzer
+	LOCK_IS_NOT_LOCKED	=	Dieser Datensatz kann bearbeitet werden
+	LOCK_NO_RIGHTS		=	Sie haben kein Recht zur Bearbeitung
+	LOCK_IS_MISMATCH_ID = 	Die Bearbeitung ist durch eine andere Instanz gesperrt
 	
 	
