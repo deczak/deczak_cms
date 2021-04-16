@@ -1,18 +1,20 @@
 {
-	"module_name"		: "Blog",
-	"module_desc"		: "xox",
-	"module_controller" : "controllerBlog",
-	"module_path" 		: "",
-	"module_group"		: "Other",
-	"module_icon"		: "&#xf781",
-	"module_frontend"	: 1,
-	"module_menu_group"	: "0",
-	"module_rights"		:[
+	"sheme"				: 2,
+	"version"			: 1,
+	"module"			: {
+		"controller"	: "controllerBlog",
+		"name"			: "Blog",
+		"desc"			: "",
+		"group"			: "Other",
+		"icon"			: "&#xf781",
+		"frontend"		: 1
+	},
+	"rights"			: [
 							{"name":"view",		"desc":"VIEW"},
 							{"name":"create",	"desc":"CREATE"},
 							{"name":"edit",		"desc":"EDIT"}
-						],
-	"module_subs"		:[
+	],
+	"sections"			: [
 							{
 								"url_name"	:"",
 								"ctl_target":"view",
@@ -41,5 +43,5 @@
 								"menu_order":"0",
 								"use_right" :"edit"
 							}
-						]
+	]
 }

@@ -175,7 +175,12 @@ class	controllerLanguages extends CController
 			if(!$_bValidationErr)	// Validation OK (by pre check)
 			{		
 
-				if(!$this -> m_pModel -> isUnique($_pDatabase, ['lang_key' => $_aFormData['lang_key']]))
+
+
+				$uniqueCondition = new CModelCondition();
+				$uniqueCondition -> where('lang_key', $_aFormData['lang_key']);
+
+				if(!$this -> m_pModel -> unique($_pDatabase, $uniqueCondition))
 				{
 					$_bValidationMsg .= CLanguage::get() -> string('M_BERMADDR_MSG_DENIEDEXIST');
 					$_bValidationErr = true;
@@ -194,13 +199,10 @@ class	controllerLanguages extends CController
 
 			if(!$_bValidationErr)	// Validation OK
 			{
-
 				$_aFormData['create_by'] 	= CSession::instance() -> getValue('user_id');
 				$_aFormData['create_time'] 	= time();
 
-				$dataId = 0;
-
-				if($this -> m_pModel -> insert($_pDatabase, $_aFormData, $dataId))
+				if($this -> m_pModel -> insert($_pDatabase, $_aFormData))
 				{
 					$_bValidationMsg = CLanguage::get() -> string('M_BELANG_BEENCREATED') .' - '. CLanguage::get() -> string('WAIT_FOR_REDIRECT');
 					$_bValidationDta['redirect'] = CMS_SERVER_URL_BACKEND . CPageRequest::instance() -> urlPath .'language/'.$_aFormData['lang_key'];
@@ -212,10 +214,10 @@ class	controllerLanguages extends CController
 						$modelCondition = new CModelCondition();
 						$modelCondition -> whereNot('lang_key', $_aFormData['lang_key']);
 
-						$_aFormData = [];
-						$_aFormData['lang_default'] = 0;
+						$updateData = [];
+						$updateData['lang_default'] = 0;
 
-						$this -> m_pModel -> update($_pDatabase, $_aFormData, $modelCondition);
+						$this -> m_pModel -> update($_pDatabase, $updateData, $modelCondition);
 					}
 
 					$rootPage = [];
@@ -229,10 +231,8 @@ class	controllerLanguages extends CController
 					$rootPage['create_time']	=	time();
 					$rootPage['create_by']		= CSession::instance() -> getValue('user_id');
 
-					$nodeId = 0;
-
 					$modelPage  = new modelPage();
-					$modelPage -> insert($_pDatabase, $rootPage, $nodeId);
+					$modelPage -> insert($_pDatabase, $rootPage);
 
 					## Update .htacces and sitemap.xml
 
@@ -416,16 +416,10 @@ class	controllerLanguages extends CController
 
 										##	Delete Pages
 
-										#$sqlRootNodeRes	= $_pDatabase -> query("SELECT node_id FROM tb_page_header WHERE page_language = '". $systemId ."'");
-										#$sqlRootNodeItm = $sqlRootNodeRes -> fetch_assoc();
-
-
-
-
 										$pageHeaderCondition		 = new CModelCondition();
 										$pageHeaderCondition		-> where('page_language', $systemId)
+																	-> orderBy('node_id')
 																	-> limit(1);
-
 
 										$dbQuery 	= $_pDatabase		-> query(DB_SELECT) 
 																		-> table('tb_page_header') 

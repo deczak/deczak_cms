@@ -186,6 +186,10 @@ class	controllerModules extends CController
 
 				case 'install'  :	// Install
 
+
+
+
+
 									$_pURLVariables	 =	new CURLVariables();
 									$_request		 =	[];
 									$_request[] 	 = 	[	"input" => "module", "validate" => "strip_tags|!empty", "use_default" => true, "default_value" => false ]; 		
@@ -337,7 +341,7 @@ class	controllerModules extends CController
 			{
 				case 'uninstall':	//	Uninstall
 							
-									CModules::instance() -> uninstall($_pDatabase, $systemId);
+									CModules::instance() -> uninstall($_pDatabase, $systemId, $_bValidationMsg);
 
 									$_bValidationMsg = CLanguage::get() -> string('M_BEMOULE_MSG_REMOVED') .' - '. CLanguage::get() -> string('WAIT_FOR_REDIRECT');
 									$_bValidationDta['redirect'] = CMS_SERVER_URL_BACKEND . CPageRequest::instance() -> urlPath;

@@ -11,6 +11,13 @@ The version number is the release date. A letter as suffix indicates fixes on sa
 
 ## Version history	 
 
+### 202104XX
+
+**Changes**
+- Moved Backend pages into database instead of file based
+- Added Module Versions System
+- Various small changes and fixes
+
 ### 20201004
 
 **Modules**

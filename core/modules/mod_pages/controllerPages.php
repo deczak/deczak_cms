@@ -175,6 +175,10 @@ class	controllerPages extends CController
 			$this -> m_modelPage  = new modelPage();
 			$this -> m_modelPage -> load($_pDatabase, $modelCondition);
 
+
+			if(empty($this -> m_modelPage -> getResult()))
+				return false;
+
 			$_logicResult['state']			=	1;
 			$_logicResult['node_id']		=	$this -> m_modelPage -> getResult()[0] -> node_id;
 			$_logicResult['page_version']	=	$this -> m_modelPage -> getResult()[0] -> page_version;
@@ -436,9 +440,7 @@ class	controllerPages extends CController
 
 		$this -> m_modelPage  = new modelPage();
 
-		$nodeId = 0;
-
-		if($this -> m_modelPage -> insert($_pDatabase, $_aFormData, $nodeId))
+		if($this -> m_modelPage -> insert($_pDatabase, $_aFormData))
 		{
 			$_pHTAccess  = new CHTAccess();
 			$_pHTAccess -> generatePart4Frontend($_pDatabase);

@@ -76,7 +76,7 @@ class	TK
 					$backendCondition	 = new CModelCondition();
 					$backendCondition 	-> where('user_id', strval($_userId));
 					$modelUsersBackend 	 = new modelUsersBackend();
-					$modelUsersBackend 	-> load($_pDatabase, $modelCondition);
+					$modelUsersBackend 	-> load($_pDatabase, $backendCondition);
 
 					if(empty($modelUsersBackend -> getResult()))
 						return '';
@@ -197,8 +197,11 @@ class	TK
 		return null;
 	}
 
-
-
+	public static function
+	getRandomId($length = 40)
+	{
+    	return substr(str_shuffle(str_repeat($x='0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.:_-$&/?=!@+*#', ceil($length/strlen($x)) )), 1, $length);
+	}
 }
 
 class	CRYPT
@@ -206,32 +209,31 @@ class	CRYPT
 	private static function
 	CRYPTKEY(string $_key, bool $_appendKey )
 	{
-		$_CryptKey	=	CFG::GET() -> ENCRYPTION -> BASEKEY;
-		if( !empty($_key) AND !$_appendKey)
+		$cryptKey	=	CFG::GET() -> ENCRYPTION -> BASEKEY;
+		if(!empty($_key) AND !$_appendKey)
 		{
-			$_CryptKey	=	$_key;
+			$cryptKey	=	$_key;
 		}
-		else if(!empty($_key) AND $_appendKey)
+		elseif(!empty($_key) AND $_appendKey)
 		{
-			$_CryptKey	= $_CryptKey . $_key;
-		
+			$cryptKey	= $cryptKey . $_key;
 		}
-		return	hash( 'sha256', $_CryptKey );
+		return $cryptKey;
 	}
 
 	private static function
 	CRYPTVECTOR(string $_key, bool $_appendKey )
 	{
-		$_CryptKey		=	CFG::GET() -> ENCRYPTION -> BASEKEY;
+		$cryptKey		=	CFG::GET() -> ENCRYPTION -> BASEKEY;
 		if( !empty($_key) AND !$_appendKey)
 		{
-			$_CryptKey	=	$_key;
+			$cryptKey	=	$_key;
 		}
 		else if(!empty($_key) AND $_appendKey)
 		{
-			$_CryptKey	= $_CryptKey . $_key;
+			$cryptKey	= $cryptKey . $_key;
 		}
-		return	substr( hash( 'sha256', $_CryptKey ), 0, 16 );
+		return	substr( hash( 'sha256', $cryptKey ), 0, 16 );
 	}
 
 	public static function
@@ -249,20 +251,20 @@ class	CRYPT
 	public static function
 	CHECKSUM(string $_string)
 	{
-		$_checksum 		= 9999;
-		$_stringSize	= strlen($_string);
-		for($i = 0; $i < $_stringSize; $i++)
+		$checksum 		= 9999;
+		$stringSize	= strlen($_string);
+		for($i = 0; $i < $stringSize; $i++)
 		{
 			if(ctype_digit($_string[$i]))
 			{
-				$_checksum = $_checksum + $_string[$i];
+				$checksum = $checksum + $_string[$i];
 			}
 			else
 			{
-				$_checksum = $_checksum + ord($_string[$i]);
+				$checksum = $checksum + ord($_string[$i]);
 			}
 		}
-		return substr($_checksum,strlen($_checksum) - 4,4);
+		return substr($checksum,strlen($checksum) - 4,4);
 	}
 
 	public static function
@@ -305,5 +307,4 @@ function bcround($n, $p = 0)
     return bcdiv(bcadd(bcmul($n, $e, 0), (strpos($n, '-') === 0 ? -5 : 5)), $e, $p);
 }
 		
-
 ?>

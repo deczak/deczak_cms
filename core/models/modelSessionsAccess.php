@@ -11,7 +11,7 @@ class 	modelSessionsAccess extends CModel
 	}	
 
 	public function
-	load(CDatabaseConnection &$_pDatabase, CModelCondition &$_pCondition = NULL, $_execFlags = NULL)
+	load(CDatabaseConnection &$_pDatabase, CModelCondition $_pCondition = NULL, $_execFlags = NULL)
 	{
 		$condition	 = new CModelCondition();
 		$condition	-> where('tb_page_header.node_id', 'tb_sessions_access.node_id');

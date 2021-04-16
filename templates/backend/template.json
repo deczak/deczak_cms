@@ -8,5 +8,22 @@
 							"header.php", 
 							"content.php", 
 							"footer.php"
+						  ],
+	"include_error"		: [
+							"header.php", 
+							"error.php", 
+							"footer.php"
+						  ],
+	"include_error_404"	: [
+							"4XX.php", 
+							"404.php"
+						  ],
+	"include_error_403"	: [
+							"4XX.php", 
+							"403.php"
+						  ],
+	"include_error_920"	: [
+							"9XX.php", 
+							"920.php"
 						  ]
 }

@@ -1,4 +1,8 @@
-<!DOCTYPE html>
+<?php
+
+	include_once '../core/classes/toolkit.php';
+
+?><!DOCTYPE html>
 <html lang="en">
 	<head>
 		<meta charset="UTF-8">
@@ -422,7 +426,7 @@
 							<tbody>
 								<tr>
 									<td>Basekey</td>
-									<td><input type="text" name="crypt-basekey" value="<?= hash('md5', time() . rand(999,9999999)); ?>"></td>
+									<td><input type="text" name="crypt-basekey" value="<?= tk::getRandomId(); ?>"></td>
 								</tr>
 							</tbody>
 						</table>

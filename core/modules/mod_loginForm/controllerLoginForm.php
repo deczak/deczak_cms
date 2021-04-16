@@ -1,16 +1,20 @@
 <?php
 
-include_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelSimple.php';	
-
+require_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelSimple.php';	
 require_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelLoginObjects.php';
 
 class	controllerLoginForm extends CController
 {
 	public function
-	__construct($_module, &$_object)
+	__construct($_module, &$_object, bool $_backendCall = false)
 	{		
-		$this -> m_modelSimple = new modelSimple();
-		parent::__construct($_module, $_object);
+		parent::__construct($_module, $_object, $_backendCall);
+
+		if($this -> isBackendCall())
+			$this -> m_modelSimple = new modelBackendSimple();
+		else
+			$this -> m_modelSimple = new modelSimple();
+
 
 		$this -> m_aModule -> user_rights[] = 'view';			// add view right as default for everyone
 	}
@@ -45,20 +49,21 @@ class	controllerLoginForm extends CController
 		$enableEdit 	= $this -> existsUserRight('edit');
 		$enableDelete	= $enableEdit;
 
-		$_logicResults = false;
+		$logicResults = false;
 		switch($_controllerAction)
 		{
-			case 'loginSuccess'	: $_logicResults = $this -> logicSuccess($_pDatabase);	break;
-			case 'view'			: $_logicResults = $this -> logicView(	$_pDatabase, $_isXHRequest, $_logicResult);	break;
-			case 'edit'			: $_logicResults = $this -> logicEdit(	$_pDatabase, $_isXHRequest, $_logicResult);	break;	
-			case 'create'		: $_logicResults = $this -> logicCreate($_pDatabase, $_isXHRequest, $_logicResult);	break;
-			case 'delete'		: $_logicResults = $this -> logicDelete($_pDatabase, $_isXHRequest, $_logicResult);	break;	
+			case 'loginSuccess'	: $logicResults = $this -> logicSuccess($_pDatabase);	break;
+			case 'view'			: $logicResults = $this -> logicView(	$_pDatabase, $_isXHRequest, $_logicResult);	break;
+			case 'edit'			: $logicResults = $this -> logicEdit(	$_pDatabase, $_isXHRequest, $_logicResult);	break;	
+			case 'create'		: $logicResults = $this -> logicCreate($_pDatabase, $_isXHRequest, $_logicResult);	break;
+			case 'delete'		: $logicResults = $this -> logicDelete($_pDatabase, $_isXHRequest, $_logicResult);	break;	
 		}
 
-		if(!$_logicResults)
+
+		if(!$logicResults)
 		{
 			##	Default View
-			$_logicResults = $this -> logicView($_pDatabase, $_isXHRequest, $_logicResult);	
+			$logicResults = $this -> logicView($_pDatabase, $_isXHRequest, $_logicResult);	
 		}
 
 	}
@@ -66,7 +71,7 @@ class	controllerLoginForm extends CController
 	public function
 	logicView(CDatabaseConnection &$_pDatabase, $_isXHRequest, &$_logicResult)
 	{
-		if(!isset($this -> m_aObject -> params))
+		if(empty($this -> m_aObject -> params))
 		{
 			$modelCondition = new CModelCondition();
 			$modelCondition -> where('object_id', $this -> m_aObject -> object_id);
@@ -81,7 +86,6 @@ class	controllerLoginForm extends CController
 
 			if(CSession::instance() -> isAuthed($this -> m_modelSimple -> getResult()[0] -> params -> object_id) !== false)
 			{
-		
 				$this -> logicSuccess($_pDatabase);
 			}
 
@@ -107,21 +111,18 @@ class	controllerLoginForm extends CController
 		{
 			// set data as property
 
-			$object		= json_encode($this -> m_aObject -> params,JSON_HEX_QUOT | JSON_HEX_APOS | JSON_UNESCAPED_UNICODE);
-
-			unset($this -> m_aObject -> params);
-
-			$this -> m_aObject -> params		= json_decode($object);
+			$object = new stdClass;
+			$object -> params		= json_decode($this -> m_aObject -> params);
+			$object -> object_id	= $this -> m_aObject -> object_id;
 
 			// authed check
-			if(CSession::instance() -> isAuthed($this -> m_aObject -> params -> object_id) !== false)
+			if(CSession::instance() -> isAuthed($object -> params -> object_id) !== false)
 			{
 				$this -> logicSuccess($_pDatabase);
 			}
 
-
 			$modelCondition = new CModelCondition();
-			$modelCondition -> where('object_id', $this -> m_aObject -> params -> object_id);
+			$modelCondition -> where('object_id', $object -> params -> object_id);
 			
 			// default view
 
@@ -132,11 +133,13 @@ class	controllerLoginForm extends CController
 							'view',
 							'', 
 							[ 
-								'object' => $this -> m_aObject,
+								'object' => $object,
 								'login_object' => $_pModelLoginObjects -> getResult()[0]
 							]
 							);
 		}
+
+		return true;
 
 	}
 
@@ -159,7 +162,6 @@ class	controllerLoginForm extends CController
 
 			$_dataset['params'] = json_encode($_dataset['params'], JSON_HEX_QUOT | JSON_HEX_APOS | JSON_UNESCAPED_UNICODE);
 
-
 			if(!$this -> m_modelSimple -> insert($_pDatabase, $_dataset, MODEL_RESULT_APPEND_DTAOBJECT))
 			{
 				$_bValidationErr =	true;
@@ -167,6 +169,9 @@ class	controllerLoginForm extends CController
 			}
 			else
 			{
+
+				if($this -> getInstallMode())
+					return true;
 
 				$_pModelLoginObjects	 =	new modelLoginObjects();
 				$_pModelLoginObjects	->	load($_pDatabase);	
@@ -186,14 +191,13 @@ class	controllerLoginForm extends CController
 			tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $_bValidationDta);	// contains exit call
 
 		}	
-	}
 
+		return true;
+	}
 
 	public function
 	logicEdit(CDatabaseConnection &$_pDatabase, $_isXHRequest, &$_logicResult)
 	{
-
-
 		##	XHR Function call
 
 		if($_isXHRequest !== false)
@@ -233,11 +237,16 @@ class	controllerLoginForm extends CController
 
 
 
-								$modelCondition = new CModelCondition();
-								$modelCondition -> where('object_id', $_aFormData['object_id']);
+									$modelCondition = new CModelCondition();
+									$modelCondition -> where('object_id', $_aFormData['object_id']);
 
 									if($this -> m_modelSimple -> update($_pDatabase, $_aFormData, $modelCondition))
 									{
+
+
+										if($this -> getInstallMode())
+											return true;
+					
 										$_bValidationMsg = 'Object updated';
 
 										$this -> m_modelPageObject = new modelPageObject();
@@ -289,7 +298,6 @@ class	controllerLoginForm extends CController
 
 
 	}
-
 
 	public function
 	logicDelete(CDatabaseConnection &$_pDatabase, $_isXHRequest, &$_logicResult)
@@ -359,8 +367,6 @@ class	controllerLoginForm extends CController
 		header("Location: ". $_redirectTarget ); 
 		exit;
 	}
-
-			
 }
 
 ?>

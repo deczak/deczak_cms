@@ -47,12 +47,12 @@ else
 					<div class="group-head width-100"><?php echo $language -> string('M_BEUSERAG_USERAGENT'); ?></div>
 
 					<div class="input width-25">
-						<label>IP <?php echo $language -> string('M_BEUSERAG_AGENTNAME'); ?></label>
+						<label><?php echo $language -> string('M_BEUSERAG_AGENTNAME'); ?></label>
 						<input type="text" name="agent_name" value="" maxlength="35">
 					</div>
 
 					<div class="input width-50">
-						<label>IP <?php echo $language -> string('M_BEUSERAG_AGENTSUFFIX'); ?></label>
+						<label><?php echo $language -> string('M_BEUSERAG_AGENTSUFFIX'); ?></label>
 						<input type="text" name="agent_suffix" value="" maxlength="75">
 					</div>
 			
@@ -107,7 +107,7 @@ else
 <script>
 
 	let	requestURL	= CMS.SERVER_URL_BACKEND + CMS.PAGE_PATH +'ping/<?= $dataset -> data_id; ?>';
-	let pingId		= cmstk.getRandomId();
+	let pingId		= cmsTabInstance.getId();
 	
 	cmstk.ping(requestURL, <?= CFG::GET() -> USER_SYSTEM -> MODULE_LOCKING -> PING_TIMEOUT; ?>, pingId);
 

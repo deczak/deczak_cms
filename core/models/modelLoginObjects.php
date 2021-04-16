@@ -11,7 +11,7 @@ class 	modelLoginObjects extends CModel
 	}	
 
 	public function
-	load(CDatabaseConnection &$_pDatabase, CModelCondition &$_pCondition = NULL, $_execFlags = NULL)
+	load(CDatabaseConnection &$_pDatabase, CModelCondition $_pCondition = NULL, $_execFlags = NULL)
 	{
 		parent::load($_pDatabase, $_pCondition, $_execFlags);
 

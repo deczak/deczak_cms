@@ -228,9 +228,9 @@ class	controllerDeniedRemote extends CController
 				$_aFormData['create_by'] 	= CSession::instance() -> getValue('user_id');
 				$_aFormData['create_time'] 	= time();
 
-				$dataId = 0;
+				$dataId = $this -> m_pModel -> insert($_pDatabase, $_aFormData);
 
-				if($this -> m_pModel -> insert($_pDatabase, $_aFormData, $dataId))
+				if($dataId !== false)
 				{
 					$_bValidationMsg = CLanguage::get() -> string('MOD_BE_RMADDR_DENIEDADDR WAS_CREATED') .' - '. CLanguage::get() -> string('WAIT_FOR_REDIRECT');
 					$_bValidationDta['redirect'] = CMS_SERVER_URL_BACKEND . CPageRequest::instance() -> urlPath .'address/'.$dataId;
@@ -288,7 +288,7 @@ class	controllerDeniedRemote extends CController
 			}
 		}
 
-		CMessages::instance() -> addMessage(CLanguage::get() -> string('MOD_BEUSER_ERR_USERID_UK') , MSG_WARNING);
+		CMessages::instance() -> addMessage(CLanguage::get() -> string('M_BERMADDR_MSG_DENIEDUK') , MSG_WARNING);
 		return false;
 	}
 

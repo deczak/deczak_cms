@@ -29,7 +29,7 @@ function printSitemapList(array &$_sitemap, int $_sitemapIndex, int $_sitemapLev
 
 	}
 
-	echo '<ul class="'. ($childIsActive ? 'active-path' : '') .' '. ($_sitemapIndex === (int)!$_printRoodNode ? 'simple-sitemap template-list' : '') .'">';
+	echo '<ul class="'. ($childIsActive ? 'active-path' : '') .' '. ($_sitemapIndex === (int)!$_printRoodNode ? 'simple-navigation template-list' : '') .'">';
 
 	for($i = $_sitemapIndex; $i < count($_sitemap); $i++)
 	{
@@ -66,7 +66,7 @@ function printSitemapList(array &$_sitemap, int $_sitemapIndex, int $_sitemapLev
 
 
 		if($_sitemap[$i] -> offspring != 0)
-			$i = printListSitemap($_sitemap, ($i + 1), ($_sitemapLevel + 1), $_objectParams, $_pagePath, $_printRoodNode);
+			$i = printSitemapList($_sitemap, ($i + 1), ($_sitemapLevel + 1), $_objectParams, $_pagePath, $_printRoodNode);
 
 		echo '</li>';
 

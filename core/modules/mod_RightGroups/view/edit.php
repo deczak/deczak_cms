@@ -96,13 +96,32 @@ $activeModulesList = CModules::instance() -> getModules();
 									$_moduleData = file_get_contents($_modLocation .'/module.json');
 									$_moduleData = json_decode($_moduleData);
 
+
+
+
+
+		$pModulesInstall = new CModulesInstall;
+
+		$moduleData = $pModulesInstall -> getMmoduleData($_moduleData, $_module -> module_location, $_module -> module_type);
+
+		if($moduleData === false)
+		{
+			continue;
+		}
+
+		$moduleData = json_decode(json_encode($moduleData));
+
+		if(empty($moduleData -> rights))
+			continue;
+
+
 									?>
 									<tr>
 										<td><?php echo $_module -> module_name; ?></td>
 										<td>
 											<div style="display:flex;">
 											<?php
-											foreach($_moduleData -> module_rights as $_right)
+											foreach($moduleData -> rights as $_right)
 											{
 												?>
 												<div class="ui pick-item">
@@ -164,7 +183,7 @@ $activeModulesList = CModules::instance() -> getModules();
 <script>
 
 	let	requestURL	= CMS.SERVER_URL_BACKEND + CMS.PAGE_PATH +'ping/<?= $dataset -> group_id; ?>';
-	let pingId		= cmstk.getRandomId();
+	let pingId		= cmsTabInstance.getId();
 	
 	cmstk.ping(requestURL, <?= CFG::GET() -> USER_SYSTEM -> MODULE_LOCKING -> PING_TIMEOUT; ?>, pingId);
 

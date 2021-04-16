@@ -365,7 +365,13 @@ class	controllerUsers extends CController
 										$_aFormData['update_time'] 	= time();
 
 
-										if(!$this -> m_pModel -> isUnique($_pDatabase, ['login_name' => $_aFormData['login_name']], ['user_id' => $systemId]))
+
+										$uniqueCondition = new CModelCondition();
+										$uniqueCondition -> where('login_name', $_aFormData['login_name']);
+										$uniqueCondition -> whereNot('user_id', $systemId);
+
+
+										if(!$this -> m_pModel -> unique($_pDatabase, $uniqueCondition))
 										{
 											$_bValidationMsg .= CLanguage::get() -> string('M_BEUSER_MSG_USERNAMEEXIST');
 											$_bValidationErr = true;

@@ -13,7 +13,7 @@ class 	modelTags extends CModel
 	}	
 
 	public function
-	load(CDatabaseConnection &$_pDatabase, CModelCondition &$_pCondition = NULL, $_execFlags = NULL)
+	load(CDatabaseConnection &$_pDatabase, CModelCondition $_pCondition = NULL, $_execFlags = NULL)
 	{
 		if($_execFlags & MODEL_TAGS_ALLOCATION_COUNT)
 		{

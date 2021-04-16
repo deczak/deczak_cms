@@ -1,5 +1,6 @@
 <?php
-include_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelSitemap.php';	
+
+include_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelBackendSitemap.php';	// includes regular modelSitemap for Frontend
 
 class CRouter extends CSingleton
 {
@@ -52,96 +53,40 @@ class CRouter extends CSingleton
 
 		##	special module nodes
 
-		$this -> _appendSpecialModuleRoutes($_dbConnection, $this -> nodesList);
+		$this -> _appendSpecialModuleRoutes($_dbConnection, $this -> nodesList, true);
 
 		##	backend nodes
 
-		$backendFilepath	= CMS_SERVER_ROOT.DIR_DATA.'backend/backend.json';
+		$modelBackendSitemap = new modelBackendSitemap();
+		$modelBackendSitemap -> load($_dbConnection);
+		$backendSitemap = &$modelBackendSitemap -> getResult();
 
-		$backend	= file_get_contents($backendFilepath);
-		$backend	= json_decode($backend);
+		$defaultLangKey = $this -> _getDefaultLanguageKey();
 
+		$nodesListA = [];
+		$nodesListB = [];
+		foreach($backendSitemap as $node)
+		{
+			if($defaultLangKey == $node -> page_language)
+				$nodesListA[] = $node;
+			else
+				$nodesListB[$node -> page_language][] = $node;
+		}
+
+		$backendSitemap = $nodesListA;
+		foreach($nodesListB as $innerList)
+			$backendSitemap = array_merge($backendSitemap, $innerList);
+		
 		$backendStructure = $this -> nodesList -> addChild( new CRouteNode(-1, 'en', CMS_BACKEND_PUBLIC) );
 
-		##	looping pages
+		$this  -> _createRoute($backendSitemap, 0, 0, $backendStructure);
 
-		foreach($backend as $page)
-		{
-			$module = null;
-
-			if(empty($page -> objects) || empty($page -> page_path))
-				$module = $backendStructure -> addChild( new CRouteNode($page -> node_id, 'en', $page -> page_path) );
-
-			if(empty($page -> page_path))
-				continue;
-
-			$_createEndNullSub = true;
-
-			$_activeModules	= CModules::instance() -> getModules();
-
-			##	looping objects of current page
-
-			foreach($page -> objects as $_object)
-			{	
-				$_moduleData = $this -> _findActiveModuleData($_activeModules, $_object -> module_id);
-
-				if($module === null && empty($_moduleData -> module_extends_by))
-					$module = $backendStructure -> addChild( new CRouteNode($page -> node_id, 'en', $page -> page_path) );
-
-
-				if($_moduleData === false)
-					continue;
-
-				## check if this module is reloaded by another one, if yes, skip this
-				
-				if(!empty($_moduleData -> module_extends_by))
-				{	
-					$_createEndNullSub = false;
-					continue;
-				}	
-				
-				##
-					
-				$_moduleJSON = CMS_SERVER_ROOT.$_moduleData -> module_type.'/'.DIR_MODULES.$_moduleData -> module_location.'/module.json';
-
-				if(!file_exists($_moduleJSON))
-					continue;
-	
-				$_moduleParams	= file_get_contents($_moduleJSON);
-				$_moduleParams	= json_decode($_moduleParams);	
-
-				##	looping sub section of module thats used by object		
-
-				foreach($_moduleParams -> module_subs as $_moduleSub)
-				{	
-					if(empty($_moduleSub -> url_name))
-					{
-						$_createEndNullSub = true;
-					}
-					else
-					{		
-						if(property_exists($_moduleSub, 'query_var'))
-							$sub = $module -> addChild( new CRouteNode($page -> node_id, 'en', $_moduleSub -> url_name, $_moduleSub -> query_var, [$_object -> object_id => $_moduleSub -> ctl_target]) );
-						else
-							$sub = $module -> addChild( new CRouteNode($page -> node_id, 'en', $_moduleSub -> url_name, 'cms-ctrl-action', [$_object -> object_id => $_moduleSub -> ctl_target]) );
-
-						if(property_exists($_moduleSub, 'subSection'))
-						{
-							$sub2 = $sub -> addChild( new CRouteNode($page -> node_id, 'en', $_moduleSub -> subSection -> url_name, $_moduleSub -> subSection -> query_var ) );
-
-							if(property_exists($_moduleSub -> subSection, 'subSection'))
-							{
-								$sub2 -> addChild( new CRouteNode($page -> node_id, 'en', $_moduleSub -> subSection -> subSection -> url_name, $_moduleSub -> subSection -> subSection -> query_var ) );						
-							}
-						}
-					}
-				}
-			}
-		}
+		$this -> _appendSpecialModuleRoutes($_dbConnection, $backendStructure, false);
 
 		## 	Structure into file
 
 		file_put_contents($this -> routesFilepah, json_encode($this -> nodesList));
+
 	}
 
 	private function
@@ -177,19 +122,37 @@ class CRouter extends CSingleton
 	}
 
 	private function
-	_appendSpecialModuleRoutes(CDatabaseConnection &$_dbConnection, &$_nodesList)
+	_appendSpecialModuleRoutes(CDatabaseConnection &$_dbConnection, &$_nodesList, bool $_isFrontend)
 	{
-		$condModules  	 = new CModelCondition();
-		$condModules 	-> where('is_frontend', 1)
-						-> where('is_active', 1);	
+		if($_isFrontend)
+		{
+			$tbPageObject 		= 'tb_page_object';
+			$tbPageObjectSimple = 'tb_page_object_simple';
+
+			$condModules  	 = new CModelCondition();
+			$condModules 	-> where('is_frontend', 1)
+							-> where('is_active', 1);	
+		}
+		else
+		{
+			$tbPageObject 		= 'tb_backend_page_object';
+			$tbPageObjectSimple = 'tb_backend_page_object_simple';
+
+			$condModules  	 = new CModelCondition();
+			$condModules 	-> where('is_frontend', 0)
+							-> where('is_active', 1);	
+		}
 
 		$modulesList 	 = $_dbConnection	-> query(DB_SELECT) 
 											-> table('tb_modules') 
 											-> condition($condModules)
 											-> exec();
 
+		$sqlDB = $_dbConnection -> getConnection();
+
 		foreach($modulesList as $module)
 		{
+
 			switch($module -> module_type) 
 			{
 				case 'core'   :	
@@ -205,20 +168,33 @@ class CRouter extends CSingleton
 								break;
 			}
 
-			if( 	property_exists($moduleConfig, 'query_url_name')  && !empty($moduleConfig  -> query_url_name)
-				&&	property_exists($moduleConfig, 'query_url_var')   && !empty($moduleConfig  -> query_url_var)
-				&&	property_exists($moduleConfig, 'query_value_var') && !empty($moduleConfig  -> query_value_var)
+			$pModulesInstall = new CModulesInstall;
+			$moduleData = $pModulesInstall -> getMmoduleData($moduleConfig, $module -> module_location, $module -> module_type);
+
+
+			if($moduleData === false)
+			{
+				continue;
+			}
+
+			$moduleData = json_decode(json_encode($moduleData));
+
+			// How to handle that better
+
+			if( 	property_exists($moduleData, 'query_url_name')  && !empty($moduleData  -> query_url_name)
+				&&	property_exists($moduleData, 'query_url_var')   && !empty($moduleData  -> query_url_var)
+				&&	property_exists($moduleData, 'query_value_var') && !empty($moduleData  -> query_value_var)
 			  )
 			{
-				$sqlDB = $_dbConnection -> getConnection();
 
-				$objectRes	=	$sqlDB -> query("	SELECT		tb_page_object.node_id,
-																tb_page_object_simple.params
+
+				$objectRes	=	$sqlDB -> query("	SELECT		$tbPageObject.node_id,
+																$tbPageObjectSimple.params
 													FROM		tb_modules
-													JOIN		tb_page_object
-														ON		tb_page_object.module_id 		= tb_modules.module_id
-													JOIN		tb_page_object_simple
-														ON		tb_page_object_simple.object_id	= tb_page_object.object_id
+													JOIN		$tbPageObject
+														ON		$tbPageObject.module_id 		= tb_modules.module_id
+													JOIN		$tbPageObjectSimple
+														ON		$tbPageObjectSimple.object_id	= $tbPageObject.object_id
 													WHERE		module_controller = '". $module -> module_controller ."'
 												",
 												PDO::FETCH_CLASS,
@@ -253,16 +229,90 @@ class CRouter extends CSingleton
 
 					$node -> childNodesList[$index] = new CRouteNode(	$node -> nodeId, 
 																		$node -> language, 
-																		$moduleConfig  -> query_url_name,
-																		$moduleConfig  -> query_url_var
+																		$moduleData  -> query_url_name,
+																		$moduleData  -> query_url_var
 																		);
 
 					$node -> childNodesList[$index] -> childNodesList[] = new CRouteNode(	$node -> nodeId, 
 																							$node -> language, 
 																							false,
-																							$moduleConfig  -> query_value_var
+																							$moduleData  -> query_value_var
 																							);
 
+				}
+			}
+
+			##	looping sub section of module thats used by object		
+			if(property_exists($moduleData, 'sections')  && !empty($moduleData  -> sections) && is_array($moduleData  -> sections))
+			{
+				$objectRes	=	$sqlDB -> query("	SELECT		DISTINCT $tbPageObject.node_id,
+																$tbPageObject.object_id,
+																$tbPageObjectSimple.params
+													FROM		tb_modules
+													JOIN		$tbPageObject
+														ON		$tbPageObject.module_id 		= tb_modules.module_id
+													LEFT JOIN	$tbPageObjectSimple
+														ON		$tbPageObjectSimple.object_id	= $tbPageObject.object_id
+													WHERE		module_controller = '". $module -> module_controller ."'
+												",
+												PDO::FETCH_CLASS,
+												"stdClass");
+
+				$objectList	=	$objectRes -> fetchAll();
+
+				$node2ExpandList = [];
+
+				foreach($objectList as $object)
+				{
+					if(property_exists($object, 'params') && !empty($object -> params))
+						$object -> params = json_decode($object -> params ?? '{}');
+					else
+						$object -> params = false;
+					
+					$item  = new stdClass;
+					$item -> objectId = $object -> object_id;
+
+					if($object -> params !== false && property_exists($object -> params, 'parent_node_id') && !empty($object -> params -> parent_node_id))
+						$item -> nodeId   = $object -> params -> parent_node_id;
+					else
+						$item -> nodeId   = $object -> node_id;
+					
+					$node2ExpandList[] = $item;
+				}
+				
+				foreach($node2ExpandList as $exNodeId)
+				{
+					$node = $this -> _getNodeByNodeId($_nodesList, $exNodeId -> nodeId);
+
+					if($node == null)
+						continue;
+					
+					foreach($moduleData -> sections as $_moduleSub)
+					{	
+						if(empty($_moduleSub -> url_name))
+						{
+							$_createEndNullSub = true;
+						}
+						else
+						{		
+							$index = count($node -> childNodesList);
+
+							if(property_exists($_moduleSub, 'query_var'))
+								$sub = $node -> addChild( new CRouteNode($node -> nodeId, 'en', $_moduleSub -> url_name, $_moduleSub -> query_var, [$exNodeId -> objectId => $_moduleSub -> ctl_target]) );
+							else
+								$sub = $node -> addChild( new CRouteNode($node -> nodeId, 'en', $_moduleSub -> url_name, 'cms-ctrl-action', [$exNodeId -> objectId => $_moduleSub -> ctl_target]) );
+
+							if(property_exists($_moduleSub, 'subSection'))
+							{
+								$sub2 = $sub -> addChild( new CRouteNode($node -> nodeId, 'en', $_moduleSub -> subSection -> url_name, $_moduleSub -> subSection -> query_var ) );
+
+								if(property_exists($_moduleSub -> subSection, 'subSection'))
+								{
+									$sub2 -> addChild( new CRouteNode($node -> nodeId, 'en', $_moduleSub -> subSection -> subSection -> url_name, $_moduleSub -> subSection -> subSection -> query_var ) );						
+								}
+							}
+						}
+					}
 				}
 			}
 		}
@@ -286,9 +336,16 @@ class CRouter extends CSingleton
 	}
 
 	public function
-	route(string $_requestedURI) : CRouteRequest
+	route(string $_requestedURI)
 	{
+		if(!file_exists($this -> routesFilepah))
+			return false;
+
 		$this -> nodesList = file_get_contents($this -> routesFilepah);
+
+		if($this -> nodesList === false)
+			return false;
+
 		$this -> nodesList = json_decode($this -> nodesList);
 
 		$routeRequest  = new CRouteRequest;
@@ -312,18 +369,24 @@ class CRouter extends CSingleton
 
 		$nodeInstance = &$this-> nodesList;
 
+
+		if(CMS_BACKEND)
+		{
+			$routeRequest -> language == 'en';
+		}
+
+
 		for($sIndex = 0; $sIndex < count($buffer); $sIndex++)
 		{
-
 			## if error documents request
 
-			if($sIndex == 0 && $buffer[$sIndex] === '404')
+			if(($sIndex == 0 && $buffer[$sIndex] === '404') || (CMS_BACKEND && $sIndex == 1 && $buffer[$sIndex] === '404'))
 			{
 				$routeRequest -> responseCode = 404;
 				return $routeRequest;
 			}
 
-			if($sIndex == 0 && $buffer[$sIndex] === '403')
+			if(($sIndex == 0 && $buffer[$sIndex] === '403') || (CMS_BACKEND && $sIndex == 1 && $buffer[$sIndex] === '403'))
 			{
 				$routeRequest -> responseCode = 403;
 				return $routeRequest;
@@ -331,88 +394,71 @@ class CRouter extends CSingleton
 
 			## determine language of request
 
-			if($sIndex == 0)
+			##	>>> Language
+
+			if($sIndex == 0 && !CMS_BACKEND)
 			{
-				$langFound = false;
-
-
+				$langFound 		 = false;
 				$defaultLanguage = null;
 
 				foreach($this -> languagesList as $lIndex => $language)
 				{
-
-
 					if($buffer[$sIndex] == $language -> lang_key)
 					{
-						# das erste segment entspricht der sprache
-
 						$routeRequest -> language = $language -> lang_key;
-
 						$langFound = true;
-
 					}
 
 					if($language -> lang_default)
 					{
-
-					$defaultLanguage = $language;
-
+						$defaultLanguage = $language;
 					}
-
-
 				}
 
 				if(!$langFound )
 				{
-
-
-						$routeRequest -> language = $defaultLanguage -> lang_key;
+					$routeRequest -> language = $defaultLanguage -> lang_key;
 				}
-
 
 				if(!$langFound && $this -> languageSettings -> DEFAULT_IN_URL)
 				{
-
-						$buffer = array_merge([$defaultLanguage -> lang_key], $buffer);
+					$buffer = array_merge([$defaultLanguage -> lang_key], $buffer);
 				}
-
 			}
+			
 
 			if($sIndex == 0 && count($buffer) == 1 && empty($buffer[$sIndex]))
 			{
 				$buffer[$sIndex] = $routeRequest -> language;
 			}
 
-		
+			## <<< Language
+
 			$nodeFound = false;
 
 			foreach($nodeInstance -> childNodesList as $childNode)
 			{
-
-
-
 				if(		$sIndex == 0 
 					&& 	$childNode -> uriSegmentName == ''  
 					&& 	$nodeInstance -> nodeId == 1 
 					&& 	$childNode -> language == $routeRequest -> language 
 					&& 	$buffer[$sIndex] != CMS_BACKEND_PUBLIC)
 				{
-					$nodeInstance = &$childNode;
+					$nodeInstance = &$childNode;					
+					
 					$nodeFound = true;
-
 					break;
 				}
 
-
-
-
-
 				if($childNode -> uriSegmentName == $buffer[$sIndex] && ( (!CMS_BACKEND && $childNode -> language == $routeRequest -> language ) || CMS_BACKEND)  )
 				{
-					$nodeInstance = &$childNode;
+
+					if($sIndex == 0 && $buffer[$sIndex] === CMS_BACKEND_PUBLIC)
+						$nodeInstance = reset($childNode -> childNodesList);
+					else
+						$nodeInstance = &$childNode;
+
 					$nodeFound = true;
-
-
 
 
 					if($childNode -> queryVar !== false)
@@ -422,7 +468,6 @@ class CRouter extends CSingleton
 					
 						$_GET[ $childNode -> queryVar ] = (!empty($childNode -> uriSegmentNameAlias) ? $childNode -> uriSegmentNameAlias: $childNode -> uriSegmentName);
 					}
-
 					break;
 				}
 
@@ -440,14 +485,22 @@ class CRouter extends CSingleton
 			if(!$nodeFound)
 			{
 				if(!CMS_BACKEND)
-				header("Location: ". CMS_SERVER_URL ."404"); 	
+				{
+					header("Location: ". CMS_SERVER_URL ."404"); 	
+
+				}
+				else
+				{
+					header("Location: ". CMS_SERVER_URL_BACKEND ."404"); 	
+				}
 				exit;	
 			}
 
 			$routeRequest -> nodeId = $nodeInstance -> nodeId;
 		}
 
-#exit;
+
+
 		return $routeRequest;
 	}
 

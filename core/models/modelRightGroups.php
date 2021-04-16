@@ -15,7 +15,7 @@ class 	modelRightGroups extends CModel
 	}	
 
 	public function
-	load(CDatabaseConnection &$_pDatabase, CModelCondition &$_pCondition = NULL, $_execFlags = NULL)
+	load(CDatabaseConnection &$_pDatabase, CModelCondition $_pCondition = NULL, $_execFlags = NULL)
 	{
 		$dtaCount = parent::load($_pDatabase, $_pCondition, $_execFlags);
 

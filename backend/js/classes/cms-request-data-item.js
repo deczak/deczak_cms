@@ -7,6 +7,7 @@ class cmsRequestDataItem extends cmsRequestDataIndex
 
 		this.systemId = systemId;
 		this.replaceCallback = replaceCallback;
+		this.timestampFormat	= timestampFormat;
 	}
 
 	requestData(onSuccess = null)
@@ -58,6 +59,22 @@ class cmsRequestDataItem extends cmsRequestDataIndex
 							break;
 
 					case 'INPUT':
+
+
+
+			switch(prop)
+			{
+				case 'update_time':
+				case 'create_time':
+				case 'time_login':
+
+						if(response.data[0][prop] != 0)
+							response.data[0][prop] = cmstk.formatDate(response.data[0][prop], callInstance.timestampFormat);
+						else
+							response.data[0][prop] = '';
+			}
+
+
 
 							node.value = response.data[0][prop];
 							node.setAttribute('value', response.data[0][prop]);

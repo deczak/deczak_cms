@@ -55,7 +55,7 @@ else
 
 					<div class="input width-25">
 						<label><?php echo CLanguage::get() -> string('MOD_BEUSER_FM_CREATEDAT'); ?></label>
-						<input type="text" disabled name="time_create" value="">
+						<input type="text" disabled name="create_time" value="">
 						<i class="fas fa-lock"></i>
 					</div>
 
@@ -250,7 +250,7 @@ else
 <script>
 
 	let	requestURL	= CMS.SERVER_URL_BACKEND + CMS.PAGE_PATH +'ping/<?= $dataset -> user_id; ?>';
-	let pingId		= cmstk.getRandomId();
+	let pingId		= cmsTabInstance.getId();
 	
 	cmstk.ping(requestURL, <?= CFG::GET() -> USER_SYSTEM -> MODULE_LOCKING -> PING_TIMEOUT; ?>, pingId);
 

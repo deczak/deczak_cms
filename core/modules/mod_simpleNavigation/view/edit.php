@@ -22,13 +22,13 @@ Changes on those settings gets visible after reload
 
 	<div class="input">
 		<label>Root Page (Node-ID)</label>
-		<input type="text" name="sitemap-parent-node-id" value="<?= $object -> params -> parent_node_id ?? '' ?>">
+		<input type="text" name="navigation-parent-node-id" value="<?= $object -> params -> parent_node_id ?? '' ?>">
 	</div>
 
 	<div class="input">
 		<label>View</label>
 		<div class="select-wrapper">
-			<select name="sitemap-template">
+			<select name="navigation-template">
 				<?php
 				foreach($avaiableTemplates as $template)
 					echo '<option '. ($object -> params -> template === $template -> templateId ? 'selected' : '') .' value="'. $template -> templateId .'">'. $template -> templateName .'</option>';
@@ -41,7 +41,7 @@ Changes on those settings gets visible after reload
 	<div class="input">
 		<label>Show hidden</label>
 		<div class="select-wrapper">
-			<select name="sitemap-display-hidden">
+			<select name="navigation-display-hidden">
 				<option <?= ($object -> params -> display_hidden === '0' ? 'selected' : ''); ?> value="0">No</option>
 				<option <?= ($object -> params -> display_hidden === '1' ? 'selected' : ''); ?> value="1">Yes</option>
 			</select>

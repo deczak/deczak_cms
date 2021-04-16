@@ -1,6 +1,12 @@
 <?php
 
+include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SHEME.'shemePageHeader.php';
+include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SHEME.'shemePagePath.php';
 include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SHEME.'shemePage.php';
+
+include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SHEME.'shemeBackendPageHeader.php';
+include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SHEME.'shemeBackendPagePath.php';
+include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SHEME.'shemeBackendPage.php';
 
 include_once 'modelPagePath.php';		
 include_once 'modelPageHeader.php';
@@ -8,25 +14,29 @@ include_once 'modelPageHeader.php';
 include_once 'modelCategories.php';	
 include_once 'modelTags.php';	
 include_once 'modelSimple.php';
+include_once 'modelSitemap.php';
 
 class 	modelPage extends CModel
 {
-	private	$m_shemePageHeader;
-	private	$m_shemePagePath;
-	private	$m_shemePage;
+	protected	$m_shemePageHeader;
+	protected	$m_shemePagePath;
+	protected	$m_shemePage;
 
 	public function
-	__construct()
+	__construct(string $_shemeName = 'shemePage', string $_dataObjectName = 'page')
 	{
-		parent::__construct('shemePage', 'page');
+		parent::__construct($_shemeName, $_dataObjectName);
 
 		$this -> m_shemePageHeader 	= new shemePageHeader();
 		$this -> m_shemePagePath 	= new shemePagePath();
 		$this -> m_shemePage	 	= new shemePage();
+
+		$this -> m_modelPageHeader	= 'modelPageHeader';
+		$this -> m_modelPagePath	= 'modelPagePath';
 	}	
 	
 	public function
-	load(CDatabaseConnection &$_pDatabase, CModelCondition &$_pCondition = NULL, $_execFlags = NULL)
+	load(CDatabaseConnection &$_pDatabase, CModelCondition $_pCondition = NULL, $_execFlags = NULL)
 	{
 		if($_pDatabase === null)
 			return false;
@@ -76,11 +86,14 @@ class 	modelPage extends CModel
 
 		$queryResult = $dbQuery -> exec($_execFlags);
 
+		$modelSitemap = new modelSitemap;
+
 		foreach($queryResult as $page)
 		{
 			$page -> alternate_path  = $this -> getAlternatePaths($_pDatabase, $page -> page_id);
 			$page -> page_categories = $this -> getCategories($_pDatabase, $page -> node_id);
 			$page -> page_tags 		 = $this -> getTags($_pDatabase, $page -> node_id);
+			$page -> page_url 		 = $modelSitemap -> getPagePath($_pDatabase, $page -> node_id, $page -> page_language);
 		
 			$this -> m_resultList[] = new $className($page, $this -> m_shemePage -> getColumns());
 		}
@@ -264,11 +277,12 @@ class 	modelPage extends CModel
 	public function
 	insert(CDatabaseConnection &$_pDatabase, array $_insertData, $_execFlags = NULL)
 	{
-		$_bQueryResult = true;
-
 		$_tablePageHeader		=	$this -> m_shemePageHeader 	-> getTableName();
 		$_tablePagePath			=	$this -> m_shemePagePath 	-> getTableName();
 		$_tablePage				=	$this -> m_shemePage 		-> getTableName();
+
+		$m_modelPageHeader		=	$this -> m_modelPageHeader;
+		$m_modelPagePath		=	$this -> m_modelPagePath;
 		
 		##	add required data
 
@@ -281,21 +295,24 @@ class 	modelPage extends CModel
 		if(!isset($_insertData['page_id']))
 			$_insertData['page_id'] 		= 	$this -> getFreePageID($_pDatabase);
 
+
+		if(empty($_insertData['page_path']))
+			$_insertData['page_path'] = $_insertData['page_name'];
+
 		if($_insertData['page_id'] !== '1')		
-			$_insertData['page_path']		=	$this -> getValidPath($_pDatabase, $_insertData['cms-edit-page-node'], $_insertData['page_name']) .'/';
+			$_insertData['page_path']		=	$this -> getValidPath($_pDatabase, $_insertData['cms-edit-page-node'], $_insertData['page_path']) .'/';
 		else
 			$_insertData['page_path']		= '/';
 			
 		##	Table tb_page_path
 		
-
 		$_parentNode = [];
 		if(!$this -> getNodeData($_pDatabase, $_insertData['cms-edit-page-node'], $_parentNode))
 		{
 			trigger_error('modelPage::insert() - Node does not exists');
 			return false;
 		}
-
+		
 		$pagePathCond	 = new CModelCondition();
 		$pagePathCond	-> whereGreaterEven('node_rgt', $_parentNode -> node_rgt);
 		$dtaObject 		 = new stdClass();
@@ -312,10 +329,10 @@ class 	modelPage extends CModel
 
 		$_insertData['node_lft'] = $_parentNode -> node_rgt;
 		$_insertData['node_rgt'] = $_parentNode -> node_rgt + 1;
+		$_insertData['node_level'] = $_parentNode -> node_level + 1;
 
-		$modelPagePath 	 		= new modelPagePath();
+		$modelPagePath 	 		= new $m_modelPagePath();
 		$_insertData['node_id'] = $modelPagePath -> insert($_pDatabase, $_insertData, $_execFlags);
-
 
 		##	Get page_auth from parent node and append dataset data
 
@@ -329,7 +346,8 @@ class 	modelPage extends CModel
 
 		$queryRes = $dbQuery -> exec();
 
-		$_dataset['page_auth'] = $queryRes[0] -> page_auth;
+		if(count($queryRes) !== 0)
+			$_insertData['page_auth'] = reset($queryRes) -> page_auth;
 
 		##	Table tb_page
 		
@@ -337,10 +355,10 @@ class 	modelPage extends CModel
 
 		##	Table tb_page_header
 		
-		$modelPageHeader 	 = new modelPageHeader();
+		$modelPageHeader 	 = new $m_modelPageHeader();
 		$modelPageHeader 	-> insert($_pDatabase, $_insertData, $_execFlags);
 
-		return $_bQueryResult;
+		return $_insertData['node_id'];
 	}
 	
 	public function
@@ -371,6 +389,8 @@ class 	modelPage extends CModel
 		$dtaObject 		 = new stdClass();
 		$dtaObject 		-> node_lft 		= 'node_lft-1';
 		$dtaObject 		-> node_rgt 		= 'node_rgt-1';
+		$dtaObject 		-> node_level 		= 'node_level-1';
+
 		$dtaObject 		-> prepareMode 		= false;
 		$_pDatabase		-> query(DB_UPDATE) -> table($_tablePagePath) -> dtaObject($dtaObject) -> condition($pagePathCond) -> exec();
 
@@ -401,7 +421,7 @@ class 	modelPage extends CModel
 		$_nodeData = [];
 		if(!$nodeId || !$this -> getNodeData($_pDatabase, $nodeId, $_nodeData))
 		{
-			trigger_error('modelPage::delete() - Node does not exists');
+			trigger_error('modelPage::deleteTree() - Node does not exists');
 			return false;
 		}
 
@@ -430,7 +450,7 @@ class 	modelPage extends CModel
 						-> exec();
 
 		$pagePathCond	 = new CModelCondition();
-		$pagePathCond	-> where('node_lft', $_nodeData -> node_rgt);
+		$pagePathCond	-> whereGreater('node_lft', $_nodeData -> node_rgt);
 		$dtaObject 		 = new stdClass();
 		$dtaObject 		-> node_lft 		= 'node_lft-ROUND('. ( $_nodeData -> node_rgt - $_nodeData -> node_lft + 1 ) .')';
 		$dtaObject 		-> prepareMode 		= false;
@@ -438,7 +458,7 @@ class 	modelPage extends CModel
 
 
 		$pagePathCond	 = new CModelCondition();
-		$pagePathCond	-> where('node_rgt', $_nodeData -> node_rgt);
+		$pagePathCond	-> whereGreater('node_rgt', $_nodeData -> node_rgt);
 		$dtaObject 		 = new stdClass();
 		$dtaObject 		-> node_rgt 		= 'node_rgt-ROUND('. ( $_nodeData -> node_rgt - $_nodeData -> node_lft + 1 ) .')';
 		$dtaObject 		-> prepareMode 		= false;
@@ -450,12 +470,13 @@ class 	modelPage extends CModel
 	private function
 	getNodeData(CDatabaseConnection &$_pDatabase, int $_nodeID, array &$_nodeData)
 	{
+		$tablePagePath	 =	$this -> m_shemePagePath 	-> getTableName();
 		$condition		 = new CModelCondition();
 		$condition		-> where('node_id', $_nodeID);
 
 		$dbQuery = $_pDatabase		-> query(DB_SELECT) 
-										-> table('tb_page_path') 
-										-> condition($condition);
+									-> table($tablePagePath) 
+									-> condition($condition);
 
 		$queryRes = $dbQuery -> exec();
 
@@ -546,19 +567,22 @@ class 	modelPage extends CModel
 	private function
 	getAlternatePaths(CDatabaseConnection &$_pDatabase, $_pageID)
 	{
+		$tablePagePath			=	$this -> m_shemePagePath 	-> getTableName();
+		$tablePage				=	$this -> m_shemePage 		-> getTableName();
+
 		$timestamp 		= 	time();
 		$_returnArray	=	[];
 		
 		$nodePageRelCond = new CModelCondition();
-		$nodePageRelCond-> where('tb_page.node_id', 'tb_page_path.node_id');
-		$nodePathRel	 = new CModelRelations('join', 'tb_page', $nodePageRelCond);
+		$nodePageRelCond-> where($tablePage.'.node_id', $tablePagePath.'.node_id');
+		$nodePathRel	 = new CModelRelations('join', $tablePage, $nodePageRelCond);
 
 		$nodePageCond	 = new CModelCondition();
-		$nodePageCond	-> where('tb_page_path.page_id', $_pageID);
+		$nodePageCond	-> where($tablePagePath.'.page_id', $_pageID);
 
 		$sqlPagesRes 	 = $_pDatabase		-> query(DB_SELECT) 
-											-> table('tb_page_path') 
-											-> selectColumns(['tb_page_path.node_id', 'tb_page_path.page_language', 'tb_page.hidden_state', 'tb_page.page_auth', 'tb_page.publish_from', 'tb_page.publish_until'])
+											-> table($tablePagePath) 
+											-> selectColumns([$tablePagePath.'.node_id', $tablePagePath.'.page_language', $tablePage.'.hidden_state', $tablePage.'.page_auth', $tablePage.'.publish_from', $tablePage.'.publish_until'])
 											-> condition($nodePageCond)
 											-> relations([$nodePathRel])
 											-> exec();
@@ -582,8 +606,8 @@ class 	modelPage extends CModel
 							-> orderBy('p.node_lft');
 
 			$sqlPgHeadRes	 = $_pDatabase	-> query(DB_SELECT) 
-											-> table('tb_page_path', 'n') 
-											-> table('tb_page_path', 'p') 
+											-> table($tablePagePath, 'n') 
+											-> table($tablePagePath, 'p') 
 											-> selectColumns(['p.node_id', 'p.page_path', 'p.page_id', 'p.page_language'])
 											-> condition($nodePathCond)
 											-> exec();
@@ -662,19 +686,21 @@ class 	modelPage extends CModel
 	}
 }
 
-/**
- * 	Parent class for the data class with toolkit functions. It get the child instance to access the child properties.
-
-class 	toolkitSite
+class 	modelBackendPage extends modelPage
 {
-	protected	$m_childInstance;
-
 	public function
-	__construct($_instance)
+	__construct()
 	{
-		$this -> m_childInstance = $_instance;
-	}
+		parent::__construct('shemeBackendPage');
+	
+		$this -> m_shemePageHeader 	= new shemeBackendPageHeader();
+		$this -> m_shemePagePath 	= new shemeBackendPagePath();
+		$this -> m_shemePage	 	= new shemeBackendPage();
 
+
+		$this -> m_modelPageHeader	= 'modelBackendPageHeader';
+		$this -> m_modelPagePath	= 'modelBackendPagePath';
+	}
 }
- */
+
 ?>

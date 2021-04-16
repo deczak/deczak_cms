@@ -3,20 +3,21 @@
 	error_reporting(E_ALL);
 	ini_set('display_errors', true);
 	
-	include '../core/classes/toolkit.php';
-	include '../config/directories.php';
-	include '../config/standard.php';
-	include '../core/classes/CSheme.php';
-	include '../core/classes/CModel.php';
-	include '../core/classes/CRouter.php';
-	include '../core/classes/CModules.php';
-	include '../core/classes/CModelCondition.php';
-	include '../core/classes/CLanguage.php';
+	include_once '../core/classes/toolkit.php';
+	include_once '../config/directories.php';
+	include_once '../config/standard.php';
+	include_once '../core/classes/CSheme.php';
+	include_once '../core/classes/CModel.php';
+	include_once '../core/classes/CSession.php';
+	include_once '../core/classes/CRouter.php';
+	include_once '../core/classes/CModules.php';
+	include_once '../core/classes/CModelCondition.php';
+	include_once '../core/classes/CLanguage.php';
 	#include '../core/shemes/shemeSitemap.php';
-	include '../core/classes/CHTAccess.php';
-	include '../core/classes/CUserRights.php';
-	include '../core/classes/CDatabase.php';
-	include '../core/classes/CMessages.php';
+	include_once '../core/classes/CHTAccess.php';
+	include_once '../core/classes/CUserRights.php';
+	include_once '../core/classes/CDatabase.php';
+	include_once '../core/classes/CMessages.php';
 
 
 	$pUserRights	 = 	new CUserRights();

@@ -154,7 +154,7 @@ document.addEventListener("DOMContentLoaded", function(){
 
 		for(let i = 0; i < numObjects; i++)
 		{
-			let	template = replaceProcessAvailable(response.data.available[i]);
+			let	template = replaceProcessAvailable(response.data.available[i].module);
 
 			let tableRow = document.createElement('tr');
 				tableRow.classList.add('trigger-batch-item');
@@ -165,8 +165,8 @@ document.addEventListener("DOMContentLoaded", function(){
 
 			let	buttonInstall = document.createElement('button');
 				buttonInstall.classList.add('ui', 'button', 'labeled', 'icon', 'trigger-install-module');
-				buttonInstall.setAttribute('data-module', response.data.available[i].module_location);
-				buttonInstall.setAttribute('data-type', response.data.available[i].module_type.toLowerCase());
+				buttonInstall.setAttribute('data-module', response.data.available[i].module.module_location);
+				buttonInstall.setAttribute('data-type', response.data.available[i].module.module_type.toLowerCase());
 				buttonInstall.innerHTML = '<span><i class="fas fa-box" data-icon="fa-box"></i></span>Install';
 				buttonInstall.style.width = "125px";
 				buttonInstall.style.textAlign = "left";

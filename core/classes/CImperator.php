@@ -81,7 +81,6 @@ class	CImperator extends CBasic
 		else
 			$_pPageRequest -> urlPath .= $_pPageRequest -> page_language .'/'. $_pPageRequest -> node_id;
 
-
 		$this -> pageRequest = &$_pPageRequest;
 	}
 
@@ -92,6 +91,7 @@ class	CImperator extends CBasic
 		{	
 			return;
 		}
+
 
 		##	XHR call
 
@@ -106,7 +106,7 @@ class	CImperator extends CBasic
 			##	Insert Module
 
 			if($_pURLVariables -> getValue("cms-insert-module") !== false)
-			{	
+			{
 				##	XHR Function call
 
 				$_request[] 	 = 	[	"input" => "cms-insert-after",  	"validate" => "strip_tags|!empty" ,	"use_default" => true, "default_value" => 0 ]; 		
@@ -155,7 +155,6 @@ class	CImperator extends CBasic
 							$objectData -> $key = $value;
 						}
 
-// insert liefert die id zurück, nicht das result object
 
 
 					$_logicResult 	  = [];
@@ -205,8 +204,7 @@ class	CImperator extends CBasic
 
 		}
 
-		$_pPageRequest -> urlPath		=	$_pPageRequest -> page_path .'/';
-
+		$_pPageRequest -> urlPath		=	$_pPageRequest -> page_path .'';
 
 		##	Looping objects
 
@@ -223,7 +221,7 @@ class	CImperator extends CBasic
 			##	Create object and call logic
 
 			$_logicResult =	false;
-			$_pPageRequest -> objectsList[$_objectKey] -> instance 	 = 	new $module -> module_controller($module, $_object);
+			$_pPageRequest -> objectsList[$_objectKey] -> instance 	 = 	new $module -> module_controller($module, $_object, true);
 			$_pPageRequest -> objectsList[$_objectKey] -> instance	->	logic($this -> m_dbConnection, $_rcaTarget, $_pPageRequest -> xhRequest, $_logicResult, false);
 
 			if($_logicResult !== false && $_logicResult['state'] === 1)
@@ -233,7 +231,7 @@ class	CImperator extends CBasic
 				$_pPageRequest -> page_language	=	$_logicResult['page_language'];
 				$_pPageRequest -> page_version	=	$_logicResult['page_version'];
 				$_pPageRequest -> isEditMode	=	true;
-				$_pPageRequest -> urlPath		=	$_pPageRequest -> page_path .'/'.$_rcaTarget[ $_pPageRequest -> objectsList[$_objectKey] -> object_id ] .'/';
+				$_pPageRequest -> urlPath		=	$_pPageRequest -> page_path .''.$_rcaTarget[ $_pPageRequest -> objectsList[$_objectKey] -> object_id ] .'/';
 
 				$_pPageRequest -> enablePageEdit	=	$_logicResult['enablePageEdit'];
 
@@ -244,7 +242,7 @@ class	CImperator extends CBasic
 		
 		##
 
-		$_pPageRequest -> urlPath		=	$_pPageRequest -> page_path .'/';
+		$_pPageRequest -> urlPath		=	$_pPageRequest -> page_path .'';
 
 		$this -> pageRequest = &$_pPageRequest;
 	}

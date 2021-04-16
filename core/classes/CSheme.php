@@ -162,9 +162,15 @@ class	CSheme
 	}
 
 	public function
-	getTableName()
+	getTableName() : string
 	{
 		return $this -> m_tableName;
+	}
+
+	public function
+	setTableName(string $_tableName)
+	{
+		$this -> m_tableName = $_tableName;
 	}
 
 	public function
@@ -223,9 +229,16 @@ class	CSheme
 	}
 	
 	protected function
-	addConstraing($_constraintName, $_keyName, $_refTable, $_refColumn, $_onDelete, $_onUpdate)
+	addConstraint($_constraintName, $_keyName, $_refTable, $_refColumn, $_onDelete, $_onUpdate)
 	{
 		$this -> m_constraintsList[] = new CShemeConstraints($_constraintName, $_keyName, $_refTable, $_refColumn, $_onDelete, $_onUpdate);
+	}
+
+	protected function
+	addConstraing($_constraintName, $_keyName, $_refTable, $_refColumn, $_onDelete, $_onUpdate)
+	{
+		// function name typo  .. remove later
+		$this -> addConstraint($_constraintName, $_keyName, $_refTable, $_refColumn, $_onDelete, $_onUpdate);
 	}
 
 	public function

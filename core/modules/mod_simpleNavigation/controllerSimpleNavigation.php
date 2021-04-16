@@ -6,7 +6,7 @@ include_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelSitemap.php';
 include_once CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CModulesTemplates.php';	
 
 
-class	controllerSimpleSitemap extends CController
+class	controllerSimpleNavigation extends CController
 {
 
 	private	$m_modelSimple;
@@ -92,7 +92,7 @@ class	controllerSimpleSitemap extends CController
 		$modelSitemap -> load($_pDatabase, $modelCondition, NULL, SITEMAP_OWN_CHILDS_ONLY);	
 
 		$moduleTemplate		 = new CModulesTemplates();
-		$moduleTemplate		->	load('simpleSitemap', $this -> m_modelSimple -> getResult()[0] -> params -> template);
+		$moduleTemplate		->	load('simpleNavigation', $this -> m_modelSimple -> getResult()[0] -> params -> template);
 
 		$this -> setView(	
 						'view',	
@@ -126,9 +126,9 @@ class	controllerSimpleSitemap extends CController
 								$_pFormVariables =	new CURLVariables();
 								$_request		 =	[];
 								$_request[] 	 = 	[	"input" => "cms-object-id", 			"output" => "object_id", 	"validate" => "strip_tags|!empty" ]; 
-								$_request[] 	 = 	[	"input" => "sitemap-template",  		"validate" => "strip_tags|!empty" ]; 
-								$_request[] 	 = 	[	"input" => "sitemap-display-hidden", 	"validate" => "strip_tags|!empty" ]; 
-								$_request[] 	 = 	[	"input" => "sitemap-parent-node-id", 	"validate" => "strip_tags|!empty" ]; 
+								$_request[] 	 = 	[	"input" => "navigation-template",  		"validate" => "strip_tags|!empty" ]; 
+								$_request[] 	 = 	[	"input" => "navigation-display-hidden", 	"validate" => "strip_tags|!empty" ]; 
+								$_request[] 	 = 	[	"input" => "navigation-parent-node-id", 	"validate" => "strip_tags|!empty" ]; 
 								$_pFormVariables-> retrieve($_request, false, true); // POST 
 								$_aFormData		 = $_pFormVariables ->getArray();
 
@@ -140,9 +140,9 @@ class	controllerSimpleSitemap extends CController
 									$modelCondition -> where('object_id', $_aFormData['object_id']);
 
 									$_aFormData['params']	= 	[
-																	"template"			=> $_aFormData['sitemap-template'],
-																	"display_hidden"	=> $_aFormData['sitemap-display-hidden'],
-																	"parent_node_id"	=> $_aFormData['sitemap-parent-node-id']
+																	"template"			=> $_aFormData['navigation-template'],
+																	"display_hidden"	=> $_aFormData['navigation-display-hidden'],
+																	"parent_node_id"	=> $_aFormData['navigation-parent-node-id']
 																];
 									$_aFormData['params']	 = 	json_encode($_aFormData['params'], JSON_FORCE_OBJECT);
 
@@ -205,10 +205,10 @@ class	controllerSimpleSitemap extends CController
 		$modelSitemap -> load($_pDatabase, $modelCondition, NULL, SITEMAP_OWN_CHILDS_ONLY);	
 
 		$moduleTemplate		 = new CModulesTemplates();
-		$moduleTemplate		->	load('simpleSitemap', $this -> m_modelSimple -> getResult()[0] -> params -> template);
+		$moduleTemplate		->	load('simpleNavigation', $this -> m_modelSimple -> getResult()[0] -> params -> template);
 
 		$moduleTemplates	 = new CModulesTemplates();
-		$moduleTemplates		->	load('simpleSitemap');
+		$moduleTemplates		->	load('simpleNavigation');
 
 		$this -> setView(	
 						'edit',	
@@ -270,10 +270,10 @@ class	controllerSimpleSitemap extends CController
 
 
 		$moduleTemplate		 = new CModulesTemplates();
-		$moduleTemplate		->	load('simpleSitemap', $this -> m_modelSimple -> getResult()[0] -> params -> template);
+		$moduleTemplate		->	load('simpleNavigation', $this -> m_modelSimple -> getResult()[0] -> params -> template);
 
 		$moduleTemplates	 = new CModulesTemplates();
-		$moduleTemplates		->	load('simpleSitemap');
+		$moduleTemplates		->	load('simpleNavigation');
 
 
 

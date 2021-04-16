@@ -1,6 +1,11 @@
 <?php
 
 require_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelModules.php';	
+require_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelPage.php';	
+require_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelPageObject.php';	
+require_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelPagePath.php';	
+require_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelPageHeader.php';	
+require_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelPageHeader.php';	
 
 require_once 'CSingleton.php';
 
@@ -36,6 +41,8 @@ class	CModules extends CSingleton
 		$moduleInstance = NULL;
 		$moduleIndex = false;
 
+
+
 		if(!$this -> getModule($_moduleId, $moduleInstance, $moduleIndex))
 		{
 			return false;
@@ -70,12 +77,22 @@ class	CModules extends CSingleton
 
 							$moduleConfig 	= file_get_contents( CMS_SERVER_ROOT.DIR_CORE.DIR_MODULES. $moduleInstance -> module_location .'/module.json');
 							$moduleConfig 	= ($moduleConfig !== false ? json_decode($moduleConfig) : [] );	
-							$this -> modulesList[$moduleIndex] = (object)array_merge((array)$moduleInstance, (array)$moduleConfig);
+
+							$pModulesInstall = new CModulesInstall;
+							$moduleData = $pModulesInstall -> getMmoduleData($moduleConfig, $moduleInstance -> module_location, $moduleInstance -> module_type);
+
+							if($moduleData === false)
+							{
+								return false;
+							}
+
+							$moduleData = json_decode(json_encode($moduleData));
+
+							$this -> modulesList[$moduleIndex] = (object)array_merge((array)$moduleInstance, (array)$moduleData);
 							$this -> modulesList[$moduleIndex] -> user_rights = $this -> m_pUserRights -> getModuleRights($_moduleId);
 
 							$_modLocation	= CMS_SERVER_ROOT . DIR_CORE . DIR_MODULES . $moduleInstance -> module_location .'/';	
 							CLanguage::instance() -> loadLanguageFile($_modLocation.'lang/', $_pageLanguage);
-
 
 							$this -> loadedList[] = $this -> modulesList[$moduleIndex];
 							return $this -> modulesList[$moduleIndex];
@@ -85,21 +102,25 @@ class	CModules extends CSingleton
 							$moduleConfig 	= file_get_contents( CMS_SERVER_ROOT.DIR_MANTLE.DIR_MODULES. $moduleInstance -> module_location .'/module.json');
 							$moduleConfig 	= ($moduleConfig !== false ? json_decode($moduleConfig) : [] );	
 
-							$_modLocation	= CMS_SERVER_ROOT . DIR_MANTLE . DIR_MODULES . $moduleInstance -> module_location .'/';
-							CLanguage::instance() -> loadLanguageFile($_modLocation.'lang/', $_pageLanguage);
+							$pModulesInstall = new CModulesInstall;
+							$moduleData = $pModulesInstall -> getMmoduleData($moduleConfig, $moduleInstance -> module_location, $moduleInstance -> module_type);
 
-							$this -> modulesList[$moduleIndex] = (object)array_merge((array)$moduleInstance, (array)$moduleConfig);
+							if($moduleData === false)
+							{
+								return false;
+							}
 
+							$moduleData = json_decode(json_encode($moduleData));
+
+							$this -> modulesList[$moduleIndex] = (object)array_merge((array)$moduleInstance, (array)$moduleData);
 							$this -> modulesList[$moduleIndex] -> user_rights = $this -> m_pUserRights -> getModuleRights($_moduleId);
 
+							$_modLocation	= CMS_SERVER_ROOT . DIR_MANTLE . DIR_MODULES . $moduleInstance -> module_location .'/';
+							CLanguage::instance() -> loadLanguageFile($_modLocation.'lang/', $_pageLanguage);
 
 							$this -> loadedList[] = $this -> modulesList[$moduleIndex];
 							return $this -> modulesList[$moduleIndex];
 		}
-
-
-
-
 
 		return false;
 	}
@@ -152,24 +173,17 @@ class	CModules extends CSingleton
 
 			foreach($this -> modulesList as $module)
 			{
-
 				if(!$module -> is_frontend)
 					continue;
 
-
 				if(!property_exists($module, 'user_rights'))
 					$module -> user_rights = $this -> m_pUserRights -> getModuleRights($module -> module_id);
-
-
 
 				if(!$this -> m_pUserRights -> existsRight($module -> module_id, 'create'))
 					continue;
 
 				$modulesList[] = $module;
-
 			}
-
-
 
 			return $modulesList;
 		}
@@ -206,9 +220,29 @@ class	CModules extends CSingleton
 					continue;
 
 				$moduleConfig = json_decode($moduleConfig);
-				$moduleConfig -> module_location = $directory;
 
-				$moduleList_core[]	= $moduleConfig;
+
+
+				// Determine Sheme
+
+				$pModulesInstall = new CModulesInstall;
+
+
+				$moduleData = $pModulesInstall -> getMmoduleData($moduleConfig, $directory, 'core');
+
+				if($moduleData === false)
+				{
+					continue;
+				}
+
+				$moduleData = json_decode(json_encode($moduleData));
+
+
+
+
+				$moduleData -> module -> module_location = $directory;
+
+				$moduleList_core[]	= $moduleData;
 			}
 		}
 
@@ -230,15 +264,48 @@ class	CModules extends CSingleton
 
 				$moduleFilepath = $procPath . $directory .'/module.json'; 
 
+
+
+
 				$moduleConfig	= file_get_contents($moduleFilepath);
 
 				if($moduleConfig === false)
 					continue;
 
 				$moduleConfig = json_decode($moduleConfig);
-				$moduleConfig -> module_location = $directory;
 
-				$moduleList_mantle[]	= $moduleConfig;
+
+
+
+
+
+
+
+				// Determine Sheme
+
+				$pModulesInstall = new CModulesInstall;
+
+
+				$moduleData = $pModulesInstall -> getMmoduleData($moduleConfig, $directory, 'mantle');
+
+				if($moduleData === false)
+				{
+					continue;
+				}
+
+
+				$moduleData = json_decode(json_encode($moduleData));
+
+
+
+
+
+
+
+
+				$moduleData -> module -> module_location = $directory;
+
+				$moduleList_mantle[]	= $moduleData;
 			}
 		}
 
@@ -248,9 +315,18 @@ class	CModules extends CSingleton
 		{
 			$moduleInstalled = false;
 
+
+			if(!isset($dirModuleItem -> module -> module_controller))
+			{
+				#tk::dbug($dirModuleItem);
+
+				// aaaooohhh well ... this should not be
+				continue;
+			}
+
 			foreach($this -> modulesList as $listItem)
 			{
-				if($listItem -> module_controller === $dirModuleItem -> module_controller)
+				if($listItem -> module_controller === $dirModuleItem -> module -> module_controller)
 				{
 					$moduleInstalled = true;
 					break;
@@ -258,19 +334,20 @@ class	CModules extends CSingleton
 			}
 
 			if($moduleInstalled)
-				break;
+				continue;
 
-			$dirModuleItem -> module_type = "core";
+		#	$dirModuleItem -> module_type = "core";
 
 			$availableList[] = $dirModuleItem;
 		}
+
 		foreach($moduleList_mantle as $dirModuleKey => $dirModuleItem)
 		{
 			$moduleInstalled = false;
 
 			foreach($this -> modulesList as $listItem)
 			{
-				if($listItem -> module_controller === $dirModuleItem -> module_controller)
+				if($listItem -> module_controller === $dirModuleItem -> module -> module_controller)
 				{
 					$moduleInstalled = true;
 					break;
@@ -279,12 +356,72 @@ class	CModules extends CSingleton
 			if($moduleInstalled)
 				continue;
 
-			$dirModuleItem -> module_type 		= "mantle";
+		#	$dirModuleItem -> module_type 		= "mantle";
 
 			$availableList[] = $dirModuleItem;
 		}
-		
+
+
 		return $availableList;
+	}
+
+	public function
+	install(CDatabaseConnection &$_dbConnection, $moduleLocation, $moduleType, &$errorMsg, bool $updateRoutes = true)
+	{
+		$_dbConnection -> beginTransaction();
+		
+		
+		$pModulesInstall = new CModulesInstall;
+		if(!$pModulesInstall -> install($_dbConnection, $moduleLocation, $moduleType, $errorMsg))
+		{
+			
+			$_dbConnection -> rollBack();
+			return false;
+		}
+
+
+		$_dbConnection -> commit();
+
+		$this -> modelModules	->	load($_dbConnection);
+		$this -> modulesList 	 =	$this -> modelModules -> getResult();
+
+		if($updateRoutes)
+		{
+			$_pHTAccess  = new CHTAccess();
+			$_pHTAccess -> generatePart4Backend($_dbConnection);
+			$_pHTAccess -> writeHTAccess($_dbConnection);
+		}
+		return true;
+	}
+
+	public function
+	uninstall(CDatabaseConnection &$_dbConnection, $_moduleId, &$errorMsg)
+	{
+		$_dbConnection -> beginTransaction();
+
+		$pModulesInstall = new CModulesInstall;
+		if(!$pModulesInstall -> uninstall($_dbConnection, $_moduleId, $errorMsg))
+		{
+			$_dbConnection -> rollBack();
+			return false;
+		}
+
+		$_dbConnection -> commit();
+		return true;
+	}
+
+	public function
+	existsRights(int $_moduleId, string $_rightsId)
+	{
+		return $this -> m_pUserRights -> existsRight($_moduleId, $_rightsId);
+	}
+}
+
+class CModulesInstall 
+{
+	public function
+	__construct()
+	{
 	}
 
 	public function
@@ -297,244 +434,797 @@ class	CModules extends CSingleton
 		$moduleConfig	= file_get_contents($moduleFilepath);
 
 		if($moduleConfig === false)
+		{
+
+
+
+
+			$errorMsg = 'Could not find module config';
 			return false;
+		}
 
 		$moduleConfig = json_decode($moduleConfig);
 
+		// Determine Sheme
 
+		$moduleData = $this -> getMmoduleData($moduleConfig, $moduleLocation, $moduleType);
 
-		// Insert module into db
-
-		$modelModules	= new modelModules();
-
-		$moduleData	= [];
-		$moduleData['module_location'] 		= $moduleLocation;
-		$moduleData['module_type'] 			= $moduleType;
-
-		$moduleData['module_controller'] 	= $moduleConfig -> module_controller;
-		$moduleData['module_name'] 			= $moduleConfig -> module_name;
-		$moduleData['module_desc'] 			= $moduleConfig -> module_desc;
-		$moduleData['module_icon'] 			= $moduleConfig -> module_icon;
-		$moduleData['module_group'] 		= $moduleConfig -> module_group;
-		$moduleData['is_frontend'] 			= strval($moduleConfig -> module_frontend);
-		$moduleData['is_active'] 			= '1';
-
-		$moduleData['create_time'] 			= time();
-		$moduleData['create_by'] 			= CSession::instance() -> getValue('user_id');
-
-
-		if(property_exists($moduleConfig, 'module_extends') && !empty($moduleConfig -> module_extends))
+		if($moduleData === false)
 		{
-			$moduleData['module_extends'] 		= $moduleConfig -> module_extends;
 
-			##	Update Parent
 
-			$parentCondition  = new CModelCondition();
-			$parentCondition -> where('module_controller', $moduleConfig -> module_extends);
 
-			$updateParent = [
-							'module_extends_by' => $moduleConfig -> module_controller
-							];
-
-			$modelModules -> update($_dbConnection, $updateParent, $parentCondition);
-
+			$errorMsg = 'Invalid module config format';
+			return false;
 		}
 
 
 
 
-		
+		## insert module, shemes
 
-		$moduleData['module_id'] = $modelModules -> insert($_dbConnection, $moduleData);
-		
-		//	Create module Tables
-
-		if(property_exists($moduleConfig, 'module_sheme') && is_array($moduleConfig -> module_sheme))
+		if($moduleData['module'] !== false)
 		{
-			foreach($moduleConfig -> module_sheme as $shemeItem)
+			$modelModules	= new modelModules();
+
+			if($moduleData['module']['extends'] !== false)
 			{
-				$shemeFilepath = CMS_SERVER_ROOT . $moduleType .'/'. DIR_MODULES . $moduleLocation .'/'. $shemeItem -> filename .'.php';
+				##	Update Parent
 
-				if(!file_exists($shemeFilepath))
+				$parentCondition  = new CModelCondition();
+				$parentCondition -> where('module_controller', $moduleData['module']['extends']);
+
+				$updateParent = [
+								'module_extends_by' => $moduleData['module']['controller']
+								];
+
+				$modelModules -> update($_dbConnection, $updateParent, $parentCondition);
+			}
+
+			$moduleData['module']['module_id'] = $modelModules -> insert($_dbConnection, $moduleData['module']);
+
+			if($moduleData['module']['shemes'] !== false)
+			{
+				foreach($moduleData['module']['shemes'] as $sheme)
 				{
-					$shemeFilepath = CMS_SERVER_ROOT . $moduleType .'/'. DIR_SHEME . $shemeItem -> filename .'.php';
-				}
+					$shemeFilepath = CMS_SERVER_ROOT . $moduleType .'/'. DIR_MODULES . $moduleLocation .'/'. $sheme -> filename .'.php';
 
-				include $shemeFilepath;
+					if(!file_exists($shemeFilepath))
+					{
+						$shemeFilepath = CMS_SERVER_ROOT . $moduleType .'/'. DIR_SHEME . $sheme -> filename .'.php';
+					}
+
+					include $shemeFilepath;
+					
+					$sheme  = new $sheme -> filename();
+
+					if(!$sheme -> createTable($_dbConnection))
+					{
+
+
+
+
+						return false;
+					}
+				}
+			}
+		}
+		else
+		{
+
+
+			$errorMsg = 'Could not find module information';
+			return false;
+		}
+
+		## insert page if requested
+
+
+
+
+
+
+		if($moduleData['page'] !== false)
+		{
+
+
+			if(isset($moduleData['module']['is_frontend']) && $moduleData['module']['is_frontend'] === '0')
+			{
+
+
+
+
+
+
+
+
+
+				## Check if page is start page
+
+				if(empty($moduleData['page']['page_path']))
+				{
+					## Check if page exists, otherwise break instead of create startpage
+
+					$modelCondition = new CModelCondition;
+					$modelCondition -> where('page_path', '/');
+					$modelCondition -> where('page_language', 'en');
+
+					$modelBackendPagePath = new modelBackendPagePath;
+					$modelBackendPagePath -> load($_dbConnection, $modelCondition);
+
+
+					if(count($modelBackendPagePath -> getResult()) !== 1)
+					{
+
+
+
+						return false;
+					}
+
+					$moduleData['page']['node_id'] = reset($modelBackendPagePath -> getResult()) -> node_id;
+
+
+				}
+				else
+				{
 				
-				$sheme  = new $shemeItem -> filename();
 
-				if(!$sheme -> createTable($_dbConnection, $errorMsg))
+					$modelBackendPage  = new modelBackendPage;
+					$nodeId = $modelBackendPage -> insert($_dbConnection, $moduleData['page']);
+
+					if($nodeId === false)
+					{
+
+
+						$errorMsg = 'Error on insert page for module';
+						return false;
+					}
+
+					$moduleData['page']['node_id'] = $nodeId;
+				}
+			}
+			else
+			{
+
+
+
+
+
+				## Check if page is start page
+
+				if(empty($moduleData['page']['path']))
 				{
-					return false;
+					## Check if page exists, otherwise break instead of create startpage
+
+					/*
+						lang does not exists
+					*/
+
+					$modelCondition = new CModelCondition;
+					$modelCondition -> where('page_path', $moduleData['page']['page_path']);
+					$modelCondition -> where('page_language', $moduleData['page']['page_language'] );
+
+					$modelPagePath = new modelPagePath;
+					$modelPagePath -> load($_dbConnection, $modelCondition);
+
+
+					if(count($modelPagePath -> getResult()) !== 1)
+					{
+
+						$errorMsg = 'Could not find node for requested page path';
+
+
+						return false;
+					}
+
+
+					$moduleData['page']['node_id'] = reset($modelBackendPagePath -> getResult()) -> node_id;
+
+
+				}
+				else
+				{
+				
+
+
+					$modelPage  = new modelPage;
+					$nodeId = $modelPage -> insert($_dbConnection, $moduleData['page']);
+
+					if($nodeId === false)
+					{
+
+
+						$errorMsg = 'Error on insert page for module';
+						return false;
+					}
+
+					$moduleData['page']['node_id'] = $nodeId;
 				}
 			}
 		}
 
-		if($moduleConfig -> module_frontend == 0)
+		## insert objects
+
+		if(isset($moduleData['objects']) && $moduleData['objects'] !== false)
 		{
-			$backendObjFilepath = CMS_SERVER_ROOT . DIR_DATA .'/backend/backend-id.json';
-			$backendObjectId	= file_get_contents($backendObjFilepath);
-			$backendObjectId	= json_decode($backendObjectId);
 
-			$backendFilepath 	= CMS_SERVER_ROOT . DIR_DATA .'/backend/backend.json';
-			$backendPages		= file_get_contents($backendFilepath);
-			$backendPages		= json_decode($backendPages, true);
 
-/*
-			foreach($backendPages as $pageIndex => $page)
+			foreach($moduleData['objects'] as $index => $object)
 			{
-				if($page['page_path'] === $moduleConfig -> module_path)
+				switch($moduleConfig -> sheme)
 				{
-					unset($backendPages[$pageIndex]);
-					break;
+					case 1:
+
+						$object['node_id']		= $moduleData['page']['node_id'];
+						$object['module_id']	= $moduleData['module']['module_id'];
+
+						break;
+
+					case 2:
+
+						$object['node_id']		= $moduleData['page']['node_id'];
+
+						$moduleCondition  = new CModelCondition();
+						$moduleCondition -> where('module_controller', $object['controller']);
+
+						$modelModules  = new modelModules;
+						$modelModules -> load($_dbConnection, $moduleCondition);
+
+						$modulesList = $modelModules -> getResult();
+
+
+
+
+
+
+						if(count($modulesList) !== 1)
+						{
+							continue 2;
+						}
+						else
+						{
+							$moduleInfo = reset($modulesList); 
+							$object['module_id']	= $moduleInfo -> module_id;
+						}
+
+						break;
 				}
+
+
+
+
+
+				$moduleCondition  = new CModelCondition();
+				$moduleCondition -> where('module_id', $object['module_id']);
+
+				$modelModules  = new modelModules;
+				$modelModules -> load($_dbConnection, $moduleCondition);
+
+				$modulesList = $modelModules -> getResult();
+
+				$moduleInfo = reset($modulesList); 
+
+
+
+
+
+				$contentId = 0;
+
+				if(isset($moduleData['module']['is_frontend']) && $moduleData['module']['is_frontend'] === '0')
+				{
+					$modelBackendPageObject = new modelBackendPageObject;
+					$contentId = $modelBackendPageObject -> insert($_dbConnection, $object);
+				}
+				else
+				{
+					$modelPageObject = new modelPageObject;
+					$contentId = $modelPageObject -> insert($_dbConnection, $object);
+				}
+
+
+
+				if($moduleInfo -> module_group === 'backend')
+					continue;
+
+
+
+				$objectData = new stdClass();
+				$objectData -> page_version 	= '1';
+				$objectData -> module_id 		= $object['module_id'];
+				$objectData -> object_id 		= $contentId;
+				#$objectData -> content_id 		= $contentId;
+				$objectData -> object_order_by 	= $index + 1;
+				$objectData -> node_id 			= $moduleData['page']['node_id'];
+				$objectData -> create_time 		= time();
+				$objectData -> create_by 		= CSession::instance() -> getValue('user_id');
+
+ 				$controller = $moduleInfo -> module_controller;
+				$controllerFilepath = CMS_SERVER_ROOT . $moduleInfo -> module_type .'/'. DIR_MODULES . $moduleInfo -> module_location .'/'. $controller .'.php';
+
+
+
+				if(!file_exists($controllerFilepath))
+				{
+					continue;
+				}
+
+
+
+
+
+
+
+		$objectModuleFilepath 	= CMS_SERVER_ROOT . $moduleInfo -> module_type .'/'. DIR_MODULES . $moduleInfo -> module_location .'/module.json';
+
+		$objectModuleConfig	= file_get_contents($objectModuleFilepath);
+
+		if($objectModuleConfig === false)
+		{
+			continue;
+		}
+
+		$objectModuleConfig = json_decode($objectModuleConfig);
+
+		// Determine Sheme
+
+		$objectModuleData = $this -> getMmoduleData($objectModuleConfig, $moduleInfo -> module_location, $moduleInfo -> module_type);
+
+		if($objectModuleData === false)
+		{
+			continue;
+		}
+
+
+
+			$moduleABC = json_decode(json_encode($objectModuleData));
+
+
+
+				$isBackendCall = false;
+				if($moduleData['module']['module_group'] === 'backend')
+					$isBackendCall  = true;
+
+
+
+
+
+
+				require_once $controllerFilepath;
+				$objectInstance = new $controller($moduleABC, $objectData, $isBackendCall);
+
+				$objectInstance -> setInstallMode();
+
+				$logicResult = [];
+
+				$objectInstance -> logic(
+											$_dbConnection, 
+											[ $objectData -> object_id => 'create' ],
+											'cms-insert-module', 
+											$logicResult, 
+											true
+											);
+
+				$_POST = [];
+				$_POST['cms-object-id'] = $contentId;
+
+				$object['data'] = (array)$object['data'];
+
+				if(is_array($object['data']) && !empty($object['data']))
+				foreach($object['data'] as $dataKey => $dataValue)
+				{
+					$_POST[$dataKey] = $dataValue;
+				}
+
+				$objectInstance -> logic(
+											$_dbConnection, 
+											[ $objectData -> object_id => 'edit' ],
+											'edit', 
+											$logicResult, 
+											true
+											);
+
 			}
-*/
-
-			$backendPages[]		= 	[
-										"page_name"			=> $moduleConfig -> module_name,
-										"page_title"		=> $moduleConfig -> module_name,
-										"page_description"	=> "",
-										"page_path"			=> $moduleConfig -> module_path,
-										"node_id"			=> $backendObjectId -> next_node_id,
-										"page_auth"			=> "ABKND",
-										"menu_group"		=> $moduleConfig -> module_menu_group,
-										"menu_order"		=> "0",
-										"objects"			=> [
-																	[
-																		"module_id"	=> strval($moduleData['module_id']),
-																		"object_id"	=> "0",     					
-																		"body"		=> "",
-																		"params"	=> ""
-																	]
-																]
-									];
-
-
-
-
-
-			$backendPages		= json_encode($backendPages);
-
-			file_put_contents($backendFilepath, $backendPages);
-
-			$backendObjectId -> next_node_id = $backendObjectId -> next_node_id + 1;
-
-			$backendObjectId		= json_encode($backendObjectId);
-
-			file_put_contents($backendObjFilepath, $backendObjectId);
-
-			$this -> modelModules	->	load($_dbConnection);
-			$this -> modulesList 	 =	$this -> modelModules -> getREsult();
-
-			$_pHTAccess  = new CHTAccess();
-			$_pHTAccess -> generatePart4Backend($_dbConnection);
-			$_pHTAccess -> writeHTAccess($_dbConnection);
 		}
 
 		return true;
 	}
 
 	public function
-	uninstall(CDatabaseConnection &$_dbConnection, $_moduleId)
+	uninstall(CDatabaseConnection &$_dbConnection, $_moduleId, &$errorMsg)
 	{
-		##	Get module data from db
+		##	get module info
 
-		$modelCondition  = new CModelCondition();
-		$modelCondition	-> where('module_id', $_moduleId);
+		$moduleCondition  = new CModelCondition();
+		$moduleCondition -> where('module_id', $_moduleId);
 
-		$modelModules	 = new modelModules();
-		$modelModules 	-> load($_dbConnection, $modelCondition);	
+		$modelModules  = new modelModules;
+		$modelModules -> load($_dbConnection, $moduleCondition);
 
-		if(empty($modelModules -> getResult()))
-			return false;
+		$modulesList = $modelModules -> getResult();
 
-		$moduleData		 = $modelModules -> getResult()[0];
-
-		if(empty($moduleData))
-			return false;
-
-		##	Read backend pages, delete page if module is backend
-
-		if($moduleData -> is_frontend === 0)
+		if(count($modulesList) !== 1)
 		{
+			$errorMsg = 'Could not find module';
+			return false;
+		}	
+							
+		$moduleInfo = reset($modulesList); 
 
-			$backendFilepath 	= CMS_SERVER_ROOT . DIR_DATA .'/backend/backend.json';
-			$backendPages		= file_get_contents($backendFilepath);
-			$backendPages		= json_decode($backendPages);
+		// Read module.json
 
-			for($i = 0; $i < count($backendPages); $i++)
-			{
-				if(!isset($backendPages[$i] -> objects[0] -> module_id) || $backendPages[$i] -> objects[0] -> module_id !== $_moduleId)
-					continue;
+		$moduleFilepath 	= CMS_SERVER_ROOT . $moduleInfo -> module_type .'/'. DIR_MODULES . $moduleInfo -> module_location .'/module.json';
 
-				unset($backendPages[$i]);
-
-				break;
-			}
-			
-			$backendPages = json_encode($backendPages);
-
-			file_put_contents($backendFilepath, $backendPages);
-		}
-
-		//	Get module config, delete tables
-
-		$moduleFilepath 	= CMS_SERVER_ROOT . $moduleData -> module_type .'/'. DIR_MODULES . $moduleData -> module_location .'/module.json';
-
-		$moduleConfig		= file_get_contents($moduleFilepath);
+		$moduleConfig	= file_get_contents($moduleFilepath);
 
 		if($moduleConfig === false)
+		{
+			$errorMsg = 'Could not find module config';
 			return false;
+		}
 
 		$moduleConfig = json_decode($moduleConfig);
 
-		if(property_exists($moduleConfig, 'module_sheme') && is_array($moduleConfig -> module_sheme))
+		// Determine Sheme
+
+		$moduleData = $this -> getMmoduleData($moduleConfig, $moduleInfo -> module_location, $moduleInfo -> module_type);
+
+		if($moduleData === false)
 		{
-			foreach($moduleConfig -> module_sheme as $shemeItem)
+			$errorMsg = 'Invalid module config format';
+			return false;
+		}
+
+		##	delete pages/object
+
+		$deleteState = false;
+		if($moduleInfo -> is_frontend)
+		{
+			$objectCondition  = new CModelCondition;
+			$objectCondition -> where('module_id', $_moduleId);
+
+			$modelPageObject  = new modelPageObject;
+			$deleteState = $modelPageObject -> delete($_dbConnection, $objectCondition);
+		}
+		else
+		{
+			$objectCondition  = new CModelCondition;
+			$objectCondition -> where('module_id', $_moduleId);
+
+			$modelBackendPageObject  = new modelBackendPageObject;
+			$modelBackendPageObject -> load($_dbConnection, $objectCondition);
+
+			$nodeList = [];
+			foreach($modelBackendPageObject -> getResult() as $object)
+				$nodeList[] = $object -> node_id;
+			$nodeList = array_unique($nodeList);
+
+			foreach($nodeList as $nodeId)
 			{
-				$shemeFilepath = CMS_SERVER_ROOT . $moduleData -> module_type .'/'. DIR_MODULES . $moduleData -> module_location .'/'. $shemeItem -> filename .'.php';
+				$pageCondition  = new CModelCondition();
+				$pageCondition -> where('module_id', $nodeId);
 
-				if(!file_exists($shemeFilepath))
-				{
-					$shemeFilepath = CMS_SERVER_ROOT . $moduleData -> module_type .'/'. DIR_SHEME . $shemeItem -> filename .'.php';
-				}
+				$modelBackendPage  = new modelBackendPage;
+				$deleteState = $modelBackendPage -> delete($_dbConnection, $pageCondition);
 
-				include $shemeFilepath;
-				
-				$sheme  = new $shemeItem -> filename();
-
-				$sheme -> dropTable($_dbConnection);
+				if(!$deleteState)
+					break;
 			}
 		}
 
-		$modelModules -> delete($_dbConnection, $modelCondition);	
-
-
-		//	Remote extends_by if set
-
-
-		if(property_exists($moduleConfig, 'module_extends') && !empty($moduleConfig -> module_extends))
+		if(!$deleteState)
 		{
+			$errorMsg = 'content deletion failed';
+			return false;
+		}
 
-			$parentCondition  = new CModelCondition();
-			$parentCondition -> where('module_controller', $moduleConfig -> module_extends);
+		## insert module, shemes
 
-			$updateParent = [
-							'module_extends_by' => ''
-							];
+		if($moduleData['module'] !== false)
+		{
+			if($moduleData['module']['shemes'] !== false)
+			{
+				foreach($moduleData['module']['shemes'] as $sheme)
+				{
+					$shemeFilepath = CMS_SERVER_ROOT . $moduleInfo -> module_type .'/'. DIR_MODULES . $moduleInfo -> module_location .'/'. $sheme -> filename .'.php';
 
-			$modelModules -> update($_dbConnection, $updateParent, $parentCondition);
-		}		
+					if(!file_exists($shemeFilepath))
+					{
+						$shemeFilepath = CMS_SERVER_ROOT . $moduleInfo -> module_type .'/'. DIR_SHEME . $sheme -> filename .'.php';
+					}
+
+					include $shemeFilepath;
+					
+					$sheme  = new $sheme -> filename();
+
+					if(!$sheme -> dropTable($_dbConnection))
+					{
+						return false;
+					}
+				}
+			}
+		}
+			
+		return $modelModules -> delete($_dbConnection, $moduleCondition);
 	}
 
 	public function
-	existsRights(int $_moduleId, string $_rightsId)
+	getMmoduleData(stdClass $_moduleConfig, $moduleLocation, $moduleType)
 	{
-		return $this -> m_pUserRights -> existsRight($_moduleId, $_rightsId);
+		$moduleData = false;
+
+		if(!property_exists($_moduleConfig, 'sheme'))
+			$_moduleConfig -> sheme = 1;
+
+
+
+		switch($_moduleConfig -> sheme)
+		{
+			case 1:
+
+				$pModulesInstallS1 = new CModulesInstallS1;
+				$moduleData = $pModulesInstallS1 -> getMmoduleData($_moduleConfig, $moduleLocation, $moduleType);
+
+				break;
+
+			case 2:
+
+				$pModulesInstallS2 = new CModulesInstallS2;
+				$moduleData = $pModulesInstallS2 -> getMmoduleData($_moduleConfig, $moduleLocation, $moduleType);
+			
+				break;
+		}
+
+		return $moduleData;
+	}
+}
+
+class CModulesInstallS1 // Module Sheme 1
+{
+	public function
+	__construct()
+	{
 	}
 
+	public function
+	getMmoduleData(stdClass $_moduleConfig, $moduleLocation, $moduleType)
+	{
+		$timestamp		= time();
+		$userId			= CSession::instance() -> getValue('user_id');
 
+		if(!property_exists($_moduleConfig, 'module_controller') || empty($_moduleConfig -> module_controller))
+			return false;
+
+
+		$moduleData		= [];
+
+		$moduleData['module']['module_location']	= $moduleLocation;
+		$moduleData['module']['module_type']		= $moduleType;
+		$moduleData['module']['module_controller']	= $_moduleConfig -> module_controller;
+		$moduleData['module']['module_name']		= $_moduleConfig -> module_name;
+		$moduleData['module']['module_desc']		= $_moduleConfig -> module_desc;
+		$moduleData['module']['module_icon']		= $_moduleConfig -> module_icon;
+		$moduleData['module']['module_group']		= $_moduleConfig -> module_group;
+		$moduleData['module']['is_frontend']		= strval($_moduleConfig -> module_frontend);
+		$moduleData['module']['is_active']			= '1';
+		$moduleData['module']['create_time']		= $timestamp;
+		$moduleData['module']['create_by']			= $userId;
+
+		if(property_exists($_moduleConfig, 'module_extends') && !empty($_moduleConfig -> module_extends))
+			$moduleData['module']['extends'] = $_moduleConfig -> module_extends;
+		else
+			$moduleData['module']['extends'] = false;
+
+		if(property_exists($_moduleConfig, 'module_sheme') && !empty($_moduleConfig -> module_sheme))
+			$moduleData['module']['shemes'] = $_moduleConfig -> module_sheme;
+		else
+			$moduleData['module']['shemes'] = false;
+
+		if($_moduleConfig -> module_frontend == 0)
+		{
+			$moduleData['page']['page_title']		= $_moduleConfig -> module_name;
+			$moduleData['page']['page_name']		= $_moduleConfig -> module_name;
+			$moduleData['page']['page_description']	= '';
+			$moduleData['page']['page_path']		= $_moduleConfig -> module_path;
+			$moduleData['page']['page_auth']		= 'ABKND';
+			$moduleData['page']['menu_group']		= $_moduleConfig -> module_menu_group;
+
+			$moduleData['page']['hidden_state']		= '0';
+			$moduleData['page']['menu_follow']		= '0';
+			$moduleData['page']['crawler_follow']	= '0';
+			$moduleData['page']['crawler_index']	= '0';
+			$moduleData['page']['cache_disabled']	= '0';
+			$moduleData['page']['publish_from']		= '0';
+			$moduleData['page']['publish_until']	= '0';
+			$moduleData['page']['publish_expired']	= '0';
+			$moduleData['page']['page_template']	= 'backend';
+			$moduleData['page']['page_language']	= 'en';
+
+			$moduleData['page']['cms-edit-page-lang']	= 'en';	// atm en only
+			$moduleData['page']['cms-edit-page-node']	= '2';	// child for en start node
+
+			$moduleData['page']['create_time']			= $timestamp;
+			$moduleData['page']['create_by']			= $userId;
+
+			$moduleData['objects'][] = [
+
+				'object_order_by'	=>	'1',
+				'create_time'		=>	$timestamp,
+				'create_by'			=>	$userId
+
+			];
+		}
+		else
+		{
+			$moduleData['page'] = false;
+			$moduleData['objects'] = false;
+		}
+
+		if(property_exists($_moduleConfig, 'module_rights'))
+		{
+			$moduleData['rights'] = $_moduleConfig -> module_rights;
+		}
+		else
+		{
+			$moduleData['rights'] = [];
+		}
+
+		if(property_exists($_moduleConfig, 'module_subs'))
+		{
+			$moduleData['sections'] = $_moduleConfig -> module_subs;
+		}
+		else
+		{
+			$moduleData['sections'] = [];
+		}
+
+		if(property_exists($_moduleConfig, 'include'))
+		{
+			$moduleData['includes'] = $_moduleConfig -> include;
+		}
+		else
+		{
+			$moduleData['includes'] = [];
+		}
+
+		if(property_exists($_moduleConfig, 'query_url_name'))
+		{
+			$moduleData['query_url_name'] = $_moduleConfig -> query_url_name;
+		}
+
+		if(property_exists($_moduleConfig, 'query_url_var'))
+		{
+			$moduleData['query_url_var'] = $_moduleConfig -> query_url_var;
+		}
+
+		if(property_exists($_moduleConfig, 'query_value_var'))
+		{
+			$moduleData['query_value_var'] = $_moduleConfig -> query_value_var;
+		}
+
+		return $moduleData;
+	}
 }
+
+class CModulesInstallS2 // Module Sheme 2
+{
+	public function
+	__construct()
+	{
+	}
+
+	public function
+	getMmoduleData(stdClass $_moduleConfig, $moduleLocation, $moduleType)
+	{
+		$timestamp		= time();
+		$userId			= CSession::instance() -> getValue('user_id');
+
+		$moduleData		= [];
+
+		if(property_exists($_moduleConfig, 'module') || !empty($_moduleConfig -> module))
+		{
+			$moduleData['module']['module_location']	= $moduleLocation;
+			$moduleData['module']['module_type']		= $moduleType;
+			$moduleData['module']['module_controller']	= $_moduleConfig -> module -> controller;
+			$moduleData['module']['module_name']		= $_moduleConfig -> module -> name;
+			$moduleData['module']['module_desc']		= $_moduleConfig -> module -> desc;
+			$moduleData['module']['module_icon']		= $_moduleConfig -> module -> icon;
+			$moduleData['module']['module_group']		= $_moduleConfig -> module -> group;
+			$moduleData['module']['is_frontend']		= strval($_moduleConfig -> module -> frontend);
+			$moduleData['module']['is_active']			= '1';
+			$moduleData['module']['create_time']		= $timestamp;
+			$moduleData['module']['create_by']			= $userId;
+
+			if(property_exists($_moduleConfig -> module, 'extends') && !empty($_moduleConfig -> module -> extends))
+				$moduleData['module']['extends'] = $_moduleConfig -> module -> extends;
+			else
+				$moduleData['module']['extends'] = false;	
+
+			if(property_exists($_moduleConfig -> module, 'shemes') && !empty($_moduleConfig -> module -> shemes))
+				$moduleData['module']['shemes'] = $_moduleConfig -> module -> shemes;
+			else
+				$moduleData['module']['shemes'] = false;
+		}
+		else
+			$moduleData['module'] = false;
+
+		if(property_exists($_moduleConfig, 'page') || !empty($_moduleConfig -> page))
+		{
+			$moduleData['page']['page_title']		= $_moduleConfig -> page -> name;
+			$moduleData['page']['page_name']		= $_moduleConfig -> page -> name;
+			$moduleData['page']['page_description']	= '';
+			$moduleData['page']['page_path']		= $_moduleConfig -> page -> path;
+			$moduleData['page']['page_auth']		= 'ABKND';
+			$moduleData['page']['menu_group']		= $_moduleConfig -> page -> menu_group;
+
+			$moduleData['page']['hidden_state']		= '0';
+			$moduleData['page']['menu_follow']		= '0';
+			$moduleData['page']['crawler_follow']	= '0';
+			$moduleData['page']['crawler_index']	= '0';
+			$moduleData['page']['cache_disabled']	= '0';
+			$moduleData['page']['publish_from']		= '0';
+			$moduleData['page']['publish_until']	= '0';
+			$moduleData['page']['publish_expired']	= '0';
+			$moduleData['page']['page_template']	= 'backend';
+			$moduleData['page']['page_language']	= 'en';
+
+			$moduleData['page']['cms-edit-page-lang']	= 'en';	// atm en only
+			$moduleData['page']['cms-edit-page-node']	= '2';	// child for en start node
+
+			$moduleData['page']['create_time']			= $timestamp;
+			$moduleData['page']['create_by']			= $userId;
+		}	
+		else
+			$moduleData['page'] = false;
+
+		if($moduleData['page'] === false && property_exists($_moduleConfig, 'objectList') && !empty($_moduleConfig -> objectList))
+			return false;
+
+		if(property_exists($_moduleConfig, 'objectList') && !empty($_moduleConfig -> objectList))
+		{
+			if(is_array($_moduleConfig -> objectList))
+			foreach($_moduleConfig -> objectList as $object)
+			{
+				$moduleData['objects'][] = [
+
+					'controller'		=>	$object -> controller,
+					'data'				=>	$object -> data ?? '',
+					'object_order_by'	=>	'1',
+					'create_time'		=>	$timestamp,
+					'create_by'			=>	$userId
+
+				];
+			}
+		}
+
+		if(property_exists($_moduleConfig, 'rights'))
+		{
+			$moduleData['rights'] = $_moduleConfig -> rights;
+		}
+		else
+		{
+			$moduleData['rights'] = [];
+		}
+
+		if(property_exists($_moduleConfig, 'sections'))
+		{
+			$moduleData['sections'] = $_moduleConfig -> sections;
+		}
+		else
+		{
+			$moduleData['sections'] = [];
+		}
+
+		if(property_exists($_moduleConfig, 'includes'))
+		{
+			$moduleData['includes'] = $_moduleConfig -> includes;
+		}
+		else
+		{
+			$moduleData['includes'] = [];
+		}
+
+		return $moduleData;
+	}
+}
+
 ?>

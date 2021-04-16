@@ -1,5 +1,12 @@
 {
 	"module_controller" : "controllerTags",
+	"module_name"		: "Tags",
+	"module_desc"		: "",
+	"module_path" 		: "tags",
+	"module_group"		: "backend",
+	"module_icon"		: "&#xf02b",
+	"module_frontend"	: 0,
+	"module_menu_group"	: "2",
 	"module_rights"		:[
 							{"name":"index",	"desc":"OVERVIEW"},
 							{"name":"view",		"desc":"VIEW"},
