@@ -1,6 +1,6 @@
 {
-	"module_controller" : "controllerSimpleSitemap",
-	"module_name"		: "Sitemap",
+	"module_controller" : "controllerSimpleNavigation",
+	"module_name"		: "Navigation",
 	"module_desc"		: "",
 	"module_path" 		: "",
 	"module_group"		: "Simple Modules",

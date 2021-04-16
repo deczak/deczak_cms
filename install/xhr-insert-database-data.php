@@ -20,6 +20,7 @@
 	include_once '../core/classes/CRouter.php';
 	include_once '../core/classes/CHTAccess.php';
 	include_once '../core/classes/CModules.php';
+	include_once '../core/models/modelRightGroups.php';
 
 	if(empty($_POST['database-server'])) 	tk::xhrResult(1, 'Database server address not set');	else $_POST['database-server'] 	 = trim(strip_tags($_POST['database-server']));
 	if(empty($_POST['database-user'])) 		tk::xhrResult(1, 'Database user name not set');			else $_POST['database-user'] 	 = trim(strip_tags($_POST['database-user']));
@@ -193,15 +194,14 @@
 	##	Add administrator base rights
 
 	$modelModules  = new modelModules;
-	$modelModules -> load($db, $moduleCondition);
+	$modelModules -> load($db);
 	$modulesList = $modelModules -> getResult();
 
 	$adminRights = [];
 
 	foreach($modulesList as $module)
 	{
-		//
-
+		
 
 
 
@@ -215,9 +215,10 @@
 		$moduleJSON = json_decode($moduleJSON);
 
 
-		$moduleData = $this -> getMmoduleData($moduleJSON, $module -> module_location, $module -> module_type);
+							$pModulesInstall = new CModulesInstall;
+		$moduleData = $pModulesInstall -> getMmoduleData($moduleJSON, $module -> module_location, $module -> module_type);
 
-// !?! $right obj oder array
+
 
 		foreach($moduleData['rights'] as $right)
 		{
