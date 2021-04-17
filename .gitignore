@@ -1,8 +1,8 @@
 
 .htaccess
-/archiv/
-/config/*
-!/config/directories.php
-/data/htaccess/
-/data/configuration.json
-/data/routes.json
+archiv/
+config/*
+!config/directories.php
+data/htaccess/
+data/configuration.json
+data/routes.json
