@@ -6,4 +6,5 @@ config/*
 data/htaccess/
 data/configuration.json
 data/routes.json
-public/sitemap.xml
+public/*
+!public/index.php
