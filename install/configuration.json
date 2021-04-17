@@ -20,16 +20,16 @@
 	"SESSION"		:	{
 							"SPAM_ACCESS_TIMEOUT"	: 60,
 							"SPAM_ACCESS_LIMIT"		: 5,
-							"SPAM_ACCESS_ON"		: true,
-							"DENIED_ACCESS_ON"		: true,
+							"SPAM_ACCESS_ON"		: false,
+							"DENIED_ACCESS_ON"		: false,
 							"DENIED_ACCESS_HTACCESS": true,
 							"TIMEOUT"				: 14400,
 							"REPORT_WEEKLYACCESS"	: true,
 							"FAIL_LIMIT"			: 5
 						},
 	"SYSTEM_MAILER"	:	{
-							"RECEIVER_NAME"			: "",
-							"RECEIVER_ADDRESS"		: "",
+							"RECEIVER_NAME"			: "%SYSMAIL_NAME%",
+							"RECEIVER_ADDRESS"		: "%SYSMAIL_MAIL%",
 							"SUBJECT_PREFIX"		: "",
 							"LOCK_TIMEOUT"			: 3600,
 							"MAIL_TIME_FORMAT"		: "Y-m-d @ H:i:s",
