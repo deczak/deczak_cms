@@ -19,6 +19,9 @@ class	TK
 						"msg"	=>	$_msg,
 						"data"	=>	$_data
 						];
+		
+		header("Permissions-Policy: interest-cohort=()");	
+		header('Content-type:application/json');
 						
 		echo json_encode($_array, JSON_HEX_APOS | JSON_UNESCAPED_SLASHES | JSON_FORCE_OBJECT | JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK);
 		exit;

@@ -70,20 +70,3 @@ class 	modelUsers extends CModel
 		return 	parent::update($_pDatabase, $_insertData, $_pCondition, $_execFlags);
 	}
 }
-
-/**
- * 	Parent class for the data class with toolkit functions. It get the child instance to access the child properties.
-
-class 	toolkitUsers
-{
-	protected	$m_childInstance;
-
-	public function
-	__construct($_instance)
-	{
-		$this -> m_childInstance = $_instance;
-	}
-
-}
- */
-?>

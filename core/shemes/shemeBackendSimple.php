@@ -12,5 +12,3 @@ class shemeBackendSimple extends shemeSimple
 		$this -> addConstraint('backend_simple_object_id', 'object_id', 'tb_backend_page_object', 'object_id', 'CASCADE', 'CASCADE');
 	}
 }
-
-?>

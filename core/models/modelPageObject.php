@@ -31,5 +31,3 @@ class 	modelBackendPageObject extends CModel
 		return $this -> createPrototype();
 	}
 }
-
-?>

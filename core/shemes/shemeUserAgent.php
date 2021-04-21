@@ -19,5 +19,3 @@ class shemeUserAgent extends CSheme
 		$this -> addColumnGroup(DB_COLUMN_GROUP_LOCK);
 	}
 }
-
-?>

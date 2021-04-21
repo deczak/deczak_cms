@@ -12,5 +12,3 @@ class shemeBackendPageObject extends shemePageObject
 		$this -> addConstraint('backend_object_node_id', 'node_id', 'tb_backend_page', 'node_id', 'CASCADE', 'CASCADE');
 	}
 }
-
-?>

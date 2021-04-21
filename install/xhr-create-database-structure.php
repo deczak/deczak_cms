@@ -1,6 +1,5 @@
 <?php
 
-
 	error_reporting(E_ALL);
 	ini_set('display_errors', true);
 
@@ -8,6 +7,7 @@
 	include '../config/directories.php';
 	include '../config/standard.php';
 	include '../core/classes/CSheme.php';
+	include '../core/classes/CModel.php';
 	include '../core/classes/CDatabase.php';
 	include '../core/classes/CMessages.php';
 
@@ -16,18 +16,8 @@
 	if(empty($_POST['database-pass'])) 		tk::xhrResult(1, 'Database password not set');			else $_POST['database-pass'] 	 = trim(strip_tags($_POST['database-pass']));
 	if(empty($_POST['database-database'])) 	tk::xhrResult(1, 'Database name not set');				else $_POST['database-database'] = trim(strip_tags($_POST['database-database']));
 
-
-
-
 	$_pMessages		 =	CMessages::instance();
 	$_pMessages		->	initialize(CMS_PROTOCOL_REPORTING, CMS_DEBUG_REPORTING);
-/*
-	$db = new mysqli($_POST['database-server'], $_POST['database-user'], $_POST['database-pass'], $_POST['database-database']);
-
-	if (mysqli_connect_errno())
-		tk::xhrResult(1, 'SQL error on connection - '. mysqli_connect_error());
-*/	
-
 
 	$databases 	 = 	[];
 	$databases[] = 	[
@@ -79,6 +69,14 @@
 		$instance -> createConstraints($db);
 	}
 
-	tk::xhrResult(0, 'OK');
+	foreach($shemeInstance as $instance)
+	{
+		foreach($instance -> m_seedList as $seed)
+		{
+			$shemeName	 = get_class($instance);
+			$pModel  	 = new CModel($shemeName, 'dta'. $shemeName);
+			$pModel 	-> insert($db, $seed);
+		}
+	}
 
-?>
+	tk::xhrResult(0, 'OK');

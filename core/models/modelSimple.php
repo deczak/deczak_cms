@@ -20,5 +20,3 @@ class 	modelBackendSimple extends CModel
 		parent::__construct('shemeBackendSimple', 'backendSimple');
 	}
 }
-
-?>

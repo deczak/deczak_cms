@@ -345,12 +345,12 @@ class 	modelPage extends CModel
 										-> condition($condition);
 
 		$queryRes = $dbQuery -> exec();
-
-		if(count($queryRes) !== 0)
+		
+		if(count($queryRes) !== 0 && empty($_insertData['page_auth']))
 			$_insertData['page_auth'] = reset($queryRes) -> page_auth;
 
 		##	Table tb_page
-		
+
 		parent::insert($_pDatabase, $_insertData, $_execFlags);
 
 		##	Table tb_page_header
@@ -691,7 +691,7 @@ class 	modelBackendPage extends modelPage
 	public function
 	__construct()
 	{
-		parent::__construct('shemeBackendPage');
+		parent::__construct('shemeBackendPage', 'backendPage');
 	
 		$this -> m_shemePageHeader 	= new shemeBackendPageHeader();
 		$this -> m_shemePagePath 	= new shemeBackendPagePath();
@@ -702,5 +702,3 @@ class 	modelBackendPage extends modelPage
 		$this -> m_modelPagePath	= 'modelBackendPagePath';
 	}
 }
-
-?>

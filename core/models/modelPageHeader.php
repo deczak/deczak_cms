@@ -19,5 +19,3 @@ class 	modelBackendPageHeader extends CModel
 		parent::__construct('shemeBackendPageHeader', 'backendPageHeader');
 	}	
 }
-
-?>

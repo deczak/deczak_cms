@@ -21,6 +21,11 @@
 	include_once '../core/classes/CHTAccess.php';
 	include_once '../core/classes/CModules.php';
 	include_once '../core/models/modelRightGroups.php';
+	include_once '../core/models/modelUsersBackend.php';
+	include_once '../core/models/modelUsersRegister.php';
+	include_once '../core/models/modelUserGroups.php';
+	include_once '../core/models/modelLanguages.php';
+	include_once '../core/models/modelPage.php';
 
 	if(empty($_POST['database-server'])) 	tk::xhrResult(1, 'Database server address not set');	else $_POST['database-server'] 	 = trim(strip_tags($_POST['database-server']));
 	if(empty($_POST['database-user'])) 		tk::xhrResult(1, 'Database user name not set');			else $_POST['database-user'] 	 = trim(strip_tags($_POST['database-user']));
@@ -30,18 +35,15 @@
 	if(empty($_POST['user-user'])) 			tk::xhrResult(1, 'User name not set');					else $_POST['user-user'] 	 	 = trim(strip_tags($_POST['user-user']));
 	if(empty($_POST['user-pass'])) 			tk::xhrResult(1, 'User password not set');				else $_POST['user-pass'] 		 = trim(strip_tags($_POST['user-pass']));
 
-	$_pMessages		 =	CMessages::instance();
-	$_pMessages		->	initialize(CMS_PROTOCOL_REPORTING, CMS_DEBUG_REPORTING);
-
 	$_POST['user-first-name'] 	= '';
 	$_POST['user-last-name'] 	= '';
 	$_POST['user-mail'] 		= '';
 
 	$_POST['user-user']			= CRYPT::LOGIN_HASH($_POST['user-user']);
 	$_POST['user-pass']			= CRYPT::LOGIN_CRYPT($_POST['user-pass'], CFG::GET() -> ENCRYPTION -> BASEKEY);
-	$_POST['user-first-name']	= CRYPT::ENCRYPT($_POST['user-first-name'], '1', true);
-	$_POST['user-last-name']	= CRYPT::ENCRYPT($_POST['user-last-name'], '1', true);
-	$_POST['user-mail']			= CRYPT::ENCRYPT($_POST['user-mail'], '1', true);
+
+	$_pMessages		 =	CMessages::instance();
+	$_pMessages		->	initialize(CMS_PROTOCOL_REPORTING, CMS_DEBUG_REPORTING);
 
 	$databases 	 = 	[];
 	$databases[] = 	[
@@ -77,19 +79,13 @@
 	$pRouter  = CRouter::instance();
 	$pRouter -> initialize(CFG::GET() -> LANGUAGE, CLanguage::instance() -> getLanguages());
 
+##	Base Data
+
 	$db -> beginTransaction();
 
 	$seedDir = 'seeds';
 
-	##	Base Data
-
 	$sqlDump = file_get_contents($seedDir.'/1-base.sql');
-
-	$sqlDump = str_replace('%USER_NAME%',$_POST['user-user'], $sqlDump);
-	$sqlDump = str_replace('%USER_PASSWORD%',$_POST['user-pass'], $sqlDump);
-	$sqlDump = str_replace('%USER_FIRST_NAME%',$_POST['user-first-name'], $sqlDump);
-	$sqlDump = str_replace('%USER_LAST_NAME%',$_POST['user-last-name'], $sqlDump);
-	$sqlDump = str_replace('%USER_MAIL%',$_POST['user-mail'], $sqlDump);
 
 	$sqlDump = str_replace('%TIMESTAMP%',time(), $sqlDump);
 
@@ -105,7 +101,47 @@
 
 	$db -> commit();
 
-	##	Install core modules
+##	Insert Languages and base nodes
+
+	$language = [];
+	$language['lang_key'] 			= 'en';
+	$language['lang_name'] 			= 'English';
+	$language['lang_name_native'] 	= 'English';
+	$language['lang_hidden'] 		= 0;
+	$language['lang_locked'] 		= 0;
+	$language['lang_default'] 		= 1;
+	$language['lang_frontend'] 		= 1;
+	$language['lang_backend'] 		= 1;
+	$language['create_time'] 		= time();
+	$language['create_by'] 			= 0;
+	$modelLanguages = new modelLanguages;
+	$modelLanguages -> insert($db, $language);
+
+	$rootPage = [];
+	$rootPage['cms-edit-page-lang'] = 'en';
+	$rootPage['cms-edit-page-node'] = '1';		// parent node-id
+	$rootPage['page_id'] 			= '1';
+	$rootPage['page_name'] 			= 'Home';
+	$rootPage['page_template'] 		= 'default';
+	$rootPage['create_time']		=	time();
+	$rootPage['create_by']			= 0;
+	$modelPage  = new modelPage();
+	$modelPage -> insert($db, $rootPage);
+
+	$rootPage = [];
+	$rootPage['cms-edit-page-lang'] = 'en';
+	$rootPage['cms-edit-page-node'] = '1';		// parent node-id
+	$rootPage['page_id'] 			= '1';
+	$rootPage['page_name'] 			= 'Home';
+	$rootPage['page_template'] 		= 'backend';
+	$rootPage['crawler_index'] 		= '0';
+	$rootPage['crawler_follow'] 	= '0';
+	$rootPage['create_time']		=	time();
+	$rootPage['create_by']			= 0;
+	$modelBackendPage  = new modelBackendPage();
+	$modelBackendPage -> insert($db, $rootPage);
+
+##	Install core modules
 
 	$pUserRights = new CUserRights;
 
@@ -160,23 +196,13 @@
 		$pModules -> install($db, $module -> location, $module -> type, $errMessage, false);
 	}
 
-	##	Example Data
+##	Example Data
 
 	$sqlDump = file_get_contents($seedDir.'/2-example.sql');
-
 	if(!empty(trim($sqlDump)))
 	{
-
 		$db -> beginTransaction();
-
-		$sqlDump = str_replace('%USER_NAME%',$_POST['user-user'], $sqlDump);
-		$sqlDump = str_replace('%USER_PASSWORD%',$_POST['user-pass'], $sqlDump);
-		$sqlDump = str_replace('%USER_FIRST_NAME%',$_POST['user-first-name'], $sqlDump);
-		$sqlDump = str_replace('%USER_LAST_NAME%',$_POST['user-last-name'], $sqlDump);
-		$sqlDump = str_replace('%USER_MAIL%',$_POST['user-mail'], $sqlDump);
-
 		$sqlDump = str_replace('%TIMESTAMP%',time(), $sqlDump);
-
 		try
 		{
 			$db -> getConnection() -> exec($sqlDump);
@@ -186,62 +212,68 @@
 			$db -> rollBack();
 			tk::xhrResult(1, 'SQL error on query - '. $exception -> getMessage());
 		}
-
 		$db -> commit();
-
 	}
 
-	##	Add administrator base rights
+##	Add administrator base rights
 
 	$modelModules  = new modelModules;
 	$modelModules -> load($db);
-	$modulesList = $modelModules -> getResult();
-
-	$adminRights = [];
-
+	$modulesList   = $modelModules -> getResult();
+	$adminRights   = [];
 	foreach($modulesList as $module)
 	{
-		
-
-
-
 		$moduleFilepath 	= CMS_SERVER_ROOT . $module -> module_type .'/'. DIR_MODULES . $module -> module_location .'/module.json';
-
 		$moduleJSON	= file_get_contents($moduleFilepath);
-
 		if($moduleJSON === false)
 			continue;
-		
 		$moduleJSON = json_decode($moduleJSON);
-
-
-							$pModulesInstall = new CModulesInstall;
+		$pModulesInstall = new CModulesInstall;
 		$moduleData = $pModulesInstall -> getMmoduleData($moduleJSON, $module -> module_location, $module -> module_type);
-
-
-
 		foreach($moduleData['rights'] as $right)
 		{
-
 			$adminRights[ $module -> module_id ][] = $right -> name;
-
-
-
 		}
-
 	}
-
-	$adminDataset['group_name'] 	= 'Administrator';
-	$adminDataset['group_rights'] 	= json_encode($adminRights);
-	$adminDataset['create_time'] 	= time();
-	$adminDataset['create_by'] 		= 0;
-
+	$userGroup = [];
+	$userGroup['group_name'] 	= 'Administrator';
+	$userGroup['group_rights'] 	= json_encode($adminRights);
+	$userGroup['create_time'] 	= time();
+	$userGroup['create_by'] 		= 0;
 	$modelRightGroups = new modelRightGroups;
-	$modelRightGroups -> insert($db, $adminDataset);
+	$userGroupId = $modelRightGroups -> insert($db, $userGroup);
 	
+##	Create initial backend user
 
-	##	finish
+	$initialUser = [];
+	$initialUser['login_name'] 		= $_POST['user-user'];
+	$initialUser['login_pass'] 		= $_POST['user-pass'];
+	$initialUser['user_id'] 		= '1';
+	$initialUser['user_name_first'] = $_POST['user-first-name'];
+	$initialUser['user_name_last'] 	= $_POST['user-last-name'];
+	$initialUser['user_mail'] 		= $_POST['user-mail'];
+	$initialUser['cookie_id'] 		= '{}';
+	$initialUser['is_locked'] 		= '0';
+	$initialUser['language'] 		= 'en';
+	$initialUser['create_time'] 	= time();
+	$initialUser['create_by'] 		= 0;
+	$modelUsersBackend = new modelUsersBackend;
+	$initialUserId = $modelUsersBackend -> insert($db, $initialUser);
+
+	$userRegister = [];
+	$userRegister['user_id'] 		= $initialUserId;
+	$userRegister['user_type'] 		= '0';
+	$modelUsersRegister = new modelUsersRegister;
+	$modelUsersRegister -> insert($db, $userRegister);
+
+##	Assign user to Admnistrator group
+
+	$userRight = [];
+	$userRight['user_id'] 	= $initialUserId;
+	$userRight['group_id'] 	= $userGroupId;
+	$modelUserGroups = new modelUserGroups;
+	$modelUserGroups -> insert($db, $userRight);
+
+##	fin
 
 	tk::xhrResult(0, 'OK');
-
-?>

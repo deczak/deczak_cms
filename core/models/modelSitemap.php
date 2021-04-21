@@ -207,5 +207,3 @@ class 	modelSitemap extends CModel
 		return $_pagePath;
 	}
 }
-
-?>

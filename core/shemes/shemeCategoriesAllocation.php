@@ -17,5 +17,3 @@ class shemeCategoriesAllocation extends CSheme
 		$this -> addConstraing('cat_page_alloc', 'node_id', 'tb_page', 'node_id', 'CASCADE', 'CASCADE');
 	}
 }
-
-?>

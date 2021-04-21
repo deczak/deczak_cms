@@ -18,5 +18,3 @@ class shemeSessionsArchiv extends CSheme
 		$this -> addColumn('login_fail_count', DB_COLUMN_TYPE_INT) -> setAttribute(DB_COLUMN_ATTR_UNSIGNED) -> setDefault('0');
 	}
 }
-
-?>

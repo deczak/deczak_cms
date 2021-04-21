@@ -30,10 +30,4 @@ class shemeSitemap extends CSheme
 		$this -> addColumn('publish_until'	, DB_COLUMN_TYPE_INT);
 		$this -> addColumn('publish_expired', DB_COLUMN_TYPE_INT);
 	}
-
-
-
-
 }
-
-?>

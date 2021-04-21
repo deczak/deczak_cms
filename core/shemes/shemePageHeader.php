@@ -22,4 +22,3 @@ class shemePageHeader extends CSheme
 	}
 }
 
-?>

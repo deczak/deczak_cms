@@ -10,5 +10,3 @@ class 	modelModules extends CModel
 		parent::__construct('shemeModules', 'modules');
 	}	
 }
-
-?>

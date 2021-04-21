@@ -30,5 +30,3 @@ class shemePageObject extends CSheme
 			$this -> addConstraint('object_node_id', 'node_id', 'tb_page', 'node_id', 'CASCADE', 'CASCADE');
 	}
 }
-
-?>

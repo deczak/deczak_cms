@@ -16,5 +16,3 @@ class shemeSimple extends CSheme
 			$this -> addConstraint('simple_object_id', 'object_id', 'tb_page_object', 'object_id', 'CASCADE', 'CASCADE');
 	}
 }
-
-?>

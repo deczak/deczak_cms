@@ -44,5 +44,3 @@ class shemePage extends CSheme
 		$this -> addColumn('objects', 0) -> setVirtual();
 	}
 }
-
-?>

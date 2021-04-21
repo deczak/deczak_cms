@@ -17,5 +17,3 @@ class shemeTagsAllocation extends CSheme
 		$this -> addConstraing('tag_page_alloc', 'node_id', 'tb_page', 'node_id', 'CASCADE', 'CASCADE');
 	}
 }
-
-?>

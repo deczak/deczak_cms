@@ -17,5 +17,3 @@ class shemeUserGroups extends CSheme
 		$this -> addColumn('update_by', DB_COLUMN_TYPE_STRING) -> setLength(25) -> setDefault('NULL');
 	}
 }
-
-?>

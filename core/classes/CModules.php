@@ -804,6 +804,8 @@ class CModulesInstall
 											true
 											);
 
+				$tmpPost = $_POST;							
+
 				$_POST = [];
 				$_POST['cms-object-id'] = $contentId;
 
@@ -822,7 +824,7 @@ class CModulesInstall
 											$logicResult, 
 											true
 											);
-
+$_POST = $tmpPost;
 			}
 		}
 

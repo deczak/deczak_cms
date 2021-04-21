@@ -12,5 +12,3 @@ class shemeBackendPageHeader extends shemePageHeader
 		$this -> addConstraint('backend_header_node_id', 'node_id', 'tb_backend_page', 'node_id', 'CASCADE', 'CASCADE');
 	}
 }
-
-?>

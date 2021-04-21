@@ -68,5 +68,3 @@ class 	modelBackendSitemap extends modelSitemap
 		return true;
 	}
 }
-
-?>

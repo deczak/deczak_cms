@@ -11,5 +11,3 @@ class shemeBackendPagePath extends shemePagePath
 		$this -> setTableName('tb_backend_page_path');
 	}
 }
-
-?>

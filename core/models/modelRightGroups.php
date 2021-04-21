@@ -36,5 +36,3 @@ class 	modelRightGroups extends CModel
 		return $dtaCount;
 	}
 }
-
-?>

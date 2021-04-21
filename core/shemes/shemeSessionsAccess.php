@@ -18,5 +18,3 @@ class shemeSessionsAccess extends CSheme
 		#$this -> addColumn('page_title', DB_COLUMN_TYPE_STRING) -> setVirtual() -> setDefault('');
 	}
 }
-
-?>

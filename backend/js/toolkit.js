@@ -65,6 +65,7 @@ class cmstk
 
 		xhRequest.open('POST', requestURL);
 		xhRequest.responseType = 'json';
+		xhRequest.setRequestHeader("X-Requested-With","XMLHttpRequest");
 		xhRequest.onerror   = function ()
 		{
 			// Event does not fire on 404 or 500

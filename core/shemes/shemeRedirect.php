@@ -18,5 +18,3 @@ class shemeRedirect extends CSheme
 		$this -> addConstraing('redirect_node_id', 'node_id', 'tb_page', 'node_id', 'CASCADE', 'CASCADE');
 	}
 }
-
-?>

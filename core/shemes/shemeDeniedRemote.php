@@ -18,5 +18,3 @@ class shemeDeniedRemote extends CSheme
 
 	}
 }
-
-?>

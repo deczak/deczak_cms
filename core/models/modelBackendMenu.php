@@ -10,5 +10,3 @@ class 	modelBackendMenu extends CModel
 		parent::__construct('shemeBackendMenu', 'backendMenu');
 	}	
 }
-
-?>

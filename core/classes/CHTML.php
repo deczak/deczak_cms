@@ -13,6 +13,9 @@ class	CHTML extends CBasic
 	{
 		if(isset($pageRequest -> cache_disabled) && $pageRequest -> cache_disabled == 1)
 			$this -> disableCaching();
+		
+		header("Permissions-Policy: interest-cohort=()");	
+
 		$pTemplate 		=	new CTemplates(CMS_SERVER_ROOT . DIR_TEMPLATES);
 
 		if(!isset($pageRequest -> page_template) || $pageRequest -> page_template == NULL)
@@ -151,7 +154,7 @@ class	CHTML extends CBasic
 	{
 		header("Cache-Control: no-cache, no-store, must-revalidate");
 		header("Pragma: no-cache");
-		header("Expires: 0");		
+		header("Expires: 0");			
 	}
 }
 

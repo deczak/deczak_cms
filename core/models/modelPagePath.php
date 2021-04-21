@@ -19,5 +19,3 @@ class 	modelBackendPagePath extends CModel
 		parent::__construct('shemeBackendPagePath', 'backendPagePath');
 	}	
 }
-
-?>

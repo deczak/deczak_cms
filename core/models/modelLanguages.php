@@ -10,5 +10,3 @@ class	modelLanguages extends CModel
         parent::__construct('shemeLanguages', 'language');
 	}
 }
-
-?>

@@ -27,5 +27,3 @@ class shemeModules extends CSheme
 		$this -> addColumnGroup(DB_COLUMN_GROUP_LOCK);
 	}
 }
-
-?>

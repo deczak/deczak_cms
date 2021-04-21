@@ -12,5 +12,3 @@ class shemeBackendPage extends shemePage
 		$this -> addColumn('menu_group', DB_COLUMN_TYPE_INT) -> setAttribute(DB_COLUMN_ATTR_UNSIGNED)-> setDefault('0');
 	}
 }
-
-?>
