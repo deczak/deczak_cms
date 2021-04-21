@@ -226,7 +226,7 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 	$_pHTML			 = 	new CHTML();
 
 ##	V I E W 
-tk::dump($pageRequest);
+
 	$_pHTML -> openDocument($_pImperator -> m_page, $_pImperator, $pageRequest);
 
 ?>
