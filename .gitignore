@@ -1,7 +1,10 @@
-
 .htaccess
 archiv/
+backend/.*
+cert/*
 config/*
+cron/.*
+temp/*
 !config/directories.php
 data/htaccess/
 data/configuration.json
