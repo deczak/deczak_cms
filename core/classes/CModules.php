@@ -18,7 +18,7 @@ class	CModules extends CSingleton
 	private $m_pUserRights;
 
 	public function
-	initialize(CDatabaseConnection &$_dbConnection, CUserRights &$_pUserRights)
+	initialize(?CDatabaseConnection &$_dbConnection, CUserRights &$_pUserRights)
 	{
 		if($_dbConnection === null)
 			return; 

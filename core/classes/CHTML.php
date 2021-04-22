@@ -39,18 +39,21 @@ class	CHTML extends CBasic
 						$pageRequest -> crawler_follow 	= 0;
 						$pageRequest -> page_title		= '404 Not Found';
 						$pageRequest -> page_description= '';
+						$pageRequest -> canonical		= false;
 						break;
 			case 403:	header('HTTP/1.0 403 Forbidden'); 
 						$pageRequest -> crawler_index 	= 0;
 						$pageRequest -> crawler_follow 	= 0;
 						$pageRequest -> page_title		= '403 Forbidden';
 						$pageRequest -> page_description= '';
+						$pageRequest -> canonical		= false;
 						break;
 			case 920:	header('HTTP/1.0 403 Forbidden'); 
 						$pageRequest -> crawler_index 	= 0;
 						$pageRequest -> crawler_follow 	= 0;
 						$pageRequest -> page_title		= 'Database Error';
 						$pageRequest -> page_description= '';
+						$pageRequest -> canonical		= false;
 						break;
 		}
 			

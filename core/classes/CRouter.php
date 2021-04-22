@@ -23,6 +23,9 @@ class CRouter extends CSingleton
 	public function
 	createRoutes(CDatabaseConnection &$_dbConnection)
 	{
+		if($_dbConnection === null)
+			return false;
+			
 		$modelSitemap = new modelSitemap();
 		$modelSitemap -> load($_dbConnection);
 		$sitemap = &$modelSitemap -> getResult();

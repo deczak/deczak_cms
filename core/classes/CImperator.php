@@ -11,7 +11,7 @@ class	CImperator extends CBasic
 	private $m_pDirector;
 
 	public function
-	__construct(CDatabaseConnection &$_pDatabase)
+	__construct(?CDatabaseConnection &$_pDatabase)
 	{
 		parent::__construct();
 
@@ -22,7 +22,7 @@ class	CImperator extends CBasic
 
 
 	public function
-	logic(CDatabaseConnection &$_pDatabase, &$_pPageRequest, $_modules, array $_rcaTarget, bool $_isBackendMode, CUserRights &$_pUserRights)
+	logic(?CDatabaseConnection &$_pDatabase, &$_pPageRequest, $_modules, array $_rcaTarget, bool $_isBackendMode, CUserRights &$_pUserRights)
 	{
 		if($_isBackendMode)
 		{

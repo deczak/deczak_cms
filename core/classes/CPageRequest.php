@@ -22,7 +22,7 @@ class CPageRequest extends CSingleton
 	public	$responseCode;
 
 	public function
-	init(CDatabaseConnection &$_pDatabase, $_nodeId, $_language, $_version, $_xhRequest)
+	init(?CDatabaseConnection &$_pDatabase, $_nodeId, $_language, $_version, $_xhRequest)
 	{
 
 		// TODO refactor because of double source
