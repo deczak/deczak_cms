@@ -81,28 +81,6 @@
 	$pRouter  = CRouter::instance();
 	$pRouter -> initialize(CFG::GET() -> LANGUAGE, CLanguage::instance() -> getLanguages());
 
-##	Base Data
-
-	$db -> beginTransaction();
-
-	$seedDir = 'seeds';
-
-	$sqlDump = file_get_contents($seedDir.'/1-base.sql');
-
-	$sqlDump = str_replace('%TIMESTAMP%',time(), $sqlDump);
-
-	try
-	{
-		$db -> getConnection() -> exec($sqlDump);
-	}
-	catch (PDOException $exception)
-	{
-		$db -> rollBack();
-		tk::xhrResult(1, 'SQL error on query - '. $exception -> getMessage());
-	}
-
-	$db -> commit();
-
 ##	Insert Languages and base nodes
 
 	$language = [];
@@ -196,25 +174,6 @@
 	{
 		$errMessage = '';
 		$pModules -> install($db, $module -> location, $module -> type, $errMessage, false);
-	}
-
-##	Example Data
-
-	$sqlDump = file_get_contents($seedDir.'/2-example.sql');
-	if(!empty(trim($sqlDump)))
-	{
-		$db -> beginTransaction();
-		$sqlDump = str_replace('%TIMESTAMP%',time(), $sqlDump);
-		try
-		{
-			$db -> getConnection() -> exec($sqlDump);
-		}
-		catch (PDOException $exception)
-		{
-			$db -> rollBack();
-			tk::xhrResult(1, 'SQL error on query - '. $exception -> getMessage());
-		}
-		$db -> commit();
 	}
 
 ##	Add administrator base rights

@@ -228,4 +228,3 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 ##	V I E W 
 
 	$_pHTML -> openDocument($_pImperator -> m_page, $_pImperator, $pageRequest);
-
