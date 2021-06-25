@@ -52,7 +52,6 @@ class	CPackages
 
 }
 
-
 class	CPackagesInstall
 {
 	public function

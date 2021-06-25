@@ -160,5 +160,3 @@ class	CHTML extends CBasic
 		header("Expires: 0");			
 	}
 }
-
-?>

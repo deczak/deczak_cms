@@ -30,13 +30,6 @@
 	define('CMS_BACKEND_STARTBUTTON','<b>'. CMS_BACKEND_NAME .'</b>');
 	
 ##  C O N F I G   C L A S S
-
-class CONFIG_TEMPLATE extends CONFIG_BASE
-{
-	protected 	$DEFAULT_TEMPLATE		=	'default';
-	protected	$ERROR_TEMPLATE			= 	'default';
-}
-
 	
 class CONFIG_CRONJOB extends CONFIG_BASE
 {
@@ -108,7 +101,6 @@ class	CFG extends CSingleton
 	protected	$ENCRYPTION;
 	protected	$MYSQL;
 	protected	$LOGIN;
-	protected	$TEMPLATE;
 	protected	$CRONJOB;
 
 	##	configuration file
@@ -117,6 +109,7 @@ class	CFG extends CSingleton
 	protected	$BACKEND;
 	protected	$SESSION;
 	protected	$SYSTEM_MAILER;
+	protected	$TEMPLATE;
 
 	public function
 	initialize()
@@ -125,7 +118,6 @@ class	CFG extends CSingleton
 		$this -> ENCRYPTION	 	= new CONFIG_ENCRYPTION();
 		$this -> MYSQL 			= new CONFIG_MYSQL();
 		$this -> LOGIN 			= new CONFIG_LOGIN();
-		$this -> TEMPLATE 		= new CONFIG_TEMPLATE();
 		$this -> CRONJOB 		= new CONFIG_CRONJOB();
 	
 		$configuration = file_get_contents(CMS_SERVER_ROOT.DIR_DATA.'configuration.json');
@@ -136,6 +128,7 @@ class	CFG extends CSingleton
 		$this -> BACKEND		= $configuration -> BACKEND;
 		$this -> SESSION 		= $configuration -> SESSION;
 		$this -> SYSTEM_MAILER	= $configuration -> SYSTEM_MAILER;
+		$this -> TEMPLATE		= $configuration -> TEMPLATE;
 	}
 
 	public function

@@ -38,6 +38,9 @@
 							"SMIME_CERT_SIGN_FILE"	: "",
 							"SMIME_PRIVKEY_FILE"	: "",
 							"SMIME_PRIVKEY_PASS"	: ""
+						},
+	"TEMPLATE"		:	{
+							"DEFAULT_TEMPLATE"	: "default",
+							"ERROR_TEMPLATE"	: "default"
 						}
-
 }
