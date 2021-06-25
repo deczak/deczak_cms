@@ -117,8 +117,8 @@ class	CHTML extends CBasic
 						break;						
 		}
 
-
 		##	temporary solution for js only
+		
 		/*
 			Später durch Klasse ersetzen die in CModules die Pfade zu den Dateien erfasst und eine sammel js/css erstellt 
 		*/
