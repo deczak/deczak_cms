@@ -9,6 +9,7 @@
 	include '../core/classes/CSheme.php';
 	include '../core/classes/CModel.php';
 	include '../core/classes/CDatabase.php';
+	include '../core/classes/CPackages.php';
 	include '../core/classes/CMessages.php';
 
 	if(empty($_POST['database-server'])) 	tk::xhrResult(1, 'Database server address not set');	else $_POST['database-server'] 	 = trim(strip_tags($_POST['database-server']));
@@ -78,5 +79,41 @@
 			$pModel 	-> insert($db, $seed);
 		}
 	}
+
+	##	install default template
+
+		$procPath = 'page-templates/';
+
+		if(file_exists($procPath))
+		{ 
+			$dirIterator 	= new DirectoryIterator($procPath);
+			foreach($dirIterator as $dirItem)
+			{
+				if($dirItem -> isDot() || $dirItem -> getType() === 'dir')
+					continue;
+
+				$filename = $dirItem -> getFilename();
+
+				if($filename[0] === '.')
+					continue;
+
+
+				$pFInfo = new finfo(FILEINFO_MIME_TYPE); 
+
+				$fileMime = $pFInfo -> file($procPath . $filename);
+
+				if($fileMime !== 'application/zip')
+					continue;
+
+				$pPackages = new CPackages;
+				$pPackages -> install($pDBInstance -> getConnection(CFG::GET() -> MYSQL -> PRIMARY_DATABASE), $procPath . $filename);
+
+
+
+			}
+		}
+
+
+
 
 	tk::xhrResult(0, 'OK');

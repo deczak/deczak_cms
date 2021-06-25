@@ -824,7 +824,7 @@ class CModulesInstall
 											$logicResult, 
 											true
 											);
-$_POST = $tmpPost;
+				$_POST = $tmpPost;
 			}
 		}
 

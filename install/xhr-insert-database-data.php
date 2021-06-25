@@ -26,6 +26,8 @@
 	include_once '../core/models/modelUserGroups.php';
 	include_once '../core/models/modelLanguages.php';
 	include_once '../core/models/modelPage.php';
+	include_once '../core/models/modelLoginObjects.php';
+
 
 	if(empty($_POST['database-server'])) 	tk::xhrResult(1, 'Database server address not set');	else $_POST['database-server'] 	 = trim(strip_tags($_POST['database-server']));
 	if(empty($_POST['database-user'])) 		tk::xhrResult(1, 'Database user name not set');			else $_POST['database-user'] 	 = trim(strip_tags($_POST['database-user']));
@@ -273,6 +275,21 @@
 	$userRight['group_id'] 	= $userGroupId;
 	$modelUserGroups = new modelUserGroups;
 	$modelUserGroups -> insert($db, $userRight);
+
+##	Insert login object für backend
+
+	$loginObject = [];
+	$loginObject['object_id'] 			= 'ABKND';
+	$loginObject['object_databases'] 	= '["primary"]';
+	$loginObject['object_fields'] 		= '[{"name":"login_name","data_prc":"crypt","type":"text","is_username":"0","query_type":"compare","table":"tb_users_backend"},{"name":"login_pass","data_prc":"hash","type":"password","is_username":"1","query_type":"compare","table":"tb_users_backend"}]';
+	$loginObject['object_session_ext'] 	= '{"1":{"name":"user_name_last","data_prc":"crypt","table":"tb_users_backend","query_type":"compare"},"2":{"name":"language","data_prc":"text","table":"tb_users_backend","query_type":"compare"}}';
+	$loginObject['object_description'] 	= 'Backend Access';
+	$loginObject['is_disabled'] 		= 0;
+	$loginObject['is_protected'] 		= 1;
+	$loginObject['create_time'] 		= time();
+	$loginObject['create_by'] 			= 0;
+	$modelLoginObjects = new modelLoginObjects;
+	$modelLoginObjects -> insert($db, $loginObject);
 
 ##	fin
 

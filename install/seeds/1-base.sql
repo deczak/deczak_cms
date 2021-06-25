@@ -32,9 +32,10 @@ INSERT INTO `tb_page_path` (`page_id`, `page_language`, `page_path`, `node_lft`,
 
 INSERT INTO `tb_languages` (`data_id`, `lang_key`, `lang_name`, `lang_name_native`, `lang_hidden`, `lang_locked`, `lang_default`, `lang_frontend`, `lang_backend`, `create_time`, `create_by`, `update_time`, `update_by`) VALUES
 (1, 'en', 'English', 'English', 0, 0, 1, 1, 1, %TIMESTAMP%, 1, 0, 0);
-*/
+
 INSERT INTO `tb_login_objects` (`object_id`, `object_databases`, `object_fields`, `object_session_ext`, `object_description`, `is_disabled`, `is_protected`, `create_time`, `create_by`) VALUES
 ('ABKND', '["primary"]', '[{"name":"login_name","data_prc":"crypt","type":"text","is_username":"0","query_type":"compare","table":"tb_users_backend"},{"name":"login_pass","data_prc":"hash","type":"password","is_username":"1","query_type":"compare","table":"tb_users_backend"}]', '{"1":{"name":"user_name_last","data_prc":"crypt","table":"tb_users_backend","query_type":"compare"},"2":{"name":"language","data_prc":"text","table":"tb_users_backend","query_type":"compare"}}', 'Backend Access', 0, 1, %TIMESTAMP%, 1);
+*/
 /*
 INSERT INTO `tb_users_backend` (`data_id`, `login_name`, `login_pass`, `login_count`, `user_id`, `user_name_first`, `user_name_last`, `user_mail`, `time_login`, `create_time`, `update_time`, `cookie_id`, `recover_key`, `recover_timeout`, `is_locked`,`language`) VALUES
 (1, '%USER_NAME%', '%USER_PASSWORD%', 0, '1', '%USER_FIRST_NAME%', '%USER_LAST_NAME%', '%USER_MAIL%', 0, %TIMESTAMP%, 0, '{}', 0, 0, 0,'en');

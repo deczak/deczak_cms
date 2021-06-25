@@ -205,6 +205,27 @@ class	TK
 	{
     	return substr(str_shuffle(str_repeat($x='0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.:_-$&/?=!@+*#', ceil($length/strlen($x)) )), 1, $length);
 	}
+
+	public static function
+	rrmdir($dir)
+	{ 
+		if(is_dir($dir))
+		{
+			$objectList = scandir($dir);
+			foreach($objectList as $object)
+			{
+				if($object != "." && $object != "..")
+				{ 
+					if(is_dir($dir. DIRECTORY_SEPARATOR .$object) && !is_link($dir."/".$object))
+						tk::rrmdir($dir. DIRECTORY_SEPARATOR .$object);
+					else
+						unlink($dir. DIRECTORY_SEPARATOR .$object); 
+				}
+			}
+			rmdir($dir); 
+		} 
+	}
+
 }
 
 class	CRYPT

@@ -13,6 +13,6 @@ public/*
 !public/index.php
 templates/*
 !templates/backend
-!templates/default
 mantle/
 !mantle/modules/mod_blog
+install/page-templates/.*
