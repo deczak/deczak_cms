@@ -15,15 +15,21 @@
 							"footer.php"
 						  ],
 	"include_error_404"	: [
+							"header.php", 
 							"4XX.php", 
-							"404.php"
+							"404.php", 
+							"footer.php"
 						  ],
 	"include_error_403"	: [
+							"header.php", 
 							"4XX.php", 
-							"403.php"
+							"403.php", 
+							"footer.php"
 						  ],
 	"include_error_920"	: [
+							"header.php", 
 							"9XX.php", 
-							"920.php"
+							"920.php", 
+							"footer.php"
 						  ]
 }

@@ -38,24 +38,18 @@ createMenu(&$sitemap, $_pos = 1, $_level = 2 )
 
 ?>
 
-
-<div class="outer-wrapper">
-
 <header>
 
-	<div class="inner-wrapper">
-
-		<div id="page-headline">
-
-			<!--Project Name-->
-			
-		</div>
+	<div class="header-title inner-wrapper">
 
 		<div>
-			<?php createMenu($sitemap); ?>
+
+			Your Project Name
+
 		</div>
 
-		<div id="language-selection">
+		<div class="header-language">
+
 			<?php
 			foreach(CLanguage::instance() -> getLanguages() as $_lang)
 			{
@@ -83,32 +77,40 @@ createMenu(&$sitemap, $_pos = 1, $_level = 2 )
 				}
 			}
 			?>
+
 		</div>
 
 	</div>
 
-	<div class="inner-wrapper">
-		<div id="crumb-path">
-			<?php
-			foreach($pageRequest -> crumbsList as $crumb)
-			{
-				if($crumb -> level !== 1)
-					echo '<span class="crumb-delimeter">&rang;</span>';
+	<div class="header-menu-banner">
 
-				if($crumb -> nodeId != $pageRequest -> node_id)
-				{
-					if(CMS_BACKEND)
-						echo '<a href="'. CMS_SERVER_URL_BACKEND .'pages/view/'. $crumb -> language .'/'. $crumb -> nodeId .'" title="'. $crumb -> title .'">'. $crumb -> name  .'</a>';
-					else
-						echo '<a href="'. CMS_SERVER_URL . URL_LANG_PRREFIX . substr($crumb -> urlPart, 1) .'" title="'. $crumb -> page_title .'">'. $crumb -> name .'</a>';
-				}
+		<div class="inner-wrapper">
 
-				if($crumb -> nodeId === $pageRequest -> node_id)
-					echo '<span>'. $crumb -> name .'</span>';
-			}
-			?>
+			<?php createMenu($sitemap); ?>
+
 		</div>
 
+	</div>
+
+	<div class="header-crumbs inner-wrapper">
+		<?php
+		foreach($pageRequest -> crumbsList as $crumb)
+		{
+			if($crumb -> level !== 1)
+				echo '<span class="crumb-delimeter">&rang;</span>';
+
+			if($crumb -> nodeId != $pageRequest -> node_id)
+			{
+				if(CMS_BACKEND)
+					echo '<a href="'. CMS_SERVER_URL_BACKEND .'pages/view/'. $crumb -> language .'/'. $crumb -> nodeId .'" title="'. $crumb -> title .'">'. $crumb -> name  .'</a>';
+				else
+					echo '<a href="'. CMS_SERVER_URL . URL_LANG_PRREFIX . substr($crumb -> urlPart, 1) .'" title="'. $crumb -> page_title .'">'. $crumb -> name .'</a>';
+			}
+
+			if($crumb -> nodeId === $pageRequest -> node_id)
+				echo '<span>'. $crumb -> name .'</span>';
+		}
+		?>
 	</div>
 
 </header>
