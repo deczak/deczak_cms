@@ -48,6 +48,13 @@ class	controllerPages extends CController
 			return;
 		}
 
+		## false edit if module gets edited, probably this needs additional fixes
+
+		if($_isXHRequest !== false && $_isXHRequest !== 'update-site' && !empty($_GET['cms-edit-page-node']))
+		{
+			$_controllerAction = 'view';
+		}
+
 		##	Call sub-logic function by target, if there results are false, we make a fall back to default view
 
 		$enableEdit 	= $this -> existsUserRight('edit');
