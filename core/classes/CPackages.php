@@ -96,7 +96,12 @@ class	CPackagesInstall
 		{
 			case 'page-template':
 
-				$destLocation = CMS_SERVER_ROOT. DIR_TEMPLATES;
+				$destLocation 		= CMS_SERVER_ROOT . DIR_TEMPLATES;
+				$destLocationPublic = CMS_SERVER_ROOT . DIR_PUBLIC . DIR_TEMPLATES;
+
+				if(!is_dir($destLocationPublic) && !mkdir($destLocationPublic, 0777, true))
+					return false;
+
 				break;
 
 			default:
@@ -105,7 +110,7 @@ class	CPackagesInstall
 				return false;
 		}
 
-		## Check destination
+		## Check destination & package file
 
 		if(is_dir($destLocation . $packageInfo -> info -> dir))
 		{
@@ -180,10 +185,47 @@ class	CPackagesInstall
 				return false;
 			}
 
+
+			$copyDestination 	= $destLocation;
+			
+ 			$fileExtension 		= pathinfo(strtolower($packageInfo -> exec -> pull[$i][0]), PATHINFO_EXTENSION);
+
+
+
+			switch($packageInfo -> info -> type)
+			{
+				case 'page-template':
+
+					switch($fileExtension)
+					{
+						case 'mp4':
+						case 'jpg':
+						case 'jpeg':
+						case 'webp':
+						case 'png':
+						case 'gif':
+						case 'css':
+						case 'less':
+						case 'js':
+
+							$copyDestination = $destLocationPublic;
+							break;
+					}		
+
+					break;
+			}		
+
+
+ 			$fileLocation 	= pathinfo($copyDestination . $packageInfo -> exec -> pull[$i][1], PATHINFO_DIRNAME);
+
+			if(!tk::mkdirs($fileLocation, $copyDestination))
+				return false;
+
 			copy(
 				$_exractedDirPath . $packageInfo -> exec -> pull[$i][0], 
-				$destLocation . $packageInfo -> exec -> pull[$i][1]
+				$copyDestination . $packageInfo -> exec -> pull[$i][1]
 				);
+
 		}
 
 		return true;
