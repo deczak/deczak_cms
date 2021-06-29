@@ -221,7 +221,7 @@ class CPageRequest extends CSingleton
 					if($this -> sitemap[$i] -> level == $_level)
 					{
 
-					$this 	-> addCrumb($this -> sitemap[$i] -> page_name, $this -> sitemap[$i] -> page_path, $this -> sitemap[$i] -> node_id, $this -> sitemap[$i] -> page_language, $this -> sitemap[$i] -> level)
+					$this 	-> addCrumb((empty($this -> sitemap[$i] -> crumb_name) ? $this -> sitemap[$i] -> page_name : $this -> sitemap[$i] -> crumb_name), $this -> sitemap[$i] -> page_path, $this -> sitemap[$i] -> node_id, $this -> sitemap[$i] -> page_language, $this -> sitemap[$i] -> level)
 							-> setTitle($this -> sitemap[$i] -> page_title);
 
 					#$this -> m_page -> crumb_path[] = $this -> sitemap[$i];
@@ -307,7 +307,7 @@ class CPageRequest extends CSingleton
 			$modelBackendPageObject -> load($_pDatabase, $modelCondition);
 			$page -> objects = $modelBackendPageObject -> getResult();
 			
-			$this -> addCrumb($page -> page_name, $page -> page_path .'');
+			$this -> addCrumb((empty($page -> crumb_name) ? $page -> page_name : $page -> crumb_name), $page -> page_path .'');
 
 			$shemeBackendPageObject		= new shemeBackendPageObject();
 

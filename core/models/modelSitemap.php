@@ -68,6 +68,7 @@ class 	modelSitemap extends CModel
 																'ROUND ((o.node_rgt - o.node_lft - 1) / 2) AS offspring',
 																$this -> tbPageHeader .'.page_title',
 																$this -> tbPageHeader .'.page_name',
+																$this -> tbPageHeader .'.crumb_name',
 																$this -> tbPageHeader .'.page_version',
 																$this -> tbPage .'.create_time',
 																$this -> tbPage .'.update_time',

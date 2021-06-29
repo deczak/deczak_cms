@@ -14,6 +14,7 @@ class shemePageHeader extends CSheme
 		$this -> addColumn('page_language'	, DB_COLUMN_TYPE_STRING) -> setLength(5);
 		$this -> addColumn('page_title'		, DB_COLUMN_TYPE_STRING) -> setLength(100);
 		$this -> addColumn('page_name'		, DB_COLUMN_TYPE_STRING) -> setLength(100);
+		$this -> addColumn('crumb_name'		, DB_COLUMN_TYPE_STRING) -> setLength(100);
 		$this -> addColumn('page_description', DB_COLUMN_TYPE_STRING) -> setLength(160);
 		$this -> addColumn('page_version'	, DB_COLUMN_TYPE_MEDIUMINT) -> setAttribute(DB_COLUMN_ATTR_UNSIGNED);
 

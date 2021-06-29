@@ -59,6 +59,7 @@ class 	modelPage extends CModel
 											"$_tablePagePath.node_id", 
 											"$_tablePageHeader.page_title",
 											"$_tablePageHeader.page_name",
+											"$_tablePageHeader.crumb_name",
 											"$_tablePageHeader.page_description",
 											"$_tablePageHeader.page_language",
 											"$_tablePage.page_id",

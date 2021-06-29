@@ -25,6 +25,7 @@
 	BEPE_PANEL_LANGUAGE				=	Language
 
 	BEPE_PANEL_PAGENAME				=	Page name
+	BEPE_PANEL_CRUMBNAME			=	Crumb name
 	BEPE_PANEL_PAGETITLE			=	Page title
 	BEPE_PANEL_PAGEDESCRIPTION		=	Page description
 	BEPE_PANEL_BROWSERCACHING		=	Browser caching

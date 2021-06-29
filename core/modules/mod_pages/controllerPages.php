@@ -238,6 +238,7 @@ class	controllerPages extends CController
 										$_pFormVariables =	new CURLVariables();
 										$_request		 =	[];
 										$_request[] 	 = 	[	"input" => "page_name",  		"validate" => "strip_tags|!empty" ]; 	
+										$_request[] 	 = 	[	"input" => "crumb_name",  		"validate" => "strip_tags|!empty" ]; 	
 										$_request[] 	 = 	[	"input" => "page_title",   		"validate" => "strip_tags|!empty" ]; 	
 										$_request[] 	 = 	[	"input" => "page_description",  "validate" => "strip_tags|!empty" ]; 	
 										$_request[] 	 = 	[	"input" => "page_template", 	"validate" => "strip_tags|!empty" ]; 	

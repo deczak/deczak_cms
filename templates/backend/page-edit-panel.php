@@ -81,6 +81,13 @@
 
 					<div class="result-box" data-field="page_description" data-error=""></div>
 
+					<div class="input width-100">
+						<label><?= CLanguage::GET() -> STRING('BEPE_PANEL_CRUMBNAME'); ?></label>
+						<input type="text" name="crumb_name" value="<?php echo $pageRequest -> crumb_name; ?>">
+					</div>
+
+					<div class="result-box" data-field="crumb_name" data-error=""></div>
+
 				</div>
 			</fieldset>		
 
@@ -478,4 +485,3 @@
 	</div>
 
 </div>	
-

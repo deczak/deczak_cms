@@ -36,6 +36,7 @@ class shemePage extends CSheme
 		$this -> addColumn('page_path', DB_COLUMN_TYPE_STRING) -> setVirtual();
 		$this -> addColumn('page_title', DB_COLUMN_TYPE_STRING) -> setVirtual();
 		$this -> addColumn('page_name', DB_COLUMN_TYPE_STRING) -> setVirtual();
+		$this -> addColumn('crumb_name', DB_COLUMN_TYPE_STRING) -> setVirtual();
 		$this -> addColumn('page_language', DB_COLUMN_TYPE_STRING) -> setVirtual();
 		$this -> addColumn('page_description', DB_COLUMN_TYPE_STRING) -> setVirtual();
 		$this -> addColumn('alternate_path', 0) -> setVirtual();
