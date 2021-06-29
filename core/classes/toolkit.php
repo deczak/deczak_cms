@@ -225,31 +225,6 @@ class	TK
 			rmdir($dir); 
 		} 
 	}
-
-	public static function
-	mkdirs($dirpath, $dirbase)
-	{
-		$dirpath = str_replace('\\', '/', $dirpath);
-		$dirpath = explode('/', $dirpath);
-		$dirpath = array_filter($dirpath, 'strlen');
-
-		$path = '';
-
-		foreach($dirpath as $segment)
-		{
-
-			$path .= $segment .'/';
-
-			if(!is_dir($dirbase . $path))
-			{
-				if(!mkdir($dirpath, 0777, true))
-				{
-					return false;
-				}
-			}
-		}
-		return true;
-	}
 }
 
 class	CRYPT

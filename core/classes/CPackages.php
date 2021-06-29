@@ -99,8 +99,9 @@ class	CPackagesInstall
 				$destLocation 		= CMS_SERVER_ROOT . DIR_TEMPLATES;
 				$destLocationPublic = CMS_SERVER_ROOT . DIR_PUBLIC . DIR_TEMPLATES;
 
-				if(!is_dir($destLocationPublic) && !mkdir($destLocationPublic, 0777, true))
-					return false;
+				if(!is_dir($destLocationPublic))
+					if(!mkdir($destLocationPublic, 0777, true))
+						return false;
 
 				break;
 
@@ -109,7 +110,7 @@ class	CPackagesInstall
 				// error
 				return false;
 		}
-
+		
 		## Check destination & package file
 
 		if(is_dir($destLocation . $packageInfo -> info -> dir))
@@ -216,10 +217,11 @@ class	CPackagesInstall
 			}		
 
 
- 			$fileLocation 	= pathinfo($copyDestination . $packageInfo -> exec -> pull[$i][1], PATHINFO_DIRNAME);
+ 			$fileLocation 	= pathinfo($packageInfo -> exec -> pull[$i][1], PATHINFO_DIRNAME);
 
-			if(!tk::mkdirs($fileLocation, $copyDestination))
-				return false;
+			if(!is_dir($copyDestination . $fileLocation))
+				if(!mkdir($copyDestination . $fileLocation, 0777, true))
+					return false;
 
 			copy(
 				$_exractedDirPath . $packageInfo -> exec -> pull[$i][0], 

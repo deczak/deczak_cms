@@ -9,7 +9,7 @@
 	body { font-size:16px; padding:0px; margin:0px; font-family:'Open Sans',sans-serif; -moz-text-size-adjust:none; -webkit-text-size-adjust:none; -ms-text-size-adjust:none; text-size-adjust:none; scroll-behavior:smooth; background:rgb(245,245,245); color:rgb(50,50,50); overflow-y:scroll; }
 	html {  padding:0px; margin:0px; }
 
-	p { margin:20px 0px; }
+	p { margin:20px 0px; hyphens: auto; }
 	
 	h1 { font-weight:300; font-size:30px; margin:20px 0px;}
 	h2 { font-weight:300; font-size:26px; }
@@ -120,7 +120,7 @@
 /**	Footer
 */
 
-	footer { background: rgb(200,200,200); height:100px; background: rgb(64, 64, 64); color:white; }
+	footer { height:100px; background: rgb(64, 64, 64); color:white; }
 	footer > div { display:flex; justify-content:space-between; align-items:center; font-size:0.8em; height:100%; }
 	footer a { color:white; }
 
