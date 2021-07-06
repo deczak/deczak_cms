@@ -15,7 +15,38 @@ class	CHTML extends CBasic
 			$this -> disableCaching();
 		
 		header("Permissions-Policy: interest-cohort=()");	
-
+		
+		switch($pageRequest -> responseCode)
+		{
+			case 404:	header("HTTP/1.0 404 Not Found");
+						$pageRequest -> crawler_index 	= 0;
+						$pageRequest -> crawler_follow 	= 0;
+						$pageRequest -> page_title		= '404 Page not Found';
+						$pageRequest -> page_name		= 'Page not Found';
+						$pageRequest -> page_description= '';
+						$pageRequest -> canonical		= false;
+						$pageRequest -> page_template = CFG::GET() -> TEMPLATE -> ERROR_TEMPLATE;
+						break;
+			case 403:	header('HTTP/1.0 403 Forbidden'); 
+						$pageRequest -> crawler_index 	= 0;
+						$pageRequest -> crawler_follow 	= 0;
+						$pageRequest -> page_title		= '403 Forbidden';
+						$pageRequest -> page_name		= 'Forbidden';
+						$pageRequest -> page_description= '';
+						$pageRequest -> canonical		= false;
+						$pageRequest -> page_template = CFG::GET() -> TEMPLATE -> ERROR_TEMPLATE;
+						break;
+			case 920:	header('HTTP/1.0 403 Forbidden'); 
+						$pageRequest -> crawler_index 	= 0;
+						$pageRequest -> crawler_follow 	= 0;
+						$pageRequest -> page_title		= 'Database Error';
+						$pageRequest -> page_name		= 'Database Error';
+						$pageRequest -> page_description= '';
+						$pageRequest -> canonical		= false;
+						$pageRequest -> page_template = CFG::GET() -> TEMPLATE -> ERROR_TEMPLATE;
+						break;
+		}
+		
 		$pTemplate 		=	new CTemplates(CMS_SERVER_ROOT . DIR_TEMPLATES);
 
 		if(!isset($pageRequest -> page_template) || $pageRequest -> page_template == NULL)
@@ -31,31 +62,6 @@ class	CHTML extends CBasic
 		$modules		= 	CModules::instance();
 
 		$sitemap		=	$pageRequest -> sitemap;
-
-		switch($pageRequest -> responseCode)
-		{
-			case 404:	header("HTTP/1.0 404 Not Found");
-						$pageRequest -> crawler_index 	= 0;
-						$pageRequest -> crawler_follow 	= 0;
-						$pageRequest -> page_title		= '404 Not Found';
-						$pageRequest -> page_description= '';
-						$pageRequest -> canonical		= false;
-						break;
-			case 403:	header('HTTP/1.0 403 Forbidden'); 
-						$pageRequest -> crawler_index 	= 0;
-						$pageRequest -> crawler_follow 	= 0;
-						$pageRequest -> page_title		= '403 Forbidden';
-						$pageRequest -> page_description= '';
-						$pageRequest -> canonical		= false;
-						break;
-			case 920:	header('HTTP/1.0 403 Forbidden'); 
-						$pageRequest -> crawler_index 	= 0;
-						$pageRequest -> crawler_follow 	= 0;
-						$pageRequest -> page_title		= 'Database Error';
-						$pageRequest -> page_description= '';
-						$pageRequest -> canonical		= false;
-						break;
-		}
 			
 		echo "<!DOCTYPE html>\r\n";
 		echo "<html lang=\"". $pageRequest -> page_language ."\">\r\n";

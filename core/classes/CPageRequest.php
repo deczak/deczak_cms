@@ -19,7 +19,7 @@ class CPageRequest extends CSingleton
 	public	$objectsList;	
 	public	$crumbsList;
 
-	public	$responseCode;
+	public	$responseCode = 200;
 
 	public function
 	init(?CDatabaseConnection &$_pDatabase, $_nodeId, $_language, $_version, $_xhRequest)

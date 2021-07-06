@@ -95,21 +95,24 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 
 	if(CMS_URL_BASE !== false)
 		$_SERVER['REQUEST_URI'] = str_replace('/'. CMS_URL_BASE, '', $_SERVER['REQUEST_URI']);
-	
-	$pRouteRequest = $pRouter -> route($_SERVER['REQUEST_URI']);
-
-	if($pRouteRequest === false)
+		
+	if(CPageRequest::instance() -> getResponseCode() === 200)
 	{
-		$pRouter -> createRoutes($pDBInstance -> getConnection(CFG::GET() -> MYSQL -> PRIMARY_DATABASE));
-		header("Location: ". $_SERVER['REQUEST_URI']); 	
-		exit;
+		$pRouteRequest = $pRouter -> route($_SERVER['REQUEST_URI']);
+
+		if($pRouteRequest === false)
+		{
+			$pRouter -> createRoutes($pDBInstance -> getConnection(CFG::GET() -> MYSQL -> PRIMARY_DATABASE));
+			header("Location: ". $_SERVER['REQUEST_URI']); 	
+			exit;
+		}
+
+		$_GET['cms-node'] = $pRouteRequest -> nodeId;
+		$_GET['cms-lang'] = $pRouteRequest -> language;
+
+		if($pRouteRequest -> responseCode != 200)
+			$_GET['cms-error'] = $pRouteRequest -> responseCode;
 	}
-
-	$_GET['cms-node'] = $pRouteRequest -> nodeId;
-	$_GET['cms-lang'] = $pRouteRequest -> language;
-
-	if($pRouteRequest -> responseCode != 200)
-		$_GET['cms-error'] = $pRouteRequest -> responseCode;
 	
 ##	C O O K I E   M A N A G E R
 
