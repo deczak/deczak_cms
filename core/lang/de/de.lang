@@ -71,6 +71,8 @@
 	November			= November
 	December			= Dezember
 
+	POSTS_NOT_FOUND		= Es wurden keine Beiträge gefunden
+
 ##	Messages
 
 	WAIT_FOR_REDIRECT	=	bitte warten für Weiterleitung

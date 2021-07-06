@@ -305,7 +305,7 @@ class	controllerBlog extends CController
 			$nodeList = &$modelSitemap -> getResult();
 		
 			$this -> appendAdditionNodeData($_pDatabase, $nodeList);
-
+		}
 		
 			##
 
@@ -352,7 +352,7 @@ class	controllerBlog extends CController
 				$createTime[$key] = $node -> create_time;
 
 			array_multisort($createTime, SORT_DESC, $nodeList);
-		}
+		
 
 		return $nodeList;
 	}
