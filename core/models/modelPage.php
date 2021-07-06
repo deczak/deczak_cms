@@ -87,6 +87,9 @@ class 	modelPage extends CModel
 
 		$queryResult = $dbQuery -> exec($_execFlags);
 
+		if($queryResult === false)
+			return false;
+
 		$modelSitemap = new modelSitemap;
 
 		foreach($queryResult as $page)
@@ -201,6 +204,9 @@ class 	modelPage extends CModel
 		}
 
 		$_tablePage				=	$this -> m_shemePage 		-> getTableName();
+
+		if(empty($nodeIdList))
+			return true;
 
 		$condition	 = new CModelCondition();
 		$condition	-> whereIn("$_tablePage.node_id", implode(',', $nodeIdList));
