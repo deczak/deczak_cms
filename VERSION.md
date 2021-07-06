@@ -11,6 +11,12 @@ The version number is the release date. A letter as suffix indicates fixes on sa
 
 ## Version history	 
 
+### 20210706
+
+**Changes**
+- Various changes and fixes
+- Removed page template from git, installer installs a default template
+
 ### 20210421
 
 **Changes**
