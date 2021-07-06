@@ -55,7 +55,7 @@
 <template id="template-table-row-page">
 	
 	<td class="batch-selection-item"><input type="checkbox" class="trigger-batch-item-checkbox" name="group-id[]" value="%NODE_ID%" id="item-%NODE_ID%"><label for="item-%NODE_ID%"></label></td>
-	<td class="center node-id"><span style="font-family:icons-solid;">%NODE_ID%</span></td>
+	<td class="center node-id">%NODE_ID%</td>
 	<td class=""><span style="display:inline-block; width:%SPACER%px;"></span>%PAGE_NAME%</td>
 	<td class="">%PAGE_PATH%</td>
 	<td class="time-create">%CREATE_TIME%</td>
