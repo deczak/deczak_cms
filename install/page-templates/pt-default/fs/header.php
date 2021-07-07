@@ -44,7 +44,7 @@ createMenu(&$sitemap, $_pos = 1, $_level = 2 )
 
 		<div>
 
-			Your Project Name
+			This is the header area
 
 		</div>
 

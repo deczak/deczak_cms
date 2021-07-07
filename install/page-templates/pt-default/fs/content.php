@@ -1,9 +1,10 @@
+<div class="content-outer">
+	<div class="content inner-wrapper">
 
-<div class="content inner-wrapper">
+		<?php	
+		$messages -> printMessages();
+		$imperator -> view(); 
+		?>
 
-	<?php	
-	$messages -> printMessages();
-	$imperator -> view(); 
-	?>
-
+	</div>
 </div>

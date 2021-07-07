@@ -1,3 +1,13 @@
-Error 920 (SQL Connection Error)
+<div class="content-outer content-error">
+	<div class="content">
 
-<br><br>This is the 920 error file. The Header file is 9XX
+		<div>
+			<span class="error-code"><?= $pageRequest -> responseCode; ?></span>
+		</div>
+
+		<div>
+			<span class="error-name"><?= $pageRequest -> page_name; ?></span>
+		</div>
+
+	</div>
+</div>

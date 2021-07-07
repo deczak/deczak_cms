@@ -1,7 +1,13 @@
-<div class="content inner-wrapper">
+<div class="content-outer content-error">
+	<div class="content">
 
-	Error 404
+		<div>
+			<span class="error-code"><?= $pageRequest -> responseCode; ?></span>
+		</div>
 
-	<br><br>This is the 404 custom error file. The Header file is 4XX
-	
+		<div>
+			<span class="error-name"><?= $pageRequest -> page_name; ?></span>
+		</div>
+
+	</div>
 </div>
