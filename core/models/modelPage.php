@@ -75,6 +75,7 @@ class 	modelPage extends CModel
 											"$_tablePage.hidden_state",
 											"$_tablePage.crawler_index",
 											"$_tablePage.crawler_follow",
+											"$_tablePage.menu_follow",
 											"$_tablePage.page_auth"
 											);
 
