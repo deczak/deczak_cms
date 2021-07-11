@@ -16,3 +16,5 @@ templates/*
 mantle/
 !mantle/modules/mod_blog
 install/page-templates/.*
+data/modules/simpleNavigation
+!data/modules/simpleNavigation/list
