@@ -3,6 +3,7 @@ archiv/
 backend/.*
 cert/*
 config/*
+log/*
 cron/.*
 temp/*
 !config/directories.php
