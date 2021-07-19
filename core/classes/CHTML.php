@@ -1,11 +1,10 @@
 <?php
 
-class	CHTML extends CBasic
+class	CHTML
 {
 	public function
 	__construct()
 	{
-		parent::__construct();
 	}
 
 	public function

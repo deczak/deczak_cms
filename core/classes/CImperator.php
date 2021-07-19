@@ -1,8 +1,7 @@
 <?php
 
-require_once 'CBasic.php';
 
-class	CImperator extends CBasic
+class	CImperator 
 {
 	private	$m_dbConnection;
 
@@ -13,7 +12,6 @@ class	CImperator extends CBasic
 	public function
 	__construct(?CDatabaseConnection &$_pDatabase)
 	{
-		parent::__construct();
 
 		$this -> m_dbConnection 	= &$_pDatabase;
 

@@ -1,13 +1,13 @@
 <?php
 
-include_once	'CBasic.php';
-
-class	CURLVariables extends CBasic
+class	CURLVariables
 {
+	public	$m_aStorage;
+
 	public function
 	__construct()
 	{
-		parent::__construct();
+		$this -> m_aStorage		= [];
 	}
 
 	public function
