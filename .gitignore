@@ -15,7 +15,7 @@ public/*
 templates/*
 !templates/backend
 mantle/
-!mantle/modules/mod_blog
+!mantle/modules/mod_blog/.*
 install/page-templates/.*
 data/modules/simpleNavigation
 !data/modules/simpleNavigation/list
