@@ -12,7 +12,7 @@ class	controllerBlog extends CController
 	__construct($_module, &$_object)
 	{
 		parent::__construct($_module, $_object);
-		$this -> m_aModule -> user_rights[] = 'view';	// add view right as default for everyone
+		$this -> moduleInfo -> user_rights[] = 'view';	// add view right as default for everyone
 	}
 	
 	public function
@@ -64,13 +64,13 @@ class	controllerBlog extends CController
 	private function
 	logicView(CDatabaseConnection &$_pDatabase, $_isXHRequest, &$_logicResult)
 	{
-		$nodeList = $this -> getNodesList($_pDatabase, $this -> m_aObject -> node_id);
+		$nodeList = $this -> getNodesList($_pDatabase, $this -> objectInfo -> node_id);
 
 		$this -> setView(	
 						'view',	
 						'',
 						[
-							'object' 	=> $this -> m_aObject,
+							'object' 	=> $this -> objectInfo,
 							'nodeList'	=> $nodeList
 						]
 						);
@@ -147,7 +147,7 @@ class	controllerBlog extends CController
 
  
 		$sitemapCondition = new CModelCondition();
-		$sitemapCondition -> where('node_id', $this -> m_aObject -> node_id);
+		$sitemapCondition -> where('node_id', $this -> objectInfo -> node_id);
 
 		$modelSitemap = new modelSitemap();
 		$modelSitemap -> load($_pDatabase, $sitemapCondition);
@@ -162,7 +162,7 @@ class	controllerBlog extends CController
 						'edit',	
 						'',
 						[
-							'object' 	=> $this -> m_aObject,
+							'object' 	=> $this -> objectInfo,
 							'sitemap'	=> $modelSitemap -> getResult()
 						]
 						);
@@ -182,7 +182,7 @@ class	controllerBlog extends CController
 			$_bValidationMsg =	'';
 			$_bValidationDta = 	[];
 
-			$_dataset['object_id'] 	= $this -> m_aObject -> object_id;
+			$_dataset['object_id'] 	= $this -> objectInfo -> object_id;
 			$_dataset['body'] 		= '';
 			$_dataset['params'] 	= '';
 		
@@ -195,7 +195,7 @@ class	controllerBlog extends CController
 			else
 			{
 				$sitemapCondition = new CModelCondition();
-				$sitemapCondition -> where('node_id', $this -> m_aObject -> node_id);
+				$sitemapCondition -> where('node_id', $this -> objectInfo -> node_id);
 
 				$modelSitemap = new modelSitemap();
 				$modelSitemap -> load($_pDatabase, $sitemapCondition);
@@ -213,7 +213,7 @@ class	controllerBlog extends CController
 								'edit',	
 								'',
 								[
-									'object' 	=> $this -> m_aObject,
+									'object' 	=> $this -> objectInfo,
 									'sitemap'	=> $modelSitemap -> getResult()
 								]
 								);
