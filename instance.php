@@ -7,11 +7,10 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 	require_once    'config/directories.php';
 	require_once    'config/standard.php';
 
-##	B E N C H M A R K ( possible outdated )
+##	B E N C H M A R K ( not in use )
 
-	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CBenchmark.php';
-	CBenchmark::instance() -> initialize(CMS_BENCHMARK);
-	CBenchmark::instance() -> measurementPoint('processing include');	
+	#require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CBenchmark.php';
+	#CBenchmark::instance() -> initialize(CMS_BENCHMARK);	
 
 ##	P H P   E R R O R   R E P O R T I N G
 
@@ -49,8 +48,6 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CPageRequest.php';
 	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CUserRights.php';
 	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CNodesSearch.php';
-
-	CBenchmark::instance() -> measurementPoint('initialize and execute system classes');	
 
 ##	M E S S A G E   S Y S T E M
 
@@ -195,14 +192,10 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 
 ##	M O D U L E S   L O A D E R	
 
-	CBenchmark::instance() -> measurementPoint('module loader');	
-
 	$_pModules		 =	CModules::instance();
 	$_pModules		->	initialize($pDBInstance -> getConnection(CFG::GET() -> MYSQL -> PRIMARY_DATABASE), $pUserRights);
 
 ##	I M P E R A T O R
-
-	CBenchmark::instance() -> measurementPoint('call imperator');	
 
 	$pageRequest 	 = 	CPageRequest::instance();
 	$pageRequest 	-> 	init(
@@ -219,11 +212,9 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 	define('URL_LANG_PRREFIX', ((CFG::GET() -> LANGUAGE -> DEFAULT_IN_URL || $pageRequest -> page_language !== CLanguage::instance() -> getDefault()) ? $pageRequest -> page_language .'/' : '') );
 
 	$_pImperator	 =	new CImperator( $pDBInstance -> getConnection(CFG::GET() -> MYSQL -> PRIMARY_DATABASE) );
-	$_pImperator	->	logic($pDBInstance -> getConnection(CFG::GET() -> MYSQL -> PRIMARY_DATABASE), $pageRequest , $_pModules, $_rcaTarget, CMS_BACKEND, $pUserRights);
+	$_pImperator	->	logic($pageRequest , $_pModules, $_rcaTarget, CMS_BACKEND, $pUserRights);
 
 ##	H T M L   D O C U M E N T
-
-	CBenchmark::instance() -> measurementPoint('create html document');	
 
 	$_pHTML			 = 	new CHTML();
 

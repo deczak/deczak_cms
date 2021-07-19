@@ -1,44 +1,53 @@
 <?php
 
-
 class	CImperator 
 {
-	private	$m_dbConnection;
-
-	private $m_pUserRights;
-
-	private $m_pDirector;
+	private	$pDatabase;
+	private $pUserRights;
+	private $pDirector;
 
 	public function
 	__construct(?CDatabaseConnection &$_pDatabase)
 	{
-
-		$this -> m_dbConnection 	= &$_pDatabase;
-
-		$this -> m_pDirector		= new CDirector;
+		$this -> pDatabase	= &$_pDatabase;
+		$this -> pDirector	= new CDirector;
 	}
 
 
+
+
+
+
+
+
+
+
+
+
+	##	code below this point is for refactoring/revision
+
+
+
+
 	public function
-	logic(?CDatabaseConnection &$_pDatabase, &$_pPageRequest, $_modules, array $_rcaTarget, bool $_isBackendMode, CUserRights &$_pUserRights)
+	logic(&$_pPageRequest, $_modules, array $_rcaTarget, bool $_isBackendMode, CUserRights &$_pUserRights) : void
 	{
 		if($_isBackendMode)
 		{
 			if(!$this -> logic_backend($_pPageRequest, $_modules, $_rcaTarget))
 			{
-
 				if(!$_pPageRequest -> isEditMode)
 					return;		
 
 				$pageRequest = CPageRequest::instance();
 
-				$_pPageRequest -> init($_pDatabase, $_pPageRequest -> node_id, $_pPageRequest -> page_language, $_pPageRequest -> page_version, $_pPageRequest -> xhRequest);
+				$_pPageRequest -> init($this -> pDatabase, $_pPageRequest -> node_id, $_pPageRequest -> page_language, $_pPageRequest -> page_version, $_pPageRequest -> xhRequest);
 
 				$_pPageRequest -> enablePageEdit = ((!empty($pageRequest -> languageInfo) && !$pageRequest -> languageInfo -> lang_locked) ? $_pPageRequest -> enablePageEdit : false);
 				
 				$_pUserRights -> disableEditRights(!$_pPageRequest -> enablePageEdit);
 
-				$this -> m_pUserRights = $_pUserRights;
+				$this -> pUserRights = $_pUserRights;
 			}
 		}		
 
@@ -66,7 +75,7 @@ class	CImperator
 
 			$_pPageRequest -> objectsList[$_objectIndex] -> instance	 = 	new $module -> module_controller($module, $_object);
 			$_pPageRequest -> objectsList[$_objectIndex] -> instance	->	logic(
-																				$this -> m_dbConnection, 
+																				$this -> pDatabase, 
 																				$_rcaTarget,
 																				$_pPageRequest -> xhRequest, 
 																				$_logicResult, 
@@ -143,7 +152,7 @@ class	CImperator
 			
 
 					$_objectModel  = new modelPageObject();
-					$_initObj['object_id'] = $_objectModel -> insert($this -> m_dbConnection, $_initObj);
+					$_initObj['object_id'] = $_objectModel -> insert($this -> pDatabase, $_initObj);
 					//$objectData	   = $_objectModel -> getResult();
 					//$objectData	   = current($objectData);
 					// = $objectId;
@@ -159,7 +168,7 @@ class	CImperator
 					$_logicResult 	  = [];
 					$_objectInstance  = new $module -> module_controller($module, $objectData);
 					$_objectInstance -> logic(
-												$this -> m_dbConnection, 
+												$this -> pDatabase, 
 												[ $objectData -> object_id => 'create' ],
 												$_pPageRequest -> xhRequest, 
 												$_logicResult, 
@@ -195,7 +204,7 @@ class	CImperator
 					$modelCondition -> where('node_id', $_pageNodeID);
 					$modelCondition -> where('object_id', $_objectID);
 					
-					$_objectModel -> update($this -> m_dbConnection, $_updateSet, $modelCondition);					
+					$_objectModel -> update($this -> pDatabase, $_updateSet, $modelCondition);					
 				}
 
 				tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $_bValidationDta);	// contains exit call
@@ -222,7 +231,7 @@ class	CImperator
 			$_logicResult =	false;
 			$_pPageRequest -> objectsList[$_objectKey] -> instance 	 = 	new $module -> module_controller($module, $_object, true);
 			$_pPageRequest -> objectsList[$_objectKey] -> instance	->	logic(
-				$this -> m_dbConnection, 
+				$this -> pDatabase, 
 				$_rcaTarget, 
 				($xhrInfo !== null ? $xhrInfo : $_pPageRequest -> xhRequest),  //  remove $_pPageRequest -> xhRequest if all controllers are changes
 				$_logicResult, 
@@ -255,9 +264,7 @@ class	CImperator
 	public function
 	view(string $_viewId = '')
 	{
-		$_viewId = $this -> m_pDirector -> register($_viewId);
-		$this -> m_pDirector -> view($_viewId, $this -> pageRequest, $this -> m_pUserRights);
+		$_viewId = $this -> pDirector -> register($_viewId);
+		$this -> pDirector -> view($_viewId, $this -> pageRequest, $this -> pUserRights);
 	}
 }
-
-?>
