@@ -16,7 +16,7 @@ class	controllerLoginForm extends CController
 			$this -> m_modelSimple = new modelSimple();
 
 
-		$this -> m_aModule -> user_rights[] = 'view';			// add view right as default for everyone
+		$this -> moduleInfo -> user_rights[] = 'view';			// add view right as default for everyone
 	}
 	
 	public function
@@ -71,18 +71,18 @@ class	controllerLoginForm extends CController
 	public function
 	logicView(CDatabaseConnection &$_pDatabase, $_isXHRequest, &$_logicResult)
 	{
-		if(empty($this -> m_aObject -> params))
+		if(empty($this -> objectInfo -> params))
 		{
 			$modelCondition = new CModelCondition();
-			$modelCondition -> where('object_id', $this -> m_aObject -> object_id);
+			$modelCondition -> where('object_id', $this -> objectInfo -> object_id);
 
 			$this -> m_modelSimple -> load($_pDatabase, $modelCondition);
 
 
 			$this -> m_modelSimple -> getResult()[0] -> params = json_decode($this -> m_modelSimple -> getResult()[0] -> params);
 
-			$this -> m_aObject -> params = $this -> m_modelSimple -> getResult()[0] -> params;
-			$this -> m_aObject -> body = $this -> m_modelSimple -> getResult()[0] -> body;
+			$this -> objectInfo -> params = $this -> m_modelSimple -> getResult()[0] -> params;
+			$this -> objectInfo -> body = $this -> m_modelSimple -> getResult()[0] -> body;
 
 			if(CSession::instance() -> isAuthed($this -> m_modelSimple -> getResult()[0] -> params -> object_id) !== false)
 			{
@@ -112,8 +112,8 @@ class	controllerLoginForm extends CController
 			// set data as property
 
 			$object = new stdClass;
-			$object -> params		= json_decode($this -> m_aObject -> params);
-			$object -> object_id	= $this -> m_aObject -> object_id;
+			$object -> params		= json_decode($this -> objectInfo -> params);
+			$object -> object_id	= $this -> objectInfo -> object_id;
 
 			// authed check
 			if(CSession::instance() -> isAuthed($object -> params -> object_id) !== false)
@@ -154,7 +154,7 @@ class	controllerLoginForm extends CController
 			$_bValidationMsg =	'';
 			$_bValidationDta = 	[];
 
-			$_dataset['object_id'] 	= $this -> m_aObject -> object_id;
+			$_dataset['object_id'] 	= $this -> objectInfo -> object_id;
 			$_dataset['body'] 		= '';
 
 			$_dataset['params']['object_id'] 	= '';
@@ -278,7 +278,7 @@ class	controllerLoginForm extends CController
 		}	
 
 		$modelCondition = new CModelCondition();
-		$modelCondition -> where('object_id', $this -> m_aObject -> object_id);
+		$modelCondition -> where('object_id', $this -> objectInfo -> object_id);
 
 		$this -> m_modelSimple -> load($_pDatabase, $modelCondition);
 
@@ -362,7 +362,7 @@ class	controllerLoginForm extends CController
 	logicSuccess(CDatabaseConnection &$_pDatabase)
 	{
 	
-		$_redirectTarget = (empty($this -> m_aObject -> body) ? $_SERVER['REQUEST_URI'] : CMS_SERVER_URL . $this -> m_aObject -> body );
+		$_redirectTarget = (empty($this -> objectInfo -> body) ? $_SERVER['REQUEST_URI'] : CMS_SERVER_URL . $this -> objectInfo -> body );
 
 		header("Location: ". $_redirectTarget ); 
 		exit;

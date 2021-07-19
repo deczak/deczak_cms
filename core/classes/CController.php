@@ -2,36 +2,100 @@
 
 class	CController
 {
-	protected	$m_aModule;
-	protected	$m_aObject;
-	protected 	$m_bBackendCall;
-	protected	$m_bInstallMode;
+	protected	$moduleInfo;
+	protected	$objectInfo;
+	protected 	$isBackendCall;
+	protected	$isInstallMode;
+
+	/**
+	 * 	Constructor
+	 * 
+	 * 	@param object $_module A stdClass-object with info about this module
+	 * 	@param object $_object A stdClass-object with info about this object
+	 * 	@param bool $_backendCall Boolean flag if this instance is called by the backend logic
+	 */
+	public function
+	__construct(object $_moduleInfo, object &$_objectInfo, bool $_isBackendCall = false)
+	{
+		$this -> moduleInfo		= $_moduleInfo;
+		$this -> objectInfo		= $_objectInfo;	
+		$this -> isBackendCall 	= $_isBackendCall;
+		$this -> isInstallMode  = false;
+	}	
+
+	/**
+	 * 	Return the requested action-name
+	 * 
+	 * 	@return string the requested action in ctl_target in module.json
+	 */
+	protected function
+	getControllerAction(array $_rcaTarget, string $_defaultAction = 'view') : string
+	{
+		if(!isset($_rcaTarget[$this -> objectInfo -> object_id])) return $_defaultAction;
+		return $_rcaTarget[$this -> objectInfo -> object_id];
+	}
+
+	/**
+	 * 	Get a list of sub-sections in this module for a sub-menu
+	 * 
+	 * 	@return array An array of sections. If no sections exists, the array is empty.
+	 */
+	public function
+	getSubSection() : array
+	{
+		$sectionInfo = [];
+
+		if(empty($this -> moduleInfo -> sections))
+			return $sectionInfo;	
+
+		usort($this -> moduleInfo -> sections, function($a, $b) { return $a -> menu_order <=> $b -> menu_order; });
+
+		if(!isset($this -> moduleInfo -> sections)) return $sectionInfo;
+		foreach($this -> moduleInfo -> sections as $sub)
+		{
+			if(empty($sub -> url_name) || empty($sub -> menu_name))
+				continue;
+
+			$sectionInfo[] = [ "page_path" => $sub -> url_name .'/', "menu_name" => CLanguage::instance() -> getString($sub -> menu_name) ];
+	
+		}	
+		return $sectionInfo;	
+	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	##	code below this point is for refactoring/revision
+
+
+
 
 	protected	$m_pModel;
 	protected 	$m_pView;
 
-	public function
-	__construct($_module, &$_object, bool $_backendCall = false)
+	public function isBackendCall() : bool
 	{
-		$this -> m_aModule	= $_module;
-		$this -> m_aObject	= $_object;	
-		$this -> m_bBackendCall = $_backendCall;
-		$this -> m_bInstallMode = false;
-	}	
-
-	public function isBackendCall()
-	{
-		return $this -> m_bBackendCall;
+		return $this -> isBackendCall;
 	}
 
-	public function setInstallMode($_installMode = true)
+	public function setInstallMode(bool $_isInstallMode = true)
 	{
-		$this -> m_bInstallMode = $_installMode;
+		$this -> isInstallMode = $_isInstallMode;
 	}
 
-	public function getInstallMode()
+	public function getInstallMode() : bool
 	{
-		return $this -> m_bInstallMode;
+		return $this -> isInstallMode;
 	}
 
 	protected function
@@ -58,19 +122,19 @@ class	CController
 		return true;
 	}
 	protected function
-	existsUserRight(string $_rightId)
+	existsUserRight(string $_rightId) : bool
 	{
-		foreach($this -> m_aModule -> rights as $rightInfo)
+		foreach($this -> moduleInfo -> rights as $rightInfo)
 			if($rightInfo -> name === $_rightId)
 				return true;
 		return false;
-		//return in_array($_rightId, $this -> m_aModule -> rights, true);
+		//return in_array($_rightId, $this -> moduleInfo -> rights, true);
 	}
 
 	private function
 	_getModulePath(string $_controllerAction)
 	{
-		foreach($this -> m_aModule -> sections as $path)
+		foreach($this -> moduleInfo -> sections as $path)
 		{
 			if($path -> ctl_target === $_controllerAction)
 				return $path;
@@ -79,9 +143,9 @@ class	CController
 	}
 
 	private function
-	_existsModuleRight(string $_rightId)
+	_existsModuleRight(string $_rightId) : bool
 	{
-		foreach($this -> m_aModule -> rights as $right)
+		foreach($this -> moduleInfo -> rights as $right)
 		{
 			if($right -> name === $_rightId)
 				return true;
@@ -106,44 +170,15 @@ class	CController
 	}
 
 	protected function
-	getControllerAction(array $_rcaTarget, string $_defaultAction = 'view')
-	{
-		if(!isset($_rcaTarget[$this -> m_aObject -> object_id])) return $_defaultAction;
-		return $_rcaTarget[$this -> m_aObject -> object_id];
-	}
-
-	public function
-	getSubSection()
-	{
-		$_aSections = [];
-
-		if(empty($this -> m_aModule -> sections))
-			return $_aSections;	
-
-		usort($this -> m_aModule -> sections, function($a, $b) { return $a -> menu_order <=> $b -> menu_order; });
-
-		if(!isset($this -> m_aModule -> sections)) return $_aSections;
-		foreach($this -> m_aModule -> sections as $_sub)
-		{
-			if(empty($_sub -> url_name) || empty($_sub -> menu_name))
-				continue;
-
-			$_aSections[] = [ "page_path" => $_sub -> url_name .'/', "menu_name" => CLanguage::instance() -> getString($_sub -> menu_name) ];
-	
-		}	
-		return $_aSections;	
-	}
-
-	protected function
 	setCrumbData(string $_ctrlTarget, string $_customMenuName = '', bool $_noLink = false)
 	{
-		$_sectionIndex = array_search($_ctrlTarget, array_column($this -> m_aModule -> sections, 'ctl_target'));
+		$_sectionIndex = array_search($_ctrlTarget, array_column($this -> moduleInfo -> sections, 'ctl_target'));
 		if($_sectionIndex !== false)
 		{		
 
 			CPageRequest::instance() -> addCrumb(
-													(!empty($_customMenuName) ? $_customMenuName : CLanguage::get() -> string($this -> m_aModule -> sections[$_sectionIndex] -> menu_name)),
-													(!$_noLink ? $this -> m_aModule -> sections[$_sectionIndex] -> url_name .'/' : false)
+													(!empty($_customMenuName) ? $_customMenuName : CLanguage::get() -> string($this -> moduleInfo -> sections[$_sectionIndex] -> menu_name)),
+													(!$_noLink ? $this -> moduleInfo -> sections[$_sectionIndex] -> url_name .'/' : false)
 												);
 		}
 	}
@@ -162,8 +197,8 @@ class	CController
 	protected function
 	setView(string $_view, string $_moduleTarget,  array $_dataInstances = [])
 	{
-		$moduleType 	= $this -> m_aModule -> module -> module_type;
-		$moduleLocation = $this -> m_aModule -> module -> module_location;
+		$moduleType 	= $this -> moduleInfo -> module -> module_type;
+		$moduleLocation = $this -> moduleInfo -> module -> module_location;
 
 		switch($moduleType)
 		{
@@ -172,10 +207,10 @@ class	CController
 		}
 
 		if(		!file_exists(CMS_SERVER_ROOT . $moduleTypeLocation . DIR_MODULES . $moduleLocation .'/view/'. $_view.'.php')
-			&&	$this -> m_aModule -> parentModule !== NULL)
+			&&	$this -> moduleInfo -> parentModule !== NULL)
 		{
-			$moduleType 	= $this -> m_aModule -> parentModule -> module_type;
-			$moduleLocation = $this -> m_aModule -> parentModule -> module_location;
+			$moduleType 	= $this -> moduleInfo -> parentModule -> module_type;
+			$moduleLocation = $this -> moduleInfo -> parentModule -> module_location;
 		}
 
 		switch($moduleType)
@@ -194,5 +229,3 @@ class	CController
 		$this -> m_pView -> view();
 	}
 }
-
-?>

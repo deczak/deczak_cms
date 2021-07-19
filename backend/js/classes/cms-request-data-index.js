@@ -6,10 +6,12 @@ class	cmsRequestDataIndex
 		this.templateId 		= templateId;
 		this.timestampFormat	= timestampFormat;
 		this.replaceCallback	= replaceCallback;
+		this.xhrAction			= '';
 	}
 	
-	init()
+	init(xhrAction = '')
 	{
+		this.xhrAction = xhrAction;
 		this.requestData();
 	}
 
@@ -79,8 +81,8 @@ class	cmsRequestDataIndex
 		var	requestTarget	= CMS.SERVER_URL_BACKEND + CMS.PAGE_PATH;
 
 		if(onSuccess !== null)
-			cmstk.callXHR(requestTarget, formData, onSuccess, cmstk.onXHRError, that);
+			cmstk.callXHR(requestTarget, formData, onSuccess, cmstk.onXHRError, that, this.xhrAction);
 		else
-			cmstk.callXHR(requestTarget, formData, that.onXHRSuccess, cmstk.onXHRError, that);
+			cmstk.callXHR(requestTarget, formData, that.onXHRSuccess, cmstk.onXHRError, that, this.xhrAction);
 	}
 }

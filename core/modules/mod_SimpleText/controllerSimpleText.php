@@ -14,7 +14,7 @@ class	controllerSimpleText extends CController
 
 		$this -> m_modelSimple = new modelSimple();
 		
-		$this -> m_aModule -> user_rights[] = 'view';	// add view right as default for everyone
+		$this -> moduleInfo -> user_rights[] = 'view';	// add view right as default for everyone
 	}
 	
 	public function
@@ -69,7 +69,7 @@ class	controllerSimpleText extends CController
 	logicView(CDatabaseConnection &$_pDatabase, $_isXHRequest, &$_logicResult)
 	{
 		$modelCondition = new CModelCondition();
-		$modelCondition -> where('object_id', $this -> m_aObject -> object_id);
+		$modelCondition -> where('object_id', $this -> objectInfo -> object_id);
 
 		$this -> m_modelSimple -> load($_pDatabase, $modelCondition);
 
@@ -149,7 +149,7 @@ class	controllerSimpleText extends CController
 		}	
 
 		$modelCondition = new CModelCondition();
-		$modelCondition -> where('object_id', $this -> m_aObject -> object_id);
+		$modelCondition -> where('object_id', $this -> objectInfo -> object_id);
 
 		$this -> m_modelSimple -> load($_pDatabase, $modelCondition);
 
@@ -176,7 +176,7 @@ class	controllerSimpleText extends CController
 			$_bValidationMsg =	'';
 			$_bValidationDta = 	[];
 
-			$_dataset['object_id'] 	= $this -> m_aObject -> object_id;
+			$_dataset['object_id'] 	= $this -> objectInfo -> object_id;
 			$_dataset['body'] 		= '';
 			$_dataset['params'] 	= '';
 			

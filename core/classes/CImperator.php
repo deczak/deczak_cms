@@ -92,10 +92,11 @@ class	CImperator extends CBasic
 			return;
 		}
 
+		$xhrInfo = $_pPageRequest -> detectXHRequest();
 
 		##	XHR call
 
-		if($_pPageRequest -> xhRequest !== false)
+		if($_pPageRequest -> xhRequest !== false)  // $xhrInfo is still null
 		{
 			$_pURLVariables	 =	new CURLVariables();
 			$_request		 =	[];
@@ -222,7 +223,13 @@ class	CImperator extends CBasic
 
 			$_logicResult =	false;
 			$_pPageRequest -> objectsList[$_objectKey] -> instance 	 = 	new $module -> module_controller($module, $_object, true);
-			$_pPageRequest -> objectsList[$_objectKey] -> instance	->	logic($this -> m_dbConnection, $_rcaTarget, $_pPageRequest -> xhRequest, $_logicResult, false);
+			$_pPageRequest -> objectsList[$_objectKey] -> instance	->	logic(
+				$this -> m_dbConnection, 
+				$_rcaTarget, 
+				($xhrInfo !== null ? $xhrInfo : $_pPageRequest -> xhRequest),  //  remove $_pPageRequest -> xhRequest if all controllers are changes
+				$_logicResult, 
+				false
+				);
 
 			if($_logicResult !== false && $_logicResult['state'] === 1)
 			{	## 	This means exit function and recall imperator public logic

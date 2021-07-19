@@ -59,13 +59,14 @@ class cmstk
 	}
 
 	static
-	callXHR(requestURL, formData, callbackSuccess, callbackError, xhrCallInstance)
+	callXHR(requestURL, formData, callbackSuccess, callbackError, xhrCallInstance, xhrAction = '')
 	{		
 		var xhRequest = new XMLHttpRequest();
 
 		xhRequest.open('POST', requestURL);
 		xhRequest.responseType = 'json';
 		xhRequest.setRequestHeader("X-Requested-With","XMLHttpRequest");
+		xhRequest.setRequestHeader("X-Requested-XHR-Action", xhrAction);
 		xhRequest.onerror   = function ()
 		{
 			// Event does not fire on 404 or 500

@@ -7,6 +7,45 @@ include_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelRedirect.php';
 
 class CPageRequest extends CSingleton
 {
+
+
+
+
+
+
+
+	/**
+	 * 	Detects if request comes by XHR, it requires a xhr-action to return a valid info
+	 * 
+	 * 	@return	object A stdClass-object with info about this xhrequest or null if this is not a valid xhrequest
+	 */
+	public function detectXHRequest() : ?object
+	{
+		$_SERVER['HTTP_X_REQUESTED_XHR_ACTION'] = (!empty($_SERVER['HTTP_X_REQUESTED_XHR_ACTION']) ? trim(strip_tags($_SERVER['HTTP_X_REQUESTED_XHR_ACTION'])) : null);
+		$_SERVER['HTTP_X_REQUESTED_WITH'] 		= (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) ? trim(strip_tags($_SERVER['HTTP_X_REQUESTED_WITH'])) : null);
+
+		if($_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest' && $_SERVER['HTTP_X_REQUESTED_XHR_ACTION'] !== null)
+		{
+			$xhrInfo = new stdClass;
+			$xhrInfo -> isXHR 	= true;
+			$xhrInfo -> action 	= $_SERVER['HTTP_X_REQUESTED_XHR_ACTION'];
+			return $xhrInfo;
+		}
+		return null;
+	}
+
+
+
+
+
+
+
+
+	##	code below this point is for refactoring/revision
+
+
+
+
 	public	$node_id;
 	public	$page_language;
 	public	$page_version;
@@ -385,6 +424,8 @@ class CPageRequest extends CSingleton
 		return $this -> responseCode;
 	}
 
+
+
 		
 }
 
@@ -415,4 +456,3 @@ class crumb
 		$this -> title 		= $_title;
 	}
 }
-?>

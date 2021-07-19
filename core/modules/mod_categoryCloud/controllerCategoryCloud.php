@@ -17,7 +17,7 @@ class	controllerCategoryCloud extends CController
 
 		parent::__construct($_module, $_object);
 
-		$this -> m_aModule -> user_rights[] = 'view';	// add view right as default for everyone
+		$this -> moduleInfo -> user_rights[] = 'view';	// add view right as default for everyone
 	}
 	
 	public function
@@ -73,13 +73,13 @@ class	controllerCategoryCloud extends CController
 	{
 		##	get object
 		$objectCondition = new CModelCondition();
-		$objectCondition -> where('object_id', $this -> m_aObject -> object_id);
+		$objectCondition -> where('object_id', $this -> objectInfo -> object_id);
 		$this -> m_modelSimple -> load($_pDatabase, $objectCondition);
 		$this -> m_modelSimple -> getResult()[0] -> params = json_decode($this -> m_modelSimple -> getResult()[0] -> params);
 		
 		##	get node list
 		$parentNode = $this -> m_modelSimple -> getResult()[0] -> params -> parent_node_id;
-		$parentNode = (empty($parentNode) ? $this -> m_aObject -> node_id : $this -> m_modelSimple -> getResult()[0] ->  params -> parent_node_id);
+		$parentNode = (empty($parentNode) ? $this -> objectInfo -> node_id : $this -> m_modelSimple -> getResult()[0] ->  params -> parent_node_id);
 
 		$modelCondition = new CModelCondition();
 		$modelCondition -> where('node_id', $parentNode);		
@@ -204,13 +204,13 @@ class	controllerCategoryCloud extends CController
 
 		##	get object
 		$objectCondition = new CModelCondition();
-		$objectCondition -> where('object_id', $this -> m_aObject -> object_id);
+		$objectCondition -> where('object_id', $this -> objectInfo -> object_id);
 		$this -> m_modelSimple -> load($_pDatabase, $objectCondition);
 		$this -> m_modelSimple -> getResult()[0] -> params = json_decode($this -> m_modelSimple -> getResult()[0] -> params);
 		
 		##	get node list
 		$parentNode = $this -> m_modelSimple -> getResult()[0] -> params -> parent_node_id;
-		$parentNode = (empty($parentNode) ? $this -> m_aObject -> node_id : $this -> m_modelSimple -> getResult()[0] ->  params -> parent_node_id);
+		$parentNode = (empty($parentNode) ? $this -> objectInfo -> node_id : $this -> m_modelSimple -> getResult()[0] ->  params -> parent_node_id);
 
 		$modelCondition = new CModelCondition();
 		$modelCondition -> where('node_id', $parentNode);		
@@ -277,7 +277,7 @@ class	controllerCategoryCloud extends CController
 			$_bValidationMsg =	'';
 			$_bValidationDta = 	[];
 
-			$_dataset['object_id'] 	= $this -> m_aObject -> object_id;
+			$_dataset['object_id'] 	= $this -> objectInfo -> object_id;
 			$_dataset['body'] 		= '';
 			$_dataset['params']		= 	[
 											"template"			=> '',
@@ -299,7 +299,7 @@ class	controllerCategoryCloud extends CController
 				
 				##	get node list
 				$parentNode = $this -> m_modelSimple -> getResult()[0] -> params -> parent_node_id;
-				$parentNode = (empty($parentNode) ? $this -> m_aObject -> node_id : $this -> m_modelSimple -> getResult()[0] ->  params -> parent_node_id);
+				$parentNode = (empty($parentNode) ? $this -> objectInfo -> node_id : $this -> m_modelSimple -> getResult()[0] ->  params -> parent_node_id);
 
 				$modelCondition = new CModelCondition();
 				$modelCondition -> where('node_id', $parentNode);		
@@ -333,7 +333,7 @@ class	controllerCategoryCloud extends CController
 
 				$pageRequest = new stdClass;
 				$pageRequest -> page_language 	= $parentNode -> page_language;
-				$pageRequest -> node_id 		= $this -> m_aObject -> node_id;
+				$pageRequest -> node_id 		= $this -> objectInfo -> node_id;
 				$pageRequest -> sitemap 		= $this -> m_modelCategories -> getResult();
 
 				##	get module templates
