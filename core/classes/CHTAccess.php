@@ -19,7 +19,7 @@ class	CHTAccess
 	}
 
 	public function
-	generatePart4Backend(CDatabaseConnection &$_pDatabase)
+	generatePart4Backend(CDatabaseConnection &$_pDatabase) : void
 	{
 		$_targetFile = '2-backend';
 
@@ -54,19 +54,8 @@ class	CHTAccess
 		fclose($_hFile);
 	}
 
-	private function
-	_findActiveModuleData(&$_modulesData, $_moduleID)
-	{
-		foreach($_modulesData as $_module)
-		{
-			if($_module -> module_id == $_moduleID)
-				return $_module;
-		}
-		return false;
-	}
-
 	public function
-	generatePart4Frontend(CDatabaseConnection &$_pDatabase)
+	generatePart4Frontend(CDatabaseConnection &$_pDatabase) : void
 	{
 		$_targetFile = '3-frontend';
 
@@ -75,19 +64,7 @@ class	CHTAccess
 		if(flock($_hFile, LOCK_EX))
 		{
 			ftruncate($_hFile, 0);
-		
-		#	if(CFG::GET() -> ERROR_PAGES -> ERROR403)
-		#	{
-		#		fwrite($_hFile, 'RewriteRule ^403/?$ index.php?cms-error=403 [NC,L]');
-		#		fwrite($_hFile, "\r\n");
-		#	}
-
-		#	if(CFG::GET() -> ERROR_PAGES -> ERROR404)
-		#	{
-		#		fwrite($_hFile, 'RewriteRule ^404/?$ index.php?cms-error=404 [NC,L]');
-		#		fwrite($_hFile, "\r\n");
-		#	}
-		
+				
 			fwrite($_hFile, "RewriteCond %{THE_REQUEST} /public/([^\s?]*) [NC]" . "\r\n");	
 			fwrite($_hFile, "RewriteRule ^ %1 [L,NE,R=302]" . "\r\n");	
 			
@@ -111,7 +88,7 @@ class	CHTAccess
 	}
 
 	public function
-	generatePart4DeniedAddress(CDatabaseConnection &$_pDatabase)
+	generatePart4DeniedAddress(CDatabaseConnection &$_pDatabase) : void
 	{
 		$_targetFile = '0-denied';
 
@@ -161,7 +138,7 @@ class	CHTAccess
 	}
 
 	public function
-	writeHTAccess(CDatabaseConnection &$_pDatabase)
+	writeHTAccess(CDatabaseConnection &$_pDatabase) : void
 	{
 		$pRouter  = CRouter::instance();
 		$pRouter -> createRoutes($_pDatabase);
@@ -188,21 +165,8 @@ class	CHTAccess
 		{
 			ftruncate($_hDstFile, 0);	
 
-		#	if(CFG::GET() -> ERROR_PAGES -> ERROR403)
-		#	{
-		#		fwrite($_hDstFile, 'ErrorDocument 403 '. CMS_SERVER_URL .'403');
-		#		fwrite($_hDstFile, "\r\n");
-		#	}
-
-		#	if(CFG::GET() -> ERROR_PAGES -> ERROR404)
-		#	{
-		#		fwrite($_hDstFile, 'ErrorDocument 404 '. CMS_SERVER_URL .'404 ');
-		#		fwrite($_hDstFile, "\r\n");
-		#	}
-
 			foreach($_filenames as $_file)
 			{	
-						
 				##	Read Source File
 
 				$_hSrcFile 	 = fopen($this -> m_dataLocation . $_file, "r");
@@ -237,8 +201,6 @@ class	CHTAccess
 		}
 
 		fclose($_hDstFile);
+		return;
 	}
-
 }
-
-?>

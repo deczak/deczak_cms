@@ -7,23 +7,23 @@ class	CCookie extends CSingleton
 	private		$m_bRequestHTTPSCookie;
 
 	public function
-	initialize()
+	initialize() : void
 	{
 		$this -> m_bRequestHTTPSCookie = CFG::GET() -> LOGIN -> COOKIE_HTTPS;
 	}
 
 	public function
-	getCookie(string $_cookieName)
+	getCookie(string $_cookieName) : ?string
 	{
-		if(!isset($_COOKIE[$_cookieName])) return false;
+		if(!isset($_COOKIE[$_cookieName])) return null;
 		return strip_tags($_COOKIE[$_cookieName]);
 	}
 
 	public function
-	getCookieID(string $_cookieName)
+	getCookieID(string $_cookieName) : ?string
 	{
-		if(!isset($_COOKIE[$_cookieName])) return false;
-		if(strlen($_COOKIE[$_cookieName]) != 324) return false;
+		if(!isset($_COOKIE[$_cookieName])) return null;
+		if(strlen($_COOKIE[$_cookieName]) != 324) return null;
 		return substr($_COOKIE[$_cookieName], 128,96);
 	}
 
@@ -34,23 +34,23 @@ class	CCookie extends CSingleton
 	}
 
 	public function
-	createCookieIdinator(string $_cookieName, int $_timestamp, string $_sessionID)
+	createCookieIdinator(string $_cookieName, int $_timestamp, string $_sessionID) : string
 	{
-		$_cookieID			= $this -> createCookieID($_timestamp);
-		$_cookieContent		= $this -> createCookieContent($_timestamp, $_sessionID, $_cookieID);	// 320
-		$_cookieChecksum	= CRYPT::CHECKSUM($_cookieContent); 									//   4 
-		setcookie($_cookieName, $_cookieContent . $_cookieChecksum, 0, "/", "", ($this -> m_bRequestHTTPSCookie === NULL ? false : $this -> m_bRequestHTTPSCookie) , true);	
-		return $_cookieID;
+		$cookieID			= $this -> createCookieID($_timestamp);
+		$cookieContent		= $this -> createCookieContent($_timestamp, $_sessionID, $cookieID);	// 320
+		$cookieChecksum	= CRYPT::CHECKSUM($cookieContent); 									//   4 
+		setcookie($_cookieName, $cookieContent . $cookieChecksum, 0, "/", "", ($this -> m_bRequestHTTPSCookie === NULL ? false : $this -> m_bRequestHTTPSCookie) , true);	
+		return $cookieID;
 	}
 
 	private function
-	createCookieID(int $_timestamp)
+	createCookieID(int $_timestamp) : string
 	{
 		return md5($_timestamp . $_SERVER['REMOTE_ADDR']) . md5($_timestamp . $_SERVER['HTTP_USER_AGENT']) . md5($_timestamp);
 	}
 
 	private function
-	createCookieContent(int $_timestamp, string $_sessionID, string $_cookieID)
+	createCookieContent(int $_timestamp, string $_sessionID, string $_cookieID) : string
 	{
 		##	If this get modifed, getCookieID() must be also edited // MD5 = 32 // SHA256 = 64
 
@@ -60,28 +60,22 @@ class	CCookie extends CSingleton
 	}
 
 	public function
-	isCookieIdinatorValid(string $_cookieName, int $_timestamp, string $_sessionID)
+	isCookieIdinatorValid(string $_cookieName, int $_timestamp, string $_sessionID) : bool
 	{
 		if(!isset($_COOKIE[$_cookieName])) return false;
 		if(strlen($_COOKIE[$_cookieName]) != 324) return false;
 		
-		$_cookieID			= $this -> createCookieID($_timestamp);
-		$_cookieContent		= $this -> createCookieContent($_timestamp, $_sessionID, $_cookieID);	// 320
-		$_cookieChecksum	= CRYPT::CHECKSUM($_cookieContent); 									//   4 
+		$cookieID			= $this -> createCookieID($_timestamp);
+		$cookieContent		= $this -> createCookieContent($_timestamp, $_sessionID, $cookieID);	// 320
+		$cookieChecksum	= CRYPT::CHECKSUM($cookieContent); 									//   4 
 
-		if($_COOKIE[$_cookieName] === ($_cookieContent . $_cookieChecksum)) return true;
+		if($_COOKIE[$_cookieName] === ($cookieContent . $cookieChecksum)) return true;
 		return false;
 	}
 
 	public function
-	deleteCookie(string $_cookieName)
+	deleteCookie(string $_cookieName) : void
 	{
 		setcookie($_cookieName, NULL, 1, "/", "", ($this -> m_bRequestHTTPSCookie === NULL ? false : $this -> m_bRequestHTTPSCookie) , true);	
 	}
-
-
 }
-
-
-
-?>

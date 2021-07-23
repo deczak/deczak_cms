@@ -281,8 +281,6 @@ class	CSession extends CSingleton
 
 
 
-
-
 								$condition		 = new CModelCondition();
 								$condition		-> whereLike('cookie_id', "%\"". $_cookieKey ."\":{\"id\":\"". $_cookieID ."\"}%")
 												-> where('is_locked', '0')

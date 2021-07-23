@@ -20,5 +20,3 @@ class CSingleton
 	private function __sleep() 		{}
 	private function __wakeup() 	{}
 }
-
-?>

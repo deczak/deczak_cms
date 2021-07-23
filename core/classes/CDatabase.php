@@ -26,7 +26,6 @@ class CDatabaseConnection
 	{
 		if($this -> m_connection === NULL)
 			return null;
-
 		return new CDatabaseQuery($this, $_queryType);
 	}
 
@@ -41,7 +40,6 @@ class CDatabaseConnection
 	{
 		if($this -> m_connection === NULL)
 			return null;
-
 		return $this -> m_connection -> beginTransaction();
 	}
 
@@ -50,7 +48,6 @@ class CDatabaseConnection
 	{
 		if($this -> m_connection === NULL)
 			return null;
-
 		return $this -> m_connection -> rollBack();
 	}
 
@@ -59,7 +56,6 @@ class CDatabaseConnection
 	{
 		if($this -> m_connection === NULL)
 			return null;
-
 		return $this -> m_connection -> commit();
 	}
 }
@@ -101,19 +97,14 @@ class	CDatabase extends CSingleton
 											[PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]
 										);
 
-
 				$this -> m_connectionsList[$_accessData['name']] = new CDatabaseConnection($connection, $_accessData['database']);
-
 			}
 			catch(PDOException $exception)
-			{
-				//echo '<br>'. $exception -> getMessage();		  
+			{	  
 				CMessages::instance() -> addMessage('CDatabase::connect - establishing connection failed for '. $_accessData['name'] .'. Exception: '. $exception -> getMessage(), MSG_LOG, '', true);
 				return false;	
 			}
-
 		}
-
 		return true;
 	}
 
@@ -124,9 +115,6 @@ class	CDatabase extends CSingleton
 		{
 			return $this -> m_connectionsList[$_connectionName];
 		}
-
 		return $this -> m_null;
 	}
 }
-
-?>

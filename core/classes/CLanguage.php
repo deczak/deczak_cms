@@ -7,14 +7,14 @@ require_once 'CSingleton.php';
 class	CLanguage extends CSingleton
 {
     private		$m_aStorage;   
-	private		$m_bInitialized;
+	private		$isInitialized;
 	private		$m_activeLanguage;
 	private		$m_defaultLanguage;
 
 	private		$languagesList;
 
 	public function
-	initialize(?CDatabaseConnection &$_dbConnection, string $_activeLanguage = '')
+	initialize(?CDatabaseConnection &$_dbConnection, string $_activeLanguage = '') : bool
 	{
 		if($_dbConnection === null)
 			return false;
@@ -40,24 +40,26 @@ class	CLanguage extends CSingleton
 		if(!isset($this -> languagesList[$_activeLanguage]))
 			$this -> m_activeLanguage = $this -> m_defaultLanguage;
 
-		$this -> m_bInitialized			= true;
+		$this -> isInitialized			= true;
+
+		return true;
 	}
 
 	public function
-	getLanguages()
+	getLanguages() : array
 	{
-		if(empty($this -> m_bInitialized)) return [];
+		if(empty($this -> isInitialized)) return [];
 		return $this -> languagesList;
 	}
 
 	public function
-	getDefault()
+	getDefault() : string
 	{
 		return $this -> m_defaultLanguage;
 	}
 
 	public function
-	loadLanguageFile(string $_Filelocation , $_LanguageKey = false, array $_compareData = [] )
+	loadLanguageFile(string $_Filelocation , $_LanguageKey = false, array $_compareData = [] ) : void
 	{ 
 		if( !file_exists( $_Filelocation . $_LanguageKey .'.lang' ) )
 		{
@@ -154,7 +156,7 @@ class	CLanguage extends CSingleton
 	public function
 	getString(string $_StringID, string $_DefaultString = '???')
 	{
-		if(empty($this -> m_bInitialized)) return 'not_initialized';
+		if(empty($this -> isInitialized)) return 'not_initialized';
 
 		$_StringID = explode(' ', $_StringID);
 
@@ -180,9 +182,9 @@ class	CLanguage extends CSingleton
 	}	
 
 	public function
-	string(string $_StringID, string $_format = 'regular')
+	string(string $_StringID, string $_format = 'regular') : string
 	{
-		if(empty($this -> m_bInitialized)) return 'not_initialized';
+		if(empty($this -> isInitialized)) return 'not_initialized';
 
 		$_StringID 		= explode(' ', $_StringID);
 		$returnValue 	= '';
@@ -216,9 +218,9 @@ class	CLanguage extends CSingleton
 	}
 
 	public function
-	getStringExt(string $_StringID , array $_Replacement = array() )
+	getStringExt(string $_StringID , array $_Replacement = array()) : string
 	{
-		if(empty($this -> m_bInitialized)) return 'not_initialized';
+		if(empty($this -> isInitialized)) return 'not_initialized';
 		if( isset( $this -> m_aStorage[$this -> m_activeLanguage][$_StringID] ) )
 		{
 			if(!empty($_Replacement))
@@ -234,16 +236,16 @@ class	CLanguage extends CSingleton
 	}
 
 	public function
-	stringExt(string $_StringID , array $_Replacement = array())
+	stringExt(string $_StringID , array $_Replacement = array()) : string
 	{
 		return $this -> getStringExt($_StringID, $_Replacement);
 	}
 
 	public function
-	getStringAlternates(string $_StringID)
+	getStringAlternates(string $_StringID) : array
 	{
 		$_aReturnData = [];
-		if(empty($this -> m_bInitialized)) return $_aReturnData;
+		if(empty($this -> isInitialized)) return $_aReturnData;
 		foreach($this -> m_aStorage as $_langKey => $_stringsData)
 		{
 			if(isset($_stringsData[$_StringID]))
@@ -255,21 +257,21 @@ class	CLanguage extends CSingleton
 	public function
 	getActiveLanguage()
 	{
-		if(empty($this -> m_bInitialized)) return false;
+		if(empty($this -> isInitialized)) return false;
 		return $this -> m_activeLanguage;
 	}
 
 	public function
 	getActive()
 	{
-		if(empty($this -> m_bInitialized)) return false;
+		if(empty($this -> isInitialized)) return false;
 		return $this -> m_activeLanguage;
 	}
 
 	public function
 	setActiveLanguage(string $_activeLanguage)
 	{
-		if(empty($this -> m_bInitialized))
+		if(empty($this -> isInitialized))
 			return false;
 
 		if(!CMS_BACKEND)
@@ -296,5 +298,3 @@ class	CLanguage extends CSingleton
 		return $this -> m_activeLanguage;
 	}	
 }
-
-?>

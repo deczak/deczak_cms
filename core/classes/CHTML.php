@@ -8,7 +8,7 @@ class	CHTML
 	}
 
 	public function
-	openDocument(&$page, &$imperator, &$pageRequest)
+	openDocument(CImperator &$imperator, CPageRequest &$pageRequest) : void
 	{
 		if(isset($pageRequest -> cache_disabled) && $pageRequest -> cache_disabled == 1)
 			$this -> disableCaching();
@@ -150,15 +150,12 @@ class	CHTML
 		if(CMS_BACKEND && $pageRequest -> page_template !== CMS_BACKEND_TEMPLATE)
 			@include CMS_SERVER_ROOT . DIR_TEMPLATES . CMS_BACKEND_TEMPLATE .'/page-edit-footer.php';			
 
-#CBenchmark::instance() -> stop();
-
 		echo "</body>\r\n";
 		echo "</html>";
-
 	}
 
 	private function
-	disableCaching()
+	disableCaching() : void
 	{
 		header("Cache-Control: no-cache, no-store, must-revalidate");
 		header("Pragma: no-cache");

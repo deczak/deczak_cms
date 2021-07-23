@@ -92,11 +92,11 @@ class	CImperator
 	}
 
 	private function
-	logic_backend(&$_pPageRequest, $_modules, array $_rcaTarget)
+	logic_backend(&$_pPageRequest, $_modules, array $_rcaTarget) : bool
 	{
 		if($_pPageRequest -> responseCode !== 200)
 		{	
-			return;
+			return false;
 		}
 
 		$xhrInfo = $_pPageRequest -> detectXHRequest();
@@ -259,10 +259,12 @@ class	CImperator
 		$_pPageRequest -> urlPath		=	$_pPageRequest -> page_path .'';
 
 		$this -> pageRequest = &$_pPageRequest;
+
+		return false;
 	}
 
 	public function
-	view(string $_viewId = '')
+	view(string $_viewId = '') : void
 	{
 		$_viewId = $this -> pDirector -> register($_viewId);
 		$this -> pDirector -> view($_viewId, $this -> pageRequest, $this -> pUserRights);

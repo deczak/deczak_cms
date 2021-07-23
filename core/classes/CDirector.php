@@ -11,7 +11,7 @@ class	CDirector
 	}
 
 	public function
-	register(string $_viewId = '')
+	register(string $_viewId = '') : string
 	{
 		if(empty($_viewId))
 			$_viewId = strval(count($this -> viewList) + 1);
@@ -25,7 +25,7 @@ class	CDirector
 	}
 
 	public function
-	view(string $_viewId, CPageRequest &$_pPageRequest, &$_pUserRights)
+	view(string $_viewId, CPageRequest &$_pPageRequest, ?CUserRights &$_pUserRights) : void
 	{
 		if($_pPageRequest -> isEditMode)
 		{
@@ -67,5 +67,4 @@ class	CDirector
 			}
 		}
 	}
-
 }

@@ -16,6 +16,7 @@ templates/*
 !templates/backend
 mantle/
 !mantle/modules/mod_blog/.*
+mediathek/*
 install/page-templates/.*
 data/modules/simpleNavigation
 !data/modules/simpleNavigation/list

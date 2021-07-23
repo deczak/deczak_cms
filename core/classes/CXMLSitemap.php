@@ -2,8 +2,13 @@
 
 class CXMLSitemap
 {
+	/**
+	 * 	Creates a sitemap.xml file
+	 * 
+	 * 	@param CDatabaseConnection $_pDatabase Database Connection object
+	 */
 	public function
-	generate(CDatabaseConnection &$_pDatabase)
+	generate(CDatabaseConnection &$_pDatabase) : void
 	{
 		$timestamp = time();
 		$_targetFile	= 'sitemap.xml';
@@ -72,5 +77,3 @@ class CXMLSitemap
 		fclose($_hFile);
 	}
 }
-
-?>
