@@ -64,6 +64,12 @@ class	CHTAccess
 		if(flock($_hFile, LOCK_EX))
 		{
 			ftruncate($_hFile, 0);
+
+			#fwrite($_hFile, "RewriteCond %{REQUEST_FILENAME} -f" . "\r\n");	
+			#fwrite($_hFile, "RewriteRule ^mediathek/(.*)/?$ mediathek/$1 [NC,L]" . "\r\n");	
+			fwrite($_hFile, "RewriteRule ^mediathek/(.*)/?$ mediathek/index.php?$1 [NC,L,QSA]" . "\r\n");	
+			
+			fwrite($_hFile, "\r\n");
 				
 			fwrite($_hFile, "RewriteCond %{THE_REQUEST} /public/([^\s?]*) [NC]" . "\r\n");	
 			fwrite($_hFile, "RewriteRule ^ %1 [L,NE,R=302]" . "\r\n");	

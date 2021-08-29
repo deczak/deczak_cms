@@ -68,6 +68,7 @@ class	CHTML
 		echo "\t<meta charset=\"UTF-8\">\r\n";
 		echo "\t<title>". $pageRequest -> page_title ."</title>\r\n";
   		echo "\t<meta name=\"description\" content=\"". tk::strip_breaks_n_tags($pageRequest -> page_description) ."\">\r\n";
+  		echo "\t<meta name=\"viewport\" content=\"width=device-width\">\r\n";
 		echo "\t<meta NAME=\"robots\" content=\"". ($pageRequest -> crawler_index == 1 ? 'INDEX' : 'NOINDEX') .','. ($pageRequest -> crawler_follow == 1 ? 'FOLLOW' : 'NOFOLLOW') ."\">\r\n";
 
 		if(!empty($pageRequest -> alternate_path))
