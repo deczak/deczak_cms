@@ -6,21 +6,17 @@
 
 		- Wenn beschränktes sichtrecht, display_filename für die anzeige
 
-	- gear_by_meta in json abfragen, wenn true, dann camera und lens aus dem Bild
-
 	- Möglichkeit für alternative Sprache der title und caption
 
 	  - sprache muss dann per parameter übergeben werden. 
 
 	  - Schauen ob die Sprachdatei geladen werden kann, dann License übersetzen, default EN
 
-	- Nur Bilddateien sollen den nicht-binary mode haben, videos und sonstige dokumte sind immer binary
+	- Nur Bilddateien sollen den nicht-binary mode haben, videos und sonstige dokumente sind immer binary
 
 		- content header vervollständigen die eventuell benötigt werden.
 
 	- Bei Bildern die Möglichkeit andere Auflösungen anzuzeigen für direkten Download
-
-	- css info block umbrechen in schmaler ansicht
 
 	- Counter Datei
 
@@ -29,8 +25,11 @@
 	- Zugriff in Session eintragen
 
 	- Erfassen von direkt Zugriffen ??
-
+	
 */
+
+require_once '../config/directories.php';
+require_once '../config/standard.php';
 
 $requestedURI = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
@@ -131,6 +130,18 @@ if($rawOutput)
 }
 else
 {
+	if($jsonInfo -> gear -> by_meta) 
+	{
+		$cameraModel = $fileInfo -> Model ?? '';
+		$lensModel 	 = $fileInfo -> LensModel ?? '';
+		$lensModel 	 = (empty($lensModel) ? ($fileInfo -> {'UndefinedTag:0xA434'} ?? '') : $lensModel);
+	}
+	else
+	{
+		$cameraModel = $jsonInfo -> gear -> camera; 
+		$lensModel   = $jsonInfo -> gear -> lens;
+	}
+
 	?><!DOCTYPE html>
 	<html>
 		<head>
@@ -163,9 +174,13 @@ else
 
 					.imagebox .center { 
 						height:calc(90vh - 100px);
-						}
+					}
 				}
 			</style>
+			<meta property="og:title" content="<?= $jsonInfo -> title; ?>"> 
+			<meta property="og:description" content="<?= $jsonInfo -> caption; ?>"> 
+			<meta property="og:url" content="<?= CMS_SERVER_URL; ?>mediathek/<?= $dstFilelocation; ?>?size=xlarge"> 
+			<meta property="og:image" content="<?= CMS_SERVER_URL; ?>mediathek/<?= $dstFilelocation; ?>?binary&size=large">
 		</head>
 		<body style="background-color:rgb(0,37,51); margin:0px;">
 
@@ -187,7 +202,8 @@ else
 
 				<div class="center">
 
-					<img src="/mediathek/<?= $dstFilelocation; ?>/?binary&size=xlarge" alt="">
+					<img 
+						src="/mediathek/<?= $dstFilelocation; ?>?binary&size=xlarge" alt="<?= $jsonInfo -> title; ?><?= (!empty($jsonInfo -> caption) ? '. '.$jsonInfo -> caption.'<br>' : ''); ?>" >
 	
 				</div>
 
@@ -209,8 +225,8 @@ else
 
 							<span style="font-size:0.7em; ">
 								<?= (!empty($jsonInfo -> license) ? 'License: '.$jsonInfo -> license.'<br>' : ''); ?>
-								<?= (!empty($jsonInfo -> gear -> camera) ? $jsonInfo -> gear -> camera.'<br>' : ''); ?>
-								<?= (!empty($jsonInfo -> gear -> lens) ? $jsonInfo -> gear -> lens.'<br>' : ''); ?>
+								<?= $cameraModel .'<br>'; ?>
+								<?= $lensModel; ?>
 							</span>
 
 						</div>
