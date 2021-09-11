@@ -17,7 +17,7 @@ class	CHTML
 		
 		switch($pageRequest -> responseCode)
 		{
-			case 404:	header("HTTP/1.0 404 Not Found");
+			case 404:	header(($_SERVER["SERVER_PROTOCOL"] ?? 'HTTP/1.1') . ' 404 Not Found');
 						$pageRequest -> crawler_index 	= 0;
 						$pageRequest -> crawler_follow 	= 0;
 						$pageRequest -> page_title		= '404 Page not Found';
@@ -26,7 +26,7 @@ class	CHTML
 						$pageRequest -> canonical		= false;
 						$pageRequest -> page_template = CFG::GET() -> TEMPLATE -> ERROR_TEMPLATE;
 						break;
-			case 403:	header('HTTP/1.0 403 Forbidden'); 
+			case 403:	header(($_SERVER["SERVER_PROTOCOL"] ?? 'HTTP/1.1') . ' 403 Forbidden'); 
 						$pageRequest -> crawler_index 	= 0;
 						$pageRequest -> crawler_follow 	= 0;
 						$pageRequest -> page_title		= '403 Forbidden';
@@ -35,7 +35,7 @@ class	CHTML
 						$pageRequest -> canonical		= false;
 						$pageRequest -> page_template = CFG::GET() -> TEMPLATE -> ERROR_TEMPLATE;
 						break;
-			case 920:	header('HTTP/1.0 403 Forbidden'); 
+			case 920:	header(($_SERVER["SERVER_PROTOCOL"] ?? 'HTTP/1.1') . ' 503 Service Unavailable'); 
 						$pageRequest -> crawler_index 	= 0;
 						$pageRequest -> crawler_follow 	= 0;
 						$pageRequest -> page_title		= 'Database Error';
