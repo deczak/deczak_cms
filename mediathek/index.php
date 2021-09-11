@@ -52,7 +52,8 @@ if(!is_string($requestedURI) || empty($requestedURI ))
 $requestedURI = trim($requestedURI, '/');
 $requestedURI = explode('/', $requestedURI);
 $requestedURI = array_filter($requestedURI, 'strlen');
-unset($requestedURI[0]);
+$requestedURI = array_splice($requestedURI, array_search('mediathek', $requestedURI, true) + 1);
+
 $dstFilelocation = implode('/', $requestedURI).'/';
 
 if(empty($dstFilelocation))
