@@ -67,7 +67,8 @@ class	CHTAccess
 
 			#fwrite($_hFile, "RewriteCond %{REQUEST_FILENAME} -f" . "\r\n");	
 			#fwrite($_hFile, "RewriteRule ^mediathek/(.*)/?$ mediathek/$1 [NC,L]" . "\r\n");	
-			fwrite($_hFile, "RewriteRule ^mediathek/(.*)/?$ mediathek/index.php?$1 [NC,L,QSA]" . "\r\n");	
+			#fwrite($_hFile, "RewriteRule ^mediathek/(.*)/?$ mediathek/index.php?$1 [NC,L,QSA]" . "\r\n");	
+			fwrite($_hFile, "RewriteRule ^mediathek/(.*)/?$ mediathek/index.php [NC,L,QSA]" . "\r\n");	
 			
 			fwrite($_hFile, "\r\n");
 				

@@ -25,17 +25,30 @@
 	- Zugriff in Session eintragen
 
 	- Erfassen von direkt Zugriffen ??
+
+	
+	->	if 404 try to get regular 404 page withouth redirect
+
+
+	//header($_SERVER["SERVER_PROTOCOL"] ?? 'HTTP/1.1' . ' 403 Forbidden'); 
 	
 */
 
 require_once '../config/directories.php';
 require_once '../config/standard.php';
 
+function exit404()
+{
+	header(($_SERVER["SERVER_PROTOCOL"] ?? 'HTTP/1.1') . " 404 Not Found");
+	echo 'Could not find the requested mediathek file.';
+	exit;
+}
+
 $requestedURI = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
 if(!is_string($requestedURI) || empty($requestedURI ))
-	exit;
-
+	exit404();
+	
 $requestedURI = trim($requestedURI, '/');
 $requestedURI = explode('/', $requestedURI);
 $requestedURI = array_filter($requestedURI, 'strlen');
@@ -43,17 +56,29 @@ unset($requestedURI[0]);
 $dstFilelocation = implode('/', $requestedURI).'/';
 
 if(empty($dstFilelocation))
-	exit;
+	exit404();
 
 $jsonInfo = file_get_contents($dstFilelocation.'info.json');
 
 if($jsonInfo === false)
-	exit;
+	exit404();
 
 $jsonInfo = json_decode($jsonInfo);
 
 if($jsonInfo === null)
+	exit404();
+
+
+if(!empty($jsonInfo -> redirect))
+{
+	$params = [];
+	$params[] = isset($_GET['binary']) ? 'binary' :'';
+	$params[] = isset($_GET['size']) ? 'size='.$_GET['size'] :'';
+	$params = array_filter($params, 'strlen');
+
+	header('Location: '. CMS_SERVER_URL .'mediathek/'.$jsonInfo -> redirect .'?'. implode('&', $params), true, 301);
 	exit;
+}
 
 $rawOutput = (isset($_GET['binary']) ? true : false);
 
@@ -112,7 +137,7 @@ if($rawOutput)
 	{
 		if(strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']) + $interval > $timeStamp)
 		{ 
-			header("HTTP/1.1 304"); 
+			header($_SERVER["SERVER_PROTOCOL"] ?? 'HTTP/1.1' . "  304 Not Modified"); 
 			exit; 
 		} 
 	}
