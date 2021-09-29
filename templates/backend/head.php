@@ -29,3 +29,14 @@
 					};
 		
 	</script>
+
+	<!-- v2 js, v1 will be removed if v2 finshed, folder gets renamed to js -->
+
+	<script src="<?php echo CMS_SERVER_URL_BACKEND; ?>js2/cms-toolkit.js"></script>
+	<script src="<?php echo CMS_SERVER_URL_BACKEND; ?>js2/cms-crypt.js"></script>
+	<script src="<?php echo CMS_SERVER_URL_BACKEND; ?>js2/cms-xhr.js"></script>
+	<script src="<?php echo CMS_SERVER_URL_BACKEND; ?>js2/cms-upload.js"></script>
+	<script src="<?php echo CMS_SERVER_URL_BACKEND; ?>js2/cms-mediathek.js"></script>
+	<script src="<?php echo CMS_SERVER_URL_BACKEND; ?>js2/cms-modal.js"></script>
+	<script src="<?php echo CMS_SERVER_URL_BACKEND; ?>js2/cms-modal-mediathek.js"></script>
+	<script src="<?php echo CMS_SERVER_URL_BACKEND; ?>js2/cms-modal-confirm.js"></script>

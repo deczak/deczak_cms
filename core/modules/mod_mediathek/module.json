@@ -12,7 +12,7 @@
 							{"name":"view",		"desc":"VIEW"},
 							{"name":"edit",		"desc":"EDIT"},
 							{"name":"delete",	"desc":"DELETE"},
-							{"name":"upload",	"desc":"MOD_MEDIATHEK_UPLOAD"}
+							{"name":"upload",	"desc":"MEDIATHEK_UPLOAD"}
 						],
 	"module_subs"		:[
 							{
@@ -25,7 +25,7 @@
 							{
 								"url_name"	:"create",
 								"ctl_target":"create",
-								"menu_name"	:"MOD_MEDIATHEK",
+								"menu_name"	:"",
 								"menu_order":"0",
 								"use_right" :"edit"
 							},

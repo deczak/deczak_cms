@@ -93,4 +93,8 @@
 
 	LOCK_IS_MISMATCH_ID = 	Editing is blocked by another instance
 
+## Mediathek
+
+	MEDIATHEK_UPLOAD	= 	Upload
+
 

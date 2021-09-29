@@ -45,8 +45,9 @@
 
 	* { box-sizing:border-box; padding:0px; margin:0px; }
 		
-	body { font-size:16px; font-family:'Open Sans',sans-serif; font-weight:300; color:rgb(65,65,65); -moz-text-size-adjust:none; -webkit-text-size-adjust:none; -ms-text-size-adjust:none; text-size-adjust:none; overflow-y:scroll; scroll-behavior:smooth; position: relative; }	
-		
+	body { font-size:16px; font-family:'Open Sans',sans-serif; font-weight:300; color:rgb(65,65,65); -moz-text-size-adjust:none; -webkit-text-size-adjust:none; -ms-text-size-adjust:none; text-size-adjust:none; overflow-y:scroll; scroll-behavior:smooth; position: relative; }		
+	body.noScroll {overflow: hidden; }
+	
 	.wrapper-inside { max-width:1400px; margin:0 auto; padding:0px 15px; }
 
 
@@ -107,3 +108,69 @@
 
 	body[data-node-id="2"] > div.login-form-container { position:fixed; top:52%; left:50%; transform:translate(-50%,-50%); }
 	body[data-node-id="2"] > div.login-form-container fieldset { background:none; }
+
+/**	Backend Modal
+**/
+
+div.cms-modal {
+	position: fixed;
+	top: 0px;
+	left: 0px;
+	width: 100vw;
+	height: 100vh;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	backdrop-filter: blur(2px) grayscale(0.7);
+	background: rgba(0,0,0,0.4);
+}
+
+div.cms-modal > div.cms-modal-inner{
+	background-color: rgb(255,255,255);
+	outline: solid 2px rgba(0,0,0,0.4);
+	padding: 10px;
+	width: 95%;
+	max-width: 700px;
+}
+
+div.cms-modal hr {
+	margin: 10px 0px;
+	border: none;
+    border-bottom: 1px solid rgba(0,0,0,0.4);
+}
+
+div.cms-modal h4 {
+	font-weight:400;
+}
+
+div.cms-modal p {
+	margin:15px 0px;
+}
+
+div.cms-modal div.cms-modal-buttons-bottom {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+div.cms-modal div.cms-modal-buttons-bottom button {
+	width:auto;
+	height:34px;
+}
+
+div.cms-modal div.cms-modal-buttons-bottom > div {
+	flex-wrap:nowrap;
+	width:50%;
+}
+
+div.cms-modal div.cms-modal-buttons-bottom > div:last-child {
+	text-align:right;
+}
+
+div.cms-modal .ui.button.icon > span > i {
+	margin-top: 1px;
+}
+
+div.cms-modal .ui.button:not(:last-child) {
+	margin-right: 15px;
+}

@@ -89,20 +89,82 @@ class	controllerMediathek extends CController
 
 
 
-	
-			$validationErr = false;
-			$validationMsg = 'OK';
-			$validationDta = [];
+
+		$validationErr   = false;
+		$validationMsg   = 'OK';
+		$responseData    = [];
+
+		$pURLVariables	 =	new CURLVariables();
+		$requestList		 =	[];
+		$requestList[] 	 = 	[ "input" => 'q', "validate" => "strip_tags|!empty", "use_default" => true, "default_value" => false ]; 		
+		$pURLVariables -> retrieve($requestList, false, true);	
 
 
 
 
 
+		$_dirIterator 	= new DirectoryIterator(CMS_SERVER_ROOT.DIR_MEDIATHEK);
+		foreach($_dirIterator as $_dirItem)
+		{
+			if($_dirItem -> isDot())
+				continue;
 
-			$_pURLVariables	 =	new CURLVariables();
-			$_request		 =	[];
-			$_request[] 	 = 	[	"input" => 'q',  	"validate" => "strip_tags|!empty" ,	"use_default" => true, "default_value" => false ]; 		
-			$_pURLVariables -> retrieve($_request, false, true);	
+			if($_dirItem -> getFilename()[0] === '.')
+				continue;
+
+			if($_dirItem -> isDir())
+			{
+				$mediathekItem  = new stdClass;
+				$mediathekItem -> type      = 'DIR';
+				$mediathekItem -> name      = $_dirItem -> getFilename();
+				$mediathekItem -> size      = 0;
+				$mediathekItem -> extension = 'dir';
+				$mediathekItem -> mime 		= 'dir';
+				$mediathekItem -> exif 		= false;
+
+				$responseData[] = $mediathekItem;
+			}
+			elseif($_dirItem -> isFile())
+			{
+				$mediathekItem  = new stdClass;
+				$mediathekItem -> type 	    = 'FILE';
+				$mediathekItem -> name 	    = $_dirItem -> getFilename();
+				$mediathekItem -> size 		= $_dirItem -> getSize();
+				$mediathekItem -> extension = $_dirItem -> getExtension();
+				$mediathekItem -> mime 		= mime_content_type($_dirItem -> getPathname());
+
+				switch($mediathekItem -> mime)
+				{
+					case 'image/jpeg':
+
+						$mediathekItem -> exif	= exif_read_data($_dirItem -> getPathname(), 'EXIF');
+						break;
+
+					default:
+
+						$mediathekItem -> exif	= false;
+				}
+
+
+				
+
+
+
+				
+
+
+				$responseData[] = $mediathekItem;		
+			}
+
+
+			
+
+
+
+
+
+		}
+
 
 
 
@@ -145,7 +207,7 @@ class	controllerMediathek extends CController
 
 
 
-			tk::xhrResult(intval($validationErr), $validationMsg, $validationDta);	// contains exit call
+			tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
 		
 
 
