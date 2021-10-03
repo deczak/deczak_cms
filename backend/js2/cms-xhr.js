@@ -4,7 +4,6 @@ class	cmsXhr
 	constructor()
 	{
 	}
-
 	
 	request(requestURL, formData, callbackSuccess, xhrCallInstance, xhrAction, callbackError = null)
 	{		
@@ -35,13 +34,9 @@ class	cmsXhr
 		};
 		xhRequest.send(formData);
 	}
-	
-	
+		
  	onXHRError(xhrInstance, xhrCallInstance)
 	{
 		console.log('XHR error '+ xhrInstance.status +' when accessing '+ xhrInstance.responseURL);
 	}
-
-
-
 }
