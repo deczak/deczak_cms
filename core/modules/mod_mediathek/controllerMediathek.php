@@ -86,10 +86,6 @@ class	controllerMediathek extends CController
 	private function
 	logicXHRIndex(CDatabaseConnection &$_pDatabase, ?object $_xhrInfo, $_enableEdit = false, $_enableDelete = false, $_enableUpload = false)
 	{
-
-
-
-
 		$validationErr   = false;
 		$validationMsg   = 'OK';
 		$responseData    = [];
@@ -98,10 +94,6 @@ class	controllerMediathek extends CController
 		$requestList		 =	[];
 		$requestList[] 	 = 	[ "input" => 'q', "validate" => "strip_tags|!empty", "use_default" => true, "default_value" => false ]; 		
 		$pURLVariables -> retrieve($requestList, false, true);	
-
-
-
-
 
 		$_dirIterator 	= new DirectoryIterator(CMS_SERVER_ROOT.DIR_MEDIATHEK);
 		foreach($_dirIterator as $_dirItem)
@@ -114,104 +106,84 @@ class	controllerMediathek extends CController
 
 			if($_dirItem -> isDir())
 			{
-				$mediathekItem  = new stdClass;
-				$mediathekItem -> type      = 'DIR';
-				$mediathekItem -> name      = $_dirItem -> getFilename();
-				$mediathekItem -> size      = 0;
-				$mediathekItem -> extension = 'dir';
-				$mediathekItem -> mime 		= 'dir';
-				$mediathekItem -> exif 		= false;
+				$itemInfoLocation = CMS_SERVER_ROOT.DIR_MEDIATHEK.$_dirItem -> getFilename().'/info.json';
 
-				$responseData[] = $mediathekItem;
-			}
-			elseif($_dirItem -> isFile())
-			{
-				$mediathekItem  = new stdClass;
-				$mediathekItem -> type 	    = 'FILE';
-				$mediathekItem -> name 	    = $_dirItem -> getFilename();
-				$mediathekItem -> size 		= $_dirItem -> getSize();
-				$mediathekItem -> extension = $_dirItem -> getExtension();
-				$mediathekItem -> mime 		= mime_content_type($_dirItem -> getPathname());
-
-				switch($mediathekItem -> mime)
+				if(file_exists($itemInfoLocation))
 				{
-					case 'image/jpeg':
+					## is mediathek item
 
-						$mediathekItem -> exif	= exif_read_data($_dirItem -> getPathname(), 'EXIF');
-						break;
+					$itemInfo = file_get_contents($itemInfoLocation);
 
-					default:
+					if($itemInfo === false)
+					{
+						// TODO ERR
+						continue;
+					}
 
-						$mediathekItem -> exif	= false;
+					$itemInfo = json_decode($itemInfo);
+
+					if($itemInfo === null)
+					{
+						// TODO ERR
+						continue;
+					}
+
+					if(!empty($itemInfo -> redirect))
+					{
+						continue;
+					}
+						
+					$mediathekFilelocation 	= CMS_SERVER_ROOT.DIR_MEDIATHEK.$_dirItem -> getFilename().'/'.$itemInfo -> filename;
+					$mediathekFileInfo 		= new SplFileInfo($mediathekFilelocation);
+
+					$mediathekItem  = new stdClass;
+					$mediathekItem -> type 	    = 'FILE';
+					$mediathekItem -> name 	    = $mediathekFileInfo -> getFilename();
+					$mediathekItem -> size 		= $mediathekFileInfo -> getSize();
+					$mediathekItem -> extension = $mediathekFileInfo -> getExtension();
+
+					$mediathekItem -> mime 		= mime_content_type($mediathekFilelocation);
+
+					switch($mediathekItem -> mime)
+					{
+						case 'image/jpeg':
+
+							$mediathekItemExif	= (object)exif_read_data($mediathekFilelocation, 'EXIF');
+
+							$mediathekItem -> exif = new stdClass;
+
+							$mediathekItem -> exif -> Model			= $mediathekItemExif -> Model ?? '';
+							$mediathekItem -> exif -> LensModel		= $mediathekItemExif -> LensModel ?? $mediathekItemExif -> {'UndefinedTag:0xA434'} ?? '';
+							$mediathekItem -> exif -> Artist		= $mediathekItemExif -> Artist ?? '';
+							$mediathekItem -> exif -> Copyright		= $mediathekItemExif -> Copyright ?? '';
+
+							break;
+
+						default:
+
+							$mediathekItem -> exif	= false;
+					}
+
+					$responseData[] = $mediathekItem;	
 				}
+				else
+				{
+					## is regular directory
 
+					$mediathekItem  = new stdClass;
+					$mediathekItem -> type      = 'DIR';
+					$mediathekItem -> name      = $_dirItem -> getFilename();
+					$mediathekItem -> size      = 0;
+					$mediathekItem -> extension = 'dir';
+					$mediathekItem -> mime 		= 'dir';
+					$mediathekItem -> exif 		= false;
 
-				
-
-
-
-				
-
-
-				$responseData[] = $mediathekItem;		
+					$responseData[] = $mediathekItem;
+				}
 			}
-
-
-			
-
-
-
-
-
 		}
 
-
-
-
-/*
-
-			$modelCondition  = 	new CModelCondition();
-
-			if($_pURLVariables -> getValue("q") !== false)
-			{	
-				$conditionSource = 	explode(' ', $_pURLVariables -> getValue("q"));
-				foreach($conditionSource as $conditionItem)
-				{
-					$itemParts = explode(':', $conditionItem);
-
-					if(count($itemParts) == 1)
-					{
-						$modelCondition -> whereLike('tag_name', $itemParts[0]);
-					}
-					else
-					{
-						if( $itemParts[0] == 'cms-system-id' )
-							$itemParts[0] = 'tb_tags.tag_id';
-						
-						$modelCondition -> where($itemParts[0], $itemParts[1]);
-					}
-				}										
-			}
-
-			$modelCondition -> groupBy('tag_id');
-
-			if(!$this -> m_pModel -> load($_pDatabase, $modelCondition, MODEL_TAGS_ALLOCATION_COUNT))
-			{
-				$_bValidationMsg .= CLanguage::get() -> string('ERR_SQL_ERROR');
-				$_bValidationErr = true;
-			}											
-
-			$data = $this -> m_pModel -> getResult();
-
-*/
-
-
-
-			tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
-		
-
-
-
+		tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
 	}
 
 
