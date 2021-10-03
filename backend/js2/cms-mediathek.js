@@ -1,10 +1,15 @@
 
 class	cmsMediathek
 {
-	constructor(displaContainerId)
+	static VIEWMODE_LIST    = 1;
+	static VIEWMODE_SQUARES = 2;
+
+	static WORKMODE_SELECT  = 1;
+	static WORKMODE_EDIT    = 2;
+
+	constructor(displaContainerNode)
 	{
-		this.displaContainerId 	 = displaContainerId;
-		this.displaContainerNode = document.getElementById(displaContainerId);
+		this.displaContainerNode = displaContainerNode;
 		this.requestURL			 = CMS.SERVER_URL_BACKEND + 'mediathek/';
 	}
 
@@ -43,8 +48,14 @@ class	cmsMediathek
 
 
 
-	init()
+	init(viewMode, workMode, rootPath = '/')
 	{
+
+		console.log('cmsMediathek::init')
+		console.log(viewMode)
+		console.log(workMode)
+
+
 		this.requestItems();
 	}
 

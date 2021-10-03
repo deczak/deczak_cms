@@ -9,7 +9,7 @@ not yet finished
 
 <script>
 
-	let	mediathek = new cmsMediathek('container-mediathek');
+	let	mediathek = new cmsMediathek(document.getElementById('container-mediathek'));
 		mediathek.init();
 
 
@@ -17,9 +17,14 @@ not yet finished
 
 	document.getElementById('btn-test-1').onclick = function()
 	{
+
+		/*
+			must submit an info what happens after selection
+		*/
+
+
 		let mediathek = new cmsModalMediathek;
-			mediathek.create()
-					 .open();
+			mediathek.open(cmsMediathek.VIEWMODE_LIST, cmsMediathek.WORKMODE_SELECT);
 	};
 
 
