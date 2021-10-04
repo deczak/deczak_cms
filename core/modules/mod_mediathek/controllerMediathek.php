@@ -95,6 +95,9 @@ class	controllerMediathek extends CController
 		$requestList[] 	 = 	[ "input" => 'q', "validate" => "strip_tags|!empty", "use_default" => true, "default_value" => false ]; 		
 		$pURLVariables -> retrieve($requestList, false, true);	
 
+		$itemsListFiles  = [];
+		$itemsListDirs   = [];
+
 		$_dirIterator 	= new DirectoryIterator(CMS_SERVER_ROOT.DIR_MEDIATHEK);
 		foreach($_dirIterator as $_dirItem)
 		{
@@ -164,7 +167,7 @@ class	controllerMediathek extends CController
 							$mediathekItem -> exif	= false;
 					}
 
-					$responseData[] = $mediathekItem;	
+					$itemsListFiles[] = $mediathekItem;	
 				}
 				else
 				{
@@ -178,10 +181,12 @@ class	controllerMediathek extends CController
 					$mediathekItem -> mime 		= 'dir';
 					$mediathekItem -> exif 		= false;
 
-					$responseData[] = $mediathekItem;
+					$itemsListDirs[] = $mediathekItem;
 				}
 			}
 		}
+
+		$responseData = array_merge($itemsListDirs, $itemsListFiles);
 
 		tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
 	}

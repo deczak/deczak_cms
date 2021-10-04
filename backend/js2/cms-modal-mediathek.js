@@ -4,11 +4,15 @@ class	cmsModalMediathek extends cmsModal
 	constructor()
 	{
 		super();
+		this.rootPath = '/';
 	}
 
-	open(viewMode, workMode, rootPath = '/')
+	open(viewMode, workMode)
 	{
 
+console.log('cmsModalMediathek::open');
+console.log(viewMode);
+console.log(workMode);
 
 		let content = document.createElement('div');
 		
@@ -29,11 +33,22 @@ class	cmsModalMediathek extends cmsModal
 
 
 		let	mediathek = new cmsMediathek(content);
-			mediathek.init(viewMode, workMode, rootPath);
+			mediathek.setEventNameOnSelected(this.eventNameOnSelected);
+			mediathek.init(viewMode, workMode, this.rootPath);
 
 
 
 
+	}
+
+	setRootPath(rootPath)
+	{
+		this.rootPath = rootPath;
+	}
+
+	setEventNameOnSelected(eventName)
+	{
+		this.eventNameOnSelected = eventName;
 	}
 
 

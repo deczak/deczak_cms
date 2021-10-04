@@ -55,8 +55,15 @@ class	cmsMediathek
 		console.log(viewMode)
 		console.log(workMode)
 
+		this.viewMode = viewMode
+		this.workMode = workMode
 
 		this.requestItems();
+	}
+
+	setEventNameOnSelected(eventName)
+	{
+		this.eventNameOnSelected = eventName;
 	}
 
 	requestItems()
@@ -77,20 +84,90 @@ class	cmsMediathek
 	onXHRSuccessRequestItems(response, srcInstance)
 	{
 
+		if(response.error === 1)
+		{
+			// TODO
+			return;
+		}
+
 
 		console.log('onXHRSuccessRequestItems');
 		console.log(response);
 		console.log(srcInstance);
 
-		srcInstance._generateHTML();
+		let contentNode = document.createElement('div');
+console.log(srcInstance.viewMode);
+console.log(srcInstance.VIEWMODE_LIST);
+		switch(srcInstance.viewMode)
+		{
+			case cmsMediathek.VIEWMODE_LIST:
+
+				srcInstance._generateHTML_List(response.data, contentNode);
+
+				break;
+
+			case cmsMediathek.VIEWMODE_SQUARES:
+
+				srcInstance._generateHTML_Squares(response.data, contentNode);
+
+				break;
+		}
+
+
+		console.log(contentNode.innerHTML);
+
+		srcInstance.displaContainerNode.innerHTML = contentNode.innerHTML;
+
+
+
+/*
+
+	eventlistener to contentNode for item events
+
+*/
+
 
 	}
 
-	_generateHTML()
+
+	_generateHTML_Squares(itemsList, contentNode)
 	{
+		for(let i = 0; i < itemsList.length; i++)
+		{
 
-		this.displaContainerNode.innerHTML = "m'kay";
+		}
+	}
+
+	_generateHTML_List(itemsList, contentNode)
+	{
+console.log('_generateHTML_List');
+		let tableBodyHTML = '';
+
+console.log(itemsList);
+console.log(itemsList.length);
+		for(let i in itemsList)
+		{
+			if(typeof itemsList[i] === 'function')
+				continue;
+				
+console.log(itemsList[i]);
+
+			tableBodyHTML += '<tr>';
+			tableBodyHTML += '<td>'+ itemsList[i].name +'</td>';
+			tableBodyHTML += '<td>'+ itemsList[i].size +'</td>';
+			tableBodyHTML += '</tr>';
+		}
+
+
+		let tableHeadHTML  = '';
+		 	tableHeadHTML += '<tr>';
+		 	tableHeadHTML += '<th>Filename</th>';
+		 	tableHeadHTML += '<th>Filesize</th>';
+		 	tableHeadHTML += '</tr>';
+
+		contentNode.innerHTML = '<table>'+ tableHeadHTML + tableBodyHTML +'</table>';
 
 	}
+
 
 }

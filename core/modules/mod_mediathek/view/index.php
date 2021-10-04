@@ -10,7 +10,8 @@ not yet finished
 <script>
 
 	let	mediathek = new cmsMediathek(document.getElementById('container-mediathek'));
-		mediathek.init();
+		mediathek.setEventNameOnSelected('test-mediathek-on-selected');
+		mediathek.init(cmsMediathek.VIEWMODE_LIST, cmsMediathek.WORKMODE_SELECT);
 
 
 
@@ -24,9 +25,22 @@ not yet finished
 
 
 		let mediathek = new cmsModalMediathek;
+			mediathek.setEventNameOnSelected('test-mediathek-on-selected');
 			mediathek.open(cmsMediathek.VIEWMODE_LIST, cmsMediathek.WORKMODE_SELECT);
 	};
 
+
+
+function testIt(event)
+{
+	console.log('testIt');
+	console.log(event);
+	console.log(event.detail);
+	console.log(this);
+}
+
+
+  window.addEventListener('test-mediathek-on-selected', testIt);
 
 </script>
 
