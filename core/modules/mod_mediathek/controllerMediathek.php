@@ -92,13 +92,29 @@ class	controllerMediathek extends CController
 
 		$pURLVariables	 =	new CURLVariables();
 		$requestList		 =	[];
-		$requestList[] 	 = 	[ "input" => 'q', "validate" => "strip_tags|!empty", "use_default" => true, "default_value" => false ]; 		
+		$requestList[] 	 = 	[ "input" => 'path', "validate" => "strip_tags|!empty", "use_default" => true, "default_value" => '/' ]; 		
 		$pURLVariables -> retrieve($requestList, false, true);	
+
+		$urlVarList		 = $pURLVariables -> getArray();
 
 		$itemsListFiles  = [];
 		$itemsListDirs   = [];
 
-		$_dirIterator 	= new DirectoryIterator(CMS_SERVER_ROOT.DIR_MEDIATHEK);
+		$mediathekPath	 = $urlVarList['path'];
+
+		$mediathekPath = trim(str_replace('..', '',$mediathekPath), '/');
+		$mediathekPath = explode('/', $mediathekPath);
+		$mediathekPath = array_filter($mediathekPath, 'strlen');
+		$mediathekPath = implode('/', $mediathekPath).'/';
+
+
+// TODO .. try catch
+
+
+		$_dirIterator 	= new DirectoryIterator(CMS_SERVER_ROOT.DIR_MEDIATHEK.$mediathekPath);
+
+
+
 		foreach($_dirIterator as $_dirItem)
 		{
 			if($_dirItem -> isDot())
@@ -109,7 +125,7 @@ class	controllerMediathek extends CController
 
 			if($_dirItem -> isDir())
 			{
-				$itemInfoLocation = CMS_SERVER_ROOT.DIR_MEDIATHEK.$_dirItem -> getFilename().'/info.json';
+				$itemInfoLocation = CMS_SERVER_ROOT.DIR_MEDIATHEK.$mediathekPath .$_dirItem -> getFilename().'/info.json';
 
 				if(file_exists($itemInfoLocation))
 				{
@@ -136,7 +152,7 @@ class	controllerMediathek extends CController
 						continue;
 					}
 						
-					$mediathekFilelocation 	= CMS_SERVER_ROOT.DIR_MEDIATHEK.$_dirItem -> getFilename().'/'.$itemInfo -> filename;
+					$mediathekFilelocation 	= CMS_SERVER_ROOT.DIR_MEDIATHEK.$mediathekPath.$_dirItem -> getFilename().'/'.$itemInfo -> filename;
 					$mediathekFileInfo 		= new SplFileInfo($mediathekFilelocation);
 
 					$mediathekItem  = new stdClass;
@@ -144,8 +160,8 @@ class	controllerMediathek extends CController
 					$mediathekItem -> name 	    = $mediathekFileInfo -> getFilename();
 					$mediathekItem -> size 		= $mediathekFileInfo -> getSize();
 					$mediathekItem -> extension = $mediathekFileInfo -> getExtension();
-
 					$mediathekItem -> mime 		= mime_content_type($mediathekFilelocation);
+					$mediathekItem -> path 		= $mediathekPath.$_dirItem -> getFilename();
 
 					switch($mediathekItem -> mime)
 					{
@@ -179,6 +195,7 @@ class	controllerMediathek extends CController
 					$mediathekItem -> size      = 0;
 					$mediathekItem -> extension = 'dir';
 					$mediathekItem -> mime 		= 'dir';
+					$mediathekItem -> path 		= $mediathekPath.$_dirItem -> getFilename();
 					$mediathekItem -> exif 		= false;
 
 					$itemsListDirs[] = $mediathekItem;

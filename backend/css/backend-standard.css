@@ -128,20 +128,21 @@ div.cms-modal {
 div.cms-modal > div.cms-modal-inner{
 	background-color: rgb(255,255,255);
 	outline: solid 2px rgba(0,0,0,0.4);
-	padding: 10px;
+
 	width: 95%;
 	max-width: 700px;
 }
 
-div.cms-modal hr {
+div.cms-modal hr { display:none;
 	margin: 10px 0px;
 	border: none;
     border-bottom: 1px solid rgba(0,0,0,0.4);
 }
 
-div.cms-modal h4 {
-	font-weight:400;
+div.cms-modal h4 {	padding: 10px;
+	font-weight:400;background-color: gold;
 }
+div.cms-modal .cms-modal-content-userdefined {	padding: 10px;}
 
 div.cms-modal p {
 	margin:15px 0px;
@@ -150,7 +151,7 @@ div.cms-modal p {
 div.cms-modal div.cms-modal-buttons-bottom {
 	display: flex;
 	justify-content: space-between;
-	align-items: center;
+	align-items: center;	padding: 10px;background: gainsboro;
 }
 
 div.cms-modal div.cms-modal-buttons-bottom button {

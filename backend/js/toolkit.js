@@ -1,5 +1,5 @@
 
-class cmstk
+class cmstkOld
 {
 	static
 	getNodeIndex(childNode)

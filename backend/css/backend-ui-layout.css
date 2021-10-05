@@ -159,6 +159,23 @@ button.ui,
 .ui.pick-item span { font-size: 1.2em; font-weight: bold; position: absolute; top: 0px; right: 0px; height: 100%; padding: 0px 9px; cursor: pointer; }
 .ui.pick-item span:hover { background:rgba(255,255,255,0.2); }
 
-
 [hidden] { display:none; } 
 
+
+/*
+**	Mediathek
+*/
+
+table.mediathek-list { width:100%; border-spacing: 0px; font-size:0.9em; }
+table.mediathek-list tr .fileicon { text-align:center; width:25px; padding:0px 3px 0px 3px; }
+table.mediathek-list tr .filename { text-align:left; }
+table.mediathek-list tr .filetype { text-align:left; }
+table.mediathek-list tr .filesize { text-align:right; }
+table.mediathek-list thead th { font-size:0.9em; font-weight:normal; }
+table.mediathek-list th,
+table.mediathek-list td { padding:5px 13px; }
+table.mediathek-list i { pointer-events:none; }
+table.mediathek-list th:nth-of-type(1):not(:empty):hover { background-color:rgba(0,0,0,0.07); cursor:pointer; font-weight:bold; }
+
+
+div.mediathek-main.mediathek-work-select table.mediathek-list tbody tr:hover { background-color:rgba(0,0,0,0.07); cursor:pointer; }

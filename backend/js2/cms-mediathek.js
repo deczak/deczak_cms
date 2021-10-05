@@ -7,9 +7,9 @@ class	cmsMediathek
 	static WORKMODE_SELECT  = 1;
 	static WORKMODE_EDIT    = 2;
 
-	constructor(displaContainerNode)
+	constructor(displayContainerNode)
 	{
-		this.displaContainerNode = displaContainerNode;
+		this.displayContainerNode = displayContainerNode;
 		this.requestURL			 = CMS.SERVER_URL_BACKEND + 'mediathek/';
 	}
 
@@ -48,15 +48,12 @@ class	cmsMediathek
 
 
 
-	init(viewMode, workMode, rootPath = '/')
+	init(viewMode, workMode, rootPath = '')
 	{
-
-		console.log('cmsMediathek::init')
-		console.log(viewMode)
-		console.log(workMode)
-
-		this.viewMode = viewMode
-		this.workMode = workMode
+		this.viewMode 	  = viewMode;
+		this.workMode 	  = workMode;
+		this.rootPath	  = rootPath;
+		this.activePath   = rootPath;
 
 		this.requestItems();
 	}
@@ -68,70 +65,87 @@ class	cmsMediathek
 
 	requestItems()
 	{
-
-
 		let	formData  = new FormData;
-
-
+			formData.append('path', this.activePath);
 
 		let	xhRequest = new cmsXhr;
 			xhRequest.request(this.requestURL, formData, this.onXHRSuccessRequestItems, this, 'index');
-
-
 	}
 
 
 	onXHRSuccessRequestItems(response, srcInstance)
 	{
-
 		if(response.error === 1)
 		{
 			// TODO
 			return;
 		}
 
+		let itemsNode = document.createElement('div');
 
-		console.log('onXHRSuccessRequestItems');
-		console.log(response);
-		console.log(srcInstance);
 
-		let contentNode = document.createElement('div');
-console.log(srcInstance.viewMode);
-console.log(srcInstance.VIEWMODE_LIST);
 		switch(srcInstance.viewMode)
 		{
 			case cmsMediathek.VIEWMODE_LIST:
 
-				srcInstance._generateHTML_List(response.data, contentNode);
+				srcInstance._generateHTML_List(response.data, itemsNode);
+
 
 				break;
 
 			case cmsMediathek.VIEWMODE_SQUARES:
 
-				srcInstance._generateHTML_Squares(response.data, contentNode);
+				srcInstance._generateHTML_Squares(response.data, itemsNode);
+
 
 				break;
 		}
 
 
-		console.log(contentNode.innerHTML);
-
-		srcInstance.displaContainerNode.innerHTML = contentNode.innerHTML;
-
-
-
-/*
-
-	eventlistener to contentNode for item events
-
-*/
+		let mediathekNode = document.createElement('div');
+			mediathekNode.classList.add('mediathek-main');
+			mediathekNode.append(itemsNode);
 
 
+		switch(srcInstance.workMode)
+		{
+			case cmsMediathek.WORKMODE_SELECT:
+
+				mediathekNode.classList.add('mediathek-work-select');
+				break;
+
+			case cmsMediathek.WORKMODE_EDIT:
+
+				mediathekNode.classList.add('mediathek-work-edit');
+				break;
+		}
+
+
+
+
+
+
+
+
+
+
+
+
+  			mediathekNode.addEventListener('click', function(event) { srcInstance._onClick(event, srcInstance); });
+
+
+
+	
+			srcInstance.displayContainerNode.innerHTML = '';
+			srcInstance.displayContainerNode.append(mediathekNode);
 	}
-
 
 	_generateHTML_Squares(itemsList, contentNode)
 	{
+
+		console.log('_generateHTML_Squares');
+		console.log(itemsList);
+
 		for(let i = 0; i < itemsList.length; i++)
 		{
 
@@ -140,34 +154,144 @@ console.log(srcInstance.VIEWMODE_LIST);
 
 	_generateHTML_List(itemsList, contentNode)
 	{
-console.log('_generateHTML_List');
-		let tableBodyHTML = '';
+		console.log('_generateHTML_List');
+		console.log(itemsList);
 
-console.log(itemsList);
-console.log(itemsList.length);
+		let tableBodyNode = document.createElement('tbody');
+
 		for(let i in itemsList)
 		{
 			if(typeof itemsList[i] === 'function')
 				continue;
-				
-console.log(itemsList[i]);
 
-			tableBodyHTML += '<tr>';
-			tableBodyHTML += '<td>'+ itemsList[i].name +'</td>';
-			tableBodyHTML += '<td>'+ itemsList[i].size +'</td>';
-			tableBodyHTML += '</tr>';
+			let itemRowNode = document.createElement('tr');
+				itemRowNode.classList.add('item-'+ (itemsList[i].extension == 'dir' ? 'dir' : 'file'));
+				itemRowNode.setAttribute('data-event-click', 'item-'+ (itemsList[i].extension == 'dir' ? 'dir' : 'file'));
+				itemRowNode.setAttribute('data-item-path', itemsList[i].path);
+				itemRowNode.itemInfo = JSON.parse(JSON.stringify(itemsList[i]));
+
+			let itemIcon = 'fas fa-file';
+			switch(itemsList[i].extension)
+			{
+				case 'dir':	itemIcon = 'fas fa-folder'; break;
+				case 'png':	
+				case 'gif':	
+				case 'webp':	
+				case 'jpeg':	
+				case 'jpg':	itemIcon = 'fas fa-file-image'; break;
+				case 'pdf':	itemIcon = 'fas fa-file-pdf'; break;
+				case 'zip':	itemIcon = 'fas fa-file-archive'; break;
+			}
+
+		let itemRowHTML = '';
+			itemRowHTML += '<td class="fileicon"><i class="'+ itemIcon +'"></i></td>';
+			itemRowHTML += '<td class="filename">'+ itemsList[i].name +'</td>';
+			itemRowHTML += '<td class="filetype">'+ itemsList[i].extension +'</td>';
+			itemRowHTML += '<td class="filesize">'+ (itemsList[i].size ?  cmstk.formatFilesize(itemsList[i].size) : '') +'</td>';
+	
+			itemRowNode.innerHTML = itemRowHTML;
+
+			tableBodyNode.append(itemRowNode);
 		}
+
+		let tableHeadNode = document.createElement('thead');
 
 
 		let tableHeadHTML  = '';
 		 	tableHeadHTML += '<tr>';
-		 	tableHeadHTML += '<th>Filename</th>';
-		 	tableHeadHTML += '<th>Filesize</th>';
+		if(this.activePath == '')
+		 	tableHeadHTML += '<th class="fileicon"></th>';
+		else
+		 	tableHeadHTML += '<th class="fileicon" data-event-click="item-ctr-dir-up"><i class="fas fa-chevron-up"></i></th>';
+		 	tableHeadHTML += '<th class="filename">Filename</th>';
+		 	tableHeadHTML += '<th class="filetype">File type</th>';
+		 	tableHeadHTML += '<th class="filesize">File size</th>';
 		 	tableHeadHTML += '</tr>';
+			tableHeadNode.innerHTML = tableHeadHTML;
 
-		contentNode.innerHTML = '<table>'+ tableHeadHTML + tableBodyHTML +'</table>';
+		let tableNode = document.createElement('table');
+			tableNode.classList.add('mediathek', 'mediathek-list');
+			tableNode.append(tableHeadNode, tableBodyNode);
 
+		contentNode.append(tableNode);
 	}
 
+
+	_onClick(event, srcInstance)
+	{
+
+		console.log('_onClick');
+		console.log(event);
+		console.log(event.target);
+		console.log(srcInstance);
+
+
+/*
+
+... item tr contains itemInfo object with item data
+
+
+
+*/
+
+
+
+
+
+		let targetNode = event.target;
+
+
+		if(srcInstance.viewMode == cmsMediathek.VIEWMODE_LIST && (event.target.tagName == 'TD'))
+		{
+			// In list mode, check for click on TD to change the targetNode, the info is in the TR
+
+			targetNode = event.target.parentNode;
+
+		
+		}
+
+
+		// check event type for targetNode, is he eligible for click event
+
+
+		if(targetNode.hasAttribute('data-event-click'))
+		{
+
+			// react on click key word
+			switch(targetNode.getAttribute('data-event-click'))
+			{
+				case 'item-dir':
+
+						// click on dir item always open this dir
+						
+
+						srcInstance.activePath = targetNode.getAttribute('data-item-path') + '';
+						srcInstance.requestItems();
+
+
+
+					break;
+
+
+				case 'item-ctr-dir-up':
+
+						// click on dir move up
+						console.log(srcInstance.activePath);
+
+						if(srcInstance.activePath == '')
+							break;
+			
+						srcInstance.activePath = srcInstance.activePath.substring(0, srcInstance.activePath.lastIndexOf('/')) + '';
+						srcInstance.requestItems();
+
+					break;
+			}
+
+
+
+		}
+
+
+	}
 
 }

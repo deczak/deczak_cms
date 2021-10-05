@@ -49,6 +49,8 @@ class	cmsModal
 			nodeModalChild.append(titleHline);
 		}
 
+		nodeContent.classList.add('cms-modal-content-userdefined')
+
 		nodeModalChild.append(nodeContent);
 
 		let hline = document.createElement('hr');
