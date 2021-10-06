@@ -154,8 +154,6 @@ class	cmsMediathek
 
 	_generateHTML_List(itemsList, contentNode)
 	{
-		console.log('_generateHTML_List');
-		console.log(itemsList);
 
 		let tableBodyNode = document.createElement('tbody');
 
@@ -219,34 +217,13 @@ class	cmsMediathek
 
 	_onClick(event, srcInstance)
 	{
-
-		console.log('_onClick');
-		console.log(event);
-		console.log(event.target);
-		console.log(srcInstance);
-
-
-/*
-
-... item tr contains itemInfo object with item data
-
-
-
-*/
-
-
-
-
-
 		let targetNode = event.target;
-
 
 		if(srcInstance.viewMode == cmsMediathek.VIEWMODE_LIST && (event.target.tagName == 'TD'))
 		{
 			// In list mode, check for click on TD to change the targetNode, the info is in the TR
 
 			targetNode = event.target.parentNode;
-
 		
 		}
 
@@ -273,10 +250,18 @@ class	cmsMediathek
 					break;
 
 
+
+				case 'item-file':
+
+							targetNode.dispatchEvent(new CustomEvent(srcInstance.eventNameOnSelected, { detail: targetNode.itemInfo, bubbles: true  }));
+
+					break;
+
+
+
 				case 'item-ctr-dir-up':
 
 						// click on dir move up
-						console.log(srcInstance.activePath);
 
 						if(srcInstance.activePath == '')
 							break;

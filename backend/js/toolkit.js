@@ -204,20 +204,6 @@ class cmstkOld
 		}
 	}
 
-	static
-	getRandomId()
-	{
-		//return Math.random().toString(36).substring(2, 20) + Math.random().toString(36).substring(2, 20);
-		
-		var result           = '';
-		var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_.:~*!?';
-		var charactersLength = characters.length;
-		for ( var i = 0; i < 40; i++ )
-		{
-			result += characters.charAt(Math.floor(Math.random() * charactersLength));
-		}
-		return result;
-	}
 		
     static
     in_array(needle, haystack, strict = false)
@@ -234,76 +220,3 @@ class cmstkOld
         return false;
     }
 }
-
-class cmsTabInstance
-{
-	static
-	getId()
-	{
-		let lockId = sessionStorage.getItem('lockId');
-		if(lockId !== null)
-			return lockId;
-
-		lockId = cmstk.getRandomId();
-		sessionStorage.setItem('lockId', lockId);
-		return lockId;
-	}
-
-	static
-	register()
-	{             
-		let tabId =  cmsTabInstance.getId();
-		let tabIdRegister = localStorage.getItem('tabIdRegister');
-		if(tabIdRegister === null)
-			tabIdRegister = [];
-		else
-			tabIdRegister = tabIdRegister.split('|');
-		if(cmsTabInstance.isRegistered(tabId, tabIdRegister))
-		{
-			tabId = cmstk.getRandomId();
-			sessionStorage.setItem('lockId', tabId);
-		}
-		else
-		{
-			tabIdRegister.push(tabId);
-		}
-		tabIdRegister = tabIdRegister.join('|');
-		localStorage.setItem('tabIdRegister', tabIdRegister);
-	}
-
-	static
-	unregister()
-	{             
-		let tabId =  cmsTabInstance.getId();
-		let tabIdRegister = localStorage.getItem('tabIdRegister');
-		if(tabIdRegister === null)
-			return;
-		tabIdRegister = tabIdRegister.split('|');
-		let newRegister    = [];
-		for(let i = 0; i < tabIdRegister.length; i++)
-		{
-			if(tabIdRegister[i] !== tabId)
-			{
-				newRegister.push(tabIdRegister[i]);
-			}
-		}
-		newRegister = newRegister.join('|');
-		localStorage.setItem('tabIdRegister', newRegister);
-	}
-
-	static
-	isRegistered(tabId, tabIdRegister)
-	{
-		for(let i = 0; i < tabIdRegister.length; i++)
-		{
-			if(tabIdRegister[i] === tabId)
-			{
-				return true;
-			}
-		}
-		return false;
-	}
-}
- 
-cmsTabInstance.register();
-addEventListener("beforeunload", function(){ cmsTabInstance.unregister() }, false);

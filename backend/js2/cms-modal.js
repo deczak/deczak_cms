@@ -104,6 +104,10 @@ class	cmsModal
 
 		this.nodeModal.appendChild(nodeModalChild);
 
+		let srcInstance = this;
+
+		this.nodeModal.addEventListener('cms-modal-close', function(event) { srcInstance.close(event, srcInstance); });
+
 		return this;
 	}
 
@@ -130,6 +134,9 @@ class	cmsModal
 		let bodyNode = document.querySelector('body');
 			bodyNode.appendChild(this.nodeModal);
 			bodyNode.classList.add('noScroll');
+
+
+
 
 	}
 

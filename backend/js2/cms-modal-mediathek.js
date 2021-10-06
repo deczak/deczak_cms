@@ -5,16 +5,31 @@ class	cmsModalMediathek extends cmsModal
 	{
 		super();
 		this.rootPath = '';
+
+		this.eventNameOnSelected = null;
 	}
 
 	open(viewMode, workMode)
 	{
+		let srcInstance = this;
+
 		let content = document.createElement('div');
+
+
 	
 		super.addButton(new cmsModalCtrlButton(cmsModal.BTN_LOCATION.BOTTOM_LEFT, 'Close', null, 'fas fa-times'));
 		super.setTitle('Mediathek')
 		super.create(content);
 		super.open();
+
+
+
+		if(this.eventNameOnSelected !== null)
+		{
+  			
+			content.addEventListener(this.eventNameOnSelected, function(event) { srcInstance._onEventItemSelected(event, srcInstance); });
+		}
+
 
 		let	mediathek = new cmsMediathek(content);
 			mediathek.setEventNameOnSelected(this.eventNameOnSelected);
@@ -29,6 +44,16 @@ class	cmsModalMediathek extends cmsModal
 	setEventNameOnSelected(eventName)
 	{
 		this.eventNameOnSelected = eventName;
+	}
+
+	_onEventItemSelected(event, srcInstance)
+	{
+		
+
+		event.target.dispatchEvent(new CustomEvent('cms-modal-close', { detail: null, bubbles: true }));
+
+
+
 	}
 }
 

@@ -183,6 +183,16 @@ class	controllerMediathek extends CController
 							$mediathekItem -> exif	= false;
 					}
 
+
+			
+
+
+
+
+
+
+
+
 					$itemsListFiles[] = $mediathekItem;	
 				}
 				else
