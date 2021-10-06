@@ -13,6 +13,7 @@
 	BEPE_PANEL_GROUP_INFORMATION	=	&nbsp;
 	BEPE_PANEL_GROUP_NAME			=	Name & Beschreibung
 	BEPE_PANEL_GROUP_TEMPLATE		=	Template
+	BEPE_PANEL_GROUP_IMAGE			=	Seitenbild
 	BEPE_PANEL_GROUP_VISIBILTY		=	Sichbarkeit & Zugriff
 	BEPE_PANEL_GROUP_EXTSETTINGS	= 	Extended Settings
 	BEPE_PANEL_GROUP_TAGSCATS		= 	Erweiterte Einstellungen

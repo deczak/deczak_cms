@@ -113,6 +113,51 @@
 				</div>
 			</fieldset>	
 
+
+			<!-- page image -->
+
+			<fieldset class="ui fieldset submit-able">
+				<legend><?= CLanguage::GET() -> STRING('BEPE_PANEL_GROUP_IMAGE'); ?></legend>
+				<div style="padding-top:10px;">
+
+					<div class="input width-100">
+
+<button id="btn-test-1">Select Modal Test</button> 
+						<script>
+
+
+
+
+
+	document.getElementById('btn-test-1').onclick = function()
+	{
+
+		let mediathek = new cmsModalMediathek;
+			mediathek.setEventNameOnSelected('test-mediathek-on-selected');
+			mediathek.open(cmsMediathek.VIEWMODE_LIST, cmsMediathek.WORKMODE_SELECT);
+	};
+
+
+
+function testIt(event)
+{
+	console.log(event.detail);
+}
+
+
+  window.addEventListener('test-mediathek-on-selected', testIt);
+
+						</script>
+
+
+						
+					</div>
+
+				</div>
+			</fieldset>	
+
+
+
 			<!-- visibilty settings -->
 
 			<fieldset class="ui fieldset submit-able">
