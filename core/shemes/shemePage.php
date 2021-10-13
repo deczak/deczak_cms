@@ -26,6 +26,7 @@ class shemePage extends CSheme
 		$this -> addColumn('publish_expired', DB_COLUMN_TYPE_TINYINT) -> setAttribute(DB_COLUMN_ATTR_UNSIGNED) -> setDefault('0');
 
 		$this -> addColumn('page_auth', DB_COLUMN_TYPE_STRING) -> setLength(25)-> setDefault('NULL');
+		$this -> addColumn('page_image', DB_COLUMN_TYPE_INT) -> setAttribute(DB_COLUMN_ATTR_UNSIGNED);
 
 
 		$this -> addColumn('create_time', DB_COLUMN_TYPE_BIGINT) -> setAttribute(DB_COLUMN_ATTR_UNSIGNED);

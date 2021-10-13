@@ -120,38 +120,121 @@
 				<legend><?= CLanguage::GET() -> STRING('BEPE_PANEL_GROUP_IMAGE'); ?></legend>
 				<div style="padding-top:10px;">
 
-					<div class="input width-100">
+					<div class="input width-100" id="panel-site-image-selector">
 
-<button id="btn-test-1">Select Modal Test</button> 
+						<div>
+
+							<div class="imagebox-def-bg"><div class="imagebox-preview" style="background-image:url('<?= $pageRequest -> page_image_url; ?>')"></div></div>
+
+
+							<input type="hidden"  id="panel-site-image-id" name="page_image" value="<?php echo $pageRequest -> page_image; ?>">
+
+							<div  class="button-panel">
+								<button class="ui button icon labeled button-select-mediathek-item" id="trigger-panel-siteimage-select"><span><i class="far fa-image"></i></span>Select Image</button> 
+								<button class="ui button icon button-remove-mediathek-item" id="trigger-panel-siteimage-remove"><i class="far fa-trash-alt"></i></button> 
+							</div>
+
+						</div>
+
+
 						<script>
 
+							console.log(<?= json_encode($pageRequest); ?>);
 
+							document.getElementById('trigger-panel-siteimage-select').onclick = function()
+							{
 
+								let mediathek = new cmsModalMediathek;
+									mediathek.setEventNameOnSelected('test-mediathek-on-selected');
+									mediathek.open(cmsMediathek.VIEWMODE_LIST, cmsMediathek.WORKMODE_SELECT);
 
+							};
 
-	document.getElementById('btn-test-1').onclick = function()
-	{
+							document.getElementById('trigger-panel-siteimage-remove').onclick = function()
+							{
 
-		let mediathek = new cmsModalMediathek;
-			mediathek.setEventNameOnSelected('test-mediathek-on-selected');
-			mediathek.open(cmsMediathek.VIEWMODE_LIST, cmsMediathek.WORKMODE_SELECT);
-	};
+								let previewBox = document.getElementById('panel-site-image-selector').querySelector('.imagebox-preview');
+									previewBox.style.backgroundImage = "";
 
+								document.getElementById('panel-site-image-id').value = 0;
 
+							};
 
-function testIt(event)
-{
-	console.log(event.detail);
-}
+							function testIt(event)
+							{
+								if(event.detail === null || event.detail.path.length === 0)
+									return;
+								
+								let previewBox = document.getElementById('panel-site-image-selector').querySelector('.imagebox-preview');
+									previewBox.style.backgroundImage = "url('"+ CMS.SERVER_URL + "mediathek" + event.detail.path +"?binary&size=small')";
+								
+								document.getElementById('panel-site-image-id').value = event.detail.media_id;
+							}
 
-
-  window.addEventListener('test-mediathek-on-selected', testIt);
+							window.addEventListener('test-mediathek-on-selected', testIt);
 
 						</script>
 
+						<style>
 
-						
+							#panel-site-image-selector .button-panel {
+
+								display:flex;
+
+								}
+
+							#panel-site-image-selector .imagebox-def-bg {
+
+							background: #445963;
+
+								background-image: 
+									linear-gradient(transparent 11px, rgba(220,220,200,.8) 12px, transparent 12px),
+									linear-gradient(90deg, transparent 11px, rgba(220,220,200,.8) 12px, transparent 12px);
+								background-size: 100% 12px, 12px 100%;
+								width:100%;
+								height:170px;
+								margin:0px;
+								border: 1px solid rgba(220,220,200,.8);
+								
+								}
+
+							#panel-site-image-selector .button-select-mediathek-item {
+
+								width:100%; 
+								border: 0px; 
+								border-top-left-radius:0px !important; 
+								border-top-right-radius:0px !important; 
+								border-bottom-right-radius:0px !important;
+
+								}
+
+							#panel-site-image-selector .button-remove-mediathek-item {
+
+								border: 0px; 
+								width:40px; 
+								background:red; 
+								flex-shrink:0; 
+								color:white;
+								border-top-left-radius:0px !important; 
+								border-top-right-radius:0px !important; 
+								border-bottom-left-radius:0px !important;
+
+								}
+
+							#panel-site-image-selector .imagebox-preview {
+
+								width:100%;
+								height:100%;
+								background-position:center center;
+								background-size:cover;
+
+								}
+
+						</style>
+
+
 					</div>
+						
 
 				</div>
 			</fieldset>	

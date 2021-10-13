@@ -27,6 +27,7 @@ class shemeSitemap extends CSheme
 		$this -> addColumn('offspring'		, DB_COLUMN_TYPE_INT);
 		$this -> addColumn('page_auth'		, DB_COLUMN_TYPE_STRING);
 		$this -> addColumn('menu_follow'	, DB_COLUMN_TYPE_INT);
+		$this -> addColumn('page_image'		, DB_COLUMN_TYPE_INT);
 		$this -> addColumn('publish_from'	, DB_COLUMN_TYPE_INT);
 		$this -> addColumn('publish_until'	, DB_COLUMN_TYPE_INT);
 		$this -> addColumn('publish_expired', DB_COLUMN_TYPE_INT);

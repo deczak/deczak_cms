@@ -238,7 +238,6 @@ div.cms-modal .ui.button:not(:last-child) {
 
 
 
-
 /*
 **	Mediathek
 */
@@ -256,3 +255,7 @@ table.mediathek-list th:nth-of-type(1):not(:empty):hover { background-color:rgba
 
 
 div.mediathek-main.mediathek-work-select table.mediathek-list tbody tr:hover { background-color:rgba(0,0,0,0.07); cursor:pointer; }
+
+div.mediathek-main div.controls { display:flex; justify-content:space-between; align-items:center; }
+div.mediathek-main div.controls > div.right { text-align:right; }
+div.mediathek-main div.controls button.button-import { width: 100px; }

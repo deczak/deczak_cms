@@ -248,6 +248,7 @@ class	controllerPages extends CController
 										$_request[] 	 = 	[	"input" => "crawler_follow", 	"validate" => "strip_tags|!empty" ]; 	
 										$_request[] 	 = 	[	"input" => "menu_follow", 		"validate" => "strip_tags|!empty" ]; 	
 										$_request[] 	 = 	[	"input" => "page_id", 			"validate" => "strip_tags|!empty" , 		"use_default" => true, "default_value" => false ]; 	
+										$_request[] 	 = 	[	"input" => "page_image",		"validate" => "strip_tags|trim|!empty" , 	"use_default" => true, "default_value" => 0 ]; 	
 										$_request[] 	 = 	[	"input" => "publish_from",		"validate" => "strip_tags|trim|!empty" , 	"use_default" => true, "default_value" => 0 ]; 	
 										$_request[] 	 = 	[	"input" => "publish_until", 	"validate" => "strip_tags|trim|!empty" , 	"use_default" => true, "default_value" => 0 ]; 	
 										$_request[] 	 = 	[	"input" => "publish_expired", 	"validate" => "strip_tags|trim|!empty" , 	"use_default" => true, "default_value" => 0 ]; 	

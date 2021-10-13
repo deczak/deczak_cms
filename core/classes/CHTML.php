@@ -61,7 +61,10 @@ class	CHTML
 		$modules		= 	CModules::instance();
 
 		$sitemap		=	$pageRequest -> sitemap;
-			
+
+		$pageRequest -> page_image_url = tk::getMediatheItemkUrl($pageRequest -> page_image);
+		$pageRequest -> page_image_url = ($pageRequest -> page_image_url !== null ? $pageRequest -> page_image_url .'?binary&size=small' : $pageRequest -> page_image_url);
+					
 		echo "<!DOCTYPE html>\r\n";
 		echo "<html lang=\"". $pageRequest -> page_language ."\">\r\n";
 		echo "<head>\r\n";

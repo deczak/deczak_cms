@@ -6,6 +6,6 @@
 
 	let	mediathek = new cmsMediathek(document.getElementById('container-mediathek'));
 		mediathek.setEventNameOnSelected('test-mediathek-on-selected');
-		mediathek.init(cmsMediathek.VIEWMODE_LIST, cmsMediathek.WORKMODE_SELECT);
+		mediathek.init(cmsMediathek.VIEWMODE_LIST, cmsMediathek.WORKMODE_EDIT);
 
 </script>

@@ -78,6 +78,7 @@ class 	modelSitemap extends CModel
 																$this -> tbPage .'.publish_expired',
 																$this -> tbPage .'.hidden_state',
 																$this -> tbPage .'.menu_follow',
+																$this -> tbPage .'.page_image',
 																'o.page_path AS page_path_segment'])
 											-> condition($condPgPath)
 											-> relations([$relPgHead, $relPg])

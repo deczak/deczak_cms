@@ -13,39 +13,6 @@ class	cmsMediathek
 		this.requestURL			 = CMS.SERVER_URL_BACKEND + 'mediathek/';
 	}
 
-	/*
-
-		view mode
-
-			list
-
-			squares
-
-		workmode
-
-			select only
-
-			edit
-
-		actions
-
-			navigate through folders
-
-			create folders
-
-			remove folders
-
-			select item (select mode)
-
-			edit item
-
-			remove item
-
-			upload item (cmsUpload)
-	*/
-
-
-
 
 
 	init(viewMode, workMode, rootPath = '')
@@ -102,9 +69,57 @@ class	cmsMediathek
 		}
 
 
+
+
 		let mediathekNode = document.createElement('div');
 			mediathekNode.classList.add('mediathek-main');
+
+
+
+		switch(srcInstance.workMode)
+		{
+	
+
+			case cmsMediathek.WORKMODE_EDIT:
+
+
+		let buttonImportNode = document.createElement('button');
+			buttonImportNode.classList.add('ui', 'button', 'button-import');
+			buttonImportNode.onclick = function(event) { srcInstance._onClickButtonImport(event, srcInstance) };
+			buttonImportNode.innerHTML = 'Import';
+
+
+		let controlPanelLeftNode = document.createElement('div');
+			controlPanelLeftNode.classList.add('left');
+
+		let controlPanelRightNode = document.createElement('div');
+			controlPanelRightNode.classList.add('right');
+			controlPanelRightNode.append(buttonImportNode);
+
+
+
+		let controlPanelNode = document.createElement('div');
+			controlPanelNode.classList.add('controls');
+			controlPanelNode.append(controlPanelLeftNode, controlPanelRightNode);
+
+
+			mediathekNode.append(controlPanelNode);
+
+
+
+
+				break;
+		}
+
+
+
+
+
 			mediathekNode.append(itemsNode);
+
+
+
+
 
 
 		switch(srcInstance.workMode)
@@ -277,6 +292,19 @@ class	cmsMediathek
 		}
 
 
+	}
+
+	_onClickButtonImport(event, srcInstance)
+	{
+		let	formData  = new FormData;
+
+		let	xhRequest = new cmsXhr;
+			xhRequest.request(srcInstance.requestURL, formData, srcInstance.onXHRSuccessImport, srcInstance, 'import');
+	}
+
+	onXHRSuccessImport(response, srcInstance)
+	{
+		srcInstance.requestItems();
 	}
 
 }

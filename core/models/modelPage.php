@@ -76,7 +76,8 @@ class 	modelPage extends CModel
 											"$_tablePage.crawler_index",
 											"$_tablePage.crawler_follow",
 											"$_tablePage.menu_follow",
-											"$_tablePage.page_auth"
+											"$_tablePage.page_auth",
+											"$_tablePage.page_image"
 											);
 
 		$dbQuery 	= $_pDatabase		-> query(DB_SELECT) 
