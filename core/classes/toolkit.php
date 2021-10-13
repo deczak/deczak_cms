@@ -241,7 +241,11 @@ class	TK
 				return CMS_SERVER_URL.DIR_MEDIATHEK.$itemPath.$directory -> getFilename().'/';
 
 			if($directory -> isDir() && !file_exists(CMS_SERVER_ROOT.DIR_MEDIATHEK.$itemPath.$directory -> getFilename().'/info.json'))
-				tk::getMediatheItemkUrl($mediaId, $directory -> getFilename().'/');
+			{
+				$response = tk::getMediatheItemkUrl($mediaId, $directory -> getFilename().'/');
+				if($response !== null)
+					return $response;
+			}
 		}
 
 		return null;

@@ -18,6 +18,7 @@ mantle/
 !mantle/modules/mod_blog/.*
 mediathek/*
 !mediathek/index.php
+!mediathek/readme
 install/page-templates/.*
 data/modules/simpleNavigation
 !data/modules/simpleNavigation/list
