@@ -6,7 +6,7 @@ if(isset($rightGroupsList))
 }
 else
 {
-	$rightGroupsList = false;
+	$dataset = false;
 }
 
 $activeModulesList = CModules::instance() -> getModules();	
@@ -24,8 +24,8 @@ $activeModulesList = CModules::instance() -> getModules();
 			</ul>
 			<hr>
 			<div class="delete-box">	
-				<?php if(isset($enableDelete) && $enableDelete && $rightGroupsList !== false) { ?>	
-					<fieldset class="ui fieldset" data-xhr-target="group-delete" data-xhr-overwrite-target="delete/<?php echo $dataset -> group_id; ?>">	
+				<?php if(isset($enableDelete) && $enableDelete && $dataset !== false) { ?>	
+					<fieldset class="ui fieldset" data-xhr-target="delete" data-xhr-overwrite-target="delete/<?php echo $dataset -> group_id; ?>">	
 						<div class="submit-container button-only">
 							<button class="ui button icon labeled trigger-submit-fieldset" type="button" disabled><span><i class="fas fa-trash-alt" data-icon="fa-trash-alt"></i></span><?php echo CLanguage::get() -> string('BUTTON_DELETE'); ?></button>
 							<div class="protector"><input type="checkbox" class="trigger-submit-protector" id="protector-user-delete"><label for="protector-user-delete"></label></div>
@@ -42,15 +42,15 @@ $activeModulesList = CModules::instance() -> getModules();
 
 	<div>
 		
-		<fieldset class="ui fieldset submit-able" id="group-data" data-xhr-target="group-rights" <?= ($rightGroupsList !== false ? 'data-xhr-overwrite-target="edit/'. $dataset -> group_id .'"' : ''); ?>>
+		<fieldset class="ui fieldset submit-able" id="group-data" data-xhr-target="<?= (!$dataset ? 'create' : 'edit'); ?>" <?= ($dataset !== false ? 'data-xhr-overwrite-target="edit/'. $dataset -> group_id .'"' : ''); ?>>
 			<legend><?php echo CLanguage::get() -> string('MOD_RGROUPS_GROUP_INFO'); ?></legend>
 			<div>
 				<!-- group -->
 				<div class="group width-100">
 					<div class="input width-25">
 						<label><?php echo CLanguage::get() -> string('MOD_RGROUPS_GROUP_ID'); ?></label>
-						<input name="group_id" type="text" <?= ($rightGroupsList !== false ? 'disabled' : ''); ?> value="<?php echo $dataset -> group_id; ?>">
-						<?= ($rightGroupsList !== false ? '<i class="fas fa-lock"></i>' : ''); ?>
+						<input name="group_id" type="text" <?= ($dataset !== false ? 'disabled' : ''); ?> value="<?php echo $dataset -> group_id; ?>">
+						<?= ($dataset !== false ? '<i class="fas fa-lock"></i>' : ''); ?>
 					</div>
 
 					<div class="input width-25">
@@ -158,7 +158,7 @@ $activeModulesList = CModules::instance() -> getModules();
 		
 			</div>
 
-			<?php if(isset($enableEdit) && $enableEdit || $rightGroupsList === false) { ?>
+			<?php if(isset($enableEdit) && $enableEdit || $dataset === false) { ?>
 
 				<div class="ui result-box" data-error=""></div>
 
@@ -177,7 +177,7 @@ $activeModulesList = CModules::instance() -> getModules();
 
 </div>
 
-<?php if($rightGroupsList !== false) { ?>
+<?php if($dataset !== false) { ?>
 <script src="<?php echo CMS_SERVER_URL_BACKEND; ?>js/classes/cms-request-data-index.js"></script>
 <script src="<?php echo CMS_SERVER_URL_BACKEND; ?>js/classes/cms-request-data-item.js"></script>
 <script>

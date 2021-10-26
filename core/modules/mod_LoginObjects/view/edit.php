@@ -1,22 +1,4 @@
 <?php
-
-
-/*
-$dataset = &$datasets[0];
-
-$dataset -> object_fields 		= json_decode($dataset -> object_fields, true);
-$dataset -> object_session_ext	= json_decode($dataset -> object_session_ext, true);
-$dataset -> object_databases	= json_decode($dataset -> object_databases, true);
-
-$dataset -> time_create 	= ($dataset -> time_create == 0 ? '-' : date(CFG::GET() -> BACKEND -> TIME_FORMAT, $dataset -> time_create) );
-$dataset -> time_update 	= ($dataset -> time_update == 0 ? '-' : date(CFG::GET() -> BACKEND -> TIME_FORMAT, $dataset -> time_update) );
-
-$dataset -> create_by 	= ($dataset -> create_by == 0 ? '-' : $dataset -> create_by );
-$dataset -> update_by 	= ($dataset -> update_by == 0 ? '-' : $dataset -> update_by );
-*/
-
-
-
 $tablesColumns = [];
 foreach($tablesList as $tableGroup)
 foreach($tableGroup as $table)
@@ -31,19 +13,14 @@ foreach($tableGroup as $table)
 	}
 }
 
-
-
-
 if(isset($loginObjectsList))
 {
 	$dataset = &$loginObjectsList[0];
 }
 else
 {
-	$loginObjectsList = false;
+	$dataset = false;
 }
-
-
 ?>
 
 <div class="be-module-container forms-view">
@@ -57,9 +34,9 @@ else
 			<hr>
 			<div class="delete-box">	
 
-				<?php if(isset($enableDelete) && $enableDelete && $loginObjectsList !== false) { ?>	
+				<?php if(isset($enableDelete) && $enableDelete && $dataset !== false) { ?>	
 
-					<fieldset class="ui fieldset" data-xhr-target="object-delete" data-xhr-overwrite-target="delete/<?php echo $dataset -> object_id; ?>">	
+					<fieldset class="ui fieldset" data-xhr-target="delete" data-xhr-overwrite-target="delete/<?php echo $dataset -> object_id; ?>">	
 						<div class="submit-container button-only">
 							<button class="ui button icon labeled trigger-submit-fieldset" type="button" disabled><span><i class="fas fa-trash-alt" data-icon="fa-trash-alt"></i></span><?php echo CLanguage::instance() -> getString('BUTTON_DELETE'); ?></button>
 							<div class="protector"><input type="checkbox" class="trigger-submit-protector" id="protector-login-objects-delete"><label for="protector-login-objects-delete"></label></div>
@@ -85,7 +62,7 @@ else
 
 
 	
-		<fieldset class="ui fieldset submit-able" id="group-data" data-xhr-target="login-data" <?= ($loginObjectsList !== false ? 'data-xhr-overwrite-target="edit/'. $dataset -> object_id .'"' : ''); ?>>
+		<fieldset class="ui fieldset submit-able" id="group-data" data-xhr-target="login-data" <?= ($dataset !== false ? 'data-xhr-overwrite-target="edit/'. $dataset -> object_id .'"' : ''); ?>>
 			<legend><?php echo CLanguage::instance() -> getString('MOD_LOGINO_OBJECT'); ?></legend>
 			<div>
 		
@@ -177,7 +154,7 @@ else
 
 			</div>
 
-			<?php if(isset($enableEdit) && $enableEdit || $loginObjectsList === false) { ?>
+			<?php if(isset($enableEdit) && $enableEdit || $dataset === false) { ?>
 
 				<div class="ui result-box" data-error=""></div>
 
@@ -924,7 +901,7 @@ else
 </script>
 
 
-<?php if($loginObjectsList !== false) { ?>
+<?php if($dataset !== false) { ?>
 <script src="<?php echo CMS_SERVER_URL_BACKEND; ?>js/classes/cms-request-data-index.js"></script>
 <script src="<?php echo CMS_SERVER_URL_BACKEND; ?>js/classes/cms-request-data-item.js"></script>
 <script>

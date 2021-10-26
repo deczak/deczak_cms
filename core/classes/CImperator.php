@@ -41,7 +41,7 @@ class	CImperator
 
 				$pageRequest = CPageRequest::instance();
 
-				$_pPageRequest -> init($this -> pDatabase, $_pPageRequest -> node_id, $_pPageRequest -> page_language, $_pPageRequest -> page_version, $_pPageRequest -> xhRequest);
+				$_pPageRequest -> init($this -> pDatabase, $_pPageRequest -> node_id, $_pPageRequest -> page_language, $_pPageRequest -> page_version);
 
 				$_pPageRequest -> enablePageEdit = ((!empty($pageRequest -> languageInfo) && !$pageRequest -> languageInfo -> lang_locked) ? $_pPageRequest -> enablePageEdit : false);
 				
@@ -62,6 +62,8 @@ class	CImperator
 			return;
 		}
 
+		$xhrInfo = $_pPageRequest -> detectXHRequest();
+
 		##	Gathering active modules data
 
 		if(!empty($_pPageRequest -> objectsList))
@@ -77,7 +79,7 @@ class	CImperator
 			$_pPageRequest -> objectsList[$_objectIndex] -> instance	->	logic(
 																				$this -> pDatabase, 
 																				$_rcaTarget,
-																				$_pPageRequest -> xhRequest, 
+																				$xhrInfo, 
 																				$_logicResult, 
 																				$_pPageRequest -> isEditMode
 																				);
@@ -103,7 +105,7 @@ class	CImperator
 
 		##	XHR call
 
-		if($_pPageRequest -> xhRequest !== false)  // $xhrInfo is still null
+		if($xhrInfo !== null)
 		{
 			$_pURLVariables	 =	new CURLVariables();
 			$_request		 =	[];
@@ -113,7 +115,7 @@ class	CImperator
 
 			##	Insert Module
 
-			if($_pURLVariables -> getValue("cms-insert-module") !== false)
+			if($xhrInfo -> action === 'cms-insert-module' && $_pURLVariables -> getValue("cms-insert-module") !== false)
 			{
 				##	XHR Function call
 
@@ -153,9 +155,7 @@ class	CImperator
 
 					$_objectModel  = new modelPageObject();
 					$_initObj['object_id'] = $_objectModel -> insert($this -> pDatabase, $_initObj);
-					//$objectData	   = $_objectModel -> getResult();
-					//$objectData	   = current($objectData);
-					// = $objectId;
+
 
 						$objectData = new stdClass();
 						foreach ($_initObj as $key => $value)
@@ -164,13 +164,15 @@ class	CImperator
 						}
 
 
+						$xhrInfo -> objectId = $_initObj['object_id'];
+
 
 					$_logicResult 	  = [];
 					$_objectInstance  = new $module -> module_controller($module, $objectData);
 					$_objectInstance -> logic(
 												$this -> pDatabase, 
 												[ $objectData -> object_id => 'create' ],
-												$_pPageRequest -> xhRequest, 
+												$xhrInfo, 
 												$_logicResult, 
 												true
 												);
@@ -226,6 +228,10 @@ class	CImperator
 			if( $module === false) continue;
 
 
+			if($xhrInfo !== null && $xhrInfo -> isXHR)
+				$xhrInfo -> objectId = $_object -> object_id;
+
+
 			##	Create object and call logic
 
 			$_logicResult =	false;
@@ -233,7 +239,7 @@ class	CImperator
 			$_pPageRequest -> objectsList[$_objectKey] -> instance	->	logic(
 				$this -> pDatabase, 
 				$_rcaTarget, 
-				($xhrInfo !== null ? $xhrInfo : $_pPageRequest -> xhRequest),  //  remove $_pPageRequest -> xhRequest if all controllers are changes
+				$xhrInfo,
 				$_logicResult, 
 				false
 				);

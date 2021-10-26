@@ -5,7 +5,7 @@ if(isset($usersList))
 }
 else
 {
-	$datasetList = false;
+	$dataset = false;
 }
 
 ?>
@@ -22,8 +22,8 @@ else
 			</ul>
 			<hr>
 			<div class="delete-box">	
-				<?php if(isset($enableDelete) && $enableDelete && $usersList !== false) { ?>	
-					<fieldset class="ui fieldset" data-xhr-target="user-delete" data-xhr-overwrite-target="delete/<?php echo $dataset -> user_id; ?>">	
+				<?php if(isset($enableDelete) && $enableDelete && $dataset !== false) { ?>	
+					<fieldset class="ui fieldset" data-xhr-target="delete" data-xhr-overwrite-target="delete/<?php echo $dataset -> user_id; ?>">	
 						<div class="submit-container button-only">
 							<button class="ui button icon labeled trigger-submit-fieldset" type="button" disabled><span><i class="fas fa-trash-alt" data-icon="fa-trash-alt"></i></span><?php echo CLanguage::get() -> string('BUTTON_DELETE'); ?></button>
 							<div class="protector"><input type="checkbox" class="trigger-submit-protector" id="protector-user-delete"><label for="protector-user-delete"></label></div>
@@ -40,7 +40,7 @@ else
 	<div>
 
 		
-		<fieldset class="ui fieldset submit-able" id="user-data" data-xhr-target="user-data" data-xhr-overwrite-target="edit/<?php echo $dataset -> user_id; ?>">
+		<fieldset class="ui fieldset submit-able" id="user-data" data-xhr-target="edit-user" data-xhr-overwrite-target="edit/<?php echo $dataset -> user_id; ?>">
 			<legend><?php echo CLanguage::get() -> string('MOD_BEUSER_FM_USERINFO'); ?></legend>
 			<div>
 				<!-- group -->
@@ -143,7 +143,7 @@ else
 
 
 
-		<fieldset class="ui fieldset submit-able" id="user-auth" data-xhr-target="user-auth" data-xhr-overwrite-target="edit/<?php echo $dataset -> user_id; ?>">
+		<fieldset class="ui fieldset submit-able" id="user-auth" data-xhr-target="edit-auth" data-xhr-overwrite-target="edit/<?php echo $dataset -> user_id; ?>">
 			<legend><?php echo CLanguage::get() -> string('MOD_BEUSER_FM_USERAUTH'); ?></legend>
 
 			<div>
@@ -184,7 +184,7 @@ else
 		</fieldset>
 
 
-		<fieldset class="ui fieldset submit-able" id="user-rights" data-xhr-target="user-rights" data-xhr-overwrite-target="edit/<?php echo $dataset -> user_id; ?>">
+		<fieldset class="ui fieldset submit-able" id="user-rights" data-xhr-target="edit-rights" data-xhr-overwrite-target="edit/<?php echo $dataset -> user_id; ?>">
 			<legend><?php echo CLanguage::get() -> string('MOD_BEUSER_FM_USERRIGHTS'); ?></legend>
 			<div>
 
@@ -244,7 +244,7 @@ else
 </div>
 
 
-<?php if($usersList !== false) { ?>
+<?php if($dataset !== false) { ?>
 <script src="<?php echo CMS_SERVER_URL_BACKEND; ?>js/classes/cms-request-data-index.js"></script>
 <script src="<?php echo CMS_SERVER_URL_BACKEND; ?>js/classes/cms-request-data-item.js"></script>
 <script>

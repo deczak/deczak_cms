@@ -5,7 +5,7 @@ if(isset($languagesList))
 }
 else
 {
-	$languagesList = false;
+	$dataset = false;
 }
 ?>
 
@@ -19,7 +19,7 @@ else
 			</ul>
 			<hr>
 			<div class="delete-box">
-				<?php if(isset($enableDelete) && $enableDelete && $languagesList !== false && !$dataset -> lang_default) { ?>	
+				<?php if(isset($enableDelete) && $enableDelete && $dataset !== false && !$dataset -> lang_default) { ?>	
 					<fieldset class="ui fieldset" data-xhr-target="delete" data-xhr-overwrite-target="delete/<?php echo $dataset -> lang_key; ?>">	
 						<div class="submit-container button-only">
 							<button class="ui button icon labeled trigger-submit-fieldset" type="button" disabled><span><i class="fas fa-trash-alt" data-icon="fa-trash-alt"></i></span><?php echo $language -> string('BUTTON_DELETE'); ?></button>
@@ -35,7 +35,7 @@ else
 	</div>
 	<div>
 		
-		<fieldset class="ui fieldset submit-able" id="lang-data" data-xhr-target="language" <?= ($dataset ? 'data-xhr-overwrite-target="edit/'. $dataset -> lang_key .'"' : ''); ?>>
+		<fieldset class="ui fieldset submit-able" id="lang-data" data-xhr-target="<?= (!$dataset ? 'create' : 'edit'); ?>" <?= ($dataset ? 'data-xhr-overwrite-target="edit/'. $dataset -> lang_key .'"' : ''); ?>>
 
 
 			<legend><?php echo $language -> string('LANGUAGE'); ?></legend>
@@ -108,7 +108,7 @@ else
 			
 			</div>
 
-			<?php if(isset($enableEdit) && $enableEdit || $languagesList === false) { ?>
+			<?php if(isset($enableEdit) && $enableEdit || $dataset === false) { ?>
 
 				<div class="result-box" data-error=""></div>
 
@@ -141,7 +141,7 @@ else
 </div>
 
 
-<?php if($languagesList !== false) { ?>
+<?php if($dataset !== false) { ?>
 <script src="<?php echo CMS_SERVER_URL_BACKEND; ?>js/classes/cms-request-data-index.js"></script>
 <script src="<?php echo CMS_SERVER_URL_BACKEND; ?>js/classes/cms-request-data-item.js"></script>
 <script>

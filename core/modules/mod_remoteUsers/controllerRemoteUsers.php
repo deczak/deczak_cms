@@ -18,6 +18,7 @@ class	controllerRemoteUsers extends CController
 		CPageRequest::instance() -> subs = $this -> getSubSection();
 	}
 	
+	/*
 	public function
 	logic(CDatabaseConnection &$_pDatabase, array $_rcaTarget, $_isXHRequest)
 	{
@@ -31,11 +32,11 @@ class	controllerRemoteUsers extends CController
 		{
 			if($_isXHRequest !== false)
 			{
-				$_bValidationErr =	true;
-				$_bValidationMsg =	CLanguage::get() -> string('ERR_PERMISSON');
-				$_bValidationDta = 	[];
+				$validationErr =	true;
+				$validationMsg =	CLanguage::get() -> string('ERR_PERMISSON');
+				$responseData = 	[];
 
-				tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $_bValidationDta);	// contains exit call
+				tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
 			}
 
 			CMessages::instance() -> addMessage(CLanguage::get() -> string('ERR_PERMISSON') , MSG_WARNING);
@@ -52,7 +53,7 @@ class	controllerRemoteUsers extends CController
 		{
 			case 'view'		: $logicResults = $this -> logicView($_pDatabase, $_isXHRequest, $enableEdit, $enableDelete);	break;
 			case 'ping'		: $logicResults = $this -> logicPing($_pDatabase, $_isXHRequest, $enableEdit, $enableDelete);	break;	
-			case 'edit'		: $logicResults = $this -> logicEdit($_pDatabase, $_isXHRequest);	break;	
+			case 'edit'		: $logicResults = $this -> logicEdit($_pDatabase, $_isXHRequest);	break;		
 		}
 
 		if(!$logicResults)
@@ -61,22 +62,86 @@ class	controllerRemoteUsers extends CController
 			$this -> logicIndex($_pDatabase, $_isXHRequest, $enableEdit, $enableDelete);	
 		}
 	}
+	*/
+
+	public function
+	logic(CDatabaseConnection &$_pDatabase, array $_rcaTarget, ?object $_xhrInfo) : bool
+	{
+		##	Set default target if not exists
+
+		$controllerAction = $this -> getControllerAction($_rcaTarget, 'index');
+		
+		##	Check user rights for this target
+		
+		if(!$this -> detectRights($controllerAction))
+		{
+			if($_xhrInfo !== null)
+			{
+				$validationErr =	true;
+				$validationMsg =	CLanguage::get() -> string('ERR_PERMISSON');
+				$responseData  = 	[];
+
+				tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
+			}
+
+			CMessages::instance() -> addMessage(CLanguage::get() -> string('ERR_PERMISSON') , MSG_WARNING);
+			return false;
+		}
+
+		$controllerAction = $this -> getControllerAction_v2($_rcaTarget, $_xhrInfo, 'index');
+
+			
+		if($_xhrInfo !== null && $_xhrInfo -> isXHR && $_xhrInfo -> objectId === $this -> objectInfo -> object_id)
+			$controllerAction = 'xhr_'. $_xhrInfo -> action;
+
+		##	Call sub-logic function by target, if there results are false, we make a fall back to default view
+
+		$enableEdit 	= $this -> existsUserRight('edit');
+		$enableDelete	= $enableEdit;
+	
+		$logicDone = false;
+		switch($controllerAction)
+		{
+			case 'view'			  : $logicDone = $this -> logicView($_pDatabase, $enableEdit, $enableDelete); break;
+			case 'xhr_index' 	  : $logicDone = $this -> logicXHRIndex($_pDatabase, $_xhrInfo); break;
+			
+			case 'xhr_ping'		  : $logicDone = $this -> logicXHRPing($_pDatabase); break;	
+			
+			case 'xhr_edit-user'  : $logicDone = $this -> logicXHREditUser($_pDatabase); break;			
+		}
+
+		if(!$logicDone) // Default
+			$logicDone = $this -> logicIndex($_pDatabase, $enableEdit, $enableDelete);	
+	
+		return $logicDone;
+	}
+
 
 	private function
-	logicIndex(CDatabaseConnection &$_pDatabase, $_isXHRequest, $_enableEdit = false, $_enableDelete = false)
+	logicIndex(CDatabaseConnection &$_pDatabase, bool $_enableEdit = false, bool $_enableDelete = false) : bool
+	{
+		$this -> setView(	
+						'index',	
+						'',
+						[
+							'enableEdit'	=> $_enableEdit,
+							'enableDelete'	=> $_enableDelete
+						]
+						);
+		
+		return true;
+	}
+
+
+	private function
+	logicXHRIndex(CDatabaseConnection &$_pDatabase) : bool
 	{
 
-		##	XHR request
 
-		if($_isXHRequest !== false)
-		{	
-			$_bValidationErr =	false;
-			$_bValidationMsg =	'';
-			$_bValidationDta = 	[];
+			$validationErr =	false;
+			$validationMsg =	'';
+			$responseData = 	[];
 
-			switch($_isXHRequest)
-			{
-				case 'raw-data'  :	// Request raw data
 
 									$_pURLVariables	 =	new CURLVariables();
 									$_request		 =	[];
@@ -116,22 +181,10 @@ class	controllerRemoteUsers extends CController
 										}
 									}
 
-									break;
-			}
 
-			tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $data);	// contains exit call
-		}
+			tk::xhrResult(intval($validationErr), $validationMsg, $data);	// contains exit call
 
-		##	No XHR request
-
-		$this -> setView(	
-						'index',	
-						'',
-						[
-							'enableEdit'	=> $_enableEdit,
-							'enableDelete'	=> $_enableDelete
-						]
-						);
+		return false;
 	}
 
 	private function
@@ -236,9 +289,8 @@ class	controllerRemoteUsers extends CController
 		return 0;
 	}
 
-
 	private function
-	logicView(CDatabaseConnection &$_pDatabase, $_isXHRequest = false, $_enableEdit = false, $_enableDelete = false)
+	logicView(CDatabaseConnection &$_pDatabase, bool $_enableEdit = false, bool $_enableDelete = false)
 	{
 		$systemId = $this -> querySystemId();
 
@@ -287,19 +339,16 @@ class	controllerRemoteUsers extends CController
 	}
 
 	private function
-	logicEdit(CDatabaseConnection &$_pDatabase, $_isXHRequest = false)
+	logicXHREditUser(CDatabaseConnection &$_pDatabase)
 	{
 		$systemId = $this -> querySystemId();
 
-		if($systemId !== false && $_isXHRequest !== false)
+		if($systemId !== false)
 		{	
-			$_bValidationErr =	false;
-			$_bValidationMsg =	'';
-			$_bValidationDta = 	[];
+			$validationErr =	false;
+			$validationMsg =	'';
+			$responseData = 	[];
 
-			switch($_isXHRequest)
-			{
-				case 'edit-user'  :	
 
 										$_pFormVariables =	new CURLVariables();
 										$_request		 =	[];
@@ -308,7 +357,7 @@ class	controllerRemoteUsers extends CController
 										$_pFormVariables -> retrieve($_request, false, true); // POST 
 										$_aFormData		 = $_pFormVariables ->getArray();
 
-										if(!$_bValidationErr)
+										if(!$validationErr)
 										{
 											$usersList = $this -> _getUsersList($systemId);
 
@@ -356,59 +405,43 @@ class	controllerRemoteUsers extends CController
 												}
 
 										
-												$_bValidationMsg = CLanguage::get() -> string('USER') .' '. CLanguage::get() -> string('WAS_UPDATED');
+												$validationMsg = CLanguage::get() -> string('USER') .' '. CLanguage::get() -> string('WAS_UPDATED');
 											}
 											else
 											{
-												$_bValidationMsg .= CLanguage::get() -> string('ERR_SQL_ERROR');
-												$_bValidationErr = true;
+												$validationMsg .= CLanguage::get() -> string('ERR_SQL_ERROR');
+												$validationErr = true;
 											}	
 
 										}
 										else	// Validation Failed
 										{
-											$_bValidationMsg .= CLanguage::get() -> string('ERR_VALIDATIONFAIL');
-											$_bValidationErr = true;
+											$validationMsg .= CLanguage::get() -> string('ERR_VALIDATIONFAIL');
+											$validationErr = true;
 										}
 
-										break;
-			}
 
-			tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $_bValidationDta);	// contains exit call		
+			tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call		
 		}
 
 		return false;
 	}
-
+	
 	public function
-	logicPing(CDatabaseConnection &$_pDatabase, $_isXHRequest = false, $_enableEdit = false, $_enableDelete = false)
+	logicXHRPing(CDatabaseConnection &$_pDatabase)
 	{
-
 		$systemId 	= $this -> querySystemId();
 		$pingId 	= $this -> querySystemId('cms-ping-id', true);
 
-		if($systemId !== false && $_isXHRequest !== false)
+		if($systemId !== false)
 		{	
-			$_bValidationErr =	false;
-			$_bValidationMsg =	'';
-			$_bValidationDta = 	[];
+			$validationErr =	false;
+			$validationMsg =	'';
+		
+			$locked	= $this -> m_pModel -> ping($_pDatabase, CSession::instance() -> getValue('user_id'), $systemId, $pingId, MODEL_LOCK_UPDATE);
 
-			switch($_isXHRequest)
-			{
-				case 'lockState':	
-				
-					$modelUsersRegister	 = new modelUsersRegister();
-					$locked	= $modelUsersRegister -> ping($_pDatabase, CSession::instance() -> getValue('user_id'), $systemId, $pingId, MODEL_LOCK_UPDATE);
-					tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $locked);
-					break;
-			}
-
-			tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $_bValidationDta);
+			tk::xhrResult(intval($validationErr), $validationMsg, $locked);
 		}
 	}
 
-
-
 }
-
-?>

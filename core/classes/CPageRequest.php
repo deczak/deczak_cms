@@ -22,13 +22,15 @@ class CPageRequest extends CSingleton
 	public function detectXHRequest() : ?object
 	{
 		$_SERVER['HTTP_X_REQUESTED_XHR_ACTION'] = (!empty($_SERVER['HTTP_X_REQUESTED_XHR_ACTION']) ? trim(strip_tags($_SERVER['HTTP_X_REQUESTED_XHR_ACTION'])) : null);
+		$_SERVER['HTTP_X_REQUESTED_XHR_OBJECT'] = (!empty($_SERVER['HTTP_X_REQUESTED_XHR_OBJECT']) ? trim(strip_tags($_SERVER['HTTP_X_REQUESTED_XHR_OBJECT'])) : 0);
 		$_SERVER['HTTP_X_REQUESTED_WITH'] 		= (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) ? trim(strip_tags($_SERVER['HTTP_X_REQUESTED_WITH'])) : null);
 
 		if($_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest' && $_SERVER['HTTP_X_REQUESTED_XHR_ACTION'] !== null)
 		{
 			$xhrInfo = new stdClass;
-			$xhrInfo -> isXHR 	= true;
-			$xhrInfo -> action 	= $_SERVER['HTTP_X_REQUESTED_XHR_ACTION'];
+			$xhrInfo -> isXHR 	 = true;
+			$xhrInfo -> action 	 = $_SERVER['HTTP_X_REQUESTED_XHR_ACTION'];
+			$xhrInfo -> objectId = (int)$_SERVER['HTTP_X_REQUESTED_XHR_OBJECT'];
 			return $xhrInfo;
 		}
 		return null;
@@ -49,7 +51,6 @@ class CPageRequest extends CSingleton
 	public	$node_id;
 	public	$page_language;
 	public	$page_version;
-	public	$xhRequest;
 	public	$urlPath;
 	public	$sitemap;
 
@@ -61,7 +62,7 @@ class CPageRequest extends CSingleton
 	public	$responseCode = 200;
 
 	public function
-	init(?CDatabaseConnection &$_pDatabase, $_nodeId, $_language, $_version, $_xhRequest)
+	init(?CDatabaseConnection &$_pDatabase, $_nodeId, $_language, $_version)
 	{
 
 		// TODO refactor because of double source
@@ -153,7 +154,6 @@ class CPageRequest extends CSingleton
 		$this -> node_id 			= $_nodeId;
 		$this -> page_language 		= $_language;
 		$this -> page_version 		= $_version;
-		$this -> xhRequest 			= $_xhRequest;
 
 		$this -> page_title			= '';
 		$this -> page_description	= '';

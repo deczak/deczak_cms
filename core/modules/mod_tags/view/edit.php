@@ -2,7 +2,7 @@
 if(isset($tagsList))
 	$dataset = &$tagsList[0];
 else
-	$tagsList = false;
+	$dataset = false;
 ?>
 
 <div class="be-module-container forms-view">
@@ -15,8 +15,8 @@ else
 			</ul>
 			<hr>
 			<div class="delete-box">
-				<?php if(isset($enableDelete) && $enableDelete && $tagsList !== false) { ?>	
-					<fieldset class="ui fieldset" data-xhr-target="tag-delete" data-xhr-overwrite-target="delete/<?= $dataset -> tag_id; ?>">	
+				<?php if(isset($enableDelete) && $enableDelete && $dataset !== false) { ?>	
+					<fieldset class="ui fieldset" data-xhr-target="delete" data-xhr-overwrite-target="delete/<?= $dataset -> tag_id; ?>">	
 						<div class="submit-container button-only">
 							<button class="ui button icon labeled trigger-submit-fieldset" type="button" disabled><span><i class="fas fa-trash-alt" data-icon="fa-trash-alt"></i></span><?= $language -> string('BUTTON_DELETE'); ?></button>
 							<div class="protector"><input type="checkbox" class="trigger-submit-protector" id="protector-agent-delete"><label for="protector-agent-delete"></label></div>
@@ -32,7 +32,7 @@ else
 	</div>
 	<div>
 		
-		<fieldset class="ui fieldset submit-able" id="tag" data-xhr-target="edit-tag" <?= ($tagsList !== false ? 'data-xhr-overwrite-target="edit/'. $dataset -> tag_id .'"' : ''); ?>>
+		<fieldset class="ui fieldset submit-able" id="tag" data-xhr-target="<?= (!$dataset ? 'create' : 'edit'); ?>" <?= ($dataset !== false ? 'data-xhr-overwrite-target="edit/'. $dataset -> tag_id .'"' : ''); ?>>
 
 			<legend><?= $language -> string('MOD_BETAGS_EDIT'); ?></legend>
 			<div>
@@ -70,7 +70,7 @@ else
 				
 			</div>
 
-			<?php if(isset($enableEdit) && $enableEdit || $tagsList === false) { ?>
+			<?php if(isset($enableEdit) && $enableEdit || $dataset === false) { ?>
 
 				<div class="result-box" data-error=""></div>
 

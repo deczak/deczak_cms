@@ -19,65 +19,86 @@ class	controllerLanguages extends CController
 	}
 	
 	public function
-	logic(CDatabaseConnection &$_pDatabase, array $_rcaTarget, $_isXHRequest)
+	logic(CDatabaseConnection &$_pDatabase, array $_rcaTarget, ?object $_xhrInfo) : bool
 	{
 		##	Set default target if not exists
 
-		$_controllerAction = $this -> getControllerAction($_rcaTarget, 'index');
-
+		$controllerAction = $this -> getControllerAction($_rcaTarget, 'index');
+		
 		##	Check user rights for this target
-
-		if(!$this -> detectRights($_controllerAction))
+		
+		if(!$this -> detectRights($controllerAction))
 		{
-			if($_isXHRequest !== false)
+			if($_xhrInfo !== null)
 			{
-				$_bValidationErr =	true;
-				$_bValidationMsg =	CLanguage::get() -> string('ERR_PERMISSON');
-				$_bValidationDta = 	[];
+				$validationErr =	true;
+				$validationMsg =	CLanguage::get() -> string('ERR_PERMISSON');
+				$responseData  = 	[];
 
-				tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $_bValidationDta);	// contains exit call
+
+				tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
 			}
 
 			CMessages::instance() -> addMessage(CLanguage::get() -> string('ERR_PERMISSON') , MSG_WARNING);
-			return;
+			return false;
 		}
+
+		$controllerAction = $this -> getControllerAction_v2($_rcaTarget, $_xhrInfo, 'index');
+
+			
+		if($_xhrInfo !== null && $_xhrInfo -> isXHR && $_xhrInfo -> objectId === $this -> objectInfo -> object_id)
+			$controllerAction = 'xhr_'. $_xhrInfo -> action;
 
 		##	Call sub-logic function by target, if there results are false, we make a fall back to default view
 
 		$enableEdit 	= $this -> existsUserRight('edit');
-		$enableDelete	= $this -> existsUserRight('delete');
-
-		$logicResults = false;
-		switch($_controllerAction)
+		$enableDelete	= $enableEdit;
+	
+		$logicDone = false;
+		switch($controllerAction)
 		{
-			case 'view'		: $logicResults = $this -> logicView(	$_pDatabase, $_isXHRequest, $enableEdit, $enableDelete);	break;
-			case 'edit'		: $logicResults = $this -> logicEdit(	$_pDatabase, $_isXHRequest);	break;	
-			case 'create'	: $logicResults = $this -> logicCreate($_pDatabase, $_isXHRequest);	break;
-			case 'delete'	: $logicResults = $this -> logicDelete($_pDatabase, $_isXHRequest);	break;	
-			case 'ping'		: $logicResults = $this -> logicPing($_pDatabase, $_isXHRequest, $enableEdit, $enableDelete);	break;	
+			case 'view'		: $logicDone = $this -> logicView(	$_pDatabase, $enableEdit, $enableDelete);	break;
+			case 'create'	: $logicDone = $this -> logicCreate($_pDatabase);	break;
+
+			case 'xhr_index' : $logicDone = $this -> logicXHRIndex($_pDatabase, $_xhrInfo); break;
+			case 'xhr_create'	: $logicDone = $this -> logicXHRCreate($_pDatabase);	break;
+			case 'xhr_delete'	: $logicDone = $this -> logicXHRDelete($_pDatabase);	break;	
+			case 'xhr_ping'		: $logicDone = $this -> logicXHRPing($_pDatabase);	break;	
+			case 'xhr_edit'		: $logicDone = $this -> logicXHREdit($_pDatabase);	break;	
 		}
 
-		if(!$logicResults)
-		{
-			##	Default View
-			$this -> logicIndex($_pDatabase, $_isXHRequest, $enableEdit, $enableDelete);	
-		}
+		if(!$logicDone) // Default
+			$logicDone = $this -> logicIndex($_pDatabase, $enableEdit, $enableDelete);	
+	
+		return $logicDone;
 	}
 
 	private function
-	logicIndex(CDatabaseConnection &$_pDatabase, $_isXHRequest, $_enableEdit = false, $_enableDelete = false)
+	logicIndex(CDatabaseConnection &$_pDatabase, bool $_enableEdit = false, bool $_enableDelete = false) : bool
+	{		
+		$modelCondition = new CModelCondition();
+
+		$this -> m_pModel -> load($_pDatabase, $modelCondition);	
+		$this -> setView(	
+						'index',	
+						'',
+						[
+							'languagesList'	=> $this -> m_pModel -> getResult(),
+							'enableEdit'	=> $_enableEdit,
+							'enableDelete'	=> $_enableDelete
+						]
+						);
+
+		return true;		
+	}
+
+	private function
+	logicXHRIndex(CDatabaseConnection &$_pDatabase) : bool
 	{
-		##	XHR request
+			$validationErr =	false;
+			$validationMsg =	'';
+			$responseData = 	[];
 
-		if($_isXHRequest !== false)
-		{	
-			$_bValidationErr =	false;
-			$_bValidationMsg =	'';
-			$_bValidationDta = 	[];
-
-			switch($_isXHRequest)
-			{
-				case 'raw-data'  :	// Request raw data
 
 									$_pURLVariables	 =	new CURLVariables();
 									$_request		 =	[];
@@ -113,8 +134,8 @@ class	controllerLanguages extends CController
 
 									if(!$this -> m_pModel -> load($_pDatabase, $modelCondition))
 									{
-										$_bValidationMsg .= CLanguage::get() -> string('ERR_SQL_ERROR');
-										$_bValidationErr = true;
+										$validationMsg .= CLanguage::get() -> string('ERR_SQL_ERROR');
+										$validationErr = true;
 									}											
 						
 									$data = $this -> m_pModel -> getResult();
@@ -125,37 +146,31 @@ class	controllerLanguages extends CController
 										$item -> update_by_name = tk::getBackendUserName($_pDatabase, $item -> update_by);
 									}
 
-									break;
-			}
-
-			tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $data);	// contains exit call
-		}
-
-		##	Non XHR request
+			tk::xhrResult(intval($validationErr), $validationMsg, $data);	// contains exit call
 		
-		$modelCondition = new CModelCondition();
 
-		$this -> m_pModel -> load($_pDatabase, $modelCondition);	
-		$this -> setView(	
-						'index',	
-						'',
-						[
-							'languagesList'	=> $this -> m_pModel -> getResult(),
-							'enableEdit'	=> $_enableEdit,
-							'enableDelete'	=> $_enableDelete
-						]
-						);
-		
+		return false;
 	}
 
 	private function
-	logicCreate(CDatabaseConnection &$_pDatabase, $_isXHRequest)
+	logicCreate(CDatabaseConnection &$_pDatabase) : bool
 	{
-		if($_isXHRequest !== false)
-		{
-			$_bValidationErr =	false;
-			$_bValidationMsg =	'';
-			$_bValidationDta = 	[];
+		$this -> setCrumbData('create');
+		$this -> setView(
+						'create',
+						'create/'
+						);
+
+		return true;
+	}
+
+	private function
+	logicXHRCreate(CDatabaseConnection &$_pDatabase) : bool
+	{
+		
+			$validationErr =	false;
+			$validationMsg =	'';
+			$responseData = 	[];
 
 			$_pURLVariables	 =	new CURLVariables();
 			$_request		 =	[];
@@ -168,11 +183,11 @@ class	controllerLanguages extends CController
 			$_pURLVariables -> retrieve($_request, false, true); // POST 
 			$_aFormData		 = $_pURLVariables ->getArray();
 
-			if(empty($_aFormData['lang_key'])) { 			$_bValidationErr = true; 	$_bValidationDta[] = 'lang_key'; 			}
-			if(empty($_aFormData['lang_name'])) { 			$_bValidationErr = true; 	$_bValidationDta[] = 'lang_name'; 			}
-			if(empty($_aFormData['lang_name_native'])) { 	$_bValidationErr = true; 	$_bValidationDta[] = 'lang_name_native'; 	}
+			if(empty($_aFormData['lang_key'])) { 			$validationErr = true; 	$responseData[] = 'lang_key'; 			}
+			if(empty($_aFormData['lang_name'])) { 			$validationErr = true; 	$responseData[] = 'lang_name'; 			}
+			if(empty($_aFormData['lang_name_native'])) { 	$validationErr = true; 	$responseData[] = 'lang_name_native'; 	}
 
-			if(!$_bValidationErr)	// Validation OK (by pre check)
+			if(!$validationErr)	// Validation OK (by pre check)
 			{		
 
 
@@ -182,8 +197,8 @@ class	controllerLanguages extends CController
 
 				if(!$this -> m_pModel -> unique($_pDatabase, $uniqueCondition))
 				{
-					$_bValidationMsg .= CLanguage::get() -> string('M_BERMADDR_MSG_DENIEDEXIST');
-					$_bValidationErr = true;
+					$validationMsg .= CLanguage::get() -> string('M_BERMADDR_MSG_DENIEDEXIST');
+					$validationErr = true;
 				}
 	
 				if(intval($_aFormData['lang_default']) === 1)
@@ -194,18 +209,18 @@ class	controllerLanguages extends CController
 			}
 			else	// Validation Failed 
 			{
-				$_bValidationMsg .= CLanguage::get() -> string('ERR_VALIDATIONFAIL');
+				$validationMsg .= CLanguage::get() -> string('ERR_VALIDATIONFAIL');
 			}
 
-			if(!$_bValidationErr)	// Validation OK
+			if(!$validationErr)	// Validation OK
 			{
 				$_aFormData['create_by'] 	= CSession::instance() -> getValue('user_id');
 				$_aFormData['create_time'] 	= time();
 
 				if($this -> m_pModel -> insert($_pDatabase, $_aFormData))
 				{
-					$_bValidationMsg = CLanguage::get() -> string('M_BELANG_BEENCREATED') .' - '. CLanguage::get() -> string('WAIT_FOR_REDIRECT');
-					$_bValidationDta['redirect'] = CMS_SERVER_URL_BACKEND . CPageRequest::instance() -> urlPath .'language/'.$_aFormData['lang_key'];
+					$validationMsg = CLanguage::get() -> string('M_BELANG_BEENCREATED') .' - '. CLanguage::get() -> string('WAIT_FOR_REDIRECT');
+					$responseData['redirect'] = CMS_SERVER_URL_BACKEND . CPageRequest::instance() -> urlPath .'language/'.$_aFormData['lang_key'];
 
 					##	If this Language is the new default, changes to other to non-default
 
@@ -245,24 +260,17 @@ class	controllerLanguages extends CController
 				}
 				else
 				{
-					$_bValidationMsg .= CLanguage::get() -> string('ERR_SQL_ERROR');
+					$validationMsg .= CLanguage::get() -> string('ERR_SQL_ERROR');
 				}
 			}
 
-			tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $_bValidationDta);	// contains exit call
-		}
-
-		$this -> setCrumbData('create');
-		$this -> setView(
-						'create',
-						'create/'
-						);
-
-		return true;
+			tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
+	
+		return false;
 	}
 
 	private function
-	logicView(CDatabaseConnection &$_pDatabase, $_isXHRequest = false, $_enableEdit = false, $_enableDelete = false)
+	logicView(CDatabaseConnection &$_pDatabase, bool $_enableEdit = false, bool $_enableDelete = false) : bool
 	{
 		$systemId = $this -> querySystemId();
 
@@ -296,19 +304,16 @@ class	controllerLanguages extends CController
 	}
 
 	private function
-	logicEdit(CDatabaseConnection &$_pDatabase, $_isXHRequest = false)
+	logicXHREdit(CDatabaseConnection &$_pDatabase) : bool
 	{
 		$systemId = $this -> querySystemId();
 
-		if($systemId !== false && $_isXHRequest !== false)
+		if($systemId !== false)
 		{	
-			$_bValidationErr =	false;
-			$_bValidationMsg =	'';
-			$_bValidationDta = 	[];
+			$validationErr =	false;
+			$validationMsg =	'';
+			$responseData = 	[];
 
-			switch($_isXHRequest)
-			{
-				case 'language'  :		// Update user data
 
 											$_pFormVariables =	new CURLVariables();
 											$_request		 =	[];
@@ -320,10 +325,10 @@ class	controllerLanguages extends CController
 											$_pFormVariables-> retrieve($_request, false, true); // POST 
 											$_aFormData		 = $_pFormVariables ->getArray();
 
-											if(empty($_aFormData['lang_name'])) { 			$_bValidationErr = true; 	$_bValidationDta[] = 'lang_name'; 			}
-											if(empty($_aFormData['lang_name_native'])) { 	$_bValidationErr = true; 	$_bValidationDta[] = 'lang_name_native'; 	}
+											if(empty($_aFormData['lang_name'])) { 			$validationErr = true; 	$responseData[] = 'lang_name'; 			}
+											if(empty($_aFormData['lang_name_native'])) { 	$validationErr = true; 	$responseData[] = 'lang_name_native'; 	}
 
-											if(!$_bValidationErr)	// Validation OK (by pre check)
+											if(!$validationErr)	// Validation OK (by pre check)
 											{		
 												if(isset($_aFormData['lang_default']) && intval($_aFormData['lang_default']) === 1)
 												{
@@ -333,10 +338,10 @@ class	controllerLanguages extends CController
 											}
 											else	// Validation Failed 
 											{
-												$_bValidationMsg .= CLanguage::get() -> string('ERR_VALIDATIONFAIL');
+												$validationMsg .= CLanguage::get() -> string('ERR_VALIDATIONFAIL');
 											}
 
-											if(!$_bValidationErr)
+											if(!$validationErr)
 											{
 												$_aFormData['update_by'] 	= CSession::instance() -> getValue('user_id');
 												$_aFormData['update_time'] 	= time();
@@ -346,7 +351,7 @@ class	controllerLanguages extends CController
 												
 												if($this -> m_pModel -> update($_pDatabase, $_aFormData, $modelCondition))
 												{
-													$_bValidationMsg = CLanguage::get() -> string('LANGUAGE') .' '. CLanguage::get() -> string('WAS_UPDATED');
+													$validationMsg = CLanguage::get() -> string('LANGUAGE') .' '. CLanguage::get() -> string('WAS_UPDATED');
 
 													##	If this Language is the new default, changes to other to non-default
 
@@ -372,47 +377,42 @@ class	controllerLanguages extends CController
 												}
 												else
 												{
-													$_bValidationMsg .= CLanguage::get() -> string('ERR_SQL_ERROR');
-													$_bValidationErr = true;
+													$validationMsg .= CLanguage::get() -> string('ERR_SQL_ERROR');
+													$validationErr = true;
 												}											
 											}
 											else	// Validation Failed
 											{
-												$_bValidationMsg .= CLanguage::get() -> string('ERR_VALIDATIONFAIL');
-												$_bValidationErr = true;
+												$validationMsg .= CLanguage::get() -> string('ERR_VALIDATIONFAIL');
+												$validationErr = true;
 											}
 
-											break;
-			}
-
-			tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $_bValidationDta);	// contains exit call
+		
+			tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
 		}
 
 		return false;
 	}
 
 	private function
-	logicDelete(CDatabaseConnection &$_pDatabase, $_isXHRequest = false)
+	logicXHRDelete(CDatabaseConnection &$_pDatabase) : bool
 	{
 		$systemId = $this -> querySystemId();
 
-		if($systemId !== false && $_isXHRequest !== false)
+		if($systemId !== false)
 		{	
-			$_bValidationErr =	false;
-			$_bValidationMsg =	'';
-			$_bValidationDta = 	[];
+			$validationErr =	false;
+			$validationMsg =	'';
+			$responseData = 	[];
 
-			switch($_isXHRequest)
-			{
-				case 'delete':	//	Delete
 
 									$modelCondition = new CModelCondition();
 									$modelCondition -> where('lang_key', $systemId);
 
 									if($this -> m_pModel -> delete($_pDatabase, $modelCondition))
 									{
-										$_bValidationMsg = CLanguage::get() -> string('M_BELANG_BEENDELETED') .' - '. CLanguage::get() -> string('WAIT_FOR_REDIRECT');
-										$_bValidationDta['redirect'] = CMS_SERVER_URL_BACKEND . CPageRequest::instance() -> urlPath;
+										$validationMsg = CLanguage::get() -> string('M_BELANG_BEENDELETED') .' - '. CLanguage::get() -> string('WAIT_FOR_REDIRECT');
+										$responseData['redirect'] = CMS_SERVER_URL_BACKEND . CPageRequest::instance() -> urlPath;
 
 										##	Delete Pages
 
@@ -455,43 +455,31 @@ class	controllerLanguages extends CController
 									}
 									else
 									{
-										$_bValidationMsg .= CLanguage::get() -> string('ERR_SQL_ERROR');
+										$validationMsg .= CLanguage::get() -> string('ERR_SQL_ERROR');
 									}
 
-									break;
-			}
-
-			tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $_bValidationDta);	// contains exit call
+			tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
 		}			
 
 		return false;
 	}
 	
 	public function
-	logicPing(CDatabaseConnection &$_pDatabase, $_isXHRequest = false, $_enableEdit = false, $_enableDelete = false)
+	logicXHRPing(CDatabaseConnection &$_pDatabase) : bool
 	{
 		$systemId 	= $this -> querySystemId();
 		$pingId 	= $this -> querySystemId('cms-ping-id', true);
 
-		if($systemId !== false && $_isXHRequest !== false)
+		if($systemId !== false)
 		{	
-			$_bValidationErr =	false;
-			$_bValidationMsg =	'';
-			$_bValidationDta = 	[];
+			$validationErr =	false;
+			$validationMsg =	'';
+		
+			$locked	= $this -> m_pModel -> ping($_pDatabase, CSession::instance() -> getValue('user_id'), $systemId, $pingId, MODEL_LOCK_UPDATE);
 
-			switch($_isXHRequest)
-			{
-				case 'lockState':	
-				
-					$locked	= $this -> m_pModel -> ping($_pDatabase, CSession::instance() -> getValue('user_id'), $systemId, $pingId, MODEL_LOCK_UPDATE);
-					tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $locked);
-					break;
-			}
-
-			tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $_bValidationDta);
+			tk::xhrResult(intval($validationErr), $validationMsg, $locked);
 		}
+
+		return false;
 	}
-
 }
-
-?>

@@ -12,7 +12,10 @@ class cmsRequestDataItem extends cmsRequestDataIndex
 
 	requestData(onSuccess = null)
 	{
-		console.log(this.systemId);
+
+
+
+		super.xhrAction = 'index';
 		super.requestData(this.systemId, this.onXHRSuccess);
 	}
 

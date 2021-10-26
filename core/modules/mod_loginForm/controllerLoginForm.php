@@ -18,7 +18,7 @@ class	controllerLoginForm extends CController
 
 		$this -> moduleInfo -> user_rights[] = 'view';			// add view right as default for everyone
 	}
-	
+	/*
 	public function
 	logic(CDatabaseConnection &$_pDatabase, array $_rcaTarget, $_isXHRequest, &$_logicResult, bool $_bEditMode)
 	{
@@ -28,11 +28,11 @@ class	controllerLoginForm extends CController
 		{
 			if($_isXHRequest !== false)
 			{
-				$_bValidationErr =	true;
-				$_bValidationMsg =	CLanguage::get() -> string('ERR_PERMISSON');
-				$_bValidationDta = 	[];
+				$validationErr =	true;
+				$validationMsg =	CLanguage::get() -> string('ERR_PERMISSON');
+				$responseData = 	[];
 
-				tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $_bValidationDta);	// contains exit call
+				tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
 			}
 
 			CMessages::instance() -> addMessage(CLanguage::get() -> string('ERR_PERMISSON') , MSG_WARNING);
@@ -67,9 +67,63 @@ class	controllerLoginForm extends CController
 		}
 
 	}
+	*/
+	public function
+	logic(CDatabaseConnection &$_pDatabase, array $_rcaTarget, ?object $_xhrInfo, &$_logicResult, bool $_bEditMode) : bool
+	{
+		##	Set default target if not exists
+
+		$controllerAction = $this -> getControllerAction_v2($_rcaTarget, $_xhrInfo, 'view');
+
+		##	Check user rights for this target
+		
+		if(!$this -> detectRights($controllerAction) && $controllerAction != 'loginSuccess')
+		{
+			if($_xhrInfo !== null)
+			{
+				$validationErr =	true;
+				$validationMsg =	CLanguage::get() -> string('ERR_PERMISSON');
+				$responseData  = 	[];
+
+
+				tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
+			}
+
+			CMessages::instance() -> addMessage(CLanguage::get() -> string('ERR_PERMISSON') , MSG_WARNING);
+			return false;
+		}
+
+		if($_bEditMode && $_xhrInfo === null) 
+			$controllerAction = 'edit';
+			
+		if($_xhrInfo !== null && $_xhrInfo -> isXHR && $_xhrInfo -> objectId === $this -> objectInfo -> object_id)
+			$controllerAction = 'xhr_'. $_xhrInfo -> action;
+
+		##	Call sub-logic function by target, if there results are false, we make a fall back to default view
+
+		$enableEdit 	= $this -> existsUserRight('edit');
+		$enableDelete	= $enableEdit;
+
+		$logicDone = false;
+		switch($controllerAction)
+		{
+			case 'edit'		    : $logicDone = $this -> logicEdit($_pDatabase); break;
+			case 'loginSuccess'	: $logicDone = $this -> logicSuccess($_pDatabase);	break;
+
+			case 'xhr_edit'     : $logicDone = $this -> logicXHREdit($_pDatabase, $_xhrInfo); break;
+			case 'xhr_create'   : $logicDone = $this -> logicXHRCreate($_pDatabase, $_xhrInfo); break;	
+			case 'xhr_delete'   : $logicDone = $this -> logicXHRDelete($_pDatabase, $_xhrInfo); break;	
+
+		}
+
+		if(!$logicDone) // Default
+			$logicDone = $this -> logicView($_pDatabase);	
+	
+		return $logicDone;
+	}
 
 	public function
-	logicView(CDatabaseConnection &$_pDatabase, $_isXHRequest, &$_logicResult)
+	logicView(CDatabaseConnection &$_pDatabase) : bool
 	{
 		if(empty($this -> objectInfo -> params))
 		{
@@ -144,15 +198,12 @@ class	controllerLoginForm extends CController
 	}
 
 	public function
-	logicCreate(CDatabaseConnection &$_pDatabase, $_isXHRequest, &$_logicResult)
+	logicXHRCreate(CDatabaseConnection &$_pDatabase, object $_xhrInfo) : bool
 	{
-		##	XHR Function call
 
-		if($_isXHRequest !== false && $_isXHRequest === 'cms-insert-module')
-		{
-			$_bValidationErr =	false;
-			$_bValidationMsg =	'';
-			$_bValidationDta = 	[];
+			$validationErr =	false;
+			$validationMsg =	'';
+			$responseData = 	[];
 
 			$_dataset['object_id'] 	= $this -> objectInfo -> object_id;
 			$_dataset['body'] 		= '';
@@ -164,8 +215,8 @@ class	controllerLoginForm extends CController
 
 			if(!$this -> m_modelSimple -> insert($_pDatabase, $_dataset, MODEL_RESULT_APPEND_DTAOBJECT))
 			{
-				$_bValidationErr =	true;
-				$_bValidationMsg =	'sql insert failed';
+				$validationErr =	true;
+				$validationMsg =	'sql insert failed';
 			}
 			else
 			{
@@ -185,97 +236,19 @@ class	controllerLoginForm extends CController
 								]
 								);
 
-				$_bValidationDta['html'] = $this -> m_pView -> getHTML();
+				$responseData['html'] = $this -> m_pView -> getHTML();
 			}
 
-			tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $_bValidationDta);	// contains exit call
+			tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
 
-		}	
 
-		return true;
+
+		return false;
 	}
 
 	public function
-	logicEdit(CDatabaseConnection &$_pDatabase, $_isXHRequest, &$_logicResult)
+	logicEdit(CDatabaseConnection &$_pDatabase) : bool
 	{
-		##	XHR Function call
-
-		if($_isXHRequest !== false)
-		{
-			$_bValidationErr =	false;
-			$_bValidationMsg =	'';
-			$_bValidationDta = 	[];
-
-		
-			switch($_isXHRequest)
-			{
-				case 'edit'  :	// Update object
-
-
-								$_pFormVariables =	new CURLVariables();
-								$_request		 =	[];
-								$_request[] 	 = 	[	"input" => "cms-object-id", "output" => "object_id", 	"validate" => "strip_tags|!empty" ]; 
-								$_request[] 	 = 	[	"input" => "login-object-id", "output" => "login-object-id", "validate" => "strip_tags|!empty" ]; 
-								$_request[] 	 = 	[	"input" => "login-object-redirect", "output" => "body", "validate" => "strip_tags|!empty" ]; 
-								$_request[] 	 = 	[	"input" => "field_label", "output" => "field_label", "validate" => "strip_tags|trim" ]; 
-								$_pFormVariables-> retrieve($_request, false, true); // POST 
-								$_aFormData		 = $_pFormVariables ->getArray();
-
-
-								if(empty($_aFormData['object_id'])) 		{ 	$_bValidationErr = true; 	$_bValidationDta[] = 'cms-object-id'; 			}
-
-								if(!$_bValidationErr)
-								{
-
-									$_aFormData['params']['object_id'] 	= $_aFormData['login-object-id'];
-									$_aFormData['params']['labels'] 	= $_aFormData['field_label'];
-
-									$_aFormData['params'] = json_encode($_aFormData['params'], JSON_HEX_QUOT | JSON_HEX_APOS | JSON_UNESCAPED_UNICODE);
-
-									unset($_aFormData['login-object-id']);
-									unset($_aFormData['field_label']);
-
-
-
-									$modelCondition = new CModelCondition();
-									$modelCondition -> where('object_id', $_aFormData['object_id']);
-
-									if($this -> m_modelSimple -> update($_pDatabase, $_aFormData, $modelCondition))
-									{
-
-
-										if($this -> getInstallMode())
-											return true;
-					
-										$_bValidationMsg = 'Object updated';
-
-										$this -> m_modelPageObject = new modelPageObject();
-
-										$_objectUpdate['update_time']		=	time();
-										$_objectUpdate['update_by']			=	0;
-										$_objectUpdate['update_reason']		=	'';
-
-										$this -> m_modelPageObject -> update($_pDatabase, $_objectUpdate, $modelCondition);
-									
-									}
-									else
-									{
-										$_bValidationMsg .= 'Unknown error on sql query';
-										$_bValidationErr = true;
-									}											
-								}
-								else	// Validation Failed
-								{
-									$_bValidationMsg .= 'Data validation failed - object was not updated';
-									$_bValidationErr = true;
-								}
-
-								break;
-			}
-			
-			tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $_bValidationDta);	// contains exit call
-
-		}	
 
 		$modelCondition = new CModelCondition();
 		$modelCondition -> where('object_id', $this -> objectInfo -> object_id);
@@ -300,60 +273,129 @@ class	controllerLoginForm extends CController
 	}
 
 	public function
-	logicDelete(CDatabaseConnection &$_pDatabase, $_isXHRequest, &$_logicResult)
+	logicXHREdit(CDatabaseConnection &$_pDatabase, object $_xhrInfo) : bool
 	{
 
-		##	XHR Function call
+			$validationErr =	false;
+			$validationMsg =	'';
+			$responseData = 	[];
 
-		if($_isXHRequest !== false)
-		{
-			$_bValidationErr =	false;
-			$_bValidationMsg =	'';
-			$_bValidationDta = 	[];
+
+
+								$_pFormVariables =	new CURLVariables();
+								$_request		 =	[];
+								#$_request[] 	 = 	[	"input" => "cms-object-id", "output" => "object_id", 	"validate" => "strip_tags|!empty" ]; 
+								$_request[] 	 = 	[	"input" => "login-object-id", "output" => "login-object-id", "validate" => "strip_tags|!empty" ]; 
+								$_request[] 	 = 	[	"input" => "login-object-redirect", "output" => "body", "validate" => "strip_tags|!empty" ]; 
+								$_request[] 	 = 	[	"input" => "field_label", "output" => "field_label", "validate" => "strip_tags|trim" ]; 
+								$_pFormVariables-> retrieve($_request, false, true); // POST 
+								$_aFormData		 = $_pFormVariables ->getArray();
+
+
+								if(empty($_xhrInfo -> objectId))
+								{
+									$validationErr = true;
+									$responseData[] = 'cms-object-id';
+								}
+								
+								if(!$validationErr)
+								{
+
+									$_aFormData['params']['object_id'] 	= $_aFormData['login-object-id'];
+									$_aFormData['params']['labels'] 	= $_aFormData['field_label'];
+
+									$_aFormData['params'] = json_encode($_aFormData['params'], JSON_HEX_QUOT | JSON_HEX_APOS | JSON_UNESCAPED_UNICODE);
+
+									unset($_aFormData['login-object-id']);
+									unset($_aFormData['field_label']);
+
+
+
+									$modelCondition = new CModelCondition();
+									$modelCondition -> where('object_id', $_xhrInfo -> objectId);
+									#$modelCondition -> where('object_id', $_aFormData['object_id']);
+
+									if($this -> m_modelSimple -> update($_pDatabase, $_aFormData, $modelCondition))
+									{
+
+
+										if($this -> getInstallMode())
+											return true;
+					
+										$validationMsg = 'Object updated';
+
+										$this -> m_modelPageObject = new modelPageObject();
+
+										$_objectUpdate['update_time']		=	time();
+										$_objectUpdate['update_by']			=	0;
+										$_objectUpdate['update_reason']		=	'';
+
+										$this -> m_modelPageObject -> update($_pDatabase, $_objectUpdate, $modelCondition);
+									
+									}
+									else
+									{
+										$validationMsg .= 'Unknown error on sql query';
+										$validationErr = true;
+									}											
+								}
+								else	// Validation Failed
+								{
+									$validationMsg .= 'Data validation failed - object was not updated';
+									$validationErr = true;
+								}
+
+			tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
+
+
+		return false;
+
+
+	}
+
+	public function
+	logicXHRDelete(CDatabaseConnection &$_pDatabase, object $_xhrInfo) : bool
+	{
+
+			$validationErr =	false;
+			$validationMsg =	'';
+			$responseData = 	[];
 		
-			switch($_isXHRequest)
-			{
-				case 'delete'  :	// Update object
+	
 
-									$_pFormVariables =	new CURLVariables();
-									$_request		 =	[];
-									$_request[] 	 = 	[	"input" => "cms-object-id",  "output" => "object_id", 	"validate" => "strip_tags|!empty" ]; 
-									$_pFormVariables-> retrieve($_request, false, true); // POST 
-									$_aFormData		 = $_pFormVariables ->getArray();
+									if(empty($_xhrInfo -> objectId))
+									{
+										$validationErr = true;
+										$responseData[] = 'cms-object-id';
+									}
 
-									if(empty($_aFormData['object_id'])) 		{ 	$_bValidationErr = true; 	$_bValidationDta[] = 'cms-object-id'; 			}
-
-									if(!$_bValidationErr)
+									if(!$validationErr)
 									{
 										$modelCondition = new CModelCondition();
-										$modelCondition -> where('object_id', $_aFormData['object_id']);
+										$modelCondition -> where('object_id', $_xhrInfo -> objectId);
 
 										if($this -> m_modelSimple -> delete($_pDatabase, $modelCondition))
 										{
 											$_objectModel  	 = new modelPageObject();
 											$_objectModel	-> delete($_pDatabase, $modelCondition);
 
-											$_bValidationMsg = 'Object deleted';
+											$validationMsg = 'Object deleted';
 										
 										}
 										else
 										{
-											$_bValidationMsg .= 'Unknown error on sql query';
-											$_bValidationErr = true;
+											$validationMsg .= 'Unknown error on sql query';
+											$validationErr = true;
 										}											
 									}
 									else	// Validation Failed
 									{
-										$_bValidationMsg .= 'Data validation failed - object was not updated';
-										$_bValidationErr = true;
+										$validationMsg .= 'Data validation failed - object was not updated';
+										$validationErr = true;
 									}
 
-									break;
-			}
-			
-			tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $_bValidationDta);	// contains exit call
+			tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
 
-		}	
 
 		return false;
 	}
@@ -368,5 +410,3 @@ class	controllerLoginForm extends CController
 		exit;
 	}
 }
-
-?>

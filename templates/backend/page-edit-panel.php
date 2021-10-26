@@ -139,8 +139,6 @@
 
 						<script>
 
-							console.log(<?= json_encode($pageRequest); ?>);
-
 							document.getElementById('trigger-panel-siteimage-select').onclick = function()
 							{
 
@@ -165,7 +163,6 @@
 								if(event.detail === null || event.detail.path.length === 0)
 									return;
 								
-console.log(CMS.SERVER_URL + "mediathek/" + event.detail.path +"?binary&size=small");
 
 								let previewBox = document.getElementById('panel-site-image-selector').querySelector('.imagebox-preview');
 									previewBox.style.backgroundImage = "url('"+ CMS.SERVER_URL + "mediathek/" + event.detail.path +"?binary&size=small')";

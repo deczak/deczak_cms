@@ -57,12 +57,16 @@
 
 		xhr = new XMLHttpRequest();
 		xhr.open('POST', requestTarget, true);
+			xhr.responseType = 'json';
+		xhr.setRequestHeader("X-Requested-With","XMLHttpRequest");
+		xhr.setRequestHeader("X-Requested-XHR-Action", fieldset.getAttribute('data-xhr-target'));
 		xhr.onload = function()
 		{
 			switch(xhr.status)
 			{
 				case 200:	// OK		
 
+							/*
 							try	{
 								var jsonObject = JSON.parse(xhr.response);
 							} catch(e) {
@@ -70,7 +74,11 @@
 								resultBox.setAttribute('data-error',1);
 								break;
 							}
+							*/
 						
+
+								var jsonObject = xhr.response;
+
 							if(typeof jsonObject.data.redirect != "undefined")
 							{
 								setTimeout(function(){ window.location.replace(jsonObject.data.redirect); }, 2000);

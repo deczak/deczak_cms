@@ -136,12 +136,15 @@ class	cmsModuleManager
 		
 		var xhr = new XMLHttpRequest();
 		xhr.open('POST', requestTarget, true);
+		xhr.responseType = 'json';
+		xhr.setRequestHeader("X-Requested-With","XMLHttpRequest");
+		xhr.setRequestHeader("X-Requested-XHR-Action", 'cms-insert-module');
 		xhr.onload = function()
 		{
 			switch(xhr.status)
 			{
 				case 200:	// OK					
-							var jsonObject = JSON.parse(xhr.response); 
+							var jsonObject = xhr.response; 
 							
 							if(typeof jsonObject.data.redirect != "undefined")
 							{

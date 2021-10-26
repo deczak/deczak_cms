@@ -42,5 +42,7 @@ class 	modelLoginObjects extends CModel
 				}
 			}
 		}
+
+		return true;
 	}
 }

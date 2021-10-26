@@ -55,7 +55,7 @@
 document.addEventListener("DOMContentLoaded", function(){
 
 	let	indexList = new cmsRequestDataIndex('template-table-row', '<?= CFG::GET() -> BACKEND -> TIME_FORMAT; ?>');
-		indexList.init();
+		indexList.init('index');
 		
 });	
 </script>

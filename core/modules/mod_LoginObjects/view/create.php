@@ -29,7 +29,7 @@ foreach($tableGroup as $table)
 	</div>
 	<div>
 		
-		<fieldset class="ui fieldset submit-able" id="group-data" data-xhr-target="group-data">
+		<fieldset class="ui fieldset submit-able" id="group-data" data-xhr-target="create">
 			<legend><?= CLanguage::get() -> string('MOD_LOGINO_SUB_CREATE_NAME'); ?></legend>
 			<div>
 				<!-- group -->

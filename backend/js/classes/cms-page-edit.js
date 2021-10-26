@@ -53,12 +53,15 @@ class cmsPageEdit
 
 		let	xhr = new XMLHttpRequest();
 			xhr.open('POST', requestTarget, true);
+			xhr.responseType = 'json';
+			xhr.setRequestHeader("X-Requested-With","XMLHttpRequest");
+			xhr.setRequestHeader("X-Requested-XHR-Action", panelContainer.getAttribute('data-xhr-target'));
 			xhr.onload = function()
 			{
 				switch(xhr.status)
 				{
 					case 200:	// OK					
-								var jsonObject = JSON.parse(xhr.response); 
+								var jsonObject = xhr.response; 
 								//console.log(jsonObject);
 								if(typeof jsonObject.data.redirect != "undefined")
 								{

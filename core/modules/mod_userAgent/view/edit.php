@@ -5,7 +5,7 @@ if(isset($agentsList))
 }
 else
 {
-	$agentsList = false;
+	$dataset = false;
 }
 ?>
 
@@ -19,8 +19,8 @@ else
 			</ul>
 			<hr>
 			<div class="delete-box">
-				<?php if(isset($enableDelete) && $enableDelete && $agentsList !== false) { ?>	
-					<fieldset class="ui fieldset" data-xhr-target="agent-delete" data-xhr-overwrite-target="delete/<?php echo $dataset -> data_id; ?>">	
+				<?php if(isset($enableDelete) && $enableDelete && $dataset !== false) { ?>	
+					<fieldset class="ui fieldset" data-xhr-target="delete" data-xhr-overwrite-target="delete/<?php echo $dataset -> data_id; ?>">	
 						<div class="submit-container button-only">
 							<button class="ui button icon labeled trigger-submit-fieldset" type="button" disabled><span><i class="fas fa-trash-alt" data-icon="fa-trash-alt"></i></span><?php echo $language -> string('BUTTON_DELETE'); ?></button>
 							<div class="protector"><input type="checkbox" class="trigger-submit-protector" id="protector-agent-delete"><label for="protector-agent-delete"></label></div>
@@ -36,7 +36,7 @@ else
 	</div>
 	<div>
 		
-		<fieldset class="ui fieldset submit-able" id="user-agent" data-xhr-target="user-agent" <?= ($agentsList !== false ? 'data-xhr-overwrite-target="edit/'. $dataset -> data_id .'"' : ''); ?>>
+		<fieldset class="ui fieldset submit-able" id="user-agent" data-xhr-target="<?= (!$dataset ? 'create' : 'edit'); ?>" <?= ($dataset !== false ? 'data-xhr-overwrite-target="edit/'. $dataset -> data_id .'"' : ''); ?>>
 
 			<legend><?php echo $language -> string('M_BEUSERAG_USERAGENT'); ?></legend>
 			<div>
@@ -79,7 +79,7 @@ else
 				
 			</div>
 
-			<?php if(isset($enableEdit) && $enableEdit || $agentsList === false) { ?>
+			<?php if(isset($enableEdit) && $enableEdit || $dataset === false) { ?>
 
 				<div class="result-box" data-error=""></div>
 
@@ -101,7 +101,7 @@ else
 	
 </div>
 
-<?php if($agentsList !== false) { ?>
+<?php if($dataset !== false) { ?>
 <script src="<?php echo CMS_SERVER_URL_BACKEND; ?>js/classes/cms-request-data-index.js"></script>
 <script src="<?php echo CMS_SERVER_URL_BACKEND; ?>js/classes/cms-request-data-item.js"></script>
 <script>

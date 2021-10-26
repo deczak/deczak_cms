@@ -21,55 +21,60 @@ class	controllerCategoryCloud extends CController
 	}
 	
 	public function
-	logic(CDatabaseConnection &$_pDatabase, array $_rcaTarget, $_isXHRequest, &$_logicResult, bool $_bEditMode)
+	logic(CDatabaseConnection &$_pDatabase, array $_rcaTarget, ?object $_xhrInfo, &$_logicResult, bool $_bEditMode) : bool
 	{
 		##	Set default target if not exists
 
-		$_controllerAction = $this -> getControllerAction($_rcaTarget, 'view');
+		$controllerAction = $this -> getControllerAction_v2($_rcaTarget, $_xhrInfo, 'view');
 
 		##	Check user rights for this target
 		
-		if(!$this -> detectRights($_controllerAction))
+		if(!$this -> detectRights($controllerAction))
 		{
-			if($_isXHRequest !== false)
+			if($_xhrInfo !== null)
 			{
-				$_bValidationErr =	true;
-				$_bValidationMsg =	CLanguage::get() -> string('ERR_PERMISSON');
-				$_bValidationDta = 	[];
+				$validationErr =	true;
+				$validationMsg =	CLanguage::get() -> string('ERR_PERMISSON');
+				$responseData  = 	[];
 
-				tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $_bValidationDta);	// contains exit call
+
+				tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
 			}
 
 			CMessages::instance() -> addMessage(CLanguage::get() -> string('ERR_PERMISSON') , MSG_WARNING);
-			return;
+			return false;
 		}
 
-		if($_bEditMode && $_isXHRequest === false) 
-			$_controllerAction = 'edit';
+		if($_bEditMode && $_xhrInfo === null) 
+			$controllerAction = 'edit';
+			
+		if($_xhrInfo !== null && $_xhrInfo -> isXHR && $_xhrInfo -> objectId === $this -> objectInfo -> object_id)
+			$controllerAction = 'xhr_'. $_xhrInfo -> action;
 
 		##	Call sub-logic function by target, if there results are false, we make a fall back to default view
 
 		$enableEdit 	= $this -> existsUserRight('edit');
 		$enableDelete	= $enableEdit;
 
-		$_logicResults = false;
-		switch($_controllerAction)
+		$logicDone = false;
+		switch($controllerAction)
 		{
-			case 'view'		: $_logicResults = $this -> logicView(	$_pDatabase, $_isXHRequest, $_logicResult);	break;
-			case 'edit'		: $_logicResults = $this -> logicEdit(	$_pDatabase, $_isXHRequest, $_logicResult);	break;	
-			case 'create'	: $_logicResults = $this -> logicCreate($_pDatabase, $_isXHRequest, $_logicResult);	break;
-			case 'delete'	: $_logicResults = $this -> logicDelete($_pDatabase, $_isXHRequest, $_logicResult);	break;	
+			case 'edit'		  : $logicDone = $this -> logicEdit($_pDatabase); break;
+
+			case 'xhr_edit'   : $logicDone = $this -> logicXHREdit($_pDatabase, $_xhrInfo); break;
+			case 'xhr_create' : $logicDone = $this -> logicXHRCreate($_pDatabase, $_xhrInfo); break;	
+			case 'xhr_delete' : $logicDone = $this -> logicXHRDelete($_pDatabase, $_xhrInfo); break;	
+
 		}
 
-		if(!$_logicResults)
-		{
-			##	Default View
-			$_logicResults = $this -> logicView($_pDatabase, $_isXHRequest, $_logicResult);	
-		}
+		if(!$logicDone) // Default
+			$logicDone = $this -> logicView($_pDatabase);	
+	
+		return $logicDone;
 	}
 
 	private function
-	logicView(CDatabaseConnection &$_pDatabase, $_isXHRequest = false, &$_logicResult)
+	logicView(CDatabaseConnection &$_pDatabase) : bool
 	{
 		##	get object
 		$objectCondition = new CModelCondition();
@@ -102,11 +107,15 @@ class	controllerCategoryCloud extends CController
 		foreach($modelCategoriesAllocation -> getResult() as $categoryAlloc)
 			$collectedCategoryIds[] = $categoryAlloc -> category_id;
 
-		##	get categorie list
-		$condCategories = new CModelCondition();
-		$condCategories -> whereIn('category_id', implode(',', $collectedCategoryIds));	
-		$condCategories -> groupBy('category_id');
-		$this -> m_modelCategories -> load($_pDatabase, $condCategories);
+		if(!empty($collectedCategoryIds))
+		{
+			##	get categorie list
+			$condCategories = new CModelCondition();
+			$condCategories -> whereIn('category_id', implode(',', $collectedCategoryIds));	
+			$condCategories -> groupBy('category_id');
+			$this -> m_modelCategories -> load($_pDatabase, $condCategories);
+			$categoriesList = $this -> m_modelTags -> getResult();
+		}
 
 		##	get module templates
 		$moduleTemplate		 = new CModulesTemplates();
@@ -120,7 +129,7 @@ class	controllerCategoryCloud extends CController
 						'',
 						[
 							'object' 	=> $this -> m_modelSimple -> getResult()[0],
-							'termList' 	=> $this -> m_modelCategories -> getResult(),
+							'termList' 	=> $categoriesList ?? [],
 							'parentNode' 	=> $parentNode,
 							'currentTemplate'	=> $moduleTemplate -> templatesList
 						]
@@ -130,77 +139,8 @@ class	controllerCategoryCloud extends CController
 	}
 
 	private function
-	logicEdit(CDatabaseConnection &$_pDatabase, $_isXHRequest, &$_logicResult)
+	logicEdit(CDatabaseConnection &$_pDatabase) : bool
 	{
-		##	XHR Function call
-
-		if($_isXHRequest !== false)
-		{
-			$_bValidationErr =	false;
-			$_bValidationMsg =	'';
-			$_bValidationDta = 	[];
-
-		
-			switch($_isXHRequest)
-			{
-				case 'edit'  :	// Update object
-
-								$_pFormVariables =	new CURLVariables();
-								$_request		 =	[];
-								$_request[] 	 = 	[	"input" => "cms-object-id",  "output" => "object_id", 	"validate" => "strip_tags|!empty" ]; 
-								$_request[] 	 = 	[	"input" => "categorycloud-template",  		"validate" => "strip_tags|!empty" ]; 
-								$_request[] 	 = 	[	"input" => "categorycloud-parent-node-id", 	"validate" => "strip_tags|!empty" ]; 
-								$_pFormVariables-> retrieve($_request, false, true); // POST 
-								$_aFormData		 = $_pFormVariables ->getArray();
-
-								if(empty($_aFormData['object_id'])) 		{ 	$_bValidationErr = true; 	$_bValidationDta[] = 'cms-object-id'; 			}
-
-								if(!$_bValidationErr)
-								{
-									$modelCondition = new CModelCondition();
-									$modelCondition -> where('object_id', $_aFormData['object_id']);
-
-									$_aFormData['params']	= 	[
-																	"template"			=> $_aFormData['categorycloud-template'],
-																	"parent_node_id"	=> $_aFormData['categorycloud-parent-node-id']
-																];
-									$_aFormData['params']	 = 	json_encode($_aFormData['params'], JSON_FORCE_OBJECT);
-
-
-
-									$objectId = $_aFormData['object_id'];
-									unset($_aFormData['object_id']);
-
-									if($this -> m_modelSimple -> update($_pDatabase, $_aFormData, $modelCondition))
-									{
-										$_bValidationMsg = 'Object updated';
-
-										$this -> m_modelPageObject = new modelPageObject();
-
-										$_objectUpdate['update_time']		=	time();
-										$_objectUpdate['update_by']			=	0;
-										$_objectUpdate['update_reason']		=	'';
-
-										$this -> m_modelPageObject -> update($_pDatabase, $_objectUpdate, $modelCondition);
-									
-									}
-									else
-									{
-										$_bValidationMsg .= 'Unknown error on sql query';
-										$_bValidationErr = true;
-									}											
-								}
-								else	// Validation Failed
-								{
-									$_bValidationMsg .= 'Data validation failed - object was not updated';
-									$_bValidationErr = true;
-								}
-
-								break;
-			}
-			
-			tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $_bValidationDta);	// contains exit call
-		}	
 
 		##	get object
 		$objectCondition = new CModelCondition();
@@ -233,11 +173,16 @@ class	controllerCategoryCloud extends CController
 		foreach($modelCategoriesAllocation -> getResult() as $categorieAlloc)
 			$collectedCategoryIds[] = $categorieAlloc -> category_id;
 
-		##	get categorie list
-		$condCategories = new CModelCondition();
-		$condCategories -> whereIn('category_id', implode(',', $collectedCategoryIds));	
-		$condCategories -> groupBy('category_id');
-		$this -> m_modelCategories -> load($_pDatabase, $condCategories);
+		if(!empty($collectedCategoryIds))
+		{
+
+			##	get categorie list
+			$condCategories = new CModelCondition();
+			$condCategories -> whereIn('category_id', implode(',', $collectedCategoryIds));	
+			$condCategories -> groupBy('category_id');
+			$this -> m_modelCategories -> load($_pDatabase, $condCategories);
+			$categoriesList = $this -> m_modelTags -> getResult();
+		}
 
 		##	get module templates
 		$moduleTemplate		 = new CModulesTemplates();
@@ -255,7 +200,7 @@ class	controllerCategoryCloud extends CController
 						'',
 						[
 							'object' 	=> $this -> m_modelSimple -> getResult()[0],
-							'termList' 	=> $this -> m_modelCategories -> getResult(),
+							'termList' 	=> $categoriesList ?? [],
 							'parentNode' 	=> $parentNode,
 							'currentTemplate'	=> $moduleTemplate -> templatesList,
 							'avaiableTemplates'	=> $moduleTemplates -> templatesList
@@ -266,16 +211,79 @@ class	controllerCategoryCloud extends CController
 	}
 
 	private function
-	logicCreate(CDatabaseConnection &$_pDatabase, $_isXHRequest, &$_logicResult)
+	logicXHREdit(CDatabaseConnection &$_pDatabase, object $_xhrInfo) : bool
 	{
 
-		##	XHR Function call
+			$validationErr =	false;
+			$validationMsg =	'';
+			$responseData = 	[];
 
-		if($_isXHRequest !== false && $_isXHRequest === 'cms-insert-module')
-		{
-			$_bValidationErr =	false;
-			$_bValidationMsg =	'';
-			$_bValidationDta = 	[];
+
+								$_pFormVariables =	new CURLVariables();
+								$_request		 =	[];
+								$_request[] 	 = 	[	"input" => "categorycloud-template",  		"validate" => "strip_tags|!empty" ]; 
+								$_request[] 	 = 	[	"input" => "categorycloud-parent-node-id", 	"validate" => "strip_tags|!empty" ]; 
+								$_pFormVariables-> retrieve($_request, false, true); // POST 
+								$_aFormData		 = $_pFormVariables ->getArray();
+
+								if(empty($_xhrInfo -> objectId))
+								{ 	
+									$validationErr = true; 	
+									$responseData[] = 'cms-object-id';
+								}
+
+								if(!$validationErr)
+								{
+									$modelCondition = new CModelCondition();
+									$modelCondition -> where('object_id', $_xhrInfo -> objectId);
+
+									$_aFormData['params']	= 	[
+																	"template"			=> $_aFormData['categorycloud-template'],
+																	"parent_node_id"	=> $_aFormData['categorycloud-parent-node-id']
+																];
+									$_aFormData['params']	 = 	json_encode($_aFormData['params'], JSON_FORCE_OBJECT);
+
+
+
+									$objectId = $_xhrInfo -> objectId;
+
+									if($this -> m_modelSimple -> update($_pDatabase, $_aFormData, $modelCondition))
+									{
+										$validationMsg = 'Object updated';
+
+										$this -> m_modelPageObject = new modelPageObject();
+
+										$_objectUpdate['update_time']		=	time();
+										$_objectUpdate['update_by']			=	0;
+										$_objectUpdate['update_reason']		=	'';
+
+										$this -> m_modelPageObject -> update($_pDatabase, $_objectUpdate, $modelCondition);
+									
+									}
+									else
+									{
+										$validationMsg .= 'Unknown error on sql query';
+										$validationErr = true;
+									}											
+								}
+								else	// Validation Failed
+								{
+									$validationMsg .= 'Data validation failed - object was not updated';
+									$validationErr = true;
+								}
+
+			tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
+
+		return false;
+	}
+
+	private function
+	logicXHRCreate(CDatabaseConnection &$_pDatabase, object $_xhrInfo) : bool
+	{
+
+			$validationErr =	false;
+			$validationMsg =	'';
+			$responseData = 	[];
 
 			$_dataset['object_id'] 	= $this -> objectInfo -> object_id;
 			$_dataset['body'] 		= '';
@@ -290,8 +298,8 @@ class	controllerCategoryCloud extends CController
 
 			if(!$this -> m_modelSimple -> insert($_pDatabase, $_dataset, MODEL_RESULT_APPEND_DTAOBJECT))
 			{
-				$_bValidationErr =	true;
-				$_bValidationMsg =	'sql insert failed';
+				$validationErr =	true;
+				$validationMsg =	'sql insert failed';
 			}
 			else
 			{
@@ -322,11 +330,15 @@ class	controllerCategoryCloud extends CController
 				foreach($modelCategoriesAllocation -> getResult() as $categorieAlloc)
 					$collectedCategoryIds[] = $categorieAlloc -> category_id;
 
+		if(!empty($collectedCategoryIds))
+		{
 				##	get categorie list
 				$condCategories = new CModelCondition();
 				$condCategories -> whereIn('category_id', implode(',', $collectedCategoryIds));	
 				$condCategories -> groupBy('category_id');
 				$this -> m_modelCategories -> load($_pDatabase, $condCategories);
+			$categoriesList = $this -> m_modelTags -> getResult();
+		}
 
 				##	create fake pageRequest
 				$parentNode = tk::getNodeFromSitemap($modelSitemap -> getResult(), $parentNode);
@@ -349,82 +361,72 @@ class	controllerCategoryCloud extends CController
 								[
 								'object' 			=> $this -> m_modelSimple -> getResult()[0],
 								'parentNode' 		=> $parentNode,
-								'termList' 			=> $this -> m_modelCategories -> getResult(),
+								'termList' 			=> $categoriesList ?? [],
 								'currentTemplate'	=> $moduleTemplate -> templatesList,
 								'avaiableTemplates'	=> $moduleTemplates -> templatesList
 								]
 								);
 
-				$_bValidationDta['html'] = $this -> m_pView -> getHTML($pageRequest);
+				$responseData['html'] = $this -> m_pView -> getHTML($pageRequest);
 
 
 				$pRouter  = CRouter::instance();
 				$pRouter -> createRoutes($_pDatabase);
 			}
 
-			tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $_bValidationDta);	// contains exit call
-		}	
+			tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
+
+		return false;
+	
 	}
 	
 	private function
-	logicDelete(CDatabaseConnection &$_pDatabase, $_isXHRequest, &$_logicResult)
+	logicXHRDelete(CDatabaseConnection &$_pDatabase, object $_xhrInfo, bool $_enableEdit = false, bool $_enableDelete = false) : bool
 	{
-		##	XHR Function call
 
-		if($_isXHRequest !== false)
-		{
-			$_bValidationErr =	false;
-			$_bValidationMsg =	'';
-			$_bValidationDta = 	[];
+			$validationErr =	false;
+			$validationMsg =	'';
+			$responseData = 	[];
 		
-			switch($_isXHRequest)
-			{
-				case 'delete'  :	// Update object
 
-									$_pFormVariables =	new CURLVariables();
-									$_request		 =	[];
-									$_request[] 	 = 	[	"input" => "cms-object-id",  "output" => "object_id", 	"validate" => "strip_tags|!empty" ]; 
-									$_pFormVariables-> retrieve($_request, false, true); // POST 
-									$_aFormData		 = $_pFormVariables ->getArray();
 
-									if(empty($_aFormData['object_id'])) 		{ 	$_bValidationErr = true; 	$_bValidationDta[] = 'cms-object-id'; 			}
 
-									if(!$_bValidationErr)
+		if(empty($_xhrInfo -> objectId))
+		{ 	
+			$validationErr	= true; 	
+			$responseData[] = 'cms-object-id'; 			
+		}
+									if(!$validationErr)
 									{
 										$modelCondition = new CModelCondition();
-										$modelCondition -> where('object_id', $_aFormData['object_id']);
+										$modelCondition -> where('object_id', $_xhrInfo -> objectId);
 
 										if($this -> m_modelSimple -> delete($_pDatabase, $modelCondition))
 										{
 											$_objectModel  	 = new modelPageObject();
 											$_objectModel	-> delete($_pDatabase, $modelCondition);
 
-											$_bValidationMsg = 'Object deleted';
+											$validationMsg = 'Object deleted';
 										}
 										else
 										{
-											$_bValidationMsg .= 'Unknown error on sql query';
-											$_bValidationErr = true;
+											$validationMsg .= 'Unknown error on sql query';
+											$validationErr = true;
 										}									
 									}
 									else	// Validation Failed
 									{
-										$_bValidationMsg .= 'Data validation failed - object was not updated';
-										$_bValidationErr = true;
+										$validationMsg .= 'Data validation failed - object was not updated';
+										$validationErr = true;
 									}
 
 
 									$pRouter  = CRouter::instance();
 									$pRouter -> createRoutes($_pDatabase);
 
-									break;
-			}
 			
-			tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $_bValidationDta);	// contains exit call
-		}	
+			tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
 
 		return false;
 	}
 }
-
-?>

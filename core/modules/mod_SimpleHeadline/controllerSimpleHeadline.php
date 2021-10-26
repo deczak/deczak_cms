@@ -4,11 +4,10 @@ include_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelSimple.php';
 
 class	controllerSimpleHeadline extends CController
 {
-
 	private	$m_modelSimple;
 		
 	public function
-	__construct($_module, &$_object)
+	__construct(object $_module, object &$_object)
 	{
 		parent::__construct($_module, $_object);
 
@@ -18,31 +17,34 @@ class	controllerSimpleHeadline extends CController
 	}
 	
 	public function
-	logic(CDatabaseConnection &$_pDatabase, array $_rcaTarget, $_isXHRequest, &$_logicResult, bool $_bEditMode)
+	logic(CDatabaseConnection &$_pDatabase, array $_rcaTarget, ?object $_xhrInfo, &$_logicResult, bool $_bEditMode) : bool
 	{
 		##	Set default target if not exists
 
-		$_controllerAction = $this -> getControllerAction($_rcaTarget, 'view');
+		$controllerAction = $this -> getControllerAction_v2($_rcaTarget, $_xhrInfo, 'view');
 
 		##	Check user rights for this target
 	
-		if(!$this -> detectRights($_controllerAction))
+		if(!$this -> detectRights($controllerAction))
 		{
-			if($_isXHRequest !== false)
+			if($_xhrInfo !== null && $_xhrInfo -> isXHR)
 			{
-				$_bValidationErr =	true;
-				$_bValidationMsg =	CLanguage::get() -> string('ERR_PERMISSON');
-				$_bValidationDta = 	[];
+				$validationErr =	true;
+				$validationMsg =	CLanguage::get() -> string('ERR_PERMISSON');
+				$responseData = 	[];
 
-				tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $_bValidationDta);	// contains exit call
+				tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
 			}
 
 			CMessages::instance() -> addMessage(CLanguage::get() -> string('ERR_PERMISSON') , MSG_WARNING);
-			return;
+			return false;
 		}
 
-		if($_bEditMode && $_isXHRequest === false) 
-			$_controllerAction = 'edit';
+		if($_bEditMode && $_xhrInfo === null) 
+			$controllerAction = 'edit';
+			
+		if($_xhrInfo !== null && $_xhrInfo -> isXHR && $_xhrInfo -> objectId === $this -> objectInfo -> object_id)
+			$controllerAction = 'xhr_'. $_xhrInfo -> action;
 
 		##	Call sub-logic function by target, if there results are false, we make a fall back to default view
 
@@ -50,29 +52,25 @@ class	controllerSimpleHeadline extends CController
 		$enableDelete	= $enableEdit;
 
 		if(!$enableEdit)
-			$_controllerAction = 'view';
-
-		$_logicResults = false;
-		switch($_controllerAction)
+			$controllerAction = 'view';
+			
+		$logicDone = false;
+		switch($controllerAction)
 		{
-			case 'view'		: $_logicResults = $this -> logicView(	$_pDatabase, $_isXHRequest, $_logicResult);	break;
-			case 'edit'		: $_logicResults = $this -> logicEdit(	$_pDatabase, $_isXHRequest, $_logicResult);	break;	
-			case 'create'	: $_logicResults = $this -> logicCreate($_pDatabase, $_isXHRequest, $_logicResult);	break;
-			case 'delete'	: $_logicResults = $this -> logicDelete($_pDatabase, $_isXHRequest, $_logicResult);	break;	
+			case 'edit'		  : $logicDone = $this -> logicEdit($_pDatabase, $enableEdit, $enableDelete); break;
+			case 'xhr_create' : $logicDone = $this -> logicXHRCreate($_pDatabase, $_xhrInfo, $enableEdit, $enableDelete); break;	
+			case 'xhr_edit'   : $logicDone = $this -> logicXHREdit($_pDatabase, $_xhrInfo, $enableEdit, $enableDelete); break;
+			case 'xhr_delete' : $logicDone = $this -> logicXHRDelete($_pDatabase, $_xhrInfo, $enableEdit, $enableDelete); break;	
 		}
 
-		if(!$_logicResults)
-		{
-			##	Default View
-			$_logicResults = $this -> logicView($_pDatabase, $_isXHRequest, $_logicResult);	
-		}
-
-
-
+		if(!$logicDone) // Default
+			$logicDone = $this -> logicView($_pDatabase, $enableEdit, $enableDelete);	
+	
+		return $logicDone;
 	}
 
 	private function
-	logicView(CDatabaseConnection &$_pDatabase, $_isXHRequest, &$_logicResult)
+	logicView(CDatabaseConnection &$_pDatabase, bool $_enableEdit = false, bool $_enableDelete = false) : bool
 	{
 		$modelCondition = new CModelCondition();
 		$modelCondition -> where('object_id', $this -> objectInfo -> object_id);
@@ -88,81 +86,16 @@ class	controllerSimpleHeadline extends CController
 						);
 
 		return true;
-
 	}
 
 	private function
-	logicEdit(CDatabaseConnection &$_pDatabase, $_isXHRequest, &$_logicResult)
+	logicEdit(CDatabaseConnection &$_pDatabase, bool $enableEdit, bool $enableDelete) : bool
 	{
-
-		##	XHR Function call
-
-		if($_isXHRequest !== false)
-		{
-			$_bValidationErr =	false;
-			$_bValidationMsg =	'';
-			$_bValidationDta = 	[];
-
-		
-			switch($_isXHRequest)
-			{
-				case 'edit'  :	// Update object
-
-
-								$_pFormVariables =	new CURLVariables();
-								$_request		 =	[];
-								$_request[] 	 = 	[	"input" => "cms-object-id",  "output" => "object_id", 	"validate" => "strip_tags|!empty" ]; 
-								$_request[] 	 = 	[	"input" => "simple-text",  "output" => "body", 			"validate" => "!empty" ]; 
-								$_pFormVariables-> retrieve($_request, false, true); // POST 
-								$_aFormData		 = $_pFormVariables ->getArray();
-
-
-								if(empty($_aFormData['object_id'])) 		{ 	$_bValidationErr = true; 	$_bValidationDta[] = 'cms-object-id'; 			}
-
-								if(!$_bValidationErr)
-								{
-									$modelCondition = new CModelCondition();
-									$modelCondition -> where('object_id', $_aFormData['object_id']);
-									
-									$objectId = $_aFormData['object_id'];
-									unset($_aFormData['object_id']);
-
-									if($this -> m_modelSimple -> update($_pDatabase, $_aFormData, $modelCondition))
-									{
-										$_bValidationMsg = 'Object updated';
-
-										$this -> m_modelPageObject = new modelPageObject();
-
-										$_objectUpdate['update_time']		=	time();
-										$_objectUpdate['update_by']			=	0;
-										$_objectUpdate['update_reason']		=	'';
-
-										$this -> m_modelPageObject -> update($_pDatabase, $_objectUpdate, $modelCondition);
-									
-									}
-									else
-									{
-										$_bValidationMsg .= 'Unknown error on sql query';
-										$_bValidationErr = true;
-									}											
-								}
-								else	// Validation Failed
-								{
-									$_bValidationMsg .= 'Data validation failed - object was not updated';
-									$_bValidationErr = true;
-								}
-
-								break;
-			}
-			
-			tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $_bValidationDta);	// contains exit call
-
-		}	
-
 		$modelCondition = new CModelCondition();
 		$modelCondition -> where('object_id', $this -> objectInfo -> object_id);
 
 		$this -> m_modelSimple -> load($_pDatabase, $modelCondition);
+
 
 		$this -> setView(	
 						'edit',	
@@ -176,15 +109,68 @@ class	controllerSimpleHeadline extends CController
 	}
 
 	private function
-	logicCreate(CDatabaseConnection &$_pDatabase, $_isXHRequest, &$_logicResult)
+	logicXHREdit(CDatabaseConnection &$_pDatabase, object $_xhrInfo, bool $_enableEdit = false, bool $_enableDelete = false) : bool
 	{
-		##	XHR Function call
+		$validationErr   = false;
+		$validationMsg   = 'OK';
+		$responseData    = [];
+	
 
-		if($_isXHRequest !== false && $_isXHRequest === 'cms-insert-module')
+		$pURLVariables =	new CURLVariables();
+		$requestList		 =	[];
+		$requestList[] 	 = 	[	"input" => "simple-text",  "output" => "body", 			"validate" => "!empty" ]; 
+		$pURLVariables-> retrieve($requestList, false, true); // POST 
+		$urlVarList		 = $pURLVariables ->getArray();
+
+
+		if(empty($_xhrInfo -> objectId)) 		{ 	$validationErr = true; 	$responseData[] = 'cms-object-id'; 			}
+
+		if(!$validationErr)
 		{
-			$_bValidationErr =	false;
-			$_bValidationMsg =	'';
-			$_bValidationDta = 	[];
+			$modelCondition = new CModelCondition();
+			$modelCondition -> where('object_id', $_xhrInfo -> objectId);
+			
+			$objectId = $_xhrInfo -> objectId;
+
+			if($this -> m_modelSimple -> update($_pDatabase, $urlVarList, $modelCondition))
+			{
+				$validationMsg = 'Object updated';
+
+				$this -> m_modelPageObject = new modelPageObject();
+
+				$_objectUpdate['update_time']		=	time();
+				$_objectUpdate['update_by']			=	0;
+				$_objectUpdate['update_reason']		=	'';
+
+				$this -> m_modelPageObject -> update($_pDatabase, $_objectUpdate, $modelCondition);
+			
+			}
+			else
+			{
+				$validationMsg .= 'Unknown error on sql query';
+				$validationErr = true;
+			}											
+		}
+		else	// Validation Failed
+		{
+			$validationMsg .= 'Data validation failed - object was not updated';
+			$validationErr = true;
+		}
+
+		tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
+
+
+
+		return false;
+	}
+
+	private function
+	logicXHRCreate(CDatabaseConnection &$_pDatabase, object $_xhrInfo, bool $_enableEdit = false, bool $_enableDelete = false) : bool
+	{
+
+			$validationErr =	false;
+			$validationMsg =	'';
+			$responseData = 	[];
 
 			$_dataset['object_id'] 	= $this -> objectInfo -> object_id;
 			$_dataset['body'] 		= '';
@@ -193,13 +179,11 @@ class	controllerSimpleHeadline extends CController
 
 
 
-
-
 			
 			if(!$this -> m_modelSimple -> insert($_pDatabase, $_dataset, MODEL_RESULT_APPEND_DTAOBJECT))
 			{
-				$_bValidationErr =	true;
-				$_bValidationMsg =	'sql insert failed';
+				$validationErr =	true;
+				$validationMsg =	'sql insert failed';
 			}
 			else
 			{
@@ -211,70 +195,54 @@ class	controllerSimpleHeadline extends CController
 								]
 								);
 
-				$_bValidationDta['html'] = $this -> m_pView -> getHTML();
+				$responseData['html'] = $this -> m_pView -> getHTML();
 			}
 
-			tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $_bValidationDta);	// contains exit call
-		}	
+			tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
+		
+		return false;
 	}
 	
 	private function
-	logicDelete(CDatabaseConnection &$_pDatabase, $_isXHRequest, &$_logicResult)
+	logicXHRDelete(CDatabaseConnection &$_pDatabase, object $_xhrInfo, bool $_enableEdit = false, bool $_enableDelete = false) : bool
 	{
-		##	XHR Function call
-
-		if($_isXHRequest !== false)
-		{
-			$_bValidationErr =	false;
-			$_bValidationMsg =	'';
-			$_bValidationDta = 	[];
+		$validationErr =	false;
+		$validationMsg =	'';
+		$responseData = 	[];
 		
-			switch($_isXHRequest)
+		if(empty($_xhrInfo -> objectId))
+		{ 	
+			$validationErr	= true; 	
+			$responseData[] = 'cms-object-id'; 			
+		}
+
+		if(!$validationErr)
+		{
+			$modelCondition = new CModelCondition();
+			$modelCondition -> where('object_id', $_xhrInfo -> objectId);
+
+			if($this -> m_modelSimple -> delete($_pDatabase, $modelCondition))
 			{
-				case 'delete'  :	// Update object
+				$_objectModel  	 = new modelPageObject();
+				$_objectModel	-> delete($_pDatabase, $modelCondition);
 
-									$_pFormVariables =	new CURLVariables();
-									$_request		 =	[];
-									$_request[] 	 = 	[	"input" => "cms-object-id",  "output" => "object_id", 	"validate" => "strip_tags|!empty" ]; 
-									$_pFormVariables-> retrieve($_request, false, true); // POST 
-									$_aFormData		 = $_pFormVariables ->getArray();
-
-									if(empty($_aFormData['object_id'])) 		{ 	$_bValidationErr = true; 	$_bValidationDta[] = 'cms-object-id'; 			}
-
-									if(!$_bValidationErr)
-									{
-										$modelCondition = new CModelCondition();
-										$modelCondition -> where('object_id', $_aFormData['object_id']);
-
-										if($this -> m_modelSimple -> delete($_pDatabase, $modelCondition))
-										{
-											$_objectModel  	 = new modelPageObject();
-											$_objectModel	-> delete($_pDatabase, $modelCondition);
-
-											$_bValidationMsg = 'Object deleted';
-										
-										}
-										else
-										{
-											$_bValidationMsg .= 'Unknown error on sql query';
-											$_bValidationErr = true;
-										}											
-									}
-									else	// Validation Failed
-									{
-										$_bValidationMsg .= 'Data validation failed - object was not updated';
-										$_bValidationErr = true;
-									}
-
-									break;
-			}
+				$validationMsg = 'Object deleted';
 			
-			tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $_bValidationDta);	// contains exit call
-		}	
+			}
+			else
+			{
+				$validationMsg .= 'Unknown error on sql query';
+				$validationErr = true;
+			}											
+		}
+		else	// Validation Failed
+		{
+			$validationMsg .= 'Data validation failed - object was not updated';
+			$validationErr = true;
+		}
 
+		tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
+	
 		return false;
 	}
-
 }
-
-?>

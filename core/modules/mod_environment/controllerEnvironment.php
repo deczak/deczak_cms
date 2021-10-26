@@ -17,54 +17,65 @@ class	controllerEnvironment extends CController
 	}
 	
 	public function
-	logic(CDatabaseConnection &$_dbConnection, array $_rcaTarget, $_isXHRequest)
+	logic(CDatabaseConnection &$_pDatabase, array $_rcaTarget, ?object $_xhrInfo) : bool
 	{
 		##	Set default target if not exists
 
-		$_controllerAction = $this -> getControllerAction($_rcaTarget, 'index');
-
+		$controllerAction = $this -> getControllerAction($_rcaTarget, 'index');
+		
 		##	Check user rights for this target
-
-		if(!$this -> detectRights($_controllerAction))
+		
+		if(!$this -> detectRights($controllerAction))
 		{
-			if($_isXHRequest !== false)
+			if($_xhrInfo !== null)
 			{
-				$_bValidationErr =	true;
-				$_bValidationMsg =	CLanguage::get() -> string('ERR_PERMISSON');
-				$_bValidationDta = 	[];
+				$validationErr =	true;
+				$validationMsg =	CLanguage::get() -> string('ERR_PERMISSON');
+				$responseData  = 	[];
 
-				tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $_bValidationDta);	// contains exit call
+
+				tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
 			}
 
 			CMessages::instance() -> addMessage(CLanguage::get() -> string('ERR_PERMISSON') , MSG_WARNING);
-			return;
+			return false;
 		}
+
+		$controllerAction = $this -> getControllerAction_v2($_rcaTarget, $_xhrInfo, 'index');
+
+			
+		if($_xhrInfo !== null && $_xhrInfo -> isXHR && $_xhrInfo -> objectId === $this -> objectInfo -> object_id)
+			$controllerAction = 'xhr_'. $_xhrInfo -> action;
 
 		##	Call sub-logic function by target, if there results are false, we make a fall back to default view
 
 		$enableEdit 	= $this -> existsUserRight('edit');
 		$enableDelete	= $enableEdit;
+	
 
-		$_logicResults = false;
-		switch($_controllerAction)
+		$logicDone = false;
+		switch($controllerAction)
 		{
-			case 'edit'		: $_logicResults = $this -> logicEdit($_dbConnection, $_isXHRequest); break;	
+
+
+
+			case 'xhr_edit_remoteuser': $logicDone = $this -> logicXHREditRemoteUser($_pDatabase);	break;	
+			case 'xhr_edit_backend': 	$logicDone = $this -> logicXHREditBackend($_pDatabase);	break;	
+			case 'xhr_update_htaccess': $logicDone = $this -> logicXHRUpdateHTAccess($_pDatabase);	break;	
+			case 'xhr_update_sitemap': 	$logicDone = $this -> logicXHRUpdateSitemap($_pDatabase);	break;	
+		
+		
 		}
 
-		if(!$_logicResults)
-		{
-			##	Default View
-			$this -> logicIndex($_dbConnection, $_isXHRequest, $enableEdit, $enableDelete);	
-		}
+		if(!$logicDone) // Default
+			$logicDone = $this -> logicIndex($_pDatabase, $enableEdit, $enableDelete);	
+	
+		return $logicDone;
 	}
 
 	private function
-	logicIndex(CDatabaseConnection &$_dbConnection, $_isXHRequest, $_enableEdit = false, $_enableDelete = false)
-	{
-		##	Non XHR request
-		
-		$modelCondition = new CModelCondition();
-	
+	logicIndex(CDatabaseConnection &$_pDatabase, bool $_enableEdit = false) : bool
+	{	
 		$this -> setView(	
 						'index',	
 						'',
@@ -72,102 +83,134 @@ class	controllerEnvironment extends CController
 							'enableEdit'	=> $_enableEdit
 						]
 						);
+
+		return true;
 		
 	}
 
 	private function
-	logicEdit(CDatabaseConnection &$_dbConnection, $_isXHRequest = false)
+	logicXHREditRemoteUser(CDatabaseConnection &$_dbConnection, $_isXHRequest = false)
 	{	
-
 		$systemId = $this -> querySystemId();
 
-		if($systemId !== false && $_isXHRequest !== false)
+		if($systemId !== false)
 		{	
-			$_bValidationErr =	false;
-			$_bValidationMsg =	'';
-			$_bValidationDta = 	[];
+			$validationErr 	= false;
+			$validationMsg 	= '';
+			$responseData 	= [];
 
-			switch($_isXHRequest)
+			$_pFormVariables	 =	new CURLVariables();
+			$_request		 =	[];
+			$_request[] 	 = 	[	"input" => "remote_enable",   	"validate" => "strip_tags|strip_whitespaces|cast_bool|!empty",	 "use_default" => true, "default_value" => false  ];
+			$_request[] 	 = 	[	"input" => "remote_timeout",   	"validate" => "strip_tags|strip_whitespaces|cast_int|!empty",	 "use_default" => true, "default_value" => '30'  ];
+			$_request[] 	 = 	[	"input" => "remote_report",   	"validate" => "strip_tags|strip_whitespaces|cast_bool|!empty",	 "use_default" => true, "default_value" => false  ];
+			$_pFormVariables -> retrieve($_request, false, true);
+			$_aFormData		 = $_pFormVariables ->getArray();
+
+			$configuration = file_get_contents(CMS_SERVER_ROOT.DIR_DATA.'configuration.json');
+			$configuration = json_decode($configuration);
+
+			$configuration -> USER_SYSTEM -> REMOTE_USER -> ENABLED			= $_aFormData['remote_enable'];
+			$configuration -> USER_SYSTEM -> REMOTE_USER -> REVOKE_RIGHTS	= $_aFormData['remote_timeout'];
+			$configuration -> USER_SYSTEM -> REMOTE_USER -> REPORT_REVOKE	= $_aFormData['remote_report'];
+
+			$configuration = json_encode($configuration, JSON_FORCE_OBJECT);
+			file_put_contents(CMS_SERVER_ROOT.DIR_DATA.'configuration.json', $configuration);
+
+			if(!$_aFormData['remote_enable'])
 			{
-				case 'set-remoteuser':	// Set remote User settings
+				$registerCondition	 = new CModelCondition();
+				$registerCondition 	-> whereNotNull('user_hash');
+				$registerCondition 	-> whereNot('user_hash','');
+				$modelUsersRegister	 = new modelUsersRegister();
+				$modelUsersRegister -> delete($_dbConnection, $registerCondition);
 
-										$_pFormVariables	 =	new CURLVariables();
-										$_request		 =	[];
-										$_request[] 	 = 	[	"input" => "remote_enable",   	"validate" => "strip_tags|strip_whitespaces|cast_bool|!empty",	 "use_default" => true, "default_value" => false  ];
-										$_request[] 	 = 	[	"input" => "remote_timeout",   	"validate" => "strip_tags|strip_whitespaces|cast_int|!empty",	 "use_default" => true, "default_value" => '30'  ];
-										$_request[] 	 = 	[	"input" => "remote_report",   	"validate" => "strip_tags|strip_whitespaces|cast_bool|!empty",	 "use_default" => true, "default_value" => false  ];
-										$_pFormVariables -> retrieve($_request, false, true);
-										$_aFormData		 = $_pFormVariables ->getArray();
+				$usergroupCondition	 = new CModelCondition();
+				$usergroupCondition -> whereNotNull('user_hash');
+				$usergroupCondition -> whereNot('user_hash','');
+				$modelUserGroups	 = new modelUserGroups();
+				$modelUserGroups	-> delete($_dbConnection, $usergroupCondition);
+			}
 
-										$configuration = file_get_contents(CMS_SERVER_ROOT.DIR_DATA.'configuration.json');
-										$configuration = json_decode($configuration);
 
-										$configuration -> USER_SYSTEM -> REMOTE_USER -> ENABLED			= $_aFormData['remote_enable'];
-										$configuration -> USER_SYSTEM -> REMOTE_USER -> REVOKE_RIGHTS	= $_aFormData['remote_timeout'];
-										$configuration -> USER_SYSTEM -> REMOTE_USER -> REPORT_REVOKE	= $_aFormData['remote_report'];
-
-										$configuration = json_encode($configuration, JSON_FORCE_OBJECT);
-										file_put_contents(CMS_SERVER_ROOT.DIR_DATA.'configuration.json', $configuration);
-
-										if(!$_aFormData['remote_enable'])
-										{
-											$registerCondition	 = new CModelCondition();
-											$registerCondition 	-> whereNotNull('user_hash');
-											$registerCondition 	-> whereNot('user_hash','');
-											$modelUsersRegister	 = new modelUsersRegister();
-											$modelUsersRegister -> delete($_dbConnection, $registerCondition);
-
-											$usergroupCondition	 = new CModelCondition();
-											$usergroupCondition -> whereNotNull('user_hash');
-											$usergroupCondition -> whereNot('user_hash','');
-											$modelUserGroups	 = new modelUserGroups();
-											$modelUserGroups	-> delete($_dbConnection, $usergroupCondition);
-										}
-
-										break;
-
-				case 'set-backend':		// Set backend settings
-
-										$_pFormVariables	 =	new CURLVariables();
-										$_request		 =	[];
-										$_request[] 	 = 	[	"input" => "backend_timeformat",   	"validate" => "strip_tags|strip_quote|trim|!empty",	 "use_default" => true, "default_value" => ''  ];
-										$_pFormVariables -> retrieve($_request, false, true);
-										$_aFormData		 = $_pFormVariables ->getArray();
-
-										$configuration = file_get_contents(CMS_SERVER_ROOT.DIR_DATA.'configuration.json');
-										$configuration = json_decode($configuration);
-
-										$configuration -> BACKEND -> TIME_FORMAT	= $_aFormData['backend_timeformat'];
-
-										$configuration = json_encode($configuration, JSON_FORCE_OBJECT | JSON_UNESCAPED_UNICODE | JSON_HEX_QUOT);
-										file_put_contents(CMS_SERVER_ROOT.DIR_DATA.'configuration.json', $configuration);
-
-										break;
-				
-				case 'update-htaccess':	// Update htaccess
-
-										$_pHTAccess  = new CHTAccess();
-										$_pHTAccess -> generatePart4Backend($_dbConnection);
-										$_pHTAccess -> generatePart4Frontend($_dbConnection);
-										$_pHTAccess -> generatePart4DeniedAddress($_dbConnection);
-										$_pHTAccess -> writeHTAccess($_dbConnection);
-									
-										break;
-
-				case 'update-sitemap':	// Update sitemap
-
-										$sitemap  	 = new CXMLSitemap();
-										$sitemap 	-> generate($_dbConnection);
-									
-										break;
-
-				}
-
-			tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $_bValidationDta);	// contains exit call
+			tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
 		}
 
 		return false;
 	}
-}
 
-?>
+	private function
+	logicXHREditBackend(CDatabaseConnection &$_dbConnection, $_isXHRequest = false)
+	{	
+		$systemId = $this -> querySystemId();
+
+		if($systemId !== false)
+		{	
+			$validationErr 	= false;
+			$validationMsg 	= '';
+			$responseData 	= [];
+
+			$_pFormVariables	 =	new CURLVariables();
+			$_request		 =	[];
+			$_request[] 	 = 	[	"input" => "backend_timeformat",   	"validate" => "strip_tags|strip_quote|trim|!empty",	 "use_default" => true, "default_value" => ''  ];
+			$_pFormVariables -> retrieve($_request, false, true);
+			$_aFormData		 = $_pFormVariables ->getArray();
+
+			$configuration = file_get_contents(CMS_SERVER_ROOT.DIR_DATA.'configuration.json');
+			$configuration = json_decode($configuration);
+
+			$configuration -> BACKEND -> TIME_FORMAT	= $_aFormData['backend_timeformat'];
+
+			$configuration = json_encode($configuration, JSON_FORCE_OBJECT | JSON_UNESCAPED_UNICODE | JSON_HEX_QUOT);
+			file_put_contents(CMS_SERVER_ROOT.DIR_DATA.'configuration.json', $configuration);
+
+			tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
+		}
+
+		return false;
+	}
+
+	private function
+	logicXHRUpdateHTAccess(CDatabaseConnection &$_dbConnection, $_isXHRequest = false)
+	{	
+		$systemId = $this -> querySystemId();
+
+		if($systemId !== false)
+		{	
+			$validationErr 	= false;
+			$validationMsg 	= '';
+			$responseData 	= [];
+
+			$_pHTAccess  = new CHTAccess();
+			$_pHTAccess -> generatePart4Backend($_dbConnection);
+			$_pHTAccess -> generatePart4Frontend($_dbConnection);
+			$_pHTAccess -> generatePart4DeniedAddress($_dbConnection);
+			$_pHTAccess -> writeHTAccess($_dbConnection);
+		
+			tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
+		}
+
+		return false;
+	}
+
+	private function
+	logicXHRUpdateSitemap(CDatabaseConnection &$_dbConnection, $_isXHRequest = false)
+	{	
+		$systemId = $this -> querySystemId();
+
+		if($systemId !== false)
+		{	
+			$validationErr 	= false;
+			$validationMsg 	= '';
+			$responseData 	= [];
+
+			$sitemap  	 = new CXMLSitemap();
+			$sitemap 	-> generate($_dbConnection);
+		
+			tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
+		}
+
+		return false;
+	}
+
+}

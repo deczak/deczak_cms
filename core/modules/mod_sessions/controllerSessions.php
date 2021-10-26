@@ -14,64 +14,77 @@ class	controllerSessions extends CController
 
 		CPageRequest::instance() -> subs = $this -> getSubSection();
 	}
-	
+
 	public function
-	logic(CDatabaseConnection &$_pDatabase, array $_rcaTarget, $_isXHRequest)
+	logic(CDatabaseConnection &$_pDatabase, array $_rcaTarget, ?object $_xhrInfo) : bool
 	{
 		##	Set default target if not exists
 
-		$_controllerAction = $this -> getControllerAction($_rcaTarget, 'index');
+		$controllerAction = $this -> getControllerAction_v2($_rcaTarget, $_xhrInfo, 'index');
 
 		##	Check user rights for this target
-
-		if(!$this -> detectRights($_controllerAction))
+		
+		if(!$this -> detectRights($controllerAction))
 		{
-			if($_isXHRequest !== false)
+			if($_xhrInfo !== null)
 			{
-				$_bValidationErr =	true;
-				$_bValidationMsg =	CLanguage::get() -> string('ERR_PERMISSON');
-				$_bValidationDta = 	[];
+				$validationErr =	true;
+				$validationMsg =	CLanguage::get() -> string('ERR_PERMISSON');
+				$responseData  = 	[];
 
-				tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $_bValidationDta);	// contains exit call
+
+				tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
 			}
 
 			CMessages::instance() -> addMessage(CLanguage::get() -> string('ERR_PERMISSON') , MSG_WARNING);
-			return;
+			return false;
 		}
+			
+		if($_xhrInfo !== null && $_xhrInfo -> isXHR && $_xhrInfo -> objectId === $this -> objectInfo -> object_id)
+			$controllerAction = 'xhr_'. $_xhrInfo -> action;
 
 		##	Call sub-logic function by target, if there results are false, we make a fall back to default view
 
 		$enableEdit 	= $this -> existsUserRight('edit');
 		$enableDelete	= $enableEdit;
-
-		$_logicResults = false;
-		switch($_controllerAction)
+		
+		$logicDone = false;
+		switch($controllerAction)
 		{
-			case 'view'		: $_logicResults = $this -> logicView(	$_pDatabase, $_isXHRequest, $enableEdit, $enableDelete);	break;
-			case 'delete'	: $_logicResults = $this -> logicDelete($_pDatabase, $_isXHRequest);	break;	
+			case 'view'		  : $logicDone = $this -> logicView($_pDatabase, $enableEdit, $enableDelete); break;
+			case 'xhr_delete' : $logicDone = $this -> logicXHRDelete($_pDatabase); break;	
+			case 'xhr_index' : $logicDone = $this -> logicXHRIndex($_pDatabase, $_xhrInfo); break;	
 		}
 
-		if(!$_logicResults)
-		{
-			##	Default View
-			$this -> logicIndex($_pDatabase, $_isXHRequest, $enableEdit, $enableDelete);	
-		}
+		if(!$logicDone) // Default
+			$logicDone = $this -> logicIndex($_pDatabase, $enableEdit, $enableDelete);	
+	
+		return $logicDone;
 	}
 
 	private function
-	logicIndex(CDatabaseConnection &$_pDatabase, $_isXHRequest, $_enableEdit = false, $_enableDelete = false)
+	logicIndex(CDatabaseConnection &$_pDatabase, $_enableEdit = false, $_enableDelete = false) : bool
 	{
-		##	XHR request
+		$this -> setView(	
+						'index',	
+						'',
+						[
+							'enableEdit'	=> $_enableEdit,
+							'enableDelete'	=> $_enableDelete
+						]
+						);
 
-		if($_isXHRequest !== false)
-		{	
-			$_bValidationErr =	false;
-			$_bValidationMsg =	'';
-			$_bValidationDta = 	[];
+		return true;
+	}
 
-			switch($_isXHRequest)
-			{
-				case 'raw-data'  :	// Request raw data
+	private function
+	logicXHRIndex(CDatabaseConnection &$_pDatabase) : bool
+	{
+	
+			$validationErr =	false;
+			$validationMsg =	'';
+			$responseData = 	[];
+
 
 									$_pURLVariables	 =	new CURLVariables();
 									$_request		 =	[];
@@ -105,44 +118,20 @@ class	controllerSessions extends CController
 
 									if(!$this -> m_pModel -> load($_pDatabase, $modelCondition, MODEL_SESSIONS_APPEND_ACCESS_DATA | MODEL_SESSIONS_APPEND_AGENT_NAME))
 									{
-										$_bValidationMsg .= CLanguage::get() -> string('ERR_SQL_ERROR');
-										$_bValidationErr = true;
+										$validationMsg .= CLanguage::get() -> string('ERR_SQL_ERROR');
+										$validationErr = true;
 									}											
 						
 									$data = $this -> m_pModel -> getResult();
-									/*
-									foreach($data as &$item)
-									{
-										$item -> creaty_by_name = tk::getBackendUserName($_pDatabase, $item -> create_by);
-										$item -> update_by_name = tk::getBackendUserName($_pDatabase, $item -> update_by);
-									}
-									*/
 
-									break;
-			}
+			tk::xhrResult(intval($validationErr), $validationMsg, $data);	// contains exit call
+		
+		return false;
 
-			tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $data);	// contains exit call
-		}
-
-		##	No XHR request
-
-		$this -> setView(	
-						'index',	
-						'',
-						[
-							'enableEdit'	=> $_enableEdit,
-							'enableDelete'	=> $_enableDelete
-						]
-						);
 	}
 
 	private function
-	logicCreate(CDatabaseConnection &$_pDatabase, $_isXHRequest)
-	{
-	}
-
-	private function
-	logicView(CDatabaseConnection &$_pDatabase, $_isXHRequest = false, $_enableEdit = false, $_enableDelete = false)
+	logicView(CDatabaseConnection &$_pDatabase, bool $_enableEdit = false, bool $_enableDelete = false) : bool
 	{	
 
 		$systemId = $this -> querySystemId();
@@ -179,30 +168,20 @@ class	controllerSessions extends CController
 		return false;
 	}
 
-	private function
-	logicEdit(CDatabaseConnection &$_pDatabase, $_isXHRequest = false)
-	{	
-	}
 
 	private function
-	logicDelete(CDatabaseConnection &$_pDatabase, $_isXHRequest = false)
+	logicXHRDelete(CDatabaseConnection &$_pDatabase) : bool
 	{	
 		$systemId = $this -> querySystemId();
 
 		if($systemId !== false)
 		{	
-			##	XHR Function call
 
-			if($_isXHRequest !== false)
-			{
-				$_bValidationErr =	false;
-				$_bValidationMsg =	'';
-				$_bValidationDta = 	[];
+				$validationErr =	false;
+				$validationMsg =	'';
+				$responseData = 	[];
 
-				switch($_isXHRequest)
-				{
-					case 'session-delete':
-
+	
 
 										$modelCondition = new CModelCondition();
 										$modelCondition -> where('data_id', $systemId);
@@ -210,8 +189,8 @@ class	controllerSessions extends CController
 
 										if($this -> m_pModel -> delete($_pDatabase, $modelCondition))
 										{
-											$_bValidationMsg = CLanguage::get() -> string('SESSION WAS_DELETED') .' - '. CLanguage::get() -> string('WAIT_FOR_REDIRECT');
-											$_bValidationDta['redirect'] = CMS_SERVER_URL_BACKEND . CPageRequest::instance() -> urlPath;
+											$validationMsg = CLanguage::get() -> string('SESSION WAS_DELETED') .' - '. CLanguage::get() -> string('WAIT_FOR_REDIRECT');
+											$responseData['redirect'] = CMS_SERVER_URL_BACKEND . CPageRequest::instance() -> urlPath;
 
 											$_pHTAccess  = new CHTAccess();
 											$_pHTAccess -> generatePart4DeniedAddress($_pDatabase);
@@ -220,14 +199,11 @@ class	controllerSessions extends CController
 										}
 										else
 										{
-											$_bValidationMsg .= CLanguage::get() -> string('ERR_SQL_ERROR');
+											$validationMsg .= CLanguage::get() -> string('ERR_SQL_ERROR');
 										}
 
-										break;
-				}
-
-				tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $_bValidationDta);	// contains exit call
-			}		
+				tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
+					
 		
 		}
 
@@ -235,5 +211,3 @@ class	controllerSessions extends CController
 		return false;
 	}
 }
-
-?>

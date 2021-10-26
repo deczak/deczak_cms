@@ -87,7 +87,7 @@ class	cmsIndexList
 
 		var	requestTarget	= CMS.SERVER_URL_BACKEND + CMS.PAGE_PATH + CMS.MODULE_TARGET;
 
-		cmstk.callXHR(requestTarget, formData, that.onXHRSuccess, cmstk.onXHRError, that);
+		cmstk.callXHR(requestTarget, formData, that.onXHRSuccess, cmstk.onXHRError, that, 'index');
 	}
 
 

@@ -130,6 +130,8 @@ class cmstkOld
 		let xhRequest = new XMLHttpRequest();
 			xhRequest.open('POST', requestURL);
 			xhRequest.responseType = 'json';
+		xhRequest.setRequestHeader("X-Requested-With","XMLHttpRequest");
+		xhRequest.setRequestHeader("X-Requested-XHR-Action", 'ping');
 			xhRequest.onloadend = function() {
 
 				if(this.status === 200)

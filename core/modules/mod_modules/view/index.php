@@ -276,7 +276,7 @@ document.addEventListener("DOMContentLoaded", function(){
 
 		var	requestTarget	= CMS.SERVER_URL_BACKEND + CMS.PAGE_PATH + CMS.MODULE_TARGET;
 
-		cmstk.callXHR(requestTarget, formData, onXHRInstallSuccess, cmstk.onXHRError, that);
+		cmstk.callXHR(requestTarget, formData, onXHRInstallSuccess, cmstk.onXHRError, that, 'install');
 	}
 
 	function
@@ -306,6 +306,8 @@ document.addEventListener("DOMContentLoaded", function(){
 
 
 	let	indexList = new cmsRequestDataIndex('template-table-row', '<?= CFG::GET() -> BACKEND -> TIME_FORMAT; ?>');
+
+		indexList.xhrAction = 'index';
 		indexList.requestData(null, onXHRSuccess);
 		
 });	

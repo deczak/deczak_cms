@@ -5,7 +5,7 @@ if(isset($modulesList))
 }
 else
 {
-	$modulesList = false;
+	$dataset = false;
 }
 ?>
 
@@ -26,7 +26,7 @@ else
 	</div>
 	<div>
 		
-		<fieldset class="ui fieldset submit-able" id="module-data" data-xhr-target="module-data" data-xhr-overwrite-target="edit/<?php echo $dataset -> module_id; ?>">
+		<fieldset class="ui fieldset submit-able" id="module-data" data-xhr-target="edit" data-xhr-overwrite-target="edit/<?php echo $dataset -> module_id; ?>">
 
 			<input type="hidden" name="data_id" value="<?php echo $dataset -> data_id; ?>">
 
@@ -124,7 +124,7 @@ else
 
 			<div class="delete-box" style="display:flex;background:rgba(255,0,0,0.6);padding: 15px 23px;; align-items:center; border-radius:3px;">
 				<div style="width:213px;border:2px solid white; border-radius:3px; background:white; padding:4px;">
-				<fieldset class="ui fieldset" data-xhr-target="uninstall" data-xhr-overwrite-target="delete/<?php echo $dataset -> module_id; ?>" style="margin:0px;">	
+				<fieldset class="ui fieldset" data-xhr-target="delete" data-xhr-overwrite-target="delete/<?php echo $dataset -> module_id; ?>" style="margin:0px;">	
 					<div class="submit-container button-only">
 						<button class="ui button icon labeled trigger-submit-fieldset" type="button" disabled><span><i class="fas fa-trash-alt" data-icon="fa-trash-alt"></i></span><?php echo $language -> string('BUTTON_DELETE'); ?></button>
 						<div class="protector"><input type="checkbox" class="trigger-submit-protector" id="protector-module-delete"><label for="protector-module-delete"></label></div>

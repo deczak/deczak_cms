@@ -48,6 +48,7 @@ class	cmsRequestDataIndex
 
 			switch(prop)
 			{
+				case 'time_create':
 				case 'update_time':
 				case 'create_time':
 				case 'time_login':
@@ -79,7 +80,7 @@ class	cmsRequestDataIndex
 			formData.append('q', 'cms-system-id:'+ systemId);
 
 		var	requestTarget	= CMS.SERVER_URL_BACKEND + CMS.PAGE_PATH;
-
+console.log( this.xhrAction);
 		if(onSuccess !== null)
 			cmstk.callXHR(requestTarget, formData, onSuccess, cmstk.onXHRError, that, this.xhrAction);
 		else

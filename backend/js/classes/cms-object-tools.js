@@ -96,7 +96,7 @@
 									formData.append('cms-ctrl-action['+ formData.get('cms-object-id') +']', command);
 									formData.append('cms-xhrequest', command);
 	
-								this.xhrCommand(formData, buttonElement, this['command'+ command[0].toUpperCase() + command.substring(1)]);
+								this.xhrCommand(formData, buttonElement, this['command'+ command[0].toUpperCase() + command.substring(1)], command, formData.get('cms-object-id'));
 								break;
 
 				case 'up':
@@ -136,17 +136,21 @@
 				});
 		}
 
-		xhrCommand(formData, buttonElement, onSuccess)
+		xhrCommand(formData, buttonElement, onSuccess, xhrAction, objectId = null)
 		{
 			var that = this;
 			var xhr = new XMLHttpRequest();
 			xhr.open('POST', this.pageURL, true);
+			xhr.responseType = 'json';
+			xhr.setRequestHeader("X-Requested-With","XMLHttpRequest");
+			xhr.setRequestHeader("X-Requested-XHR-Action", xhrAction);
+			xhr.setRequestHeader("X-Requested-XHR-Object", objectId);
 			xhr.onload = function()
 			{
 				switch(xhr.status)
 				{
 					case 200:	// OK					
-								var jsonObject = JSON.parse(xhr.response); 
+								var jsonObject = xhr.response; 
 								if(jsonObject.state == 0)
 								{
 									if(onSuccess != null)
@@ -186,7 +190,7 @@
 				formData.append('cms-xhrequest', 'cms-order-by-modules');
 				formData.append('cms-order-by-node-id', nodeID);
 
-			this.xhrCommand(formData, null, null);
+			this.xhrCommand(formData, null, null, 'cms-order-by-modules');
 		}
 
 

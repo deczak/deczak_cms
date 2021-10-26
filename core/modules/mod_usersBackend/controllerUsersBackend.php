@@ -18,122 +18,66 @@ class	controllerUsersBackend extends CController
 
 		CPageRequest::instance() -> subs = $this -> getSubSection();
 	}
-	
+
 	public function
-	logic(CDatabaseConnection &$_pDatabase, array $_rcaTarget, $_isXHRequest)
+	logic(CDatabaseConnection &$_pDatabase, array $_rcaTarget, ?object $_xhrInfo) : bool
 	{
 		##	Set default target if not exists
 
-		$_controllerAction = $this -> getControllerAction($_rcaTarget, 'index');
-
+		$controllerAction = $this -> getControllerAction($_rcaTarget, 'index');
+		
 		##	Check user rights for this target
-
-		if(!$this -> detectRights($_controllerAction))
+		
+		if(!$this -> detectRights($controllerAction))
 		{
-			if($_isXHRequest !== false)
+			if($_xhrInfo !== null)
 			{
-				$_bValidationErr =	true;
-				$_bValidationMsg =	CLanguage::get() -> string('ERR_PERMISSON');
-				$_bValidationDta = 	[];
+				$validationErr =	true;
+				$validationMsg =	CLanguage::get() -> string('ERR_PERMISSON');
+				$responseData  = 	[];
 
-				tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $_bValidationDta);	// contains exit call
+				tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
 			}
 
 			CMessages::instance() -> addMessage(CLanguage::get() -> string('ERR_PERMISSON') , MSG_WARNING);
-			return;
+			return false;
 		}
+
+		$controllerAction = $this -> getControllerAction_v2($_rcaTarget, $_xhrInfo, 'index');
+
+			
+		if($_xhrInfo !== null && $_xhrInfo -> isXHR && $_xhrInfo -> objectId === $this -> objectInfo -> object_id)
+			$controllerAction = 'xhr_'. $_xhrInfo -> action;
 
 		##	Call sub-logic function by target, if there results are false, we make a fall back to default view
 
 		$enableEdit 	= $this -> existsUserRight('edit');
 		$enableDelete	= $enableEdit;
-
-		$logicResults = false;
-		switch($_controllerAction)
+	
+		$logicDone = false;
+		switch($controllerAction)
 		{
-			case 'view'		: $logicResults = $this -> logicView(	$_pDatabase, $_isXHRequest, $enableEdit, $enableDelete);	break;
-			case 'ping'		: $logicResults = $this -> logicPing(	$_pDatabase, $_isXHRequest, $enableEdit, $enableDelete);	break;	
-			case 'edit'		: $logicResults = $this -> logicEdit(	$_pDatabase, $_isXHRequest);	break;	
-			case 'create'	: $logicResults = $this -> logicCreate( $_pDatabase, $_isXHRequest);	break;
-			case 'delete'	: $logicResults = $this -> logicDelete( $_pDatabase, $_isXHRequest);	break;	
+			case 'view'			  : $logicDone = $this -> logicView($_pDatabase, $enableEdit, $enableDelete); break;
+			case 'create'	 	  : $logicDone = $this -> logicCreate($_pDatabase);	break;
+			case 'xhr_index' 	  : $logicDone = $this -> logicXHRIndex($_pDatabase, $_xhrInfo); break;
+			case 'xhr_create'	  : $logicDone = $this -> logicXHRCreate($_pDatabase); break;
+			case 'xhr_delete'	  : $logicDone = $this -> logicXHRDelete($_pDatabase); break;	
+			case 'xhr_ping'		  : $logicDone = $this -> logicXHRPing($_pDatabase); break;	
+			case 'xhr_edit-rights': $logicDone = $this -> logicXHREditRights($_pDatabase); break;	
+			case 'xhr_edit-auth'  : $logicDone = $this -> logicXHREditAuth($_pDatabase); break;	
+			case 'xhr_edit-user'  : $logicDone = $this -> logicXHREditUser($_pDatabase); break;			
 		}
 
-		if(!$logicResults)
-		{
-			##	Default View
-			$this -> logicIndex($_pDatabase, $_isXHRequest, $enableEdit, $enableDelete);		
-		}
+		if(!$logicDone) // Default
+			$logicDone = $this -> logicIndex($_pDatabase, $enableEdit, $enableDelete);	
+	
+		return $logicDone;
 	}
 
-	private function
-	logicIndex(CDatabaseConnection &$_pDatabase, $_isXHRequest, $_enableEdit = false, $_enableDelete = false)
+
+	protected function
+	logicIndex(CDatabaseConnection &$_pDatabase, bool $_enableEdit = false, bool $_enableDelete = false) : bool
 	{
-		##	XHR request
-
-		if($_isXHRequest !== false)
-		{	
-			$_bValidationErr =	false;
-			$_bValidationMsg =	'';
-			$_bValidationDta = 	[];
-
-			switch($_isXHRequest)
-			{
-				case 'raw-data'  :	// Request raw data
-
-									$_pURLVariables	 =	new CURLVariables();
-									$_request		 =	[];
-									$_request[] 	 = 	[	"input" => 'q',  	"validate" => "strip_tags|!empty" ,	"use_default" => true, "default_value" => false ]; 		
-									$_pURLVariables -> retrieve($_request, false, true);	
-
-									
-
-
-									$modelCondition  = 	new CModelCondition();
-
-									if($_pURLVariables -> getValue("q") !== false)
-									{	
-										$conditionSource = 	explode(' ', $_pURLVariables -> getValue("q"));
-										foreach($conditionSource as $conditionItem)
-										{
-											$itemParts = explode(':', $conditionItem);
-
-											if(count($itemParts) == 1)
-											{
-												$modelCondition -> whereLike('user_name_first', $itemParts[0]);
-												$modelCondition -> whereLike('user_name_last', $itemParts[0]);
-											}
-											else
-											{
-												if( $itemParts[0] == 'cms-system-id' )
-													$itemParts[0] = 'user_id';
-												
-												$modelCondition -> where($itemParts[0], $itemParts[1]);
-											}
-										}										
-									}
-
-									if(!$this -> m_pModel -> load($_pDatabase, $modelCondition, MODEL_USERSBACKEND_STRIP_SENSITIVE_DATA))
-									{
-										$_bValidationMsg .= CLanguage::get() -> string('ERR_SQL_ERROR');
-										$_bValidationErr = true;
-									}											
-						
-									$data = $this -> m_pModel -> getResult();
-
-									foreach($data as &$item)
-									{
-										$item -> creaty_by_name = tk::getBackendUserName($_pDatabase, $item -> create_by);
-										$item -> update_by_name = tk::getBackendUserName($_pDatabase, $item -> update_by);
-									}
-
-									break;
-			}
-
-			tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $data);	// contains exit call
-		}
-
-		##	No XHR request
-
 		$this -> setView(	
 						'index',	
 						'',
@@ -142,88 +86,68 @@ class	controllerUsersBackend extends CController
 							'enableDelete'	=> $_enableDelete
 						]
 						);
+
+		return true;
 	}
 
-	private function
-	logicCreate(CDatabaseConnection &$_pDatabase, $_isXHRequest)
+	protected function
+	logicXHRIndex(CDatabaseConnection &$_pDatabase) : bool
 	{
-		if($_isXHRequest !== false)
-		{
-			$_bValidationErr =	false;
-			$_bValidationMsg =	'';
-			$_bValidationDta = 	[];
+		$validationErr =	false;
+		$validationMsg =	'';
+		$responseData = 	[];
 
-			$_pURLVariables	 =	new CURLVariables();
-			$_request		 =	[];
-			$_request[] 	 = 	[	"input" => "user_name_first",  	"validate" => "strip_tags|!empty" ]; 	
-			$_request[] 	 = 	[	"input" => "user_name_last",   	"validate" => "strip_tags|!empty" ]; 	
-			$_request[] 	 = 	[	"input" => "user_mail",    		"validate" => "strip_tags|strip_whitespaces|!empty" ]; 	
-			$_request[] 	 = 	[	"input" => "login_name",    	"validate" => "strip_tags|!empty" ]; 	
-			$_request[] 	 = 	[	"input" => "login_pass_a",    	"validate" => "strip_tags|!empty" ]; 	
-			$_request[] 	 = 	[	"input" => "login_pass_b",    	"validate" => "strip_tags|!empty" ]; 
-			$_request[] 	 = 	[	"input" => "language",    		"validate" => "strip_tags|strip_whitespaces|!empty" ]; 		
-			$_request[] 	 = 	[	"input" => "allow_remote",    		"validate" => "strip_tags|strip_whitespaces|!empty" ]; 		
-			$_pURLVariables -> retrieve($_request, false, true); // POST 
-			$_aFormData		 = $_pURLVariables ->getArray();
+		$_pURLVariables	 =	new CURLVariables();
+		$_request		 =	[];
+		$_request[] 	 = 	[	"input" => 'q',  	"validate" => "strip_tags|!empty" ,	"use_default" => true, "default_value" => false ]; 		
+		$_pURLVariables -> retrieve($_request, false, true);	
 
-			if(empty($_aFormData['user_name_first'])) { 	$_bValidationErr = true; 	$_bValidationDta[] = 'user_name_first'; 	}
-			if(empty($_aFormData['user_name_last'])) { 		$_bValidationErr = true; 	$_bValidationDta[] = 'user_name_last'; 		}
-			if(empty($_aFormData['user_mail'])) { 			$_bValidationErr = true; 	$_bValidationDta[] = 'user_mail'; 			}
-			if(empty($_aFormData['login_name'])) { 			$_bValidationErr = true; 	$_bValidationDta[] = 'login_name'; 			}
-			if(empty($_aFormData['login_pass_a'])) { 		$_bValidationErr = true; 	$_bValidationDta[] = 'login_pass_a'; 		}
-			if(empty($_aFormData['login_pass_b'])) { 		$_bValidationErr = true; 	$_bValidationDta[] = 'login_pass_b'; 		}
-			if(empty($_aFormData['language'])) { 			$_bValidationErr = true; 	$_bValidationDta[] = 'language'; 			}
+		$modelCondition  = 	new CModelCondition();
 
-			if(!$_bValidationErr)	// Validation OK (by pre check)
-			{		
-				$_aFormData['is_locked'] 	= '0';
-				$_aFormData['login_name'] 	= CRYPT::LOGIN_HASH($_aFormData['login_name']);
-
-				$modelUsersRegister	 	= new modelUsersRegister();
-				$_aFormData['user_id'] 	= $modelUsersRegister -> registerUserId($_pDatabase, 0);
-
-				// Checking password	
-
-				if(isset($_aFormData['login_pass_a']) && isset($_aFormData['login_pass_b']) && $_aFormData['login_pass_a'] === $_aFormData['login_pass_b'])
-				{
-					$_aFormData['login_pass'] = $_aFormData['login_pass_a'];
-					$_aFormData['login_pass'] = CRYPT::LOGIN_CRYPT($_aFormData['login_pass'], CFG::GET() -> ENCRYPTION -> BASEKEY);
-				} 
-				elseif(isset($_aFormData['login_pass_a']) && isset($_aFormData['login_pass_b']) && $_aFormData['login_pass_a'] !== $_aFormData['login_pass_b'])
-				{
-					$_bValidationMsg .= CLanguage::get() -> string('M_BEUSER_MSG_PASSNOTEQUAL');
-					$_bValidationErr = true;
-				}
-			}
-			else	// Validation Failed
+		if($_pURLVariables -> getValue("q") !== false)
+		{	
+			$conditionSource = 	explode(' ', $_pURLVariables -> getValue("q"));
+			foreach($conditionSource as $conditionItem)
 			{
-				$_bValidationMsg .= CLanguage::get() -> string('ERR_VALIDATIONFAIL');
-			}
+				$itemParts = explode(':', $conditionItem);
 
-			if(!$_bValidationErr)	// Validation OK
-			{
-				$_aFormData['create_by'] 	= CSession::instance() -> getValue('user_id');
-				$_aFormData['create_time'] 	= time();
-
-				
-				
-				if($this -> m_pModel -> insert($_pDatabase, $_aFormData))
+				if(count($itemParts) == 1)
 				{
-					$_bValidationMsg = CLanguage::get() -> string('USER WAS_CREATED') .' - '. CLanguage::get() -> string('WAIT_FOR_REDIRECT');
-					$_bValidationDta['redirect'] = CMS_SERVER_URL_BACKEND . CPageRequest::instance() -> urlPath .'user/'.$_aFormData['user_id'];
+					$modelCondition -> whereLike('user_name_first', $itemParts[0]);
+					$modelCondition -> whereLike('user_name_last', $itemParts[0]);
 				}
 				else
 				{
-					$_bValidationMsg .= CLanguage::get() -> string('ERR_SQL_ERROR');
-
-					$modelUsersRegister -> removeUserId($_pDatabase, $_aFormData['user_id']);
+					if( $itemParts[0] == 'cms-system-id' )
+						$itemParts[0] = 'user_id';
+					
+					$modelCondition -> where($itemParts[0], $itemParts[1]);
 				}
-			}
-
-
-			tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $_bValidationDta);	// contains exit call
+			}										
 		}
 
+		if(!$this -> m_pModel -> load($_pDatabase, $modelCondition, MODEL_USERSBACKEND_STRIP_SENSITIVE_DATA))
+		{
+			$validationMsg .= CLanguage::get() -> string('ERR_SQL_ERROR');
+			$validationErr = true;
+		}											
+
+		$data = $this -> m_pModel -> getResult();
+
+		foreach($data as &$item)
+		{
+			$item -> creaty_by_name = tk::getBackendUserName($_pDatabase, $item -> create_by);
+			$item -> update_by_name = tk::getBackendUserName($_pDatabase, $item -> update_by);
+		}
+
+		tk::xhrResult(intval($validationErr), $validationMsg, $data);	// contains exit call
+
+		return false;
+	}
+
+	protected function
+	logicCreate(CDatabaseConnection &$_pDatabase) : bool
+	{
 		$this -> setCrumbData('create');
 		$this -> setView(
 						'create',
@@ -233,8 +157,86 @@ class	controllerUsersBackend extends CController
 		return true;
 	}
 
-	private function
-	logicView(CDatabaseConnection &$_pDatabase, $_isXHRequest = false, $_enableEdit = false, $_enableDelete = false)
+	protected function
+	logicXHRCreate(CDatabaseConnection &$_pDatabase) : bool
+	{
+		$validationErr =	false;
+		$validationMsg =	'';
+		$responseData = 	[];
+
+		$_pURLVariables	 =	new CURLVariables();
+		$_request		 =	[];
+		$_request[] 	 = 	[	"input" => "user_name_first",  	"validate" => "strip_tags|!empty" ]; 	
+		$_request[] 	 = 	[	"input" => "user_name_last",   	"validate" => "strip_tags|!empty" ]; 	
+		$_request[] 	 = 	[	"input" => "user_mail",    		"validate" => "strip_tags|strip_whitespaces|!empty" ]; 	
+		$_request[] 	 = 	[	"input" => "login_name",    	"validate" => "strip_tags|!empty" ]; 	
+		$_request[] 	 = 	[	"input" => "login_pass_a",    	"validate" => "strip_tags|!empty" ]; 	
+		$_request[] 	 = 	[	"input" => "login_pass_b",    	"validate" => "strip_tags|!empty" ]; 
+		$_request[] 	 = 	[	"input" => "language",    		"validate" => "strip_tags|strip_whitespaces|!empty" ]; 			
+		$_request[] 	 = 	[	"input" => "allow_remote",   	"validate" => "strip_tags|strip_whitespaces|!empty" ]; 
+		$_pURLVariables -> retrieve($_request, false, true); // POST 
+		$_aFormData		 = $_pURLVariables ->getArray();
+
+		if(empty($_aFormData['user_name_first'])) { 	$validationErr = true; 	$responseData[] = 'user_name_first'; 	}
+		if(empty($_aFormData['user_name_last'])) { 		$validationErr = true; 	$responseData[] = 'user_name_last'; 		}
+		if(empty($_aFormData['user_mail'])) { 			$validationErr = true; 	$responseData[] = 'user_mail'; 			}
+		if(empty($_aFormData['login_name'])) { 			$validationErr = true; 	$responseData[] = 'login_name'; 			}
+		if(empty($_aFormData['login_pass_a'])) { 		$validationErr = true; 	$responseData[] = 'login_pass_a'; 		}
+		if(empty($_aFormData['login_pass_b'])) { 		$validationErr = true; 	$responseData[] = 'login_pass_b'; 		}
+		if(empty($_aFormData['language'])) { 			$validationErr = true; 	$responseData[] = 'language'; 			}
+
+		if(!$validationErr)	// Validation OK (by pre check)
+		{		
+			$_aFormData['is_locked'] 	= '0';
+			$_aFormData['login_name'] 	= CRYPT::LOGIN_HASH($_aFormData['login_name']);
+
+			$modelUsersRegister	 	= new modelUsersRegister();
+			$_aFormData['user_id'] 	= $modelUsersRegister -> registerUserId($_pDatabase, 1);
+
+			// Checking password	
+
+			if(isset($_aFormData['login_pass_a']) && isset($_aFormData['login_pass_b']) && $_aFormData['login_pass_a'] === $_aFormData['login_pass_b'])
+			{
+				$_aFormData['login_pass'] = $_aFormData['login_pass_a'];
+				$_aFormData['login_pass'] = CRYPT::LOGIN_CRYPT($_aFormData['login_pass'], CFG::GET() -> ENCRYPTION -> BASEKEY);
+			} 
+			elseif(isset($_aFormData['login_pass_a']) && isset($_aFormData['login_pass_b']) && $_aFormData['login_pass_a'] !== $_aFormData['login_pass_b'])
+			{
+				$validationMsg .= CLanguage::get() -> string('M_BEUSER_MSG_PASSNOTEQUAL');
+				$validationErr = true;
+			}
+		}
+		else	// Validation Failed
+		{
+			$validationMsg .= CLanguage::get() -> string('ERR_VALIDATIONFAIL');
+		}
+
+		if(!$validationErr)	// Validation OK
+		{
+			$_aFormData['create_by'] 	= CSession::instance() -> getValue('user_id');
+			$_aFormData['create_time'] 	= time();
+
+
+			if($this -> m_pModel -> insert($_pDatabase, $_aFormData))
+			{
+				$validationMsg = CLanguage::get() -> string('USER WAS_CREATED') .' - '. CLanguage::get() -> string('WAIT_FOR_REDIRECT');
+				$responseData['redirect'] = CMS_SERVER_URL_BACKEND . CPageRequest::instance() -> urlPath .'user/'.$_aFormData['user_id'];
+			}
+			else
+			{
+				$validationMsg .= CLanguage::get() -> string('ERR_SQL_ERROR');
+
+				$modelUsersRegister -> removeUserId($_pDatabase, $_aFormData['user_id']);
+			}
+		}
+
+		tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
+
+		return false;
+	}
+
+	protected function
+	logicView(CDatabaseConnection &$_pDatabase, bool $_enableEdit = false, bool $_enableDelete = false) : bool
 	{	
 
 		$systemId = $this -> querySystemId();
@@ -274,137 +276,17 @@ class	controllerUsersBackend extends CController
 		return false;
 	}
 
-	private function
-	logicEdit(CDatabaseConnection &$_pDatabase, $_isXHRequest = false)
+	protected function
+	logicXHREditRights(CDatabaseConnection &$_pDatabase) : bool
 	{	
+
 		$systemId = $this -> querySystemId();
 
-		if($systemId !== false && $_isXHRequest !== false)
-		{	
-			$_bValidationErr =	false;
-			$_bValidationMsg =	'';
-			$_bValidationDta = 	[];
-
-			switch($_isXHRequest)
-			{
-				case 'user-data'  :	// Update user data
-
-									$_pFormVariables =	new CURLVariables();
-									$_request		 =	[];
-									$_request[] 	 = 	[	"input" => "user_name_first",  	"validate" => "strip_tags|!empty" ]; 	
-									$_request[] 	 = 	[	"input" => "user_name_last",   	"validate" => "strip_tags|!empty" ]; 	
-									$_request[] 	 = 	[	"input" => "user_mail",    		"validate" => "strip_tags|strip_whitespaces|!empty" ]; 	
-									$_request[] 	 = 	[	"input" => "language",    		"validate" => "strip_tags|strip_whitespaces|!empty" ]; 	
-									$_request[] 	 = 	[	"input" => "allow_remote",   	"validate" => "strip_tags|strip_whitespaces|!empty" ]; 	
-									$_pFormVariables-> retrieve($_request, false, true); // POST 
-									$_aFormData		 = $_pFormVariables ->getArray();
-
-									if(empty($_aFormData['user_name_first'])) { 	$_bValidationErr = true; 	$_bValidationDta[] = 'user_name_first'; 	}
-									if(empty($_aFormData['user_name_last'])) { 		$_bValidationErr = true; 	$_bValidationDta[] = 'user_name_last'; 		}
-									if(empty($_aFormData['user_mail'])) { 			$_bValidationErr = true; 	$_bValidationDta[] = 'user_mail'; 			}
-									if(empty($_aFormData['language'])) { 			$_bValidationErr = true; 	$_bValidationDta[] = 'language'; 			}
-
-									if(!$_bValidationErr)
-									{
-										$_aFormData['update_by'] 	= CSession::instance() -> getValue('user_id');
-										$_aFormData['update_time'] 	= time();
-
-										$modelCondition = new CModelCondition();
-										$modelCondition -> where('user_id', $systemId);
-
-										if($this -> m_pModel -> update($_pDatabase, $_aFormData, $modelCondition))
-										{
-											$_bValidationMsg = CLanguage::get() -> string('USER WAS_UPDATED');
-										}
-										else
-										{
-											$_bValidationMsg .= CLanguage::get() -> string('ERR_SQL_ERROR');
-											$_bValidationErr = true;
-										}											
-									}
-									else	// Validation Failed
-									{
-										$_bValidationMsg .= CLanguage::get() -> string('ERR_VALIDATIONFAIL');
-										$_bValidationErr = true;
-									}
-
-									break;
-
-				case 'user-auth'  :	// Update user auth data
-
-									$_pFormVariables	 =	new CURLVariables();
-									$_request		 =	[];
-									$_request[] 	 = 	[	"input" => "login_name",    	"validate" => "strip_tags|!empty" ]; 	
-									$_request[] 	 = 	[	"input" => "login_pass_a",    	"validate" => "strip_tags|!empty" ]; 	
-									$_request[] 	 = 	[	"input" => "login_pass_b",    	"validate" => "strip_tags|!empty" ]; 	
-									$_pFormVariables -> retrieve($_request, false, true); // POST 
-									$_aFormData		 = $_pFormVariables ->getArray();
+			$validationErr =	false;
+			$validationMsg =	'';
+			$responseData = 	[];
 
 
-									if(empty($_aFormData['login_name'])) { 			$_bValidationErr = true; 	$_bValidationDta[] = 'login_name'; 			}
-									if(empty($_aFormData['login_pass_a'])) { 		$_bValidationErr = true; 	$_bValidationDta[] = 'login_pass_a'; 		}
-									if(empty($_aFormData['login_pass_b'])) { 		$_bValidationErr = true; 	$_bValidationDta[] = 'login_pass_b'; 		}
-
-									if(!$_bValidationErr)	// Validation OK (by pre check)
-									{		
-										$_aFormData['login_name'] 	= CRYPT::LOGIN_HASH($_aFormData['login_name']);
-
-										$_aFormData['update_by'] 	= CSession::instance() -> getValue('user_id');
-										$_aFormData['update_time'] 	= time();
-
-										$uniqueCondition = new CModelCondition();
-										$uniqueCondition -> where('login_name', $_aFormData['login_name']);
-										$uniqueCondition -> whereNot('user_id', $systemId);
-
-										if(!$this -> m_pModel -> unique($_pDatabase, $uniqueCondition))
-										{
-											$_bValidationMsg .= CLanguage::get() -> string('M_BEUSER_MSG_USERNAMEEXIST');
-											$_bValidationErr = true;
-										}
-
-										// Checking password	
-
-										if(isset($_aFormData['login_pass_a']) && isset($_aFormData['login_pass_b']) && $_aFormData['login_pass_a'] === $_aFormData['login_pass_b'])
-										{
-											$_aFormData['login_pass'] = $_aFormData['login_pass_a'];
-											$_aFormData['login_pass'] = CRYPT::LOGIN_CRYPT($_aFormData['login_pass'], CFG::GET() -> ENCRYPTION -> BASEKEY);
-											unset($_aFormData['login_pass_a']);
-											unset($_aFormData['login_pass_b']);
-										} 
-										elseif(isset($_aFormData['login_pass_a']) && isset($_aFormData['login_pass_b']) && $_aFormData['login_pass_a'] !== $_aFormData['login_pass_b'])
-										{
-											$_bValidationMsg .= CLanguage::get() -> string('M_BEUSER_MSG_PASSNOTEQUAL');
-											$_bValidationErr = true;
-										}
-									}
-
-									if(!$_bValidationErr)
-									{
-										$_aFormData['update_by'] 	= CSession::instance() -> getValue('user_id');
-										$_aFormData['update_time'] 	= time();
-
-										$modelCondition = new CModelCondition();
-										$modelCondition -> where('user_id', $systemId);
-
-										if($this -> m_pModel -> update($_pDatabase, $_aFormData, $modelCondition))
-										{
-											$_bValidationMsg = CLanguage::get() -> string('USER WAS_UPDATED');
-										}
-										else
-										{
-											$_bValidationMsg .= CLanguage::get() -> string('ERR_SQL_ERROR');
-											$_bValidationErr = true;
-										}											
-									}
-									else	// Validation Failed
-									{
-										$_bValidationMsg .= CLanguage::get() -> string('ERR_VALIDATIONFAIL');
-										$_bValidationErr = true;
-									}
-
-									break;
-
-				case 'user-rights': // Update user rights
 
 									$_pFormVariables	 =	new CURLVariables();
 									$_request		 =	[];
@@ -444,97 +326,228 @@ class	controllerUsersBackend extends CController
 
 									if($this -> m_pModel -> update($_pDatabase, $_aFormData, $modelCondition))
 									{
-										$_bValidationMsg = CLanguage::get() -> string('USER WAS_UPDATED');
+										$validationMsg = CLanguage::get() -> string('USER WAS_UPDATED');
 									}
 									else
 									{
-										$_bValidationMsg .= CLanguage::get() -> string('ERR_SQL_ERROR');
+										$validationMsg .= CLanguage::get() -> string('ERR_SQL_ERROR');
 									}	
 
-									break;
-			}
 
-			tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $_bValidationDta);	// contains exit call	
-		}
+				tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call	
+
 
 		return false;
 	}
 
-	private function
-	logicDelete(CDatabaseConnection &$_pDatabase, $_isXHRequest = false)
+	protected function
+	logicXHREditAuth(CDatabaseConnection &$_pDatabase) : bool
 	{	
 
 		$systemId = $this -> querySystemId();
+
+			$validationErr =	false;
+			$validationMsg =	'';
+			$responseData = 	[];
+
+
+
+									$_pFormVariables	 =	new CURLVariables();
+									$_request		 =	[];
+									$_request[] 	 = 	[	"input" => "login_name",    	"validate" => "strip_tags|!empty" ]; 	
+									$_request[] 	 = 	[	"input" => "login_pass_a",    	"validate" => "strip_tags|!empty" ]; 	
+									$_request[] 	 = 	[	"input" => "login_pass_b",    	"validate" => "strip_tags|!empty" ]; 	
+									$_pFormVariables -> retrieve($_request, false, true); // POST 
+									$_aFormData		 = $_pFormVariables ->getArray();
+
+
+									if(empty($_aFormData['login_name'])) { 			$validationErr = true; 	$responseData[] = 'login_name'; 			}
+									if(empty($_aFormData['login_pass_a'])) { 		$validationErr = true; 	$responseData[] = 'login_pass_a'; 		}
+									if(empty($_aFormData['login_pass_b'])) { 		$validationErr = true; 	$responseData[] = 'login_pass_b'; 		}
+
+									if(!$validationErr)	// Validation OK (by pre check)
+									{		
+										$_aFormData['login_name'] 	= CRYPT::LOGIN_HASH($_aFormData['login_name']);
+
+										$_aFormData['update_by'] 	= CSession::instance() -> getValue('user_id');
+										$_aFormData['update_time'] 	= time();
+
+
+
+										$uniqueCondition = new CModelCondition();
+										$uniqueCondition -> where('login_name', $_aFormData['login_name']);
+										$uniqueCondition -> whereNot('user_id', $systemId);
+
+
+										if(!$this -> m_pModel -> unique($_pDatabase, $uniqueCondition))
+										{
+											$validationMsg .= CLanguage::get() -> string('M_BEUSER_MSG_USERNAMEEXIST');
+											$validationErr = true;
+										}
+
+										// Checking password	
+
+										if(isset($_aFormData['login_pass_a']) && isset($_aFormData['login_pass_b']) && $_aFormData['login_pass_a'] === $_aFormData['login_pass_b'])
+										{
+											$_aFormData['login_pass'] = $_aFormData['login_pass_a'];
+											$_aFormData['login_pass'] = CRYPT::LOGIN_CRYPT($_aFormData['login_pass'], CFG::GET() -> ENCRYPTION -> BASEKEY);
+											unset($_aFormData['login_pass_a']);
+											unset($_aFormData['login_pass_b']);
+										} 
+										elseif(isset($_aFormData['login_pass_a']) && isset($_aFormData['login_pass_b']) && $_aFormData['login_pass_a'] !== $_aFormData['login_pass_b'])
+										{
+											$validationMsg .= CLanguage::get() -> string('M_BEUSER_MSG_PASSNOTEQUAL');
+											$validationErr = true;
+										}
+									}
+
+									if(!$validationErr)
+									{
+										$_aFormData['update_by'] 	= CSession::instance() -> getValue('user_id');
+										$_aFormData['update_time'] 	= time();
+
+										$modelCondition = new CModelCondition();
+										$modelCondition -> where('user_id', $systemId);
+
+										if($this -> m_pModel -> update($_pDatabase, $_aFormData, $modelCondition))
+										{
+											$validationMsg = CLanguage::get() -> string('USER WAS_UPDATED');
+										}
+										else
+										{
+											$validationMsg .= CLanguage::get() -> string('ERR_SQL_ERROR');
+											$validationErr = true;
+										}											
+									}
+									else	// Validation Failed
+									{
+										$validationMsg .= CLanguage::get() -> string('ERR_VALIDATIONFAIL');
+										$validationErr = true;
+									}
+
+
+				tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call	
+
+
+		return false;
+	}
+
+	protected function
+	logicXHREditUser(CDatabaseConnection &$_pDatabase) : bool
+	{	
+
+		$systemId = $this -> querySystemId();
+
+			$validationErr =	false;
+			$validationMsg =	'';
+			$responseData = 	[];
+
+
+
+									$_pFormVariables =	new CURLVariables();
+									$_request		 =	[];
+									$_request[] 	 = 	[	"input" => "user_name_first",  	"validate" => "strip_tags|!empty" ]; 	
+									$_request[] 	 = 	[	"input" => "user_name_last",   	"validate" => "strip_tags|!empty" ]; 	
+									$_request[] 	 = 	[	"input" => "user_mail",    		"validate" => "strip_tags|strip_whitespaces|!empty" ]; 	
+									$_request[] 	 = 	[	"input" => "language",    		"validate" => "strip_tags|strip_whitespaces|!empty" ]; 	
+									$_request[] 	 = 	[	"input" => "allow_remote",   	"validate" => "strip_tags|strip_whitespaces|!empty" ]; 
+									$_pFormVariables-> retrieve($_request, false, true); // POST 
+									$_aFormData		 = $_pFormVariables ->getArray();
+
+									if(empty($_aFormData['user_name_first'])) { 	$validationErr = true; 	$responseData[] = 'user_name_first'; 	}
+									if(empty($_aFormData['user_name_last'])) { 		$validationErr = true; 	$responseData[] = 'user_name_last'; 		}
+									if(empty($_aFormData['user_mail'])) { 			$validationErr = true; 	$responseData[] = 'user_mail'; 			}
+									if(empty($_aFormData['language'])) { 			$validationErr = true; 	$responseData[] = 'language'; 			}	
+
+									if(!$validationErr)
+									{
+										$_aFormData['update_by'] 	= CSession::instance() -> getValue('user_id');
+										$_aFormData['update_time'] 	= time();
+
+										$modelCondition = new CModelCondition();
+										$modelCondition -> where('user_id', $systemId);
+
+										if($this -> m_pModel -> update($_pDatabase, $_aFormData, $modelCondition))
+										{
+											$validationMsg = CLanguage::get() -> string('USER WAS_UPDATED');
+										}
+										else
+										{
+											$validationMsg .= CLanguage::get() -> string('ERR_SQL_ERROR');
+											$validationErr = true;
+										}											
+									}
+									else	// Validation Failed
+									{
+										$validationMsg .= CLanguage::get() -> string('ERR_VALIDATIONFAIL');
+										$validationErr = true;
+									}
+
+
+				tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call	
+
+
+		return false;
+	}
+
+	protected function
+	logicXHRDelete(CDatabaseConnection &$_pDatabase) : bool
+	{	
+
+		$systemId = $this -> querySystemId();
+
 		if($systemId !== false)
 		{	
-			##	XHR Function call
+	
+				$validationErr =	false;
+				$validationMsg =	'';
+				$responseData = 	[];
 
-			if($_isXHRequest !== false)
-			{
-				$_bValidationErr =	false;
-				$_bValidationMsg =	'';
-				$_bValidationDta = 	[];
-
-				switch($_isXHRequest)
-				{
-					case 'user-delete': // delete user
 
 										$modelCondition = new CModelCondition();
 										$modelCondition -> where('user_id', $systemId);
 
 										if($this -> m_pModel -> delete($_pDatabase, $modelCondition))
 										{
-											$_bValidationMsg = CLanguage::get() -> string('USER WAS_DELETED') .' - '. CLanguage::get() -> string('WAIT_FOR_REDIRECT');
-											$_bValidationDta['redirect'] = CMS_SERVER_URL_BACKEND . CPageRequest::instance() -> urlPath;
+											$validationMsg = CLanguage::get() -> string('USER WAS_DELETED') .' - '. CLanguage::get() -> string('WAIT_FOR_REDIRECT');
+											$responseData['redirect'] = CMS_SERVER_URL_BACKEND . CPageRequest::instance() -> urlPath;
 
 											$modelUsersRegister  = new modelUsersRegister();
 											$modelUsersRegister -> removeUserId($_pDatabase, $systemId);
-											
-											$_pDatabase -> query("DELETE FROM tb_users_groups WHERE tb_users_groups.user_id = '". $systemId ."'");
+
+										$modelUserGroups = new modelUserGroups();
+										$modelUserGroups -> delete($_pDatabase, $modelCondition);
+
 										}
 										else
 										{
-											$_bValidationMsg .= CLanguage::get() -> string('ERR_SQL_ERROR');
+											$validationMsg .= CLanguage::get() -> string('ERR_SQL_ERROR');
 										}
 
-										break;
-				}
 
-				tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $_bValidationDta);	// contains exit call
+			#	if((!$_preventXHRRequestResultOnError && $validationErr) || (!$_forcePreventXHRRequestResult && !$validationErr))
+					tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
 			}		
-		
-		}
+	
 
 		CMessages::instance() -> addMessage(CLanguage::get() -> string('MOD_BEUSER_ERR_USERID_UK') , MSG_WARNING);
 		return false;
 	}
 	
 	public function
-	logicPing(CDatabaseConnection &$_pDatabase, $_isXHRequest = false, $_enableEdit = false, $_enableDelete = false)
+	logicXHRPing(CDatabaseConnection &$_pDatabase)
 	{
 		$systemId 	= $this -> querySystemId();
 		$pingId 	= $this -> querySystemId('cms-ping-id', true);
 
-		if($systemId !== false && $_isXHRequest !== false)
+		if($systemId !== false)
 		{	
-			$_bValidationErr =	false;
-			$_bValidationMsg =	'';
-			$_bValidationDta = 	[];
+			$validationErr =	false;
+			$validationMsg =	'';
+		
+			$locked	= $this -> m_pModel -> ping($_pDatabase, CSession::instance() -> getValue('user_id'), $systemId, $pingId, MODEL_LOCK_UPDATE);
 
-			switch($_isXHRequest)
-			{
-				case 'lockState':	
-				
-					$locked	= $this -> m_pModel -> ping($_pDatabase, CSession::instance() -> getValue('user_id'), $systemId, $pingId, MODEL_LOCK_UPDATE);
-					tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $locked);
-					break;
-			}
-
-			tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $_bValidationDta);
+			tk::xhrResult(intval($validationErr), $validationMsg, $locked);
 		}
 	}
-
-
 }
-
-?>

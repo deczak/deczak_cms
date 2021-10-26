@@ -35,6 +35,21 @@ class	CController
 		return $_rcaTarget[$this -> objectInfo -> object_id];
 	}
 
+	protected function // remove upper one if all modules are changed
+	getControllerAction_v2(array $_rcaTarget, ?object &$_xhrInfo = null, string $_defaultAction = 'view') : string
+	{
+		if($_xhrInfo !== null && $_xhrInfo -> action === 'cms-insert-module')
+			return $_xhrInfo -> action = 'create';
+
+		if($_xhrInfo !== null && !empty($_xhrInfo -> objectId) && $_xhrInfo -> objectId === $this -> objectInfo -> object_id)
+			return $_xhrInfo -> action;
+			
+		if(!isset($_rcaTarget[$this -> objectInfo -> object_id]))
+			return $_defaultAction;
+
+		return $_rcaTarget[$this -> objectInfo -> object_id];
+	}
+
 	/**
 	 * 	Get a list of sub-sections in this module for a sub-menu
 	 * 

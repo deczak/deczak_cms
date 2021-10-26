@@ -12,7 +12,7 @@
 	<div>
 
 
-		<fieldset class="ui fieldset submit-able" id="user-create" data-xhr-target="user-create">
+		<fieldset class="ui fieldset submit-able" id="user-create" data-xhr-target="create">
 			<legend><?= CLanguage::get() -> string('MOD_BEUSER_FM_CREATEUSER'); ?></legend>
 
 			<div>

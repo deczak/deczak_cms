@@ -16,120 +16,63 @@ class	controllerTags extends CController
 	}
 	
 	public function
-	logic(CDatabaseConnection &$_pDatabase, array $_rcaTarget, $_isXHRequest)
+	logic(CDatabaseConnection &$_pDatabase, array $_rcaTarget, ?object $_xhrInfo) : bool
 	{
 		##	Set default target if not exists
 
-		$_controllerAction = $this -> getControllerAction($_rcaTarget, 'index');
+		$controllerAction = $this -> getControllerAction_v2($_rcaTarget, $_xhrInfo, 'index');
 
 		##	Check user rights for this target
-
-		if(!$this -> detectRights($_controllerAction))
+		
+		if(!$this -> detectRights($controllerAction))
 		{
-			if($_isXHRequest !== false)
+			if($_xhrInfo !== null)
 			{
-				$_bValidationErr =	true;
-				$_bValidationMsg =	CLanguage::get() -> string('ERR_PERMISSON');
-				$_bValidationDta = 	[];
+				$validationErr =	true;
+				$validationMsg =	CLanguage::get() -> string('ERR_PERMISSON');
+				$responseData  = 	[];
 
-				tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $_bValidationDta);	// contains exit call
+
+				tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
 			}
 
 			CMessages::instance() -> addMessage(CLanguage::get() -> string('ERR_PERMISSON') , MSG_WARNING);
-			return;
+			return false;
 		}
+
+			
+		if($_xhrInfo !== null && $_xhrInfo -> isXHR && $_xhrInfo -> objectId === $this -> objectInfo -> object_id)
+			$controllerAction = 'xhr_'. $_xhrInfo -> action;
 
 		##	Call sub-logic function by target, if there results are false, we make a fall back to default view
 
 		$enableEdit 	= $this -> existsUserRight('edit');
 		$enableDelete	= $enableEdit;
-
-		$_logicResults = false;
-		switch($_controllerAction)
+	
+		$logicDone = false;
+		switch($controllerAction)
 		{
-			case 'view'		: $_logicResults = $this -> logicView(	$_pDatabase, $_isXHRequest, $enableEdit, $enableDelete);	break;
-			case 'edit'		: $_logicResults = $this -> logicEdit(	$_pDatabase, $_isXHRequest);	break;	
-			case 'create'	: $_logicResults = $this -> logicCreate($_pDatabase, $_isXHRequest);	break;
-			case 'delete'	: $_logicResults = $this -> logicDelete($_pDatabase, $_isXHRequest);	break;	
-			case 'ping'		: $_logicResults = $this -> logicPing($_pDatabase, $_isXHRequest, $enableEdit, $enableDelete);	break;	
+		#	case 'view'		  : $logicDone = $this -> logicView($_pDatabase, $enableEdit, $enableDelete); break;
+		#	case 'delete' : $logicDone = $this -> logicXHRDelete($_pDatabase); break;	
+
+			case 'view'		: $logicDone = $this -> logicView(	$_pDatabase, $enableEdit, $enableDelete);	break;
+			case 'xhr_edit'		: $logicDone = $this -> logicXHREdit(	$_pDatabase, $_xhrInfo);	break;
+			case 'xhr_delete'	: $logicDone = $this -> logicXHRDelete($_pDatabase);	break;	
+			case 'xhr_ping'		: $logicDone = $this -> logicXHRPing($_pDatabase);	break;	
+			case 'xhr_index' : $logicDone = $this -> logicXHRIndex($_pDatabase, $_xhrInfo); break;		
+			case 'create'	: $logicDone = $this -> logicCreate($_pDatabase);	break;
+			case 'xhr_create'	: $logicDone = $this -> logicXHRCreate($_pDatabase);	break;
 		}
 
-		if(!$_logicResults)
-		{
-			##	Default View
-			$this -> logicIndex($_pDatabase, $_isXHRequest, $enableEdit, $enableDelete);	
-		}
+		if(!$logicDone) // Default
+			$logicDone = $this -> logicIndex($_pDatabase, $enableEdit, $enableDelete);	
+	
+		return $logicDone;
 	}
 
 	private function
-	logicIndex(CDatabaseConnection &$_pDatabase, $_isXHRequest, $_enableEdit = false, $_enableDelete = false)
+	logicIndex(CDatabaseConnection &$_pDatabase, bool $_enableEdit = false, bool $_enableDelete = false) : bool
 	{
-
-		##	XHR request
-
-		if($_isXHRequest !== false)
-		{	
-			$_bValidationErr =	false;
-			$_bValidationMsg =	'';
-			$_bValidationDta = 	[];
-
-			switch($_isXHRequest)
-			{
-				case 'raw-data'  :	// Request raw data
-
-									$_pURLVariables	 =	new CURLVariables();
-									$_request		 =	[];
-									$_request[] 	 = 	[	"input" => 'q',  	"validate" => "strip_tags|!empty" ,	"use_default" => true, "default_value" => false ]; 		
-									$_pURLVariables -> retrieve($_request, false, true);	
-
-									$modelCondition  = 	new CModelCondition();
-
-									if($_pURLVariables -> getValue("q") !== false)
-									{	
-										$conditionSource = 	explode(' ', $_pURLVariables -> getValue("q"));
-										foreach($conditionSource as $conditionItem)
-										{
-											$itemParts = explode(':', $conditionItem);
-
-											if(count($itemParts) == 1)
-											{
-												$modelCondition -> whereLike('tag_name', $itemParts[0]);
-											}
-											else
-											{
-												if( $itemParts[0] == 'cms-system-id' )
-													$itemParts[0] = 'tb_tags.tag_id';
-												
-												$modelCondition -> where($itemParts[0], $itemParts[1]);
-											}
-										}										
-									}
-
-									$modelCondition -> groupBy('tag_id');
-	
-									if(!$this -> m_pModel -> load($_pDatabase, $modelCondition, MODEL_TAGS_ALLOCATION_COUNT))
-									{
-										$_bValidationMsg .= CLanguage::get() -> string('ERR_SQL_ERROR');
-										$_bValidationErr = true;
-									}											
-						
-									$data = $this -> m_pModel -> getResult();
-									/*
-									foreach($data as &$item)
-									{
-										$item -> creaty_by_name = tk::getBackendUserName($_pDatabase, $item -> create_by);
-										$item -> update_by_name = tk::getBackendUserName($_pDatabase, $item -> update_by);
-									}
-									*/
-
-									break;
-			}
-
-			tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $data);	// contains exit call
-		}
-
-		##	No XHR request
-
 		$this -> setView(	
 						'index',	
 						'',
@@ -138,59 +81,63 @@ class	controllerTags extends CController
 							'enableDelete'		=> $_enableDelete
 						]
 						);
+
+		return true;
 	}
 
 	private function
-	logicCreate(CDatabaseConnection &$_pDatabase, $_isXHRequest)
+	logicXHRIndex(CDatabaseConnection &$_pDatabase) : bool
 	{
-		if($_isXHRequest !== false)
-		{
-			$_bValidationErr =	false;
-			$_bValidationMsg =	'';
-			$_bValidationDta = 	[];
+		$validationErr =	false;
+		$validationMsg =	'';
+		$responseData = 	[];
 
-			$_pURLVariables	 =	new CURLVariables();
-			$_request		 =	[];
-			$_request[] 	 = 	[	"input" => "tag_name",  	"validate" => "strip_tags|trim|!empty" ]; 	
-			$_request[] 	 = 	[	"input" => "tag_hidden",  	"validate" => "strip_tags|trim|!empty" ]; 	
-			$_request[] 	 = 	[	"input" => "tag_disabled", "validate" => "strip_tags|trim|!empty" ]; 		
-			$_pURLVariables -> retrieve($_request, false, true); // POST 
-			$_aFormData		 = $_pURLVariables ->getArray();
+		$_pURLVariables	 =	new CURLVariables();
+		$_request		 =	[];
+		$_request[] 	 = 	[	"input" => 'q',  	"validate" => "strip_tags|!empty" ,	"use_default" => true, "default_value" => false ]; 		
+		$_pURLVariables -> retrieve($_request, false, true);	
 
-			if(empty($_aFormData['tag_name'])) 	{ 	$_bValidationErr = true; 	$_bValidationDta[] = 'tag_name'; 	}
-			if(!isset($_aFormData['tag_hidden'])) { 	$_bValidationErr = true; 	$_bValidationDta[] = 'tag_hidden'; 	}
-			if(!isset($_aFormData['tag_disabled'])) { 	$_bValidationErr = true; 	$_bValidationDta[] = 'tag_disabled'; 	}
+		$modelCondition  = 	new CModelCondition();
 
-			if(!$_bValidationErr)	// Validation OK (by pre check)
-			{		
-			}
-			else	// Validation Failed 
+		if($_pURLVariables -> getValue("q") !== false)
+		{	
+			$conditionSource = 	explode(' ', $_pURLVariables -> getValue("q"));
+			foreach($conditionSource as $conditionItem)
 			{
-				$_bValidationMsg .= CLanguage::get() -> string('ERR_VALIDATIONFAIL');
-			}
+				$itemParts = explode(':', $conditionItem);
 
-			if(!$_bValidationErr)	// Validation OK
-			{
-				$_aFormData['tag_url'] 	= tk::normalizeFilename($_aFormData['tag_name'], true);
-
-				$dataId = $this -> m_pModel -> insert($_pDatabase, $_aFormData);
-
-				if($dataId !== false)
-				{					
-					$_bValidationMsg = CLanguage::get() -> string('MOD_BETAGS_TAG') .' '. CLanguage::get() -> string('WAS_CREATED') .' - '. CLanguage::get() -> string('WAIT_FOR_REDIRECT');
-											
-					$_bValidationDta['redirect'] = CMS_SERVER_URL_BACKEND . CPageRequest::instance() -> urlPath .'tag/'.$dataId;
+				if(count($itemParts) == 1)
+				{
+					$modelCondition -> whereLike('tag_name', $itemParts[0]);
 				}
 				else
 				{
-					$_bValidationMsg .= CLanguage::get() -> string('ERR_SQL_ERROR');
+					if( $itemParts[0] == 'cms-system-id' )
+						$itemParts[0] = 'tb_tags.tag_id';
+					
+					$modelCondition -> where($itemParts[0], $itemParts[1]);
 				}
-			}
-
-
-			tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $_bValidationDta);	// contains exit call
+			}										
 		}
 
+		$modelCondition -> groupBy('tag_id');
+
+		if(!$this -> m_pModel -> load($_pDatabase, $modelCondition, MODEL_TAGS_ALLOCATION_COUNT))
+		{
+			$validationMsg .= CLanguage::get() -> string('ERR_SQL_ERROR');
+			$validationErr = true;
+		}											
+
+		$data = $this -> m_pModel -> getResult();
+
+		tk::xhrResult(intval($validationErr), $validationMsg, $data);	// contains exit call
+	
+		return false;
+	}
+
+	private function
+	logicCreate(CDatabaseConnection &$_pDatabase) : bool
+	{
 		$this -> setCrumbData('create');
 		$this -> setView(
 						'create',
@@ -201,7 +148,59 @@ class	controllerTags extends CController
 	}
 
 	private function
-	logicView(CDatabaseConnection &$_pDatabase, $_isXHRequest = false, $_enableEdit = false, $_enableDelete = false)
+	logicXHRCreate(CDatabaseConnection &$_pDatabase) : bool
+	{
+
+		$validationErr =	false;
+		$validationMsg =	'';
+		$responseData = 	[];
+
+		$_pURLVariables	 =	new CURLVariables();
+		$_request		 =	[];
+		$_request[] 	 = 	[	"input" => "tag_name",  	"validate" => "strip_tags|trim|!empty" ]; 	
+		$_request[] 	 = 	[	"input" => "tag_hidden",  	"validate" => "strip_tags|trim|!empty" ]; 	
+		$_request[] 	 = 	[	"input" => "tag_disabled", "validate" => "strip_tags|trim|!empty" ]; 		
+		$_pURLVariables -> retrieve($_request, false, true); // POST 
+		$_aFormData		 = $_pURLVariables ->getArray();
+
+		if(empty($_aFormData['tag_name'])) 	{ 	$validationErr = true; 	$responseData[] = 'tag_name'; 	}
+		if(!isset($_aFormData['tag_hidden'])) { 	$validationErr = true; 	$responseData[] = 'tag_hidden'; 	}
+		if(!isset($_aFormData['tag_disabled'])) { 	$validationErr = true; 	$responseData[] = 'tag_disabled'; 	}
+
+		if(!$validationErr)	// Validation OK (by pre check)
+		{		
+		}
+		else	// Validation Failed 
+		{
+			$validationMsg .= CLanguage::get() -> string('ERR_VALIDATIONFAIL');
+		}
+
+		if(!$validationErr)	// Validation OK
+		{
+			$_aFormData['tag_url'] 	= tk::normalizeFilename($_aFormData['tag_name'], true);
+
+			$dataId = $this -> m_pModel -> insert($_pDatabase, $_aFormData);
+
+			if($dataId !== false)
+			{					
+				$validationMsg = CLanguage::get() -> string('MOD_BETAGS_TAG') .' '. CLanguage::get() -> string('WAS_CREATED') .' - '. CLanguage::get() -> string('WAIT_FOR_REDIRECT');
+										
+				$responseData['redirect'] = CMS_SERVER_URL_BACKEND . CPageRequest::instance() -> urlPath .'tag/'.$dataId;
+			}
+			else
+			{
+				$validationMsg .= CLanguage::get() -> string('ERR_SQL_ERROR');
+			}
+		}
+
+
+		tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
+
+		return false;
+	}
+
+	private function
+	logicView(CDatabaseConnection &$_pDatabase, bool $_enableEdit = false, bool $_enableDelete = false) : bool
 	{
 		$systemId = $this -> querySystemId();
 
@@ -235,24 +234,21 @@ class	controllerTags extends CController
 	}
 
 	private function
-	logicEdit(CDatabaseConnection &$_pDatabase, $_isXHRequest = false)
+	logicXHREdit(CDatabaseConnection &$_pDatabase, $_xhrInfo = false)
 	{
 		$systemId = $this -> querySystemId();
 
-		if($systemId !== false && $_isXHRequest !== false)
+		if($systemId !== false)
 		{	
-			$_bValidationErr =	false;
-			$_bValidationMsg =	'';
-			$_bValidationDta = 	[];
+			$validationErr =	false;
+			$validationMsg =	'';
+			$responseData = 	[];
 
 			$pingId 	= $this -> querySystemId('cms-ping-id', true);
 
 			## check if dataset is locked, call his own xhrResult() 
 			$this -> detectLock($_pDatabase, $systemId, $pingId);
 
-			switch($_isXHRequest)
-			{
-				case 'edit-tag'  :	
 
 										$_pFormVariables =	new CURLVariables();
 										$_request		 =	[];
@@ -262,11 +258,11 @@ class	controllerTags extends CController
 										$_pFormVariables -> retrieve($_request, false, true); // POST 
 										$_aFormData		 = $_pFormVariables ->getArray();
 
-										if(empty($_aFormData['tag_name'])) 	{ 	$_bValidationErr = true; 	$_bValidationDta[] = 'tag_name'; 	}
-										if(!isset($_aFormData['tag_hidden'])) { 	$_bValidationErr = true; 	$_bValidationDta[] = 'tag_hidden'; 	}
-										if(!isset($_aFormData['tag_disabled'])) { 	$_bValidationErr = true; 	$_bValidationDta[] = 'tag_disabled'; 	}
+										if(empty($_aFormData['tag_name'])) 	{ 	$validationErr = true; 	$responseData[] = 'tag_name'; 	}
+										if(!isset($_aFormData['tag_hidden'])) { 	$validationErr = true; 	$responseData[] = 'tag_hidden'; 	}
+										if(!isset($_aFormData['tag_disabled'])) { 	$validationErr = true; 	$responseData[] = 'tag_disabled'; 	}
 
-										if(!$_bValidationErr)
+										if(!$validationErr)
 										{
 											$_aFormData['tag_url'] 	= tk::normalizeFilename($_aFormData['tag_name'], true);
 
@@ -275,95 +271,79 @@ class	controllerTags extends CController
 
 											if($this -> m_pModel -> update($_pDatabase, $_aFormData, $modelCondition))
 											{
-												$_bValidationMsg = CLanguage::get() -> string('MOD_BETAGS_TAG') .' '. CLanguage::get() -> string('WAS_UPDATED');
+												$validationMsg = CLanguage::get() -> string('MOD_BETAGS_TAG') .' '. CLanguage::get() -> string('WAS_UPDATED');
 											}
 											else
 											{
-												$_bValidationMsg .= CLanguage::get() -> string('ERR_SQL_ERROR');
-												$_bValidationErr = true;
+												$validationMsg .= CLanguage::get() -> string('ERR_SQL_ERROR');
+												$validationErr = true;
 											}											
 										}
 										else	// Validation Failed
 										{
-											$_bValidationMsg .= CLanguage::get() -> string('ERR_VALIDATIONFAIL');
-											$_bValidationErr = true;
+											$validationMsg .= CLanguage::get() -> string('ERR_VALIDATIONFAIL');
+											$validationErr = true;
 										}
 
-										break;
-			}
-
-			tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $_bValidationDta);	// contains exit call		
+			tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call		
 		}
 
 		return false;
 	}
 
 	private function
-	logicDelete(CDatabaseConnection &$_pDatabase, $_isXHRequest = false)
+	logicXHRDelete(CDatabaseConnection &$_pDatabase) : bool
 	{
 		$systemId = $this -> querySystemId();
 
-		if($systemId !== false && $_isXHRequest !== false)
+		if($systemId !== false)
 		{	
-			$_bValidationErr =	false;
-			$_bValidationMsg =	'';
-			$_bValidationDta = 	[];
+			$validationErr =	false;
+			$validationMsg =	'';
+			$responseData = 	[];
 
 			$pingId 	= $this -> querySystemId('cms-ping-id', true);
 
 			## check if dataset is locked, call his own xhrResult() 
 			$this -> detectLock($_pDatabase, $systemId, $pingId);
 
-			switch($_isXHRequest)
-			{
-				case 'tag-delete':
 
 									$modelCondition = new CModelCondition();
 									$modelCondition -> where('tag_id', $systemId);
 
 									if($this -> m_pModel -> delete($_pDatabase, $modelCondition))
 									{
-										$_bValidationMsg = CLanguage::get() -> string('MOD_BETAGS_TAG') .' '. CLanguage::get() -> string('WAS_DELETED') .' - '. CLanguage::get() -> string('WAIT_FOR_REDIRECT');
-										$_bValidationDta['redirect'] = CMS_SERVER_URL_BACKEND . CPageRequest::instance() -> urlPath;
+										$validationMsg = CLanguage::get() -> string('MOD_BETAGS_TAG') .' '. CLanguage::get() -> string('WAS_DELETED') .' - '. CLanguage::get() -> string('WAIT_FOR_REDIRECT');
+										$responseData['redirect'] = CMS_SERVER_URL_BACKEND . CPageRequest::instance() -> urlPath;
 									}
 									else
 									{
-										$_bValidationMsg .= CLanguage::get() -> string('ERR_SQL_ERROR');
+										$validationMsg .= CLanguage::get() -> string('ERR_SQL_ERROR');
 									}
 
-									break;
-			}
-
-			tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $_bValidationDta);	// contains exit call
+			tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
 		}
 
 		return false;
 	}
 
 	public function
-	logicPing(CDatabaseConnection &$_pDatabase, $_isXHRequest = false, $_enableEdit = false, $_enableDelete = false)
+	logicXHRPing(CDatabaseConnection &$_pDatabase) : bool
 	{
 		$systemId 	= $this -> querySystemId();
 		$pingId 	= $this -> querySystemId('cms-ping-id', true);
 
-		if($systemId !== false && $_isXHRequest !== false)
+		if($systemId !== false)
 		{	
-			$_bValidationErr =	false;
-			$_bValidationMsg =	'';
-			$_bValidationDta = 	[];
+			$validationErr =	false;
+			$validationMsg =	'';
+			$responseData = 	[];
 
-			switch($_isXHRequest)
-			{
-				case 'lockState':	
 				
-					$locked	= $this -> m_pModel -> ping($_pDatabase, CSession::instance() -> getValue('user_id'), $systemId, $pingId, MODEL_LOCK_UPDATE);
-					tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $locked);
-					break;
-			}
-
-			tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $_bValidationDta);
+			$locked	= $this -> m_pModel -> ping($_pDatabase, CSession::instance() -> getValue('user_id'), $systemId, $pingId, MODEL_LOCK_UPDATE);
+			tk::xhrResult(intval($validationErr), $validationMsg, $locked);
 		}
+
+		return false;
 	}
 }
-
-?>

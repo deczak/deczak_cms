@@ -2,7 +2,7 @@
 if(isset($deniedList))
 	$dataset = &$deniedList[0];
 else
-	$deniedList = false;
+	$dataset = false;
 ?>
 
 <div class="be-module-container forms-view">
@@ -15,8 +15,8 @@ else
 			</ul>
 			<hr>
 			<div class="delete-box">
-				<?php if(isset($enableDelete) && $enableDelete && $deniedList !== false) { ?>	
-					<fieldset class="ui fieldset" data-xhr-target="address-delete" data-xhr-overwrite-target="delete/<?php echo $dataset  -> data_id; ?>">	
+				<?php if(isset($enableDelete) && $enableDelete && $dataset !== false) { ?>	
+					<fieldset class="ui fieldset" data-xhr-target="delete" data-xhr-overwrite-target="delete/<?php echo $dataset  -> data_id; ?>">	
 						<div class="submit-container button-only">
 							<button class="ui button icon labeled trigger-submit-fieldset" type="button" disabled><span><i class="fas fa-trash-alt" data-icon="fa-trash-alt"></i></span><?php echo $language -> string('BUTTON_DELETE'); ?></button>
 							<div class="protector"><input type="checkbox" class="trigger-submit-protector" id="protector-address-delete"><label for="protector-address-delete"></label></div>
@@ -32,7 +32,7 @@ else
 	</div>
 	<div>
 		
-		<fieldset class="ui fieldset submit-able" id="denied-address" data-xhr-target="denied-address" <?= ($deniedList !== false ? 'data-xhr-overwrite-target="edit/'. $dataset -> data_id .'"' : ''); ?>>
+		<fieldset class="ui fieldset submit-able" id="denied-address" data-xhr-target="<?= (!$dataset ? 'create' : 'edit'); ?>" <?= ($dataset !== false ? 'data-xhr-overwrite-target="edit/'. $dataset -> data_id .'"' : ''); ?>>
 			
 			<legend><?php echo $language -> string('DENIED'); ?> <?php echo $language -> string('ADDRESS'); ?></legend>
 			<div>
@@ -56,7 +56,7 @@ else
 				
 			</div>
 
-			<?php if(isset($enableEdit) && $enableEdit || $deniedList === false) { ?>
+			<?php if(isset($enableEdit) && $enableEdit || $dataset === false) { ?>
 
 				<div class="result-box" data-error=""></div>
 
@@ -77,7 +77,7 @@ else
 	</div>
 </div>
 
-<?php if($deniedList !== false) { ?>
+<?php if($dataset !== false) { ?>
 <script src="<?php echo CMS_SERVER_URL_BACKEND; ?>js/classes/cms-request-data-index.js"></script>
 <script src="<?php echo CMS_SERVER_URL_BACKEND; ?>js/classes/cms-request-data-item.js"></script>
 <script>
