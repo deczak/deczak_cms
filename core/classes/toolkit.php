@@ -1,5 +1,7 @@
 <?php
 
+require_once 'type_pos.php';
+
 class	TK
 {
 	public static function
@@ -225,31 +227,6 @@ class	TK
 			rmdir($dir); 
 		} 
 	}
-
-	public static function getMediatheItemkUrl(int $mediaId, string $itemPath = '') : ?string
-	{
-		if(empty($mediaId))
-			return null;
-
-		$directoryList = new DirectoryIterator(CMS_SERVER_ROOT.DIR_MEDIATHEK.$itemPath);
-		foreach($directoryList as $directory)
-		{
-			if($directory -> isDot())
-				continue;
-
-			if(file_exists(CMS_SERVER_ROOT.DIR_MEDIATHEK.$itemPath.$directory -> getFilename().'/'.$mediaId.'.media-id'))
-				return CMS_SERVER_URL.DIR_MEDIATHEK.$itemPath.$directory -> getFilename().'/';
-
-			if($directory -> isDir() && !file_exists(CMS_SERVER_ROOT.DIR_MEDIATHEK.$itemPath.$directory -> getFilename().'/info.json'))
-			{
-				$response = tk::getMediatheItemkUrl($mediaId, $directory -> getFilename().'/');
-				if($response !== null)
-					return $response;
-			}
-		}
-
-		return null;
-	}
 }
 
 class	CRYPT
@@ -344,6 +321,250 @@ class	CRYPT
 	{
 		return CRYPT::HASH512($_string, CRYPT::CHECKSUM(CRYPT::HASH256($_string)), $_key ) . CRYPT::CHECKSUM(CRYPT::HASH256($_string));
 	}
+}
+
+class 	MEDIATHEK
+{
+
+	public static function 
+	getItemUrl(int $mediaId, string $itemPath = '') : ?string
+	{
+		if(empty($mediaId))
+			return null;
+
+		$directoryList = new DirectoryIterator(CMS_SERVER_ROOT.DIR_MEDIATHEK.$itemPath);
+		foreach($directoryList as $directory)
+		{
+			if($directory -> isDot())
+				continue;
+
+			if(file_exists(CMS_SERVER_ROOT.DIR_MEDIATHEK.$itemPath.$directory -> getFilename().'/'.$mediaId.'.media-id'))
+				return CMS_SERVER_URL.DIR_MEDIATHEK.$itemPath.$directory -> getFilename().'/';
+
+			if($directory -> isDir() && !file_exists(CMS_SERVER_ROOT.DIR_MEDIATHEK.$itemPath.$directory -> getFilename().'/info.json'))
+			{
+				$response = MEDIATHEK::getItemUrl($mediaId, $directory -> getFilename().'/');
+				if($response !== null)
+					return $response;
+			}
+		}
+
+		return null;
+	}
+ 
+	public static function 
+	getItemsList(string $path, array &$destList)
+	{
+		$directoryList = new DirectoryIterator(CMS_SERVER_ROOT.DIR_MEDIATHEK.$path);
+		foreach($directoryList as $directory)
+		{
+			if($directory -> isDot())
+				continue;
+
+			if(!$directory -> isDir())
+				continue;
+
+			if(file_exists(CMS_SERVER_ROOT.DIR_MEDIATHEK.$path.$directory -> getFilename().'/info.json'))
+			{
+				$itemInfo = file_get_contents(CMS_SERVER_ROOT.DIR_MEDIATHEK.$path.$directory -> getFilename().'/info.json');
+
+				if($itemInfo === false)
+				{
+					// TODO ERR
+					continue;
+				}
+
+				$itemInfo = json_decode($itemInfo);
+
+				if($itemInfo === null)
+				{
+					// TODO ERR
+					continue;
+				}
+
+				if(!empty($itemInfo -> redirect))
+				{
+					continue;
+				}
+					
+				$mediathekFilelocation 	= CMS_SERVER_ROOT.DIR_MEDIATHEK.$path.$directory -> getFilename().'/'.$itemInfo -> filename;
+				$mediathekFileInfo 		= new SplFileInfo($mediathekFilelocation);
+
+				$mediathekItem  = new stdClass;
+				$mediathekItem -> path  	= $path.$directory -> getFilename();
+				$mediathekItem -> filename  	= $directory -> getFilename();
+				$mediathekItem -> name 	    	= $mediathekFileInfo -> getFilename();
+				$mediathekItem -> size 			= $mediathekFileInfo -> getSize();
+				$mediathekItem -> extension 	= $mediathekFileInfo -> getExtension();
+				$mediathekItem -> title 		= $itemInfo -> title ?? '';
+				$mediathekItem -> caption 		= $itemInfo -> caption ?? '';
+				$mediathekItem -> author 		= $itemInfo -> author ?? '';
+				$mediathekItem -> notice 		= $itemInfo -> notice ?? '';
+				$mediathekItem -> gear 			= $itemInfo -> gear ?? [];
+				$mediathekItem -> gear_settings = $itemInfo -> gear_settings ?? [];
+				$mediathekItem -> license 		= $itemInfo -> license ?? '';
+				$mediathekItem -> license_url 	= $itemInfo -> license_url ?? '';
+				$mediathekItem -> mime 			= mime_content_type($mediathekFilelocation);
+
+				$destList[] = $mediathekItem;
+			}
+			else
+			{
+				MEDIATHEK::getItemsList($path.$directory -> getFilename().'/', $destList);
+			}
+		}
+	}
+
+	/**
+	 *	Searches for unprocessed Mediethak Files
+	 *	@param array $destList Reference of an Array where the found will be written as object
+	 *	@param string $path Relative mediathek start path of the directory being searched in. An Empty String indicates a search in the whole mediathek.
+	 */	
+	public static function 
+	getRawItemsList(array &$destList, string $path = '') : void
+	{
+		$directoryList = new DirectoryIterator(CMS_SERVER_ROOT.DIR_MEDIATHEK.$path);
+		foreach($directoryList as $directory)
+		{
+			if($directory -> isDot())
+				continue;
+
+			if($directory -> isDir())
+			{
+				if(file_exists(CMS_SERVER_ROOT.DIR_MEDIATHEK.$path.$directory -> getFilename().'/info.json'))
+				{
+					continue;
+				}
+				else
+				{
+					MEDIATHEK::getRawItemsList($destList, $path.$directory -> getFilename().'/');
+				}
+			}
+			elseif($directory -> isFile())
+			{
+				$mediathekFilelocation 	= CMS_SERVER_ROOT.DIR_MEDIATHEK.$path.$directory -> getFilename();
+				$mediathekFileInfo 		= new SplFileInfo($mediathekFilelocation);
+
+				$mediathekItem  = new stdClass;
+				$mediathekItem -> filelocation	= $path;
+				$mediathekItem -> filepath  	= $path.$directory -> getFilename();
+				$mediathekItem -> filename  	= $directory -> getFilename();
+				$mediathekItem -> filenameBase  = $mediathekFileInfo -> getBasename('.'. $mediathekFileInfo -> getExtension());
+				$mediathekItem -> extension 	= $mediathekFileInfo -> getExtension();
+				$mediathekItem -> mime 			= mime_content_type($mediathekFilelocation);
+				$mediathekItem -> size 			= $mediathekFileInfo -> getSize();
+
+				if($path === '')
+				switch($mediathekItem -> filenameBase)
+				{
+					case 'index':
+					case 'readme':	continue 2;
+				}
+
+				$destList[] = $mediathekItem;
+			}
+		}
+	}
+	
+	public static function 
+	getMediaIdFromItem(string $itemPath)
+	{
+		$directoryList = new DirectoryIterator(CMS_SERVER_ROOT.DIR_MEDIATHEK.$itemPath);
+		foreach($directoryList as $directory)
+		{
+			if($directory -> isDot())
+				continue;
+
+			if($directory -> isDir())
+				continue;
+
+			if($directory -> getExtension() === 'media-id')
+				return $directory -> getBasename('.media-id');
+		}
+
+		return null;
+	}
+
+	public static function
+	createResizedImages(string $fileLocation, string $fileName, string $mime, array $supportedSizes) : ?array
+	{
+		$resizedImageList = [];
+
+		switch($mime)
+		{
+			case 'image/jpeg':
+
+    			$imageResource = imagecreatefromjpeg($fileLocation . $fileName);
+				break;
+
+			case 'image/png':
+
+    			$imageResource = imagecreatefrompng($fileLocation . $fileName);
+				break;
+
+			case 'image/webp':
+
+    			$imageResource = imagecreatefromwebp($fileLocation . $fileName);
+				break;
+
+			default:
+
+				return null;
+		}
+
+		$srcSize = new pos(0, 0, imagesx($imageResource), imagesy($imageResource));
+
+		foreach($supportedSizes as $sizeKey => $sizeValues)
+		{
+			if($sizeValues -> w > $srcSize -> w || $sizeValues -> h > $srcSize -> h)
+				continue;
+
+			$ratio = $srcSize -> w / $srcSize -> h;
+			$pch   = $sizeValues -> w / $ratio;  // 832
+
+			if($pch > $sizeValues -> h)
+			{
+				$pcw      = $sizeValues -> h * $ratio;
+				$destSize = new pos(0, 0, $pcw, $sizeValues -> h);
+			}
+			else
+			{
+				$destSize = new pos(0, 0, $sizeValues -> w, $pch);
+			}
+
+			$resizedResource = imagecreatetruecolor($destSize -> w, $destSize -> h);
+			imagecopyresampled($resizedResource, $imageResource, 0, 0, 0, 0, $destSize -> w, $destSize -> h, $srcSize -> w, $srcSize -> h);
+
+			$destFilename = $sizeKey .'_'. $fileName;
+
+			switch($mime)
+			{
+				case 'image/jpeg':
+
+					imagejpeg($resizedResource, $fileLocation. $destFilename, 85); 
+					break;
+
+				case 'image/png':
+
+					imagepng($resizedResource, $fileLocation. $destFilename, 5); 
+					break;
+
+				case 'image/png':
+
+					imagewebp($resizedResource, $fileLocation. $destFilename, 95); 
+					break;
+
+				default:
+
+					continue 2;
+			}
+
+			$resizedImageList[$sizeKey] = $destFilename;
+		}
+
+		return $resizedImageList;
+	}
+
 }
 
 /**

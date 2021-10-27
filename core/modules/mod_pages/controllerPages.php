@@ -46,14 +46,16 @@ class	controllerPages extends CController
 		if($_xhrInfo !== null && $_xhrInfo -> isXHR && $_xhrInfo -> action !== 'update-site' && !empty($_GET['cms-edit-page-node']))
 			$_xhrInfo -> action = 'view';
 		
-		if($_xhrInfo !== null && $_xhrInfo -> isXHR && $_xhrInfo -> objectId)
+
+		if($_xhrInfo !== null && $_xhrInfo -> isXHR && $_xhrInfo -> objectId !== $this -> objectInfo -> object_id)
 			$_xhrInfo -> action = 'view';
 
 
 		if($_xhrInfo !== null && $_xhrInfo -> isXHR && $_xhrInfo -> action === 'update-site')
 			$_xhrInfo -> action = 'edit';
 		
-		if($_xhrInfo !== null && $_xhrInfo -> isXHR && !$_xhrInfo -> objectId)
+
+		if($_xhrInfo !== null && $_xhrInfo -> isXHR && $_xhrInfo -> objectId === $this -> objectInfo -> object_id)
 			$controllerAction = 'xhr_'. $_xhrInfo -> action;
 
 		##	Call sub-logic function by target, if there results are false, we make a fall back to default view

@@ -62,7 +62,7 @@ class	CHTML
 
 		$sitemap		=	$pageRequest -> sitemap;
 
-		$pageRequest -> page_image_url = tk::getMediatheItemkUrl($pageRequest -> page_image ?? 0);
+		$pageRequest -> page_image_url = MEDIATHEK::getItemUrl($pageRequest -> page_image ?? 0);
 		$pageRequest -> page_image_url = ($pageRequest -> page_image_url !== null ? $pageRequest -> page_image_url .'?binary&size=small' : $pageRequest -> page_image_url);
 					
 		echo "<!DOCTYPE html>\r\n";

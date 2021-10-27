@@ -11,6 +11,14 @@ class	controllerMediathek extends CController
 		parent::__construct($_module, $_object);
 
 		CPageRequest::instance() -> subs = $this -> getSubSection();
+
+		$this -> imageSizesList = [
+			'xlarge' => new pos(0, 0,1980, 1200),
+			'large'  => new pos(0, 0,1600, 1024),
+			'medium' => new pos(0, 0,1200, 1200),
+			'small'  => new pos(0, 0, 800,  800),
+			'thumb'  => new pos(0, 0, 500,  500),
+		];
 	}
 	
 	public function
@@ -50,6 +58,7 @@ class	controllerMediathek extends CController
 		$enableDelete	= $this -> existsUserRight('delete');
 		$enableUpload	= $this -> existsUserRight('upload');
 	
+
 		$logicDone = false;
 		switch($controllerAction)
 		{
@@ -63,69 +72,9 @@ class	controllerMediathek extends CController
 		return $logicDone;
 	}
 
-
-
-
-
-
-
 	private function
 	logicIndex(CDatabaseConnection &$_pDatabase, bool $_enableEdit = false, bool $_enableDelete = false, bool $_enableUpload = false) : bool
 	{
-
-
-
-
-/*
-
-		$example = [];
-
-
-
-
-			$dirItem  = new stdClass;
-			$dirItem -> level = 0; 
-			$dirItem -> path  = '';
-			$dirItem -> childs = [];
-
-			$example[] = $dirItem;
-
-			$dirItem -> ts     = $this -> getMediathekStructure('', $dirItem -> childs, 1);
-			
-
-		
-		
-
-
-		tk::dbug($example);
-
-		$example2 = [];
-
-		$left = 1;
-		$right = 2;
-
-		$this -> getNestedSetStructure($example, $example2, $left, $right);
-
-		tk::dbug($example2);
-
-	*/
-
-
-
-/*
-
-das für import
-
-							$mediathekItemExif	= (object)exif_read_data($mediathekFilelocation, 'EXIF');
-
-							$mediathekItem -> exif = new stdClass;
-
-							$mediathekItem -> exif -> Model			= $mediathekItemExif -> Model ?? '';
-							$mediathekItem -> exif -> LensModel		= $mediathekItemExif -> LensModel ?? $mediathekItemExif -> {'UndefinedTag:0xA434'} ?? '';
-							$mediathekItem -> exif -> Artist		= $mediathekItemExif -> Artist ?? '';
-							$mediathekItem -> exif -> Copyright		= $mediathekItemExif -> Copyright ?? '';
-*/
-	
 		$this -> setView(	
 						'index',	
 						'',
@@ -195,7 +144,7 @@ das für import
 
 
 
-			$mediaId = $this -> getMediaIdFromItem($mediathekPath .$_dirItem -> getFilename());
+			$mediaId = MEDIATHEK::getMediaIdFromItem($mediathekPath .$_dirItem -> getFilename());
 
 
 			if($mediaId === null)
@@ -206,17 +155,13 @@ das für import
 			$modelCondition -> where('media_id', $mediaId);
 			
 
-		$modelMediathek = new modelMediathek;
-		$modelMediathek	-> load($_pDatabase, $modelCondition);	
+			$modelMediathek = new modelMediathek;
+			$modelMediathek	-> load($_pDatabase, $modelCondition);	
 
 			$itemDBInfo = $modelMediathek -> getResult();
 
 			$itemDBInfo = (!empty($itemDBInfo) ? reset($itemDBInfo) : null);
 
-
-
-#$itemDBInfo -> media_gear = ($itemDBInfo -> media_gear !== null ? json_decode($itemDBInfo -> media_gear) : null);
-#$itemDBInfo -> media_gear_settings = ($itemDBInfo -> media_gear_settings !== null ? json_decode($itemDBInfo -> media_gear_settings) : null);
 
 
 			if($itemDBInfo === null)
@@ -320,80 +265,150 @@ das für import
 	private function
 	logicXHRImport(CDatabaseConnection &$_pDatabase, ?object $_xhrInfo, bool $_enableEdit = false, bool $_enableDelete = false, bool $_enableUpload = false) : bool
 	{
+
+
 		$validationErr   = false;
 		$validationMsg   = 'OK';
 		$responseData    = [];
 
-		$modelMediathek = new modelMediathek;
 
-		/*
-			import several states
-
-				- items withouth media-id
-
-				- single images
-		*/
-
-
-
-
-
-		/*
-			verzeichnisse recursiv loopen und items per array abrufen
-
-			items in db eintragen und media id in die json eintragen
-
-		*/
 
 
 
 		$itemsList = [];
 
-		$this -> getMediathekItemsList('', $itemsList);
+		MEDIATHEK::getRawItemsList($itemsList);
+
+
 
 
 
 		foreach($itemsList as $item)
 		{
 
-			$mediaId = $this -> getMediaIdFromItem($item -> path);
 
 
 
 
-			if($mediaId !== null)
+			$itemPath = CMS_SERVER_ROOT.DIR_MEDIATHEK.$item -> filelocation . $item -> filenameBase .'/';
+
+
+
+
+			if(!file_exists($itemPath))
+			if(!mkdir($itemPath, 0777, true))
+			{
+				// TODO ERR
 				continue;
+			}
+
+
+
+			if(!rename(CMS_SERVER_ROOT.DIR_MEDIATHEK.$item -> filepath, $itemPath . $item -> filename))
+			{
+				// TODO ERR
+				continue;
+			}
+
+
+
+
+
+			switch($item -> mime)
+			{
+				case 'image/jpeg':
+
+					$itemExifInfo	= (object)exif_read_data($itemPath . $item -> filename, 'EXIF');
+					break;
+			}
 
 
 
 
 
 
+			$itemInfo = new stdClass;
 
+
+$itemInfo -> sheme		   = 1;
+$itemInfo -> filename	   = $item -> filename;
+$itemInfo -> sizes		   = [];
+$itemInfo -> license	   = $itemExifInfo -> Copyright ?? '';
+$itemInfo -> license_url   = '';
+$itemInfo -> gear		   = [
+	"by_meta"	=> false,
+	"camera"	=> $itemExifInfo -> Model ?? '',
+	"lens"		=> $itemExifInfo -> LensModel ?? $itemExifInfo -> {'UndefinedTag:0xA434'} ?? ''
+];
+$itemInfo -> gear_settings = [];	// This values are not getting retrieved at the moment
+$itemInfo -> title		   = '';
+$itemInfo -> caption	   = '';
+$itemInfo -> author 	   = $itemExifInfo -> Artist ?? '';
+$itemInfo -> notice		   = '';
+$itemInfo -> timeAdd	   = time();
+
+
+
+			switch($item -> mime)
+			{
+				case 'image/png': 
+				case 'image/webp': 
+				case 'image/jpeg':
+
+
+				$itemInfo -> sizes = MEDIATHEK::createResizedImages($itemPath, $item -> filename, $item -> mime, $this -> imageSizesList);
+				$itemInfo -> sizes = $itemInfo -> sizes ?? [];
+		
+
+
+										break;
+
+				default: // ...................	Add file for download
+
+					// todo
+
+			}
+
+
+
+
+
+				file_put_contents($itemPath.'info.json', json_encode($itemInfo, JSON_UNESCAPED_UNICODE));
+
+
+
+			$modelMediathek = new modelMediathek;
 			$mediaId = $modelMediathek -> insert($_pDatabase, [
-				'media_filename' => $item -> filename,
-				'media_title' => $item -> title,
-				'media_caption' => $item -> caption,
-				'media_author' => $item -> author,
-				'media_notice' => $item -> notice,
-				'media_license' => $item -> license,
-				'media_license_url' => $item -> license_url,
-				'media_gear' => json_encode($item -> gear),
-				'media_gear_settings' => json_encode($item -> gear_settings),
-				'media_size' => $item -> size,
-				'media_extension' => $item -> extension,
-				'media_mime' => $item -> mime
+				'media_filename' 	  => $itemInfo -> filename,
+				'media_title' 		  => $itemInfo -> title,
+				'media_caption' 	  => $itemInfo -> caption,
+				'media_author' 		  => $itemInfo -> author,
+				'media_notice' 		  => $itemInfo -> notice,
+				'media_license' 	  => $itemInfo -> license,
+				'media_license_url'   => $itemInfo -> license_url,
+				'media_gear' 		  => $itemInfo -> gear,
+				'media_gear_settings' => $itemInfo -> gear_settings ?? [],
+				'media_size' 		  => $item -> size,
+				'media_extension' 	  => $item -> extension,
+				'media_mime' 		  => $item -> mime
 			]);
 
 
-			file_put_contents(CMS_SERVER_ROOT.DIR_MEDIATHEK.$item -> path.'/'. $mediaId .'.media-id', $mediaId);
+			file_put_contents($itemPath. $mediaId .'.media-id', $mediaId);
 
 
 
-			// TODO mediaid als datei erstellen
-		
+
+
+
+
 		}
 
+
+
+
+
+		
 
 
 
@@ -404,9 +419,9 @@ das für import
 
 	/**
 	 * 	Create multi-level array from the mediethek directory
-	 */
+
 	public function
-	getMediathekStructure(string $path, array &$destList, int $level)
+	getMediathekStructure(string $path, array &$destList, int $level)								........ not in use
 	{
 		$found = 0;
 		$directoryList = new DirectoryIterator(CMS_SERVER_ROOT.DIR_MEDIATHEK.$path);
@@ -432,12 +447,12 @@ das für import
 		}
 		return $found;
 	}
-
+	 */
 	/**
 	 * 	Create one-level array from getMediathekStructure-array and append left/right informationen
-	 */
+	
 	public function
-	getNestedSetStructure(array $structureList, array &$destList, int &$left, int &$right)
+	getNestedSetStructure(array $structureList, array &$destList, int &$left, int &$right)			........ not in use
 	{
 		foreach($structureList as $index => $item)
 		{
@@ -465,99 +480,6 @@ das für import
 			unset($item -> childs);
 		}
 	}
+ 	*/
 
-	public function
-	getMediathekItemsList(string $path, array &$destList)
-	{
-		$directoryList = new DirectoryIterator(CMS_SERVER_ROOT.DIR_MEDIATHEK.$path);
-		foreach($directoryList as $directory)
-		{
-			if($directory -> isDot())
-				continue;
-
-			if(!$directory -> isDir())
-				continue;
-
-			if(file_exists(CMS_SERVER_ROOT.DIR_MEDIATHEK.$path.$directory -> getFilename().'/info.json'))
-			{
-
-
-
-
-					$itemInfo = file_get_contents(CMS_SERVER_ROOT.DIR_MEDIATHEK.$path.$directory -> getFilename().'/info.json');
-
-					if($itemInfo === false)
-					{
-						// TODO ERR
-						continue;
-					}
-
-					$itemInfo = json_decode($itemInfo);
-
-					if($itemInfo === null)
-					{
-						// TODO ERR
-						continue;
-					}
-
-					if(!empty($itemInfo -> redirect))
-					{
-						continue;
-					}
-						
-					$mediathekFilelocation 	= CMS_SERVER_ROOT.DIR_MEDIATHEK.$path.$directory -> getFilename().'/'.$itemInfo -> filename;
-					$mediathekFileInfo 		= new SplFileInfo($mediathekFilelocation);
-
-					$mediathekItem  = new stdClass;
-					$mediathekItem -> path  	= $path.$directory -> getFilename();
-					$mediathekItem -> filename  	= $directory -> getFilename();
-					$mediathekItem -> name 	    	= $mediathekFileInfo -> getFilename();
-					$mediathekItem -> size 			= $mediathekFileInfo -> getSize();
-					$mediathekItem -> extension 	= $mediathekFileInfo -> getExtension();
-					$mediathekItem -> title 		= $itemInfo -> title ?? '';
-					$mediathekItem -> caption 		= $itemInfo -> caption ?? '';
-					$mediathekItem -> author 		= $itemInfo -> author ?? '';
-					$mediathekItem -> notice 		= $itemInfo -> notice ?? '';
-					$mediathekItem -> gear 			= $itemInfo -> gear ?? [];
-					$mediathekItem -> gear_settings = $itemInfo -> gear_settings ?? [];
-					$mediathekItem -> license 		= $itemInfo -> license ?? '';
-					$mediathekItem -> license_url 	= $itemInfo -> license_url ?? '';
-					$mediathekItem -> mime 			= mime_content_type($mediathekFilelocation);
-
-
-
-				$destList[] = $mediathekItem;
-
-			}
-			else
-			{
-
-				$this -> getMediathekItemsList($path.$directory -> getFilename().'/', $destList);
-
-			}
-			
-
-		}
-	}
-
-	private function
-	getMediaIdFromItem(string $itemPath)
-	{
-
-		$directoryList = new DirectoryIterator(CMS_SERVER_ROOT.DIR_MEDIATHEK.$itemPath);
-		foreach($directoryList as $directory)
-		{
-			if($directory -> isDot())
-				continue;
-
-			if($directory -> isDir())
-				continue;
-
-			if($directory -> getExtension() === 'media-id')
-				return $directory -> getBasename('.media-id');
-		}
-
-		return null;
-
-	}
 }

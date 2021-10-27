@@ -184,8 +184,7 @@
 
 							#panel-site-image-selector .imagebox-def-bg {
 
-							background: #445963;
-
+								background: #445963;
 								background-image: 
 									linear-gradient(transparent 11px, rgba(220,220,200,.8) 12px, transparent 12px),
 									linear-gradient(90deg, transparent 11px, rgba(220,220,200,.8) 12px, transparent 12px);
@@ -225,7 +224,8 @@
 								width:100%;
 								height:100%;
 								background-position:center center;
-								background-size:cover;
+								background-size:contain;
+    							background-repeat:no-repeat;
 
 								}
 
