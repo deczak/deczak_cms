@@ -21,12 +21,19 @@ class	controllerPages extends CController
 	logic(CDatabaseConnection &$_pDatabase, array $_rcaTarget, ?object $_xhrInfo, &$_logicResult) : bool
 	{
 		##	Set default target if not exists
-	
+
 		$controllerAction = $this -> getControllerAction_v2($_rcaTarget, $_xhrInfo, 'view');
+
+
+
+
+			// temp .. needs a rewrite ...
+		$rca = (isset($_rcaTarget[$this -> objectInfo -> object_id]) ? $_rcaTarget[$this -> objectInfo -> object_id] : 'nothing123');
+
 
 		##	Check user rights for this target
 
-		if(!$this -> detectRights($controllerAction))
+		if(!$this -> detectRights($rca))
 		{
 			if($_xhrInfo !== null && $_xhrInfo -> action === 'update-site') // update-site check benötigt weil im bearbeitungs modus zwei controller actions erzeugt werden wenn ein modul bearbeitet wird.
 			{
@@ -62,7 +69,7 @@ class	controllerPages extends CController
 
 		$enableEdit 	= $this -> existsUserRight('edit');
 		$enableDelete	= $enableEdit;
-		
+
 		$logicDone = false;
 		switch($controllerAction)
 		{

@@ -531,7 +531,7 @@
 
 						var	requestTarget	= CMS.SERVER_URL_BACKEND + 'pages/';
 
-						cmstk.callXHR(requestTarget, formData, onSuccessRetrieveAlternates, cmstk.onXHRError, this);
+						cmstk.callXHR(requestTarget, formData, onSuccessRetrieveAlternates, cmstk.onXHRError, this, 'indexAlt');
 					}
 
 					function
