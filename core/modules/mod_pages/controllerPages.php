@@ -22,13 +22,15 @@ class	controllerPages extends CController
 	{
 		##	Set default target if not exists
 
+
+
 		$controllerAction = $this -> getControllerAction_v2($_rcaTarget, $_xhrInfo, 'view');
 
 
-
-
 			// temp .. needs a rewrite ...
-		$rca = (isset($_rcaTarget[$this -> objectInfo -> object_id]) ? $_rcaTarget[$this -> objectInfo -> object_id] : 'nothing123');
+		$rca = (isset($_rcaTarget[$this -> objectInfo -> object_id]) ? $_rcaTarget[$this -> objectInfo -> object_id] : 'view');
+
+
 
 
 		##	Check user rights for this target
@@ -48,11 +50,15 @@ class	controllerPages extends CController
 			return false;
 		}
 
+
 		## false edit if module gets edited, probably this needs additional fixes
+
+
 
 		if($_xhrInfo !== null && $_xhrInfo -> isXHR && $_xhrInfo -> action !== 'update-site' && !empty($_GET['cms-edit-page-node']))
 			$_xhrInfo -> action = 'view';
 		
+
 
 		if($_xhrInfo !== null && $_xhrInfo -> isXHR && $_xhrInfo -> objectId !== $this -> objectInfo -> object_id)
 			$_xhrInfo -> action = 'view';
@@ -70,9 +76,11 @@ class	controllerPages extends CController
 		$enableEdit 	= $this -> existsUserRight('edit');
 		$enableDelete	= $enableEdit;
 
+
 		$logicDone = false;
 		switch($controllerAction)
 		{
+			case 'xhr_view':
 			case 'view': $logicDone = $this -> logicView($_pDatabase, $_logicResult, $enableEdit, $enableDelete); break;
 				
 			case 'create': $logicDone = $this -> logicXHRCreate($_pDatabase); break;
