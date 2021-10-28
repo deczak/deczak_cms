@@ -31,13 +31,21 @@ class	cmsModal
 	/**
 	 * 	Creates the required nodes for the modal
 	 */
-	create(nodeContent)
+	create(nodeContent, extInnerStyles = null)
 	{		
 		this.nodeModal = document.createElement('div');
 		this.nodeModal.classList.add('cms-modal', 'cms-modal-id-');
 
 		let	nodeModalChild = document.createElement('div');
 		nodeModalChild.classList.add('cms-modal-inner');
+
+		if(extInnerStyles !== null)
+		{
+			for(let styleKey in extInnerStyles)
+			{
+				nodeModalChild.style[styleKey] = extInnerStyles[styleKey];
+			}
+		}
 
 		if(this.modalTitle.trim().length != 0)
 		{
