@@ -450,7 +450,7 @@ class 	MEDIATHEK
 				$mediathekItem -> filepath  	= $path.$directory -> getFilename();
 				$mediathekItem -> filename  	= $directory -> getFilename();
 				$mediathekItem -> filenameBase  = $mediathekFileInfo -> getBasename('.'. $mediathekFileInfo -> getExtension());
-				$mediathekItem -> extension 	= $mediathekFileInfo -> getExtension();
+				$mediathekItem -> extension 	= strtolower($mediathekFileInfo -> getExtension());
 				$mediathekItem -> mime 			= mime_content_type($mediathekFilelocation);
 				$mediathekItem -> size 			= $mediathekFileInfo -> getSize();
 
