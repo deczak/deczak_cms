@@ -15,6 +15,7 @@ define('DIR_TEMP'	 	, 'temp/');
 define('DIR_LANGUAGES' 	, 'lang/');
 define('DIR_DATA' 		, 'data/');
 define('DIR_PUBLIC' 	, 'public/');
+define('DIR_BACKEND' 	, 'backend/');
 define('DIR_CERT' 		, 'cert/');
 define('DIR_CRON' 		, 'cron/');
 define('DIR_MEDIATHEK'	, 'mediathek/');

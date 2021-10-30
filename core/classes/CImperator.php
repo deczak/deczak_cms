@@ -30,11 +30,11 @@ class	CImperator
 
 
 	public function
-	logic(&$_pPageRequest, $_modules, array $_rcaTarget, bool $_isBackendMode, CUserRights &$_pUserRights) : void
+	logic(&$_pPageRequest, array $_rcaTarget, bool $_isBackendMode, CUserRights &$_pUserRights) : void
 	{
 		if($_isBackendMode)
 		{
-			if(!$this -> logic_backend($_pPageRequest, $_modules, $_rcaTarget))
+			if(!$this -> logic_backend($_pPageRequest, $_rcaTarget))
 			{
 				if(!$_pPageRequest -> isEditMode)
 					return;		
@@ -51,11 +51,11 @@ class	CImperator
 			}
 		}		
 
-		$this -> logic_public($_pPageRequest, $_modules, $_rcaTarget);
+		$this -> logic_public($_pPageRequest, $_rcaTarget);
 	}
 
 	private function
-	logic_public(&$_pPageRequest, $_modules, array $_rcaTarget)
+	logic_public(&$_pPageRequest, array $_rcaTarget)
 	{
 		if($_pPageRequest -> responseCode !== 200)
 		{	
@@ -69,9 +69,10 @@ class	CImperator
 		if(!empty($_pPageRequest -> objectsList))
 		foreach($_pPageRequest -> objectsList as $_objectIndex =>  $_object)
 		{	
+			$_modules = CModules::instance();
 			$module = $_modules -> loadModule((int)$_object -> module_id, $_pPageRequest -> page_language);
 
-			if( $module === false) continue;
+			if( $module === null) continue;
 
 			$_logicResult =	false;
 
@@ -94,7 +95,7 @@ class	CImperator
 	}
 
 	private function
-	logic_backend(&$_pPageRequest, $_modules, array $_rcaTarget) : bool
+	logic_backend(&$_pPageRequest, array $_rcaTarget) : bool
 	{
 		if($_pPageRequest -> responseCode !== 200)
 		{	
@@ -130,9 +131,10 @@ class	CImperator
 
 
 
+			$_modules = CModules::instance();
 				$module = $_modules -> loadModule((int)$_pURLVariables -> getValue("cms-insert-module"), $_pPageRequest -> page_language);
 
-				if( $module === false)
+				if( $module === null)
 				{
 					$_bValidationErr =	true;
 					$_bValidationMsg =	'Module is unknown';					
@@ -221,11 +223,11 @@ class	CImperator
 		foreach($_pPageRequest -> objectsList as $_objectKey =>  $_object)
 		{
 			
-		#	$_iModuleIndex = $_modules -> isLoaded( $_object -> module_id );
 
+			$_modules = CModules::instance();
 			$module = $_modules -> loadModule((int)$_object -> module_id, $_pPageRequest -> page_language);
 
-			if( $module === false) continue;
+			if( $module === null) continue;
 
 
 			if($xhrInfo !== null && $xhrInfo -> isXHR)

@@ -44,8 +44,16 @@ class CLog extends CSingleton
 	 * 	@param mixed $value A string or object/array for the log file.
 	 */
 	public static function
-	add($value)
+	add($value, bool $_alsoErrorLog = false)
 	{
+		if($_alsoErrorLog && CFG::GET() -> ERROR_SYSTEM -> ERROR_FILE -> ENABLED)
+		{
+			if(is_object($value) || is_array($value))
+				error_log($value);	
+			else
+				error_log($value);	
+		}
+
 		if(!CFG::GET() -> ERROR_SYSTEM -> LOG_FILE -> ENABLED)
 			return;
 

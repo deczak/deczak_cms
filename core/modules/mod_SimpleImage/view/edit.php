@@ -6,7 +6,7 @@ $image_url = ($image_url !== null ? $image_url .'?binary&size=large' : $image_ur
 
 ?>
 
-<div style="position:relative; padding-top:<?= ($object -> params -> height ?? '45') . ($object -> params -> height_unit ?? '%'); ?>;" id="simple-image-controll">
+<div style="position:relative; padding-top:<?= ($object -> params -> height ?? '45') . ($object -> params -> height_unit ?? '%'); ?>;" class="simple-image-controll">
 
 	<div style="position:absolute; top:0; left:0; height:100%; width:100%;" class="simple-image-div-inner">
 
@@ -18,7 +18,7 @@ $image_url = ($image_url !== null ? $image_url .'?binary&size=large' : $image_ur
 
 		<div style="display:flex; align-items:center;background-color:grey; color:white;">
 			<input type="hidden"  name="simple-image-id" value="<?= $object -> params -> id ?? 38; ?>">
-			<button class="ui button icon labeled button-select-mediathek-iteem" style="border-radius:0px;" id="trigger-simple-image-select"><span><i class="far fa-image"></i></span>Select Image</button> 
+			<button class="ui button icon labeled button-select-mediathek-iteem" style="border-radius:0px;" id="trigger-simple-image-select"><span style="pointer-events:none;"><i class="far fa-image"></i></span>Select Image</button> 
 		</div>
 
 		<div style="display:flex; align-items:center;background-color:grey; color:white;">

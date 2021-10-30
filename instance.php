@@ -197,8 +197,7 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 
 ##	M O D U L E S   L O A D E R	
 
-	$_pModules		 =	CModules::instance();
-	$_pModules		->	initialize($pDBInstance -> getConnection(CFG::GET() -> MYSQL -> PRIMARY_DATABASE), $pUserRights);
+	CModules::initialize($pDBInstance -> getConnection(CFG::GET() -> MYSQL -> PRIMARY_DATABASE), $pUserRights);
 
 ##	I M P E R A T O R
 
@@ -217,7 +216,7 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 	define('URL_LANG_PRREFIX', ((CFG::GET() -> LANGUAGE -> DEFAULT_IN_URL || $pageRequest -> page_language !== CLanguage::instance() -> getDefault()) ? $pageRequest -> page_language .'/' : '') );
 
 	$pImperator	 =	new CImperator( $pDBInstance -> getConnection(CFG::GET() -> MYSQL -> PRIMARY_DATABASE) );
-	$pImperator	->	logic($pageRequest , $_pModules, $_rcaTarget, CMS_BACKEND, $pUserRights);
+	$pImperator	->	logic($pageRequest, $_rcaTarget, CMS_BACKEND, $pUserRights);
 
 ##	H T M L   D O C U M E N T
 
@@ -226,3 +225,5 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 ##	V I E W 
 
 	$_pHTML -> openDocument($pImperator, $pageRequest);
+
+#CModules::generateResources();

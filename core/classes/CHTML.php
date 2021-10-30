@@ -88,6 +88,12 @@ class	CHTML
 		foreach($template -> include_head as $_file)
 			@include $templatePath . $_file;	
 
+		if(!CMS_BACKEND && file_exists(CMS_SERVER_ROOT.DIR_PUBLIC .'css/cms.css'))
+			echo "\t<link href=\"".CMS_SERVER_URL.DIR_PUBLIC ."css/cms.css\" rel=\"stylesheet\" title=\"default\" media=\"screen\">";
+
+		if(CMS_BACKEND && file_exists(CMS_SERVER_ROOT.DIR_BACKEND .'css/cms.css'))
+			echo "\t<link href=\"".CMS_SERVER_URL.DIR_BACKEND ."css/cms.css\" rel=\"stylesheet\" title=\"default\" media=\"screen\">";
+
 		echo "</head>\r\n";
 
 		if(CMS_BACKEND)			
@@ -124,14 +130,14 @@ class	CHTML
 						}
 
 						break;						
-		}
+		} 
 
-		##	temporary solution for js only
-		
-		/*
-			Später durch Klasse ersetzen die in CModules die Pfade zu den Dateien erfasst und eine sammel js/css erstellt 
-		*/
-		
+		if(!CMS_BACKEND && file_exists(CMS_SERVER_ROOT.DIR_PUBLIC .'js/cms.js'))
+			echo "\t<script src=\"". CMS_SERVER_URL.DIR_PUBLIC ."js/cms.js\"></script>";
+
+		if(CMS_BACKEND && file_exists(CMS_SERVER_ROOT.DIR_BACKEND .'js/cms.js'))
+			echo "\t<script src=\"". CMS_SERVER_URL.DIR_BACKEND ."js/cms.js\"></script>";
+					
 		echo '<script>';
 		foreach($modules -> loadedList as $loadedModule)
 		{
@@ -139,6 +145,15 @@ class	CHTML
 			{
 				foreach($loadedModule -> includes as $includeFile)
 				{
+					if(($includeFile -> collect ?? false))
+						continue;
+
+					if(CMS_BACKEND && !($includeFile -> backend ?? false))
+						continue;
+
+					if(!CMS_BACKEND && !($includeFile -> frontend ?? false))
+						continue;
+
 					switch($loadedModule -> module_type)
 					{
 						case 'core'   : include_once CMS_SERVER_ROOT . DIR_CORE . DIR_MODULES . $loadedModule -> module_location .'/'. $includeFile -> file; break;
@@ -148,7 +163,6 @@ class	CHTML
 			}
 		}
 		echo '</script>';
-
 	
 		##	Page edit
 		if(CMS_BACKEND && $pageRequest -> page_template !== CMS_BACKEND_TEMPLATE)

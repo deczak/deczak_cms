@@ -9,48 +9,70 @@ require_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelPageHeader.php';
 
 require_once 'CSingleton.php';
 
-class	CModules extends CSingleton
+/**
+ * 	This class gathers and loads information about modules. Also contains function for installing and removing modules.
+ * 
+ * 	This is a singleton class.
+ */
+class CModules extends CSingleton
 {
 	public 	$modelModules;
 	public	$modulesList;
 	public	$loadedList;
-
 	private $m_pUserRights;
 
-	public function
+	/**
+	 * 	Initialize function to setup the log system
+	 * 
+	 * 	@param CDatabaseConnection $_dbConnection Database Connection object
+	 * 	@param CUserRights $_pUserRights User Rights object
+	 * 	@return CModules instance
+	 */
+	public static function 
 	initialize(?CDatabaseConnection &$_dbConnection, CUserRights &$_pUserRights)
 	{
+		$instance  = static::instance();
+
 		if($_dbConnection === null)
 			return; 
 
-		$this -> modelModules	 =	new modelModules();
-		$this -> modelModules	->	load($_dbConnection);
-		$this -> modulesList 	 =	&$this -> modelModules -> getResult();
+		$instance -> modelModules	 =	new modelModules();
+		$instance -> modelModules	->	load($_dbConnection);
+		$instance -> modulesList 	 =	&$instance -> modelModules -> getResult();
 
-		$this -> loadedList		 =	[];
+		$instance -> loadedList		 =	[];
 
-		$this -> m_pUserRights	 = &$_pUserRights;
+		$instance -> m_pUserRights	 = &$_pUserRights;
+
+		CLog::add('CModules::initialize -- Initialized CModules Instance');
+
+		return $instance;
 	}
 
 	/**
-	 *	Loads the Module by given moduleID if not already loaded 
+	 *	Loads the Module by given moduleID if not already loaded. This Function includes the Module controller File and read the Language and json Files
+	 *
+	 *	@param int $_moduleId The ID from the requested module
+	 *	@param string $_pageLanguage The 2-letter language code for the requested language.
+	 *	@return object Returns a valid module object with his data, otherwise NULL
 	 */
 	public function
-	loadModule(int $_moduleId, string $_pageLanguage)
+	loadModule(int $_moduleId, string $_pageLanguage) : ?object
 	{
 		$moduleInstance = NULL;
 		$moduleIndex = false;
 
-
+		CLog::add('CModules::loadModule -- Load defined Module with ID '. $_moduleId .' and language '.$_pageLanguage);
 
 		if(!$this -> getModule($_moduleId, $moduleInstance, $moduleIndex))
 		{
-			return false;
+			CLog::add('CModules::loadModule -- Aborted, could not find module with ID '. $_moduleId, true);
+			return null;
 		}
 
 		if($moduleInstance -> is_active === 0)
 		{
-			return false;
+			return null;
 		}
 
 		if(class_exists($moduleInstance -> module_controller))
@@ -83,7 +105,8 @@ class	CModules extends CSingleton
 
 							if($moduleData === false)
 							{
-								return false;
+								CLog::add('CModules::loadModule -- Unable to retrieve modul info for module-ID '. $_moduleId, true);
+								return null;
 							}
 
 							$moduleData = json_decode(json_encode($moduleData));
@@ -107,7 +130,8 @@ class	CModules extends CSingleton
 
 							if($moduleData === false)
 							{
-								return false;
+								CLog::add('CModules::loadModule -- Unable to retrieve modul info for module-ID '. $_moduleId, true);
+								return null;
 							}
 
 							$moduleData = json_decode(json_encode($moduleData));
@@ -122,11 +146,19 @@ class	CModules extends CSingleton
 							return $this -> modulesList[$moduleIndex];
 		}
 
-		return false;
+		return null;
 	}
 
+	/**
+	 * 	Get a module info from the list of installed modules
+	 * 
+	 * 	@param int The module ID
+	 * 	@param object A reference where the module info will be written
+	 * 	@param int A reference where the list index will be written
+	 * 	@return bool Return true if a module found, otherwise false
+	 */
 	public function
-	getModule(int $_moduleId, &$_moduleIinstance, int &$_moduleIndex)
+	getModule(int $_moduleId, ?object &$_moduleIinstance, int &$_moduleIndex) : bool
 	{
 		$modulesCount = count($this -> modulesList);
 
@@ -144,6 +176,14 @@ class	CModules extends CSingleton
 
 		return false;
 	}
+
+
+
+
+
+
+
+
 
 	public function
 	getModuleByController(string $_moduleController, &$_moduleIinstance)
@@ -414,6 +454,15 @@ class	CModules extends CSingleton
 	existsRights(int $_moduleId, string $_rightsId)
 	{
 		return $this -> m_pUserRights -> existsRight($_moduleId, $_rightsId);
+	}
+
+	public static function
+	generateResources()
+	{
+		$instance  = static::instance();
+
+		$modulesResources = new CModulesResources;
+		$modulesResources -> generateResources($instance->getModules(true));
 	}
 }
 
@@ -1229,4 +1278,136 @@ class CModulesInstallS2 // Module Sheme 2
 	}
 }
 
-?>
+
+/**
+ * 	This class create modules releated resources of CSS and JS Files based on module.json information.
+ */
+class CModulesResources
+{
+	public function
+	__construct()
+	{
+	}	
+
+	public function
+	generateResources(array $_modulesList)
+	{
+		if(!file_exists(CMS_SERVER_ROOT.DIR_PUBLIC .'css'))		mkdir(CMS_SERVER_ROOT.DIR_PUBLIC .'css');
+		if(!file_exists(CMS_SERVER_ROOT.DIR_PUBLIC .'js'))		mkdir(CMS_SERVER_ROOT.DIR_PUBLIC .'js');
+
+		if(!file_exists(CMS_SERVER_ROOT.DIR_BACKEND .'css'))	mkdir(CMS_SERVER_ROOT.DIR_BACKEND .'css');
+		if(!file_exists(CMS_SERVER_ROOT.DIR_BACKEND .'js'))		mkdir(CMS_SERVER_ROOT.DIR_BACKEND .'js');
+
+		$hFileCSSFrontend 	 = fopen(CMS_SERVER_ROOT.DIR_PUBLIC .'css/cms.css', "a");
+		$hFileCSSBackend 	 = fopen(CMS_SERVER_ROOT.DIR_BACKEND .'css/cms.css', "a");
+
+		$hFileJSFrontend 	 = fopen(CMS_SERVER_ROOT.DIR_PUBLIC .'js/cms.js', "a");
+		$hFileJSBackend 	 = fopen(CMS_SERVER_ROOT.DIR_BACKEND .'js/cms.js', "a");
+
+		if(flock($hFileCSSFrontend, LOCK_EX) && flock($hFileCSSBackend, LOCK_EX) && flock($hFileJSFrontend, LOCK_EX) && flock($hFileJSBackend, LOCK_EX))
+		{	
+			ftruncate($hFileCSSFrontend, 0);
+			ftruncate($hFileCSSBackend, 0);
+			ftruncate($hFileJSFrontend, 0);
+			ftruncate($hFileJSBackend, 0);
+		
+			foreach($_modulesList as $module)
+			{
+				switch($module -> module_type) 
+				{
+					case 'core':	
+
+						$moduleConfig 	= file_get_contents( CMS_SERVER_ROOT.DIR_CORE.DIR_MODULES. $module -> module_location .'/module.json');
+						$moduleConfig 	= ($moduleConfig !== false ? json_decode($moduleConfig) : [] );	
+
+						$pModulesInstall = new CModulesInstall;
+						$moduleData = $pModulesInstall -> getMmoduleData($moduleConfig, $module -> module_location, $module -> module_type);
+
+						if($moduleData === false)
+							continue 2;
+						
+						$moduleData = json_decode(json_encode($moduleData));
+						break;
+									
+					case 'mantle':
+
+						$moduleConfig 	= file_get_contents( CMS_SERVER_ROOT.DIR_MANTLE.DIR_MODULES. $module -> module_location .'/module.json');
+						$moduleConfig 	= ($moduleConfig !== false ? json_decode($moduleConfig) : [] );	
+
+						$pModulesInstall = new CModulesInstall;
+						$moduleData = $pModulesInstall -> getMmoduleData($moduleConfig, $module -> module_location, $module -> module_type);
+
+						if($moduleData === false)
+							continue 2;
+						
+						$moduleData = json_decode(json_encode($moduleData));
+						break;
+				}
+
+				if(empty($moduleData -> includes))
+					continue;
+
+				foreach($moduleData -> includes as $include)
+				{
+					if(!$include -> collect)
+						continue;
+
+					switch($moduleData -> module -> module_type) 
+					{
+						case 'core':
+
+							$moduleLocation = CMS_SERVER_ROOT.DIR_CORE.DIR_MODULES. $module -> module_location .'/';
+							break;
+
+						case 'mantle':	
+
+							$moduleLocation = CMS_SERVER_ROOT.DIR_MANTLE.DIR_MODULES. $module -> module_location .'/';
+							break;
+
+						default: continue 2;
+					}
+
+					$resFileData = file_get_contents($moduleLocation . $include -> file);
+
+					switch($include -> type)
+					{
+						case 'script':
+
+							if($include -> frontend)
+								fwrite($hFileJSFrontend, "\r\n" . $resFileData);	
+
+							if($include -> backend)
+								fwrite($hFileJSBackend, "\r\n" . $resFileData);	
+
+							break;
+
+						case 'style':
+
+							if($include -> frontend)
+								fwrite($hFileCSSFrontend, "\r\n" . $resFileData);	
+
+							if($include -> backend)
+								fwrite($hFileCSSBackend, "\r\n" . $resFileData);	
+
+							break;
+					}
+				}
+			}
+
+			fflush($hFileCSSFrontend); 
+			fflush($hFileCSSBackend); 
+			fflush($hFileJSFrontend); 
+			fflush($hFileJSBackend); 
+
+			flock($hFileCSSFrontend, LOCK_UN); 
+			flock($hFileCSSBackend, LOCK_UN); 
+			flock($hFileJSFrontend, LOCK_UN); 
+			flock($hFileJSBackend, LOCK_UN); 
+		}
+	
+		fclose($hFileCSSFrontend);
+		fclose($hFileCSSBackend);
+		fclose($hFileJSFrontend);
+		fclose($hFileJSBackend);
+	}
+}
