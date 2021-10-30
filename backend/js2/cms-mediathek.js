@@ -25,9 +25,10 @@ class	cmsMediathek
 		this.requestItems();
 	}
 
-	setEventNameOnSelected(eventName)
+	setEventNameOnSelected(eventName, sourceNode = null)
 	{
 		this.eventNameOnSelected = eventName;
+		this.eventSourceNode     = sourceNode;
 	}
 
 	requestItems()
@@ -268,7 +269,10 @@ class	cmsMediathek
 
 				case 'item-file':
 
-							targetNode.dispatchEvent(new CustomEvent(srcInstance.eventNameOnSelected, { detail: targetNode.itemInfo, bubbles: true  }));
+
+
+
+							targetNode.dispatchEvent(new CustomEvent(srcInstance.eventNameOnSelected, { detail: { file: targetNode.itemInfo, sourceNode: srcInstance.eventSourceNode }, bubbles: true  }));
 
 					break;
 

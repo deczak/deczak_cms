@@ -160,14 +160,14 @@
 
 							function testIt(event)
 							{
-								if(event.detail === null || event.detail.path.length === 0)
+								if(event.detail.file === null || event.detail.file.path.length === 0)
 									return;
 								
 
 								let previewBox = document.getElementById('panel-site-image-selector').querySelector('.imagebox-preview');
-									previewBox.style.backgroundImage = "url('"+ CMS.SERVER_URL + "mediathek/" + event.detail.path +"?binary&size=small')";
+									previewBox.style.backgroundImage = "url('"+ CMS.SERVER_URL + "mediathek/" + event.detail.file.path +"?binary&size=small')";
 								
-								document.getElementById('panel-site-image-id').value = event.detail.media_id;
+								document.getElementById('panel-site-image-id').value = event.detail.file.media_id;
 							}
 
 							window.addEventListener('test-mediathek-on-selected', testIt);

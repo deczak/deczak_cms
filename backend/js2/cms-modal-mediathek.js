@@ -9,7 +9,7 @@ class	cmsModalMediathek extends cmsModal
 		this.eventNameOnSelected = null;
 	}
 
-	open(viewMode, workMode)
+	open(viewMode, workMode, sourceNode = null)
 	{
 		let srcInstance = this;
 
@@ -26,7 +26,7 @@ class	cmsModalMediathek extends cmsModal
 		}
 
 		let	mediathek = new cmsMediathek(content);
-			mediathek.setEventNameOnSelected(this.eventNameOnSelected);
+			mediathek.setEventNameOnSelected(this.eventNameOnSelected, sourceNode);
 			mediathek.init(viewMode, workMode, this.rootPath);
 
 		content.style.overflowY = 'scroll';
