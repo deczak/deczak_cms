@@ -16,3 +16,12 @@ M_BEENV_SESSION				= Session Einstellungen
 M_BEENV_SESSION_SPAMTIMEOUT	= Zeitlimit des Zugriffsschutz gegen Massenzugriff in Sekunden
 M_BEENV_SESSION_SPAMLIMIT	= Session Anzahl des Zugriffsschutz gegen Massenzugriff
 M_BEENV_SESSION_TIMEOUT		= Gültigkeitsdauer der Session in Sekunden
+
+
+M_BEENV_ERROR				= Error Reporting
+M_BEENV_ERROR_ENABLE_EFILE	= Enable error log file for PHP related errors.
+M_BEENV_ERROR_ENABLE_LFILE	= Enable process log file. (This should only be used in development mode)
+M_BEENV_ERROR_LOG_MODE		= Write mode for logfile. single file only or one file per session.
+M_BEENV_ERROR_LOG_MODE_1	= Single File
+M_BEENV_ERROR_LOG_MODE_2	= Session File
+M_BEENV_ERROR_CLEAR			= Deletes all log and error files in log directory.

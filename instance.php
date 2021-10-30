@@ -14,8 +14,18 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 
 ##	P H P   E R R O R   R E P O R T I N G
 
-	if(PHP_ERROR_REPORTING) error_reporting(E_ALL);
-	ini_set('display_errors', PHP_ERROR_REPORTING);
+	if(CFG::GET() -> ERROR_SYSTEM -> ERROR_FILE -> ENABLE || PHP_ERROR_DISPLAY)
+		error_reporting(E_ALL);
+	else
+		error_reporting(0);
+
+	ini_set('display_errors', PHP_ERROR_DISPLAY);
+
+##	L O G   S Y S T E M
+
+	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CLog.php';
+
+	CLog::initialize();
 
 ##	I N C L U D E   C L A S S E S   &   F U N C T O N S	
 
@@ -51,11 +61,7 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 
 ##	M E S S A G E   S Y S T E M
 
-	//	CMessages is a singleton class
-	//	Collects messages for logging or print them to the screen for different reason
-
-	$_pMessages		 =	CMessages::instance();
-	$_pMessages		->	initialize(CMS_PROTOCOL_REPORTING, CMS_DEBUG_REPORTING);
+	CMessages::initialize();
 
 ##	S Y S T E M   M A I L E R
 
@@ -165,8 +171,7 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 						}
 						else
 						{	##	Missing data for login
-					
-							$_pMessages -> 	addMessage( $_pLanguage -> getString('ERR_CR_LOGINDTAMM') , MSG_WARNING, '', true);							
+							CMessages::add($_pLanguage -> getString('ERR_CR_LOGINDTAMM') , MSG_WARNING, '', true);							
 						}
 						break;
 

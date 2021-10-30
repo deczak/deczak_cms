@@ -61,8 +61,10 @@ class	controllerEnvironment extends CController
 
 			case 'xhr_edit_remoteuser': $logicDone = $this -> logicXHREditRemoteUser($_pDatabase);	break;	
 			case 'xhr_edit_backend': 	$logicDone = $this -> logicXHREditBackend($_pDatabase);	break;	
+			case 'xhr_edit_error': 		$logicDone = $this -> logicXHREditError($_pDatabase);	break;	
 			case 'xhr_update_htaccess': $logicDone = $this -> logicXHRUpdateHTAccess($_pDatabase);	break;	
 			case 'xhr_update_sitemap': 	$logicDone = $this -> logicXHRUpdateSitemap($_pDatabase);	break;	
+			case 'xhr_error_clear': 	$logicDone = $this -> logicXHRClearError($_pDatabase);	break;	
 		
 		
 		}
@@ -89,7 +91,7 @@ class	controllerEnvironment extends CController
 	}
 
 	private function
-	logicXHREditRemoteUser(CDatabaseConnection &$_dbConnection, $_isXHRequest = false)
+	logicXHREditRemoteUser(CDatabaseConnection &$_dbConnection) : bool
 	{	
 		$systemId = $this -> querySystemId();
 
@@ -140,7 +142,7 @@ class	controllerEnvironment extends CController
 	}
 
 	private function
-	logicXHREditBackend(CDatabaseConnection &$_dbConnection, $_isXHRequest = false)
+	logicXHREditBackend(CDatabaseConnection &$_dbConnection) : bool
 	{	
 		$systemId = $this -> querySystemId();
 
@@ -170,8 +172,74 @@ class	controllerEnvironment extends CController
 		return false;
 	}
 
+
+
 	private function
-	logicXHRUpdateHTAccess(CDatabaseConnection &$_dbConnection, $_isXHRequest = false)
+	logicXHREditError(CDatabaseConnection &$_dbConnection) : bool
+	{	
+		$systemId = $this -> querySystemId();
+
+		if($systemId !== false)
+		{	
+			$validationErr 	= false;
+			$validationMsg 	= '';
+			$responseData 	= [];
+
+			$_pFormVariables	 =	new CURLVariables();
+			$_request		 =	[];
+			$_request[] 	 = 	[	"input" => "enable_error_file", "validate" => "strip_tags|strip_whitespaces|cast_bool|!empty", "use_default" => true, "default_value" => false  ];
+			$_request[] 	 = 	[	"input" => "enable_log_file", "validate" => "strip_tags|strip_whitespaces|cast_bool|!empty", "use_default" => true, "default_value" => false  ];
+			$_request[] 	 = 	[	"input" => "error_log_file_mode", "validate" => "strip_tags|strip_whitespaces|cast_int|!empty", "use_default" => true, "default_value" => 1  ];
+			$_pFormVariables -> retrieve($_request, false, true);
+			$_aFormData		 = $_pFormVariables ->getArray();
+
+			$configuration = file_get_contents(CMS_SERVER_ROOT.DIR_DATA.'configuration.json');
+			$configuration = json_decode($configuration);
+
+			$configuration -> ERROR_SYSTEM -> ERROR_FILE -> ENABLED	 = $_aFormData['enable_error_file'];
+			$configuration -> ERROR_SYSTEM -> LOG_FILE   -> ENABLED	 = $_aFormData['enable_log_file'];
+			$configuration -> ERROR_SYSTEM -> LOG_FILE   -> LOG_MODE = $_aFormData['error_log_file_mode'];
+
+			$configuration = json_encode($configuration, JSON_FORCE_OBJECT | JSON_UNESCAPED_UNICODE | JSON_HEX_QUOT);
+			file_put_contents(CMS_SERVER_ROOT.DIR_DATA.'configuration.json', $configuration);
+
+			tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
+		}
+
+		return false;
+	}
+
+	private function
+	logicXHRClearError(CDatabaseConnection &$_dbConnection) : bool
+	{	
+		$systemId = $this -> querySystemId();
+
+		if($systemId !== false)
+		{	
+			$validationErr 	= false;
+			$validationMsg 	= '';
+			$responseData 	= [];
+
+
+			$directoryList = new DirectoryIterator(CMS_SERVER_ROOT.DIR_LOG);
+			foreach($directoryList as $directory)
+			{
+				if(!$directory -> isFile())
+					continue;
+
+				unlink($directory -> getPathname());
+			}
+		
+			tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
+		}
+
+		return false;
+	}
+
+
+
+	private function
+	logicXHRUpdateHTAccess(CDatabaseConnection &$_dbConnection) : bool
 	{	
 		$systemId = $this -> querySystemId();
 
@@ -194,7 +262,7 @@ class	controllerEnvironment extends CController
 	}
 
 	private function
-	logicXHRUpdateSitemap(CDatabaseConnection &$_dbConnection, $_isXHRequest = false)
+	logicXHRUpdateSitemap(CDatabaseConnection &$_dbConnection) : bool
 	{	
 		$systemId = $this -> querySystemId();
 

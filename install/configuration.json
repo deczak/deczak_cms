@@ -42,5 +42,16 @@
 	"TEMPLATE"		:	{
 							"DEFAULT_TEMPLATE"	: "default",
 							"ERROR_TEMPLATE"	: "default"
+						},
+	"ERROR_SYSTEM"	:	{
+							"ERROR_FILE"	:	{
+													"ENABLED"		: false
+												},
+							"LOG_FILE"	:		{
+													"ENABLED"		: false,
+													"LOG_MODE"		: 1
+												}
 						}
+
+
 }

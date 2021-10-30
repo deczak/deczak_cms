@@ -17,9 +17,7 @@
 
 ##	E R R O R   R E P O R T I N G   &   D E B U G
 
-	define('PHP_ERROR_REPORTING',true);
-	define('CMS_PROTOCOL_REPORTING',false);
-	define('CMS_DEBUG_REPORTING',false);
+	define('PHP_ERROR_DISPLAY',true);
 	define('CMS_BENCHMARK',false);
 
 ##	B A C K E N D   N A M E
@@ -106,6 +104,7 @@ class	CFG extends CSingleton
 	##	configuration file
 	protected	$ERROR_PAGES;
 	protected	$USER_SYSTEM;
+	protected	$ERROR_SYSTEM;
 	protected	$BACKEND;
 	protected	$SESSION;
 	protected	$SYSTEM_MAILER;
@@ -125,6 +124,7 @@ class	CFG extends CSingleton
 
 		$this -> ERROR_PAGES	= $configuration -> ERROR_PAGES;
 		$this -> USER_SYSTEM	= $configuration -> USER_SYSTEM;
+		$this -> ERROR_SYSTEM	= $configuration -> ERROR_SYSTEM;
 		$this -> BACKEND		= $configuration -> BACKEND;
 		$this -> SESSION 		= $configuration -> SESSION;
 		$this -> SYSTEM_MAILER	= $configuration -> SYSTEM_MAILER;
@@ -139,5 +139,3 @@ class	CFG extends CSingleton
 }
 
 CFG::instance() -> initialize();	
-
-?>

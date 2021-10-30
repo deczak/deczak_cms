@@ -5,65 +5,72 @@ define('MSG_WARNING',2);
 define('MSG_OK',3);
 define('MSG_NOTIFY',4);
 define('MSG_LOG',9);
-define('MSG_DEBUG',10);
+
+define('MSG_DEBUG',10);		// deprecated
 
 require_once 'CSingleton.php';
 
+/**
+ * 	This class handles the messages for the user. 
+ * 
+ * 	This is a singleton class.
+ */
 class	CMessages extends CSingleton
 {
-	private	$m_bProtocolReporting;
-	private	$m_bDebugReporting;
 	private	$m_LogDestination;
 	private	$m_aStorage;
 
-	public function
-	initialize(bool $_protocolReporting = false, bool $_debugReporting = false)
+	/**
+	 * 	Initialize function to setup the message system
+	 */
+	public static function 
+	initialize()
 	{
-		$this -> m_bProtocolReporting 	= $_protocolReporting;
-		$this -> m_bDebugReporting 		= $_debugReporting;
-		$this -> m_aStorage				= [];
-
-		if($_protocolReporting) $this -> initMessagesLog();
-		return true;
+		$instance  = static::instance();
+		$instance -> m_aStorage				= [];
 	}
 
-	public function
-	addMessage(string $_msgContent, int $_msgType = MSG_OK, string $_msgTarget = '', bool $_toLogFile = false)
+	/**
+	 * 	Adds a message to the message system for the user.
+	 * 
+	 * 	@param string $_msgContent The message string
+	 * 	@param int $_msgType The message type, a named constant that begins with MSG_
+	 * 	@param string $_msgTarget Optional the name of that section that should only receive the info
+	 * 	@param bool $_msgContent Boolean switch for print the message into the log file. Log System needs to be enabled.
+	 */
+	public static function
+	add(string $_msgContent, int $_msgType = MSG_OK, string $_msgTarget = '', bool $_toLogFile = false)
 	{
-		if(strlen($_msgContent) == 0) return false;
-		if(!$this -> m_bProtocolReporting && $_msgType === MSG_LOG && !$_toLogFile) return false;
-		if(!$this -> m_bDebugReporting && $_msgType === MSG_DEBUG) return false;
+		$instance  = static::instance();
+
+		if(strlen($_msgContent) == 0) return;
 		switch($_msgType)
 		{
 			case MSG_ERROR:
 			case MSG_WARNING:
 			case MSG_OK:
-			case MSG_NOTIFY:	$this -> m_aStorage[$_msgType][] = new CMessagesItem($_msgType, $_msgTarget, $_msgContent);
+			case MSG_NOTIFY:	$instance -> m_aStorage[$_msgType][] = new CMessagesItem($_msgType, $_msgTarget, $_msgContent);
+
 								if(!$_toLogFile) break;
 
-			case MSG_LOG:		if(!$this -> m_bProtocolReporting) break;
-								$_hFile = fopen($this -> m_LogDestination, "a");
-								while(true)
-								{
-									if (flock($_hFile, LOCK_EX))
-									{
-										fwrite($_hFile, "\t". date("H:i:s") ."  ::  ". $_msgContent ."\r\n");
-										fflush($_hFile); 
-										flock($_hFile, LOCK_UN);
-										break;
-									}
-								}
-								fclose($_hFile);
+			case MSG_LOG:		CLog::add($_msgContent);
 		}
-		return true;
 	}
 
+	/**
+	 * 	Clears the message storage
+	 */
 	public function
 	clearMessages()
 	{
 		$this -> m_aStorage = [];
 	}
 
+	/**
+	 * 	Prints all Message to the HTML Output or just by names target
+	 * 
+	 * 	@param string $_msgTarget Name of the section for only his message
+	 */
 	public function
 	printMessages(string $_msgTarget = '')
 	{
@@ -77,30 +84,6 @@ class	CMessages extends CSingleton
 			}
 			echo '</div>';
 		}
-	}
-
-	public function
-	initMessagesLog()
-	{
-		$_timeStamp		= time();
-
-		$_destDirectoryPath		  = CMS_SERVER_ROOT . DIR_MESSSAGELOG;
-		$this -> m_LogDestination = $_destDirectoryPath . date("Ymd-H-i-s",$_timeStamp) .'-mesages-log';
-
-		if(!is_dir($_destDirectoryPath))
-		{
-			if(mkdir($_destDirectoryPath) === false)
-				trigger_error("CMessages::initMessagesLog -- Call of mkdir fails on initialization",E_USER_WARNING);
-		}
-
-		$_hFile = fopen($this -> m_LogDestination, "w");
-		fwrite($_hFile, "\r\n\tLOG FILE SESSION @ ". date("Y-m-d H:i:s",$_timeStamp) ."\r\n");
-		fwrite($_hFile, "\r\n");
-		fwrite($_hFile, "\r\n\t\tuser_agent     :  " .$_SERVER['HTTP_USER_AGENT'] ."");
-		fwrite($_hFile, "\r\n\t\trequested_uri  :  " .$_SERVER['REQUEST_URI'] ."\r\n");
-		fwrite($_hFile, "\r\n\t----------------------------------------------------------------------------------------------\r\n");
-		fwrite($_hFile, "\r\n");
-		fclose($_hFile);
 	}
 }
 
@@ -136,4 +119,3 @@ class	CMessagesItem
 		return ($_msgTarget === $this -> m_MessageTarget ? true : false);
 	}
 }
-?>

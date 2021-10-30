@@ -9,7 +9,8 @@ define('DIR_MODELS'		, 'models/');
 define('DIR_SHEME'		, 'shemes/');
 
 define('DIR_TEMPLATES'  , 'templates/');
-define('DIR_MESSSAGELOG', 'log/');
+define('DIR_MESSSAGELOG', 'log/');			// deprecated
+define('DIR_LOG', 'log/');
 define('DIR_TEMP'	 	, 'temp/');
 define('DIR_LANGUAGES' 	, 'lang/');
 define('DIR_DATA' 		, 'data/');
