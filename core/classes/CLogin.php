@@ -560,7 +560,7 @@ class	CLogin extends CSingleton
 	public	function
 	setError($_errorCode)
 	{	
-		CMessages::instance()-> addMessage( CLanguage::get() -> string($_errorCode) , MSG_LOG , '' , true );
+		CMessages::add( CLanguage::get() -> string($_errorCode) , MSG_LOG , '' , true );
 	}
 
 }

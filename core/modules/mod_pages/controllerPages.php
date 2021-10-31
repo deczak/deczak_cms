@@ -46,7 +46,7 @@ class	controllerPages extends CController
 				tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
 			}
 
-			CMessages::instance() -> addMessage(CLanguage::get() -> string('ERR_PERMISSON') , MSG_WARNING);
+			CMessages::add(CLanguage::get() -> string('ERR_PERMISSON') , MSG_WARNING);
 			return false;
 		}
 
@@ -470,11 +470,11 @@ class	controllerPages extends CController
 			$sitemap  	 = new CXMLSitemap();
 			$sitemap 	-> generate($_pDatabase);	
 
-			CMessages::instance() -> addMessage(CLanguage::instance() -> getString('MOD_SITES_PAGECREATED') , MSG_OK);
+			CMessages::add(CLanguage::instance() -> getString('MOD_SITES_PAGECREATED') , MSG_OK);
 		}
 		else
 		{
-			CMessages::instance() -> addMessage(CLanguage::instance() -> getString('MOD_SITES_ERR_NOTCREATED') , MSG_WARNING);
+			CMessages::add(CLanguage::instance() -> getString('MOD_SITES_ERR_NOTCREATED') , MSG_WARNING);
 		}
 		return false;
 	}
@@ -501,11 +501,11 @@ class	controllerPages extends CController
 			$sitemap  	 = new CXMLSitemap();
 			$sitemap 	-> generate($_pDatabase);	
 
-			CMessages::instance() -> addMessage(CLanguage::instance() -> getString('MOD_SITES_PAGEDELETED') , MSG_OK);
+			CMessages::add(CLanguage::instance() -> getString('MOD_SITES_PAGEDELETED') , MSG_OK);
 		}
 		else
 		{
-			CMessages::instance() -> addMessage(CLanguage::instance() -> getString('MOD_SITES_ERR_NOTDELETED') , MSG_WARNING);
+			CMessages::add(CLanguage::instance() -> getString('MOD_SITES_ERR_NOTDELETED') , MSG_WARNING);
 		}
 		return false;
 	}	
@@ -532,11 +532,11 @@ class	controllerPages extends CController
 			$sitemap  	 = new CXMLSitemap();
 			$sitemap 	-> generate($_pDatabase);	
 			
-			CMessages::instance() -> addMessage(CLanguage::instance() -> getString('MOD_SITES_PAGEDELETED') , MSG_OK);
+			CMessages::add(CLanguage::instance() -> getString('MOD_SITES_PAGEDELETED') , MSG_OK);
 		}
 		else
 		{
-			CMessages::instance() -> addMessage(CLanguage::instance() -> getString('MOD_SITES_ERR_NOTDELETED') , MSG_WARNING);
+			CMessages::add(CLanguage::instance() -> getString('MOD_SITES_ERR_NOTDELETED') , MSG_WARNING);
 		}
 		return false;
 	}	

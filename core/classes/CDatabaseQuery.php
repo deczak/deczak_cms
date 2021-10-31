@@ -244,7 +244,7 @@ class	CDatabaseQuery
 			if($this -> m_printException)
 			{
 				echo '<br><br>'. $exception -> getMessage();
-				CMessages::instance() -> addMessage('CDatabaseQuery::exec - prepared execution failed. Exception: '. $exception -> getMessage(), MSG_LOG, '', true);
+				CMessages::add('CDatabaseQuery::exec - prepared execution failed. Exception: '. $exception -> getMessage(), MSG_LOG, '', true);
 				echo '<pre>';
 				var_dump($execParameters);
 				echo '</pre>';
@@ -385,7 +385,7 @@ class	CDatabaseQuery
 		{
 			if($this -> m_printException)
 			{
-				CMessages::instance() -> addMessage('CDatabaseQuery::_createTable - query failed on create table. Exception: '. $exception -> getMessage(), MSG_LOG, '', true);
+				CMessages::add('CDatabaseQuery::_createTable - query failed on create table. Exception: '. $exception -> getMessage(), MSG_LOG, '', true);
 			}
 
 			return false;
@@ -417,7 +417,7 @@ class	CDatabaseQuery
 		{
 			if($this -> m_printException)
 			{
-				CMessages::instance() -> addMessage('CDatabaseQuery::_createTable - query failed on alter table. Exception: '. $exception -> getMessage(), MSG_LOG, '', true);
+				CMessages::add('CDatabaseQuery::_createTable - query failed on alter table. Exception: '. $exception -> getMessage(), MSG_LOG, '', true);
 			}
 
 			return false;
@@ -451,7 +451,7 @@ class	CDatabaseQuery
 			{
 				if($this -> m_printException)
 				{
-					CMessages::instance() -> addMessage('CDatabaseQuery::_createConstraints - query failed on alter table. Exception: '. $exception -> getMessage(), MSG_LOG, '', true);
+					CMessages::add('CDatabaseQuery::_createConstraints - query failed on alter table. Exception: '. $exception -> getMessage(), MSG_LOG, '', true);
 				}	
 				
 				return false;	

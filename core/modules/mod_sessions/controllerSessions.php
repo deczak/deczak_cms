@@ -36,7 +36,7 @@ class	controllerSessions extends CController
 				tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
 			}
 
-			CMessages::instance() -> addMessage(CLanguage::get() -> string('ERR_PERMISSON') , MSG_WARNING);
+			CMessages::add(CLanguage::get() -> string('ERR_PERMISSON') , MSG_WARNING);
 			return false;
 		}
 			
@@ -164,7 +164,7 @@ class	controllerSessions extends CController
 			}
 		}
 
-		CMessages::instance() -> addMessage(CLanguage::get() -> string('SESSION IS_UNKNOWN') , MSG_WARNING);
+		CMessages::add(CLanguage::get() -> string('SESSION IS_UNKNOWN') , MSG_WARNING);
 		return false;
 	}
 
@@ -207,7 +207,7 @@ class	controllerSessions extends CController
 		
 		}
 
-		CMessages::instance() -> addMessage(CLanguage::get() -> string('SESSION IS_UNKNOWN') , MSG_WARNING);
+		CMessages::add(CLanguage::get() -> string('SESSION IS_UNKNOWN') , MSG_WARNING);
 		return false;
 	}
 }

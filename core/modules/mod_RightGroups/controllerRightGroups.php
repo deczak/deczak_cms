@@ -37,7 +37,7 @@ class	controllerRightGroups extends CController
 				tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
 			}
 
-			CMessages::instance() -> addMessage(CLanguage::get() -> string('ERR_PERMISSON') , MSG_WARNING);
+			CMessages::add(CLanguage::get() -> string('ERR_PERMISSON') , MSG_WARNING);
 			return false;
 		}
 
@@ -247,7 +247,7 @@ class	controllerRightGroups extends CController
 			}
 		}
 
-		CMessages::instance() -> addMessage(CLanguage::get() -> string('MOD_RGROUP_ERR_RGROUP_ID_UK') , MSG_WARNING);
+		CMessages::add(CLanguage::get() -> string('MOD_RGROUP_ERR_RGROUP_ID_UK') , MSG_WARNING);
 		return false;
 	}
 

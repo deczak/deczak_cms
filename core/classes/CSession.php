@@ -508,7 +508,7 @@ class	CSession extends CSingleton
 		}
 		else
 		{
-			CMessages::instance() -> addMessage('Database table error: '. $_db -> error, MSG_LOG);
+			CMessages::add('Database table error: '. $_db -> error, MSG_LOG);
 			trigger_error("CSession::updateSession -- There is a session table issue, the query failed",E_USER_ERROR);
 		}
 

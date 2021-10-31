@@ -85,7 +85,7 @@ class	CDatabase extends CSingleton
 				||	!isset($_accessData['name'])
 			  )
 			{			  
-				CMessages::instance() -> addMessage('CDatabase::connect - Required parameters for connection establishment not valid', MSG_LOG, '', true);				  
+				CMessages::add('CDatabase::connect - Required parameters for connection establishment not valid', MSG_LOG, '', true);				  
 				return false;
 			}
 
@@ -101,7 +101,7 @@ class	CDatabase extends CSingleton
 			}
 			catch(PDOException $exception)
 			{	  
-				CMessages::instance() -> addMessage('CDatabase::connect - establishing connection failed for '. $_accessData['name'] .'. Exception: '. $exception -> getMessage(), MSG_LOG, '', true);
+				CMessages::add('CDatabase::connect - establishing connection failed for '. $_accessData['name'] .'. Exception: '. $exception -> getMessage(), MSG_LOG, '', true);
 				return false;	
 			}
 		}

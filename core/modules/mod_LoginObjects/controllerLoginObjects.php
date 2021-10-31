@@ -44,7 +44,7 @@ class	controllerLoginObjects extends CController
 				tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
 			}
 
-			CMessages::instance() -> addMessage(CLanguage::get() -> string('ERR_PERMISSON') , MSG_WARNING);
+			CMessages::add(CLanguage::get() -> string('ERR_PERMISSON') , MSG_WARNING);
 			return false;
 		}
 
@@ -295,7 +295,7 @@ class	controllerLoginObjects extends CController
 			}
 		}
 
-		CMessages::instance() -> addMessage(CLanguage::get() -> string('MOD_LOGINO_ERR_OBJECT_ID_UK') , MSG_WARNING);
+		CMessages::add(CLanguage::get() -> string('MOD_LOGINO_ERR_OBJECT_ID_UK') , MSG_WARNING);
 		return false;
 	}
 
