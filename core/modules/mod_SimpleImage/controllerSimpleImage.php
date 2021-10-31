@@ -120,14 +120,14 @@ class	controllerSimpleImage extends CController
 	
 		$pURLVariables =	new CURLVariables();
 		$requestList		 =	[];
-		$requestList[] 	 = 	[	"input" => "simple-image-id", "validate" => "!empty" ]; 
-		$requestList[] 	 = 	[	"input" => "simple-image-position-x", "validate" => "!empty" ]; 
-		$requestList[] 	 = 	[	"input" => "simple-image-position-x-unit", "validate" => "!empty" ]; 
-		$requestList[] 	 = 	[	"input" => "simple-image-position-y", "validate" => "!empty" ]; 
-		$requestList[] 	 = 	[	"input" => "simple-image-position-y-unit", "validate" => "!empty" ]; 
-		$requestList[] 	 = 	[	"input" => "simple-image-height", "validate" => "!empty" ]; 
-		$requestList[] 	 = 	[	"input" => "simple-image-height-unit", "validate" => "!empty" ]; 
-		$requestList[] 	 = 	[	"input" => "simple-image-fit", "validate" => "!empty" ]; 
+		$requestList[] 	 = 	[	"input" => "simple-image-id", "validate" => "strip_tags|!empty" ]; 
+		$requestList[] 	 = 	[	"input" => "simple-image-position-x", "validate" => "strip_tags|!empty" ]; 
+		$requestList[] 	 = 	[	"input" => "simple-image-position-x-unit", "validate" => "strip_tags|!empty" ]; 
+		$requestList[] 	 = 	[	"input" => "simple-image-position-y", "validate" => "strip_tags|!empty" ]; 
+		$requestList[] 	 = 	[	"input" => "simple-image-position-y-unit", "validate" => "strip_tags|!empty" ]; 
+		$requestList[] 	 = 	[	"input" => "simple-image-height", "validate" => "strip_tags|!empty" ]; 
+		$requestList[] 	 = 	[	"input" => "simple-image-height-unit", "validate" => "strip_tags|!empty" ]; 
+		$requestList[] 	 = 	[	"input" => "simple-image-fit", "validate" => "strip_tags|!empty" ]; 
 		$pURLVariables-> retrieve($requestList, false, true); // POST 
 		$urlVarList		 = $pURLVariables ->getArray();
 
@@ -191,45 +191,33 @@ class	controllerSimpleImage extends CController
 	private function
 	logicXHRCreate(CDatabaseConnection &$_pDatabase, object $_xhrInfo, bool $_enableEdit = false, bool $_enableDelete = false) : bool
 	{
+		$validationErr =	false;
+		$validationMsg =	'';
+		$responseData = 	[];
 
-			$validationErr =	false;
-			$validationMsg =	'';
-			$responseData = 	[];
+		$_dataset['object_id'] 	= $this -> objectInfo -> object_id;
+		$_dataset['body'] 		= '';
+		$_dataset['params'] 	= '';
+		
+		if(!$this -> m_modelSimple -> insert($_pDatabase, $_dataset, MODEL_RESULT_APPEND_DTAOBJECT))
+		{
+			$validationErr =	true;
+			$validationMsg =	'sql insert failed';
+		}
+		else
+		{
+			$this -> setView(	
+							'edit',	
+							'',
+							[
+								'object' 	=> $this -> m_modelSimple -> getResult()[0]
+							]
+							);
 
-			$_dataset['object_id'] 	= $this -> objectInfo -> object_id;
-			$_dataset['body'] 		= '';
-			$_dataset['params'] 	= '';
+			$responseData['html'] = $this -> m_pView -> getHTML();
+		}
 
-
-/*
-
-		$_dataset['params']		= 	[
-										"template"			=> '',
-										"display_hidden"	=> '',
-										"parent_node_id"	=> ''
-									];
-*/
-
-			
-			if(!$this -> m_modelSimple -> insert($_pDatabase, $_dataset, MODEL_RESULT_APPEND_DTAOBJECT))
-			{
-				$validationErr =	true;
-				$validationMsg =	'sql insert failed';
-			}
-			else
-			{
-				$this -> setView(	
-								'edit',	
-								'',
-								[
-									'object' 	=> $this -> m_modelSimple -> getResult()[0]
-								]
-								);
-
-				$responseData['html'] = $this -> m_pView -> getHTML();
-			}
-
-			tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
+		tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
 		
 		return false;
 	}

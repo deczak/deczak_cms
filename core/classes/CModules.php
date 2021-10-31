@@ -846,12 +846,19 @@ class CModulesInstall
 
 				$objectInstance -> setInstallMode();
 
+
+				$xhrInfo = new stdClass;
+				$xhrInfo -> isXHR 	 = true;
+				$xhrInfo -> action 	 = 'cms-insert-module';
+				$xhrInfo -> objectId = (int)$objectData -> object_id;
+
+
 				$logicResult = [];
 
 				$objectInstance -> logic(
 											$_dbConnection, 
 											[ $objectData -> object_id => 'create' ],
-											'cms-insert-module', 
+											$xhrInfo, 
 											$logicResult, 
 											true
 											);
@@ -869,10 +876,12 @@ class CModulesInstall
 					$_POST[$dataKey] = $dataValue;
 				}
 
+				$xhrInfo -> action 	 = 'edit';
+
 				$objectInstance -> logic(
 											$_dbConnection, 
 											[ $objectData -> object_id => 'edit' ],
-											'edit', 
+											$xhrInfo, 
 											$logicResult, 
 											true
 											);

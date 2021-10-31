@@ -5,6 +5,9 @@ window.addEventListener('change', function(event)
 
 	let sic = event.target.closest('.simple-image-controll');
 
+	if(sic === null)
+		return true;
+
 	let inputName = event.target.name;
 
 	let	innerNode = sic.querySelector('.simple-image-div-inner');
