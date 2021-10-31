@@ -1,5 +1,5 @@
 
 	If you add directories, use only valid characters for URI purpose.
 	Ignoring this, leads into not accessible files via browser.
-	
+		
 	Be aware of lowercase and uppercase letters on unix systems.

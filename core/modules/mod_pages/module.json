@@ -94,6 +94,12 @@
 							}
 						],
 	"include"			:[
-							{"type":"script",	"file":"script.js"}
+							{	
+								"type":"script",	
+								"file":"script.js",
+								"collect":false,
+								"backend":true,
+								"frontend":false
+							}
 						]
 }

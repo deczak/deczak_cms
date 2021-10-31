@@ -262,6 +262,35 @@
 
 					</div>
 
+
+
+					<div class="ui" style="width:100%;"><div class="result-box" data-error="2">
+						<?= $language -> string('M_BEENV_GENERATE_RES_NOTE'); ?>		
+					</div></div>
+
+
+
+			
+					<div class="delete-box" style="padding: 15px 23px; border-radius:3px; display:flex; flex-direction:column;">
+
+						<div style="display:flex; align-items:center; margin-bottom:15px;">
+							<div style="width:213px; border-radius:3px; background:white;">
+							<fieldset class="ui fieldset" data-xhr-target="update_resources" data-xhr-overwrite-target="edit/1" style="margin:0px;">	
+								<div class="submit-container button-only">
+									<button class="ui button icon labeled trigger-submit-fieldset" type="button" disabled><span><i class="fas fa-sync-alt" data-icon="fa-sync-alt"></i></span><?php echo $language -> string('M_BEENV_UPDATE'); ?></button>
+									<div class="protector"><input type="checkbox" class="trigger-submit-protector" id="protector-update-resources"><label for="protector-update-resources"></label></div>
+								</div>
+							</fieldset>
+							</div>
+							<div style="font-weight:500; margin-left:20px;">
+								<?= $language -> string('M_BEENV_GENERATE_RES'); ?>
+							</div>
+						</div>
+
+					</div>
+
+
+
 				</div>
 
 			</div>

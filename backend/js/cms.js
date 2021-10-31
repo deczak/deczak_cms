@@ -1,29 +1,12 @@
 
-
-
-
-
-
 window.addEventListener('change', function(event)
 {
-
-	
 	if(typeof event.target === 'undefined' || typeof event.target.name === 'undefined')
 		return false;
 
-	//let cco = event.target.closest('.cms-content-object');
 	let sic = event.target.closest('.simple-image-controll');
 
-
-console.log(event.target);
-console.log(sic);
-
-//document.getElementById('simple-image-controll').onchange = function(event)
-//{
-
-
 	let inputName = event.target.name;
-
 
 	let	innerNode = sic.querySelector('.simple-image-div-inner');
 	let	imageNode = sic.querySelector('img');
@@ -91,7 +74,6 @@ console.log(sic);
 			imageNode.style.objectPosition = posX + posXUnit +' '+ posY + posYUnit;
 			break;
 	}
-//};
 });
 
 window.addEventListener('click', function(event)
@@ -104,18 +86,12 @@ window.addEventListener('click', function(event)
 		mediathek.open(cmsMediathek.VIEWMODE_LIST, cmsMediathek.WORKMODE_SELECT, event.target);
 });
 
-
-
-
 function simpleImageOnSelected(event, aaaa)
 {
-
-
 	if(event.detail.file === null || event.detail.file.path.length === 0)
 		return;
 
 	let	simpeImageNode = event.detail.sourceNode.closest('.simple-image-controll');
-	
 
 	let	imageNode = simpeImageNode.querySelector('img');
 		imageNode.src = CMS.SERVER_URL + "mediathek/" + event.detail.file.path +"?binary&size=large";

@@ -109,27 +109,27 @@ class	CHTML
 		{
 			case 200:
 
-						foreach($template -> include_content as $_file)
-							@include $templatePath . $_file;	
+				foreach($template -> include_content as $_file)
+					@include $templatePath . $_file;	
 
-						break;
+				break;
 
 			default:
 
-						if(property_exists($template, 'include_error_'. $pageRequest -> responseCode))
-						{
-							$propertyName = 'include_error_'. $pageRequest -> responseCode;
+				if(property_exists($template, 'include_error_'. $pageRequest -> responseCode))
+				{
+					$propertyName = 'include_error_'. $pageRequest -> responseCode;
 
-							foreach($template -> $propertyName as $_file)
-								@include $templatePath . $_file;	
-						}
-						else
-						{
-							foreach($template -> include_error as $_file)
-								@include $templatePath . $_file;	
-						}
+					foreach($template -> $propertyName as $_file)
+						@include $templatePath . $_file;	
+				}
+				else
+				{
+					foreach($template -> include_error as $_file)
+						@include $templatePath . $_file;	
+				}
 
-						break;						
+				break;						
 		} 
 
 		if(!CMS_BACKEND && file_exists(CMS_SERVER_ROOT.DIR_PUBLIC .'js/cms.js'))

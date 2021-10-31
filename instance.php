@@ -225,5 +225,3 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 ##	V I E W 
 
 	$_pHTML -> openDocument($pImperator, $pageRequest);
-
-#CModules::generateResources();

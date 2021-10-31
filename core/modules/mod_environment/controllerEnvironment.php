@@ -59,12 +59,13 @@ class	controllerEnvironment extends CController
 
 
 
-			case 'xhr_edit_remoteuser': $logicDone = $this -> logicXHREditRemoteUser($_pDatabase);	break;	
-			case 'xhr_edit_backend': 	$logicDone = $this -> logicXHREditBackend($_pDatabase);	break;	
-			case 'xhr_edit_error': 		$logicDone = $this -> logicXHREditError($_pDatabase);	break;	
-			case 'xhr_update_htaccess': $logicDone = $this -> logicXHRUpdateHTAccess($_pDatabase);	break;	
-			case 'xhr_update_sitemap': 	$logicDone = $this -> logicXHRUpdateSitemap($_pDatabase);	break;	
-			case 'xhr_error_clear': 	$logicDone = $this -> logicXHRClearError($_pDatabase);	break;	
+			case 'xhr_edit_remoteuser':  $logicDone = $this -> logicXHREditRemoteUser($_pDatabase);	break;	
+			case 'xhr_edit_backend': 	 $logicDone = $this -> logicXHREditBackend($_pDatabase); break;	
+			case 'xhr_edit_error': 		 $logicDone = $this -> logicXHREditError($_pDatabase); break;	
+			case 'xhr_update_htaccess':  $logicDone = $this -> logicXHRUpdateHTAccess($_pDatabase);	break;	
+			case 'xhr_update_sitemap': 	 $logicDone = $this -> logicXHRUpdateSitemap($_pDatabase); break;	
+			case 'xhr_update_resources': $logicDone = $this -> logicXHRUpdateResources($_pDatabase); break;	
+			case 'xhr_error_clear': 	 $logicDone = $this -> logicXHRClearError($_pDatabase);	break;	
 		
 		
 		}
@@ -281,4 +282,24 @@ class	controllerEnvironment extends CController
 		return false;
 	}
 
+
+
+	private function
+	logicXHRUpdateResources(CDatabaseConnection &$_dbConnection) : bool
+	{	
+		$systemId = $this -> querySystemId();
+
+		if($systemId !== false)
+		{	
+			$validationErr 	= false;
+			$validationMsg 	= '';
+			$responseData 	= [];
+
+			CModules::generateResources();
+		
+			tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
+		}
+
+		return false;
+	}
 }

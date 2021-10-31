@@ -25,3 +25,6 @@ M_BEENV_ERROR_LOG_MODE		= Write mode for logfile. single file only or one file p
 M_BEENV_ERROR_LOG_MODE_1	= Single File
 M_BEENV_ERROR_LOG_MODE_2	= Session File
 M_BEENV_ERROR_CLEAR			= Deletes all log and error files in log directory.
+
+M_BEENV_GENERATE_RES_NOTE	= Die Resource Dateien werden bei der Bearbeitung der Module automatisch aktualisiert
+M_BEENV_GENERATE_RES		= Manuelles aktualisieren der Resource Dateien JS and CSS
