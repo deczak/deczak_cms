@@ -456,11 +456,14 @@ class CModules extends CSingleton
 		return $this -> m_pUserRights -> existsRight($_moduleId, $_rightsId);
 	}
 
+
+	/**
+	 * 	Static wrapper function for resource generation 
+	 */
 	public static function
 	generateResources()
 	{
 		$instance  = static::instance();
-
 		$modulesResources = new CModulesResources;
 		$modulesResources -> generateResources($instance->getModules(true));
 	}
@@ -1029,6 +1032,9 @@ class CModulesInstall
 	}
 }
 
+/**
+ * 	This is a helper class to translate the module config into normalized module info
+ */
 class CModulesInstallS1 // Module Sheme 1
 {
 	public function
@@ -1036,8 +1042,15 @@ class CModulesInstallS1 // Module Sheme 1
 	{
 	}
 
+	/**
+	 * 	Get the Module Info by module data
+	 * 
+	 * 	@param stdClass $_moduleConfig Module config as object
+	 * 	@param string $moduleLocation Dir name of that module
+	 * 	@param string $moduleType Module Type of that module, mantle or core
+	 */
 	public function
-	getMmoduleData(stdClass $_moduleConfig, $moduleLocation, $moduleType)
+	getMmoduleData(stdClass $_moduleConfig, string $moduleLocation, string $moduleType)
 	{
 		$timestamp		= time();
 		$userId			= CSession::instance() -> getValue('user_id');
@@ -1156,6 +1169,9 @@ class CModulesInstallS1 // Module Sheme 1
 	}
 }
 
+/**
+ * 	This is a helper class to translate the module config into normalized module info
+ */
 class CModulesInstallS2 // Module Sheme 2
 {
 	public function
@@ -1163,8 +1179,15 @@ class CModulesInstallS2 // Module Sheme 2
 	{
 	}
 
+	/**
+	 * 	Get the Module Info by module data
+	 * 
+	 * 	@param stdClass $_moduleConfig Module config as object
+	 * 	@param string $moduleLocation Dir name of that module
+	 * 	@param string $moduleType Module Type of that module, mantle or core
+	 */
 	public function
-	getMmoduleData(stdClass $_moduleConfig, $moduleLocation, $moduleType)
+	getMmoduleData(stdClass $_moduleConfig, string $moduleLocation, string $moduleType)
 	{
 		$timestamp		= time();
 		$userId			= CSession::instance() -> getValue('user_id');
@@ -1289,6 +1312,11 @@ class CModulesResources
 	{
 	}	
 
+	/**
+	 * 	Generates the CSS and JS Files based on the modules delivered resources. This does not include module templates related data.
+	 * 
+	 * 	@param array $_modulesList A list of modules by CModules::getModules
+	 */
 	public function
 	generateResources(array $_modulesList)
 	{
