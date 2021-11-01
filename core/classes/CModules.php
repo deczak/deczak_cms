@@ -409,21 +409,20 @@ class CModules extends CSingleton
 	install(CDatabaseConnection &$_dbConnection, $moduleLocation, $moduleType, &$errorMsg, bool $updateRoutes = true)
 	{
 		$_dbConnection -> beginTransaction();
-		
-		
+				
 		$pModulesInstall = new CModulesInstall;
 		if(!$pModulesInstall -> install($_dbConnection, $moduleLocation, $moduleType, $errorMsg))
 		{
-			
 			$_dbConnection -> rollBack();
 			return false;
 		}
-
 
 		$_dbConnection -> commit();
 
 		$this -> modelModules	->	load($_dbConnection);
 		$this -> modulesList 	 =	$this -> modelModules -> getResult();
+
+		CModules::generateResources();
 
 		if($updateRoutes)
 		{
@@ -447,6 +446,12 @@ class CModules extends CSingleton
 		}
 
 		$_dbConnection -> commit();
+
+		$this -> modelModules	->	load($_dbConnection);
+		$this -> modulesList 	 =	$this -> modelModules -> getResult();
+
+		CModules::generateResources();
+
 		return true;
 	}
 

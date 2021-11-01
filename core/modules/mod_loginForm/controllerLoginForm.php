@@ -104,6 +104,8 @@ class	controllerLoginForm extends CController
 		$enableEdit 	= $this -> existsUserRight('edit');
 		$enableDelete	= $enableEdit;
 
+
+
 		$logicDone = false;
 		switch($controllerAction)
 		{
@@ -125,6 +127,20 @@ class	controllerLoginForm extends CController
 	public function
 	logicView(CDatabaseConnection &$_pDatabase) : bool
 	{
+
+
+
+
+if(isset($_GET['logout']))
+{
+	CLogin::logout($_pDatabase);
+}
+
+
+
+
+
+
 		if(empty($this -> objectInfo -> params))
 		{
 			$modelCondition = new CModelCondition();

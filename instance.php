@@ -157,7 +157,6 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 	$_pSession		 = 	CSession::instance();		
 	$_pSession		->	updateSession(intval($_pURLVariables -> getValue("cms-node")), $_pURLVariables -> getValue("cms-lang"), $pUserRights);	
 
-
 ##	Requested initial script action
 
 	switch($_pURLVariables -> getValue("cms-risa"))
@@ -177,8 +176,7 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 
 		case 'logout':	## User logout ################################################################################################################
 
-						$_pLogin	 =	CLogin::instance();
-						$_pLogin 	->	logout($pDBInstance -> getConnection(CFG::GET() -> MYSQL -> PRIMARY_DATABASE), $_pURLVariables -> getValue("cms-tlon"));
+						$_pLogin	 =	CLogin::logout($pDBInstance -> getConnection(CFG::GET() -> MYSQL -> PRIMARY_DATABASE), $_pURLVariables -> getValue("cms-tlon"));
 						break;
 	}
 

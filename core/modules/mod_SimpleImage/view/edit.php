@@ -41,6 +41,7 @@ $image_url = ($image_url !== null ? $image_url .'?binary&size=large' : $image_ur
 					<select name="simple-image-fit" style="width:130px; border:0px; border-radius:0;">
 						<option <?= (($object -> params -> fit ?? 'cover') === 'cover' ? 'selected' : ''); ?> value="cover">Cover</option>
 						<option <?= (($object -> params -> fit ?? 'cover') === 'contain' ? 'selected' : ''); ?> value="contain">Contain</option>
+						<option <?= (($object -> params -> fit ?? 'cover') === 'none' ? 'selected' : ''); ?> value="none">None</option>
 					</select>
 				</div>	
 			</div>

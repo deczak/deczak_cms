@@ -465,95 +465,73 @@ class	CLogin extends CSingleton
 		}
 	}
 
-	public	function
-	logout(&$_pDatabase, string $_loginObjectName)
+	public static function
+	logout(&$_pDatabase, string $_loginObjectName = '')
 	{
-
+		if(empty($_loginObjectName))
+		{
+			$modelCondition = new CModelCondition();
+		}
+		else
+		{
 			$modelCondition = new CModelCondition();
 			$modelCondition -> where('object_id', $_loginObjectName);
-			
-		## get login objects
-		$_pModelLoginObjects	 =	new modelLoginObjects();
-		$_pModelLoginObjects	->	load($_pDatabase, $modelCondition);	
+		}
 
-		$_loginObjects			 = 	$_pModelLoginObjects -> getResult();
+		$modelLoginObjects	 = new modelLoginObjects();
+		$modelLoginObjects	-> load($_pDatabase, $modelCondition);	
+		$loginObjectList 	 = $modelLoginObjects -> getResult();
 
-		if(count($_loginObjects) == 0)
+		if(count($loginObjectList) == 0)
 		{	##	Login object unknown
 			$this -> setError('ERR_CR_LOGIN_2');
 			return false;
 		}
-		
-		$_authObject	= CSession::instance() -> isAuthed($_loginObjectName);
 
-		if($_authObject !== false)
-		{	
-			$_db 			= 	&$_authObject['db'];
-			/*
-			$_sqlString		=	"	SELECT		". $_authObject['table'] .".cookie_id
-									FROM		". $_authObject['table'] ."
-									WHERE		". $_authObject['table'] .".data_id		= '". $_authObject['data_id'] ."'
-									LIMIT		1
-								";
-			$_sqlLogoutRes	=	$_db -> query($_sqlString) ;	
-			*/
+		foreach($loginObjectList as $loginObject)
+		{
+			$_authObject	= CSession::instance() -> isAuthed($loginObject -> object_id);
 
+			if($_authObject !== false)
+			{	
+				$_db 			= 	&$_authObject['db'];
 
-			$condition		 = new CModelCondition();
-			$condition		-> where('data_id', $_authObject['data_id'])
-							-> limit(1);
+				$condition		 = new CModelCondition();
+				$condition		-> where('data_id', $_authObject['data_id'])
+								-> limit(1);
 
-			$dbQuery 	= $_db				-> query(DB_SELECT) 
-											-> table($_authObject['table']) 
-											-> selectColumns(['cookie_id'])
-											-> condition($condition);
+				$dbQuery 	= $_db				-> query(DB_SELECT) 
+												-> table($_authObject['table']) 
+												-> selectColumns(['cookie_id'])
+												-> condition($condition);
 
-			$_sqlLogoutRes = $dbQuery -> exec();
+				$_sqlLogoutRes = $dbQuery -> exec();
 
+				if($_sqlLogoutRes !== false && count($_sqlLogoutRes) > 0)		
+				{
+					$_sqlLogout 	=	$_sqlLogoutRes[0];
 
-
+					$_existsCookies =	json_decode($_sqlLogout -> cookie_id,true);
+					unset($_existsCookies[$loginObject -> object_id]);
+					$_existsCookies	=	json_encode($_existsCookies, JSON_FORCE_OBJECT);
 
 
-
-			if($_sqlLogoutRes !== false && count($_sqlLogoutRes) > 0)		
-			{
-				$_sqlLogout 	=	$_sqlLogoutRes[0];
+					$dtaObject = new stdClass();
+					$dtaObject -> cookie_id 	= $_existsCookies;
 
 
+					$condition		 = new CModelCondition();
+					$condition		-> where('data_id', $_authObject['data_id']);
 
-				$_existsCookies =	json_decode($_sqlLogout -> cookie_id,true);
-				unset($_existsCookies[$_loginObjectName]);
-				$_existsCookies	=	json_encode($_existsCookies, JSON_FORCE_OBJECT);
+					$_db			-> query(DB_UPDATE) 
+									-> table($_authObject['table']) 
+									-> dtaObject($dtaObject)
+									-> condition($condition)
+									-> exec();
+				}	
 
-				/*
-				$_sqlString		=	"	UPDATE		". $_authObject['table'] ."
-										SET			". $_authObject['table'] .".cookie_id	= '". $_db -> real_escape_string($_existsCookies) ."'
-										WHERE		". $_authObject['table'] .".data_id		= '". $_authObject['data_id'] ."'
-									";
-
-				$_db -> query($_sqlString);	
-				*/
-
-
-							$dtaObject = new stdClass();
-							$dtaObject -> cookie_id 	= $_existsCookies;
-
-
-							$condition		 = new CModelCondition();
-							$condition		-> where('data_id', $_authObject['data_id']);
-
-							$_db			-> query(DB_UPDATE) 
-											-> table($_authObject['table']) 
-											-> dtaObject($dtaObject)
-											-> condition($condition)
-											-> exec();
-
-
-
-
-			}	
-
-			CCookie::instance() -> deleteCookie( $_loginObjectName );
+				CCookie::instance() -> deleteCookie($loginObject -> object_id);
+			}
 		}
 	}
 
@@ -562,9 +540,4 @@ class	CLogin extends CSingleton
 	{	
 		CMessages::add( CLanguage::get() -> string($_errorCode) , MSG_LOG , '' , true );
 	}
-
 }
-
-
-
-?>
