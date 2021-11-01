@@ -182,7 +182,7 @@ class	CLanguage extends CSingleton
 	}	
 
 	public function
-	string(string $_StringID, string $_format = 'regular') : string
+	string(string $_StringID, string $_format = 'regular', bool $_preventUnknownKMark = false) : string
 	{
 		if(empty($this -> isInitialized)) return 'not_initialized';
 
@@ -204,7 +204,9 @@ class	CLanguage extends CSingleton
 			}
 			else
 			{
-				$returnValue .= '(!)'. $stringId;
+				if(!$_preventUnknownKMark)
+					$returnValue .= '(!) ';
+				$returnValue .= $stringId;
 			}
 		}
 

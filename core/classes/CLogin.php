@@ -468,6 +468,8 @@ class	CLogin extends CSingleton
 	public static function
 	logout(&$_pDatabase, string $_loginObjectName = '')
 	{
+		$instance = static::instance();
+
 		if(empty($_loginObjectName))
 		{
 			$modelCondition = new CModelCondition();
@@ -484,7 +486,7 @@ class	CLogin extends CSingleton
 
 		if(count($loginObjectList) == 0)
 		{	##	Login object unknown
-			$this -> setError('ERR_CR_LOGIN_2');
+			$instance -> setError('ERR_CR_LOGIN_2');
 			return false;
 		}
 
