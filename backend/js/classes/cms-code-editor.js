@@ -84,7 +84,8 @@ class	cmsCodeEditor
 					textarea.innerHTML = this.value;
 			};
 			oEditBox.onkeydown	= function(event) {
-				if(event.keyCode == 9) { // tab key
+				//if(event.keyCode == 9) { // tab key
+				if(event.key == 'Tab') { // tab key
 					var text = "\t";
 					if(this.selectionStart || this.selectionStart === 0)
 					{
