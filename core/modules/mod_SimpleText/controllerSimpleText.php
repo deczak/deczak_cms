@@ -77,6 +77,8 @@ class	controllerSimpleText extends CController
 
 		$this -> m_modelSimple -> load($_pDatabase, $modelCondition);
 
+		$this -> m_modelSimple -> getResult()[0] -> params = json_decode($this -> m_modelSimple -> getResult()[0] -> params);
+		
 		$this -> setView(	
 						'view',	
 						'',
@@ -96,6 +98,7 @@ class	controllerSimpleText extends CController
 
 		$this -> m_modelSimple -> load($_pDatabase, $modelCondition);
 
+		$this -> m_modelSimple -> getResult()[0] -> params = json_decode($this -> m_modelSimple -> getResult()[0] -> params);
 
 		$this -> setView(	
 						'edit',	
@@ -118,7 +121,8 @@ class	controllerSimpleText extends CController
 
 		$pURLVariables =	new CURLVariables();
 		$requestList		 =	[];
-		$requestList[] 	 = 	[	"input" => "simple-text",  "output" => "body", 			"validate" => "!empty" ]; 
+		$requestList[] 	 = 	[	"input" => "simple-text",  			"validate" => "!empty" ]; 
+		$requestList[] 	 = 	[	"input" => "simple-text-flag-hidden", 			"validate" => "!empty" ]; 
 		$pURLVariables-> retrieve($requestList, false, true); // POST 
 		$urlVarList		 = $pURLVariables ->getArray();
 
@@ -129,10 +133,24 @@ class	controllerSimpleText extends CController
 		{
 			$modelCondition = new CModelCondition();
 			$modelCondition -> where('object_id', $_xhrInfo -> objectId);
+
+
+
+			$valuesList = [];
+
+			$valuesList['params']	= 	[
+											"hidden"		=> $urlVarList['simple-text-flag-hidden']
+										];
+			
+
+			$valuesList['params']	 = 	json_encode($valuesList['params'], JSON_FORCE_OBJECT);
+
+			$valuesList['body']		 = 	$urlVarList['simple-text'];
+
 			
 			$objectId = $_xhrInfo -> objectId;
 
-			if($this -> m_modelSimple -> update($_pDatabase, $urlVarList, $modelCondition))
+			if($this -> m_modelSimple -> update($_pDatabase, $valuesList, $modelCondition))
 			{
 				$validationMsg = 'Object updated';
 
@@ -175,8 +193,6 @@ class	controllerSimpleText extends CController
 			$_dataset['object_id'] 	= $this -> objectInfo -> object_id;
 			$_dataset['body'] 		= '';
 			$_dataset['params'] 	= '';
-
-
 
 
 			
