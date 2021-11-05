@@ -13,14 +13,22 @@ class	cmsMediathek
 		this.requestURL			 = CMS.SERVER_URL_BACKEND + 'mediathek/';
 	}
 
-
-
 	init(viewMode, workMode, rootPath = '')
 	{
 		this.viewMode 	  = viewMode;
 		this.workMode 	  = workMode;
 		this.rootPath	  = rootPath;
 		this.activePath   = rootPath;
+
+		console.log(document.cmsMediathek);
+
+		if(typeof document.cmsMediathek === 'undefined')
+		{
+			document.cmsMediathek = {};
+			document.cmsMediathek.viewMode = viewMode
+		}
+		
+
 
 		this.requestItems();
 	}
@@ -40,7 +48,6 @@ class	cmsMediathek
 			xhRequest.request(this.requestURL, formData, this.onXHRSuccessRequestItems, this, 'index');
 	}
 
-
 	onXHRSuccessRequestItems(response, srcInstance)
 	{
 		if(response.error === 1)
@@ -51,77 +58,102 @@ class	cmsMediathek
 
 		let itemsNode = document.createElement('div');
 
-
-		switch(srcInstance.viewMode)
+		switch(document.cmsMediathek.viewMode)
 		{
 			case cmsMediathek.VIEWMODE_LIST:
 
 				srcInstance._generateHTML_List(response.data, itemsNode);
-
-
 				break;
 
 			case cmsMediathek.VIEWMODE_SQUARES:
 
 				srcInstance._generateHTML_Squares(response.data, itemsNode);
-
-
 				break;
 		}
 
-
-
-
 		let mediathekNode = document.createElement('div');
 			mediathekNode.classList.add('mediathek-main');
-
-
-
-		switch(srcInstance.workMode)
-		{
-	
-
-			case cmsMediathek.WORKMODE_EDIT:
-
-
-		let buttonImportNode = document.createElement('button');
-			buttonImportNode.classList.add('ui', 'button', 'button-import');
-			buttonImportNode.onclick = function(event) { srcInstance._onClickButtonImport(event, srcInstance) };
-			buttonImportNode.innerHTML = 'Import';
-
 
 		let controlPanelLeftNode = document.createElement('div');
 			controlPanelLeftNode.classList.add('left');
 
 		let controlPanelRightNode = document.createElement('div');
 			controlPanelRightNode.classList.add('right');
-			controlPanelRightNode.append(buttonImportNode);
 
 
+		switch(srcInstance.workMode)
+		{
+			case cmsMediathek.WORKMODE_EDIT:
+
+				let buttonImportNode = document.createElement('button');
+					buttonImportNode.classList.add('ui', 'button', 'icon', 'labeled', 'button-import');
+					buttonImportNode.type = 'button';
+					buttonImportNode.onclick = function(event) { srcInstance._onClickButtonImport(event, srcInstance) };
+					buttonImportNode.innerHTML = '<span><i class="fas fa-file-import"></i></span> Mediathek Import';
+
+				controlPanelRightNode.append(buttonImportNode);
+
+
+				break;
+
+			case cmsMediathek.WORKMODE_SELECT:
+
+				break;
+
+
+		}
+
+		// Button Folder Up
+
+
+
+				let buttonFolderUpNode = document.createElement('button');
+					buttonFolderUpNode.classList.add('ui', 'button', 'icon');
+					buttonFolderUpNode.type = 'button';
+
+		if(srcInstance.activePath !== '')
+		{
+					buttonFolderUpNode.innerHTML = '<i class="fas fa-chevron-up"></i>';
+					buttonFolderUpNode.setAttribute('data-event-click', 'item-ctr-dir-up');
+		}
+		else
+		{
+			buttonFolderUpNode.innerHTML = '<i class="fas"></i>';
+			buttonFolderUpNode.disabled = true;
+		}
+
+		// Button View mode
+
+				var textViewModeNode = document.createElement('label');
+					textViewModeNode.append(document.createTextNode('View mode'));
+
+
+				let buttonViewSquareNode = document.createElement('button');
+					buttonViewSquareNode.classList.add('ui', 'button', 'icon', 'button-view-square');
+					buttonViewSquareNode.onclick = function(event) { srcInstance._onClickButtonViewSquare(event, srcInstance) };
+					buttonViewSquareNode.innerHTML = '<i class="fas fa-th"></i>';
+					buttonViewSquareNode.type = 'button';
+
+
+				let buttonViewListNode = document.createElement('button');
+					buttonViewListNode.classList.add('ui', 'button', 'icon', 'button-view-list');
+					buttonViewListNode.onclick = function(event) { srcInstance._onClickButtonViewList(event, srcInstance) };
+					buttonViewListNode.innerHTML = '<i class="fas fa-bars"></i>';
+					buttonViewListNode.type = 'button';
+
+
+				controlPanelLeftNode.append(buttonFolderUpNode, textViewModeNode, buttonViewListNode, buttonViewSquareNode);
+
+
+		//
 
 		let controlPanelNode = document.createElement('div');
 			controlPanelNode.classList.add('controls');
 			controlPanelNode.append(controlPanelLeftNode, controlPanelRightNode);
+			controlPanelNode.style.background = 'rgba(194, 214, 214, 0.4)';
 
-
-			mediathekNode.append(controlPanelNode);
-
-
-
-
-				break;
-		}
-
-
-
-
-
-			mediathekNode.append(itemsNode);
-
-
-
-
-
+		mediathekNode.append(controlPanelNode);
+		mediathekNode.append(itemsNode);
 
 		switch(srcInstance.workMode)
 		{
@@ -136,41 +168,56 @@ class	cmsMediathek
 				break;
 		}
 
+		mediathekNode.addEventListener('click', function(event) { srcInstance._onClick(event, srcInstance); });
 
-
-
-
-
-
-
-
-
-
-
-  			mediathekNode.addEventListener('click', function(event) { srcInstance._onClick(event, srcInstance); });
-
-
-
-	
-			srcInstance.displayContainerNode.innerHTML = '';
-			srcInstance.displayContainerNode.append(mediathekNode);
+		srcInstance.displayContainerNode.innerHTML = '';
+		srcInstance.displayContainerNode.append(mediathekNode);
 	}
 
 	_generateHTML_Squares(itemsList, contentNode)
 	{
+		let parentNode = document.createElement('div');
+			parentNode.classList.add('mediathek', 'mediathek-square');
 
 		console.log('_generateHTML_Squares');
 		console.log(itemsList);
 
-		for(let i = 0; i < itemsList.length; i++)
+		for(let i in itemsList)
 		{
+			if(typeof itemsList[i] === 'function')
+				continue;
+				
+			let squareNode = document.createElement('div');
+				squareNode.classList.add('item-'+ (itemsList[i].extension == 'dir' ? 'dir' : 'file'));
+				squareNode.setAttribute('data-event-click', 'item-'+ (itemsList[i].extension == 'dir' ? 'dir' : 'file'));
+				squareNode.setAttribute('data-item-path', itemsList[i].path);
+				squareNode.itemInfo = JSON.parse(JSON.stringify(itemsList[i]));
+				
+			switch(itemsList[i].extension)
+			{
+				case 'png':	
+				case 'gif':	
+				case 'webp':	
+				case 'jpeg':	
+				case 'jpg':	
 
+					squareNode.style.backgroundImage = "url('"+ CMS.SERVER_URL +"mediathek/"+ itemsList[i].path +"?binary&size=thumb')";
+					break;
+
+				case 'dir':	
+
+					squareNode.innerHTML = '<div><i class="fas fa-folder"></i><span class="name">'+ itemsList[i].name  +'</span></div>';
+					break;
+			}
+
+			parentNode.append(squareNode);
 		}
+
+		contentNode.append(parentNode);
 	}
 
 	_generateHTML_List(itemsList, contentNode)
 	{
-
 		let tableBodyNode = document.createElement('tbody');
 
 		for(let i in itemsList)
@@ -210,13 +257,9 @@ class	cmsMediathek
 
 		let tableHeadNode = document.createElement('thead');
 
-
 		let tableHeadHTML  = '';
 		 	tableHeadHTML += '<tr>';
-		if(this.activePath == '')
 		 	tableHeadHTML += '<th class="fileicon"></th>';
-		else
-		 	tableHeadHTML += '<th class="fileicon" data-event-click="item-ctr-dir-up"><i class="fas fa-chevron-up"></i></th>';
 		 	tableHeadHTML += '<th class="filename">Filename</th>';
 		 	tableHeadHTML += '<th class="filetype">File type</th>';
 		 	tableHeadHTML += '<th class="filesize">File size</th>';
@@ -233,9 +276,12 @@ class	cmsMediathek
 
 	_onClick(event, srcInstance)
 	{
+
+		console.log(event.target);
+
 		let targetNode = event.target;
 
-		if(srcInstance.viewMode == cmsMediathek.VIEWMODE_LIST && (event.target.tagName == 'TD'))
+		if(document.cmsMediathek.viewMode == cmsMediathek.VIEWMODE_LIST && (event.target.tagName == 'TD'))
 		{
 			// In list mode, check for click on TD to change the targetNode, the info is in the TR
 
@@ -243,6 +289,9 @@ class	cmsMediathek
 		
 		}
 
+
+
+		console.log(targetNode);
 
 		// check event type for targetNode, is he eligible for click event
 
@@ -305,6 +354,34 @@ class	cmsMediathek
 		let	xhRequest = new cmsXhr;
 			xhRequest.request(srcInstance.requestURL, formData, srcInstance.onXHRSuccessImport, srcInstance, 'import');
 	}
+
+
+	_onClickButtonViewSquare(event, srcInstance)
+	{
+
+console.log('_onClickButtonViewSquare');
+
+		document.cmsMediathek.viewMode = cmsMediathek.VIEWMODE_SQUARES;
+
+		srcInstance.requestItems();
+
+
+	}
+
+
+
+
+	_onClickButtonViewList(event, srcInstance)
+	{
+
+console.log('_onClickButtonViewList');
+		document.cmsMediathek.viewMode = cmsMediathek.VIEWMODE_LIST;
+
+
+		srcInstance.requestItems();
+	}
+
+
 
 	onXHRSuccessImport(response, srcInstance)
 	{
