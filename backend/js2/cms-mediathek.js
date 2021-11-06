@@ -199,7 +199,10 @@ class	cmsMediathek
 				case 'jpeg':	
 				case 'jpg':	
 
+					squareNode.classList.add('item-image');
 					squareNode.style.backgroundImage = "url('"+ CMS.SERVER_URL +"mediathek/"+ itemsList[i].path +"?binary&size=thumb')";
+					squareNode.innerHTML = '<div class="name">'+ itemsList[i].name  +'</div>';
+
 					break;
 
 				case 'dir':	

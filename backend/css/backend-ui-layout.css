@@ -287,6 +287,10 @@ div.mediathek-main div.mediathek-square > div.item-dir > div { position: absolut
 div.mediathek-main div.mediathek-square > div.item-dir > div i { font-size:4em; pointer-events:none; }
 div.mediathek-main div.mediathek-square > div.item-dir > div span.name { display:block; margin-top:5px; pointer-events:none; font-size:0.9em; }
 
+div.mediathek-main div.mediathek-square > div.item-file.item-image { position:relative; } 
+div.mediathek-main div.mediathek-square > div.item-file.item-image > div { position: absolute; display:none; bottom: 0; left: 0; width: 100%; pointer-events:none; background-color:rgba(255,255,255,0.8); padding:5px 5px; font-size:0.7em; overflow:hidden; } 
+div.mediathek-main div.mediathek-square > div.item-file.item-image:hover > div { display:block; } 
+
 div.cms-modal div.mediathek-main div.mediathek-square > div { width:calc(25% - 1px); } 
 div.cms-modal div.mediathek-main div.mediathek-square > div {  padding-top: 19%; } 
 
