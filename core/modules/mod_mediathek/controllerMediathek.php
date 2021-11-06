@@ -62,8 +62,9 @@ class	controllerMediathek extends CController
 		$logicDone = false;
 		switch($controllerAction)
 		{
-			case 'xhr_index': 	$logicDone = $this -> logicXHRIndex($_pDatabase, $_xhrInfo, $enableEdit, $enableDelete, $enableUpload);
-			case 'xhr_import': 	$logicDone = $this -> logicXHRImport($_pDatabase, $_xhrInfo, $enableEdit, $enableDelete, $enableUpload);
+			case 'xhr_index': 			$logicDone = $this -> logicXHRIndex($_pDatabase, $_xhrInfo, $enableEdit, $enableDelete, $enableUpload);
+			case 'xhr_import': 			$logicDone = $this -> logicXHRImport($_pDatabase, $_xhrInfo, $enableEdit, $enableDelete, $enableUpload);
+			case 'xhr_directory_list': 	$logicDone = $this -> logicXHRDirectoryList();
 		}
 
 		if(!$logicDone) // Default
@@ -262,6 +263,10 @@ class	controllerMediathek extends CController
 		return false;
 	}
 
+
+	/**
+	 * 	XHR Call to import all new (unprocessed) files in mediathek directory
+	 */
 	private function
 	logicXHRImport(CDatabaseConnection &$_pDatabase, ?object $_xhrInfo, bool $_enableEdit = false, bool $_enableDelete = false, bool $_enableUpload = false) : bool
 	{
@@ -330,22 +335,22 @@ class	controllerMediathek extends CController
 			$itemInfo = new stdClass;
 
 
-$itemInfo -> sheme		   = 1;
-$itemInfo -> filename	   = $item -> filename;
-$itemInfo -> sizes		   = [];
-$itemInfo -> license	   = $itemExifInfo -> Copyright ?? '';
-$itemInfo -> license_url   = '';
-$itemInfo -> gear		   = [
-	"by_meta"	=> false,
-	"camera"	=> $itemExifInfo -> Model ?? '',
-	"lens"		=> $itemExifInfo -> LensModel ?? $itemExifInfo -> {'UndefinedTag:0xA434'} ?? ''
-];
-$itemInfo -> gear_settings = [];	// This values are not getting retrieved at the moment
-$itemInfo -> title		   = '';
-$itemInfo -> caption	   = '';
-$itemInfo -> author 	   = $itemExifInfo -> Artist ?? '';
-$itemInfo -> notice		   = '';
-$itemInfo -> timeAdd	   = time();
+			$itemInfo -> sheme		   = 1;
+			$itemInfo -> filename	   = $item -> filename;
+			$itemInfo -> sizes		   = [];
+			$itemInfo -> license	   = $itemExifInfo -> Copyright ?? '';
+			$itemInfo -> license_url   = '';
+			$itemInfo -> gear		   = [
+				"by_meta"	=> false,
+				"camera"	=> $itemExifInfo -> Model ?? '',
+				"lens"		=> $itemExifInfo -> LensModel ?? $itemExifInfo -> {'UndefinedTag:0xA434'} ?? ''
+			];
+			$itemInfo -> gear_settings = [];	// This values are not getting retrieved at the moment
+			$itemInfo -> title		   = '';
+			$itemInfo -> caption	   = '';
+			$itemInfo -> author 	   = $itemExifInfo -> Artist ?? '';
+			$itemInfo -> notice		   = '';
+			$itemInfo -> timeAdd	   = time();
 
 
 
@@ -417,69 +422,21 @@ $itemInfo -> timeAdd	   = time();
 		return false;
 	}
 
+
 	/**
-	 * 	Create multi-level array from the mediethek directory
-
-	public function
-	getMediathekStructure(string $path, array &$destList, int $level)								........ not in use
-	{
-		$found = 0;
-		$directoryList = new DirectoryIterator(CMS_SERVER_ROOT.DIR_MEDIATHEK.$path);
-		foreach($directoryList as $directory)
-		{
-			if($directory -> isDot())
-				continue;
-
-			if(!$directory -> isDir())
-				continue;
-
-			if(file_exists(CMS_SERVER_ROOT.DIR_MEDIATHEK.$path.$directory -> getFilename().'/info.json'))
-				continue;
-
-			$dirItem  = new stdClass;
-			$dirItem -> level = $level; 
-			$dirItem -> path  = $path.$directory -> getFilename();
-			$dirItem -> childs = [];
-			$destList[] = $dirItem;
-			$found++;
-			$dirItem -> ts = $this -> getMediathekStructure($path.$directory -> getFilename().'/', $dirItem -> childs, $level + 1);
-			$found = $found + $dirItem -> ts;
-		}
-		return $found;
-	}
+	 * 	XHR Call to retrieve a multidimensional array of mediathek directory
 	 */
-	/**
-	 * 	Create one-level array from getMediathekStructure-array and append left/right informationen
-	
-	public function
-	getNestedSetStructure(array $structureList, array &$destList, int &$left, int &$right)			........ not in use
+	private function
+	logicXHRDirectoryList() : bool
 	{
-		foreach($structureList as $index => $item)
-		{
-			$item -> left = $left;
-			$destList[] = $item;
-			$left++;
-			if($item -> ts != 0)
-			{
-				$right++;
-				$this -> getNestedSetStructure($item -> childs, $destList, $left, $right);
-			}
-			$item -> right = $right;
-			if($item -> ts == 0)
-			{
-				$right++;		
-			}
-			if($item -> ts != 0)
-			{
-				$left = $right + 1;
-				if(count($structureList) !== 1 && $item -> ts !== 0)
-				$right = $right + 2;
-					else
-				$right = $right + 1;
-			}
-			unset($item -> childs);
-		}
-	}
- 	*/
+		$validationErr   = false;
+		$validationMsg   = 'OK';
+		$responseData    = [];
 
+		MEDIATHEK::getMediathekStructure('', $responseData, 1);
+
+		tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
+
+		return false;
+	}
 }

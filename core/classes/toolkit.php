@@ -325,7 +325,6 @@ class	CRYPT
 
 class 	MEDIATHEK
 {
-
 	public static function 
 	getItemUrl(int $mediaId, string $itemPath = '') : ?string
 	{
@@ -343,7 +342,7 @@ class 	MEDIATHEK
 
 			if($directory -> isDir() && !file_exists(CMS_SERVER_ROOT.DIR_MEDIATHEK.$itemPath.$directory -> getFilename().'/info.json'))
 			{
-				$response = MEDIATHEK::getItemUrl($mediaId, $directory -> getFilename().'/');
+				$response = MEDIATHEK::getItemUrl($mediaId, $itemPath .$directory -> getFilename().'/');
 				if($response !== null)
 					return $response;
 			}
@@ -565,6 +564,77 @@ class 	MEDIATHEK
 		return $resizedImageList;
 	}
 
+	/**
+	 * 	Create multidimensional array with directory names from the mediethek directory
+	 * 	@param string $path Initial path to start, empty string means the whole mediathek
+	 * 	@param array $destList A reference to an Array where the data will be written
+	 * 	@param int $level Integer that indicates the Level of the current element. It is independent from the real level, choice your own start value for your usage.
+ 	 */
+	public static function
+	getMediathekStructure(string $path, array &$destList, int $level)							
+	{
+		$found = 0;
+		$directoryList = new DirectoryIterator(CMS_SERVER_ROOT.DIR_MEDIATHEK.$path);
+		foreach($directoryList as $directory)
+		{
+			if($directory -> isDot())
+				continue;
+
+			if(!$directory -> isDir())
+				continue;
+
+			if(file_exists(CMS_SERVER_ROOT.DIR_MEDIATHEK.$path.$directory -> getFilename().'/info.json'))
+				continue;
+
+			$dirItem  = new stdClass;
+			$dirItem -> level  = $level; 
+			$dirItem -> name   = $directory -> getFilename();
+			$dirItem -> path   = $path.$directory -> getFilename();
+			$dirItem -> childs = [];
+			$destList[] = $dirItem;
+			$found++;
+			$dirItem -> ts = MEDIATHEK::getMediathekStructure($path.$directory -> getFilename().'/', $dirItem -> childs, $level + 1);
+			$found = $found + $dirItem -> ts;
+		}
+		return $found;
+	}
+	
+	/**
+	 * 	Create one-level array from getMediathekStructure-array and append left/right informationen
+	 * 	@param array $structureList The Array from MEDIATHEK::getMediathekStructure call
+	 * 	@param array $destList A reference to an Array where the data will be written
+	 * 	@param int $left A reference to an Integer of left nested item, intial value should be 1 
+	 * 	@param int $right A reference to an Integer of right nested item, intial value should be 2 
+	 */
+	public static function
+	getNestedSetStructure(array $structureList, array &$destList, int &$left, int &$right)
+	{
+		foreach($structureList as $index => $item)
+		{
+			$item -> left = $left;
+			$destList[] = $item;
+			$left++;
+			if($item -> ts != 0)
+			{
+				$right++;
+				MEDIATHEK::getNestedSetStructure($item -> childs, $destList, $left, $right);
+			}
+			$item -> right = $right;
+			if($item -> ts == 0)
+			{
+				$right++;		
+			}
+			if($item -> ts != 0)
+			{
+				$left = $right + 1;
+				if(count($structureList) !== 1 && $item -> ts !== 0)
+				$right = $right + 2;
+					else
+				$right = $right + 1;
+			}
+			unset($item -> childs);
+		}
+	}
 }
 
 /**
@@ -575,5 +645,3 @@ function bcround($n, $p = 0)
     $e = bcpow(10, $p + 1);
     return bcdiv(bcadd(bcmul($n, $e, 0), (strpos($n, '-') === 0 ? -5 : 5)), $e, $p);
 }
-		
-?>

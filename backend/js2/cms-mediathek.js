@@ -10,7 +10,6 @@ class	cmsMediathek
 	constructor(displayContainerNode)
 	{
 		this.displayContainerNode = displayContainerNode;
-		this.requestURL			 = CMS.SERVER_URL_BACKEND + 'mediathek/';
 	}
 
 	init(viewMode, workMode, rootPath = '')
@@ -20,7 +19,6 @@ class	cmsMediathek
 		this.rootPath	  = rootPath;
 		this.activePath   = rootPath;
 
-		console.log(document.cmsMediathek);
 
 		if(typeof document.cmsMediathek === 'undefined')
 		{
@@ -45,7 +43,7 @@ class	cmsMediathek
 			formData.append('path', this.activePath);
 
 		let	xhRequest = new cmsXhr;
-			xhRequest.request(this.requestURL, formData, this.onXHRSuccessRequestItems, this, 'index');
+			xhRequest.request(CMS.SERVER_URL_BACKEND + 'mediathek/', formData, this.onXHRSuccessRequestItems, this, 'index');
 	}
 
 	onXHRSuccessRequestItems(response, srcInstance)
@@ -276,7 +274,6 @@ class	cmsMediathek
 
 	_onClick(event, srcInstance)
 	{
-
 		console.log(event.target);
 
 		let targetNode = event.target;
@@ -286,19 +283,14 @@ class	cmsMediathek
 			// In list mode, check for click on TD to change the targetNode, the info is in the TR
 
 			targetNode = event.target.parentNode;
-		
 		}
-
-
 
 		console.log(targetNode);
 
 		// check event type for targetNode, is he eligible for click event
 
-
 		if(targetNode.hasAttribute('data-event-click'))
 		{
-
 			// react on click key word
 			switch(targetNode.getAttribute('data-event-click'))
 			{
@@ -306,26 +298,16 @@ class	cmsMediathek
 
 						// click on dir item always open this dir
 						
-
 						srcInstance.activePath = targetNode.getAttribute('data-item-path') + '';
 						srcInstance.requestItems();
 
-
-
 					break;
-
-
 
 				case 'item-file':
 
-
-
-
-							targetNode.dispatchEvent(new CustomEvent(srcInstance.eventNameOnSelected, { detail: { file: targetNode.itemInfo, sourceNode: srcInstance.eventSourceNode }, bubbles: true  }));
+					targetNode.dispatchEvent(new CustomEvent(srcInstance.eventNameOnSelected, { detail: { file: targetNode.itemInfo, sourceNode: srcInstance.eventSourceNode }, bubbles: true  }));
 
 					break;
-
-
 
 				case 'item-ctr-dir-up':
 
@@ -339,12 +321,7 @@ class	cmsMediathek
 
 					break;
 			}
-
-
-
 		}
-
-
 	}
 
 	_onClickButtonImport(event, srcInstance)
@@ -352,40 +329,36 @@ class	cmsMediathek
 		let	formData  = new FormData;
 
 		let	xhRequest = new cmsXhr;
-			xhRequest.request(srcInstance.requestURL, formData, srcInstance.onXHRSuccessImport, srcInstance, 'import');
+			xhRequest.request(CMS.SERVER_URL_BACKEND + 'mediathek/', formData, srcInstance.onXHRSuccessImport, srcInstance, 'import');
 	}
-
 
 	_onClickButtonViewSquare(event, srcInstance)
 	{
-
-console.log('_onClickButtonViewSquare');
-
 		document.cmsMediathek.viewMode = cmsMediathek.VIEWMODE_SQUARES;
-
 		srcInstance.requestItems();
-
-
 	}
-
-
-
 
 	_onClickButtonViewList(event, srcInstance)
 	{
-
-console.log('_onClickButtonViewList');
 		document.cmsMediathek.viewMode = cmsMediathek.VIEWMODE_LIST;
-
-
 		srcInstance.requestItems();
 	}
-
-
 
 	onXHRSuccessImport(response, srcInstance)
 	{
 		srcInstance.requestItems();
 	}
+
+
+
+	static queryDirectories(onSuccessCallback, srcInstance)
+	{
+		let	formData  = new FormData;
+
+		let	xhRequest = new cmsXhr;
+			xhRequest.request(CMS.SERVER_URL_BACKEND + 'mediathek/', formData, onSuccessCallback, srcInstance, 'directory_list');
+	}
+
+
 
 }
