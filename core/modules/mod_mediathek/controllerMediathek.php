@@ -65,6 +65,7 @@ class	controllerMediathek extends CController
 			case 'xhr_index': 			$logicDone = $this -> logicXHRIndex($_pDatabase, $_xhrInfo, $enableEdit, $enableDelete, $enableUpload);
 			case 'xhr_import': 			$logicDone = $this -> logicXHRImport($_pDatabase, $_xhrInfo, $enableEdit, $enableDelete, $enableUpload);
 			case 'xhr_directory_list': 	$logicDone = $this -> logicXHRDirectoryList();
+			case 'xhr_directory_items': $logicDone = $this -> logicXHRDirectoryItems();
 		}
 
 		if(!$logicDone) // Default
@@ -439,4 +440,35 @@ class	controllerMediathek extends CController
 
 		return false;
 	}
+
+	/**
+	 * 	XHR Call to retrieve the items in the defined diretory only
+	 */
+	private function
+	logicXHRDirectoryItems() : bool
+	{
+		$validationErr   = false;
+		$validationMsg   = 'OK';
+		$responseData    = [];
+
+
+
+
+		$pURLVariables	 =	new CURLVariables();
+		$requestList		 =	[];
+		$requestList[] 	 = 	[ "input" => 'simple-gallery-path', "validate" => "strip_tags|!empty", "use_default" => true, "default_value" => '/' ]; 		
+		$pURLVariables -> retrieve($requestList, false, true);	
+
+		$urlVarList		 = $pURLVariables -> getArray();
+
+	
+	
+		MEDIATHEK::getItemsList($urlVarList['simple-gallery-path'].'/', $responseData, true);
+
+		tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
+
+		return false;
+	}
+
+	
 }

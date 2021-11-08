@@ -6,7 +6,7 @@
 }
 
 
-	button { cursor:pointer; background:rgb(242, 242, 242); background:linear-gradient(to bottom, rgb(242, 242, 242), rgb(204, 204, 204)); border:1px solid grey; text-shadow: 0 0 4px rgba(255,255,255,0.8); }
+	button { cursor:pointer; background:rgb(242, 242, 242);  font-family: 'Open Sans', sans-serif; background:linear-gradient(to bottom, rgb(242, 242, 242), rgb(204, 204, 204)); border:1px solid grey; text-shadow: 0 0 4px rgba(255,255,255,0.8); }
 
 	input,
 	textarea,
@@ -24,7 +24,7 @@
 	input,
 	textarea,
 	select,
-	button	{ font-size:0.85em; padding: var(--ui-input-padding); }
+	button	{ font-size:0.87em; padding: var(--ui-input-padding); }
 
 
 	input:required,

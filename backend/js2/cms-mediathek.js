@@ -352,8 +352,6 @@ class	cmsMediathek
 		srcInstance.requestItems();
 	}
 
-
-
 	static queryDirectories(onSuccessCallback, srcInstance)
 	{
 		let	formData  = new FormData;
@@ -362,6 +360,12 @@ class	cmsMediathek
 			xhRequest.request(CMS.SERVER_URL_BACKEND + 'mediathek/', formData, onSuccessCallback, srcInstance, 'directory_list');
 	}
 
+	static queryDiretoryItems(mediathekPath, onSuccessCallback, srcInstance)
+	{
+		let	formData  = new FormData;
+			formData.append('simple-gallery-path', mediathekPath);
 
-
+		let	xhRequest = new cmsXhr;
+			xhRequest.request(CMS.SERVER_URL_BACKEND + 'mediathek/', formData, onSuccessCallback, srcInstance, 'directory_items');
+	}
 }

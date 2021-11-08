@@ -1,18 +1,20 @@
 {
-	"module_controller" : "controllerSimpleImage",
-	"module_name"		: "Image",
-	"module_desc"		: "",
-	"module_path" 		: "",
-	"module_group"		: "Simple Modules",
-	"module_icon"		: "&#xf03e;",
-	"module_frontend"	: 1,
-	"module_menu_group"	: "0",
-	"module_rights"		:[
+	"sheme"				: 2,
+	"version"			: 1,
+	"module"			: {
+		"controller"	: "controllerSimpleGallery",
+		"name"			: "Gallery",
+		"desc"			: "",
+		"group"			: "Simple Modules",
+		"icon"			: "&#xf302;",
+		"frontend"		: 1
+	},
+	"rights"			: [
 							{"name":"view",		"desc":"VIEW"},
 							{"name":"create",	"desc":"CREATE"},
 							{"name":"edit",		"desc":"EDIT"}
-						],
-	"module_subs"		:[	
+	],
+	"sections"			: [
 							{
 								"url_name"	:"",
 								"ctl_target":"view",
@@ -51,8 +53,8 @@
 												"query_var" :"cms-system-id"
 											 }
 							}
-						],
-	"include"			:[
+	],
+	"includes"			:[
 							{	
 								"type":"script",	
 								"file":"script.js",

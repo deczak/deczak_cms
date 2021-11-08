@@ -352,7 +352,7 @@ class 	MEDIATHEK
 	}
  
 	public static function 
-	getItemsList(string $path, array &$destList)
+	getItemsList(string $path, array &$destList, bool $ignoreSubDirectory = false)
 	{
 		$directoryList = new DirectoryIterator(CMS_SERVER_ROOT.DIR_MEDIATHEK.$path);
 		foreach($directoryList as $directory)
@@ -405,11 +405,24 @@ class 	MEDIATHEK
 				$mediathekItem -> license_url 	= $itemInfo -> license_url ?? '';
 				$mediathekItem -> mime 			= mime_content_type($mediathekFilelocation);
 
+
+				switch($mediathekItem -> mime )
+				{
+					case 'image/jpeg':
+					case 'image/png':
+					case 'image/png':
+
+						$mediathekItem -> props  = getimagesize(CMS_SERVER_ROOT.DIR_MEDIATHEK.$path.$directory -> getFilename().'/'.$itemInfo -> filename);
+						$mediathekItem -> orient = (($mediathekItem -> props[0] / $mediathekItem -> props[1]) > 1 ? 0 : 1);
+				}
+
+
 				$destList[] = $mediathekItem;
 			}
 			else
 			{
-				MEDIATHEK::getItemsList($path.$directory -> getFilename().'/', $destList);
+				if(!$ignoreSubDirectory)
+					MEDIATHEK::getItemsList($path.$directory -> getFilename().'/', $destList);
 			}
 		}
 	}
