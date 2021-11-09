@@ -44,8 +44,7 @@
 	$_POST['user-user']			= CRYPT::LOGIN_HASH($_POST['user-user']);
 	$_POST['user-pass']			= CRYPT::LOGIN_CRYPT($_POST['user-pass'], CFG::GET() -> ENCRYPTION -> BASEKEY);
 
-	$_pMessages		 =	CMessages::instance();
-	$_pMessages		->	initialize(CMS_PROTOCOL_REPORTING, CMS_DEBUG_REPORTING);
+	$_pMessages		 =	CMessages::initialize();
 
 	$databases 	 = 	[];
 	$databases[] = 	[
@@ -190,7 +189,7 @@
 			continue;
 		$moduleJSON = json_decode($moduleJSON);
 		$pModulesInstall = new CModulesInstall;
-		$moduleData = $pModulesInstall -> getMmoduleData($moduleJSON, $module -> module_location, $module -> module_type);
+		$moduleData = $pModulesInstall -> getModuleData($moduleJSON, $module -> module_location, $module -> module_type);
 		foreach($moduleData['rights'] as $right)
 		{
 			$adminRights[ $module -> module_id ][] = $right -> name;

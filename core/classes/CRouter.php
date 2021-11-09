@@ -172,7 +172,7 @@ class CRouter extends CSingleton
 			}
 
 			$pModulesInstall = new CModulesInstall;
-			$moduleData = $pModulesInstall -> getMmoduleData($moduleConfig, $module -> module_location, $module -> module_type);
+			$moduleData = $pModulesInstall -> getModuleData($moduleConfig, $module -> module_location, $module -> module_type);
 
 
 			if($moduleData === false)

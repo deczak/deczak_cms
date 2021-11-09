@@ -17,8 +17,7 @@
 	if(empty($_POST['database-pass'])) 		tk::xhrResult(1, 'Database password not set');			else $_POST['database-pass'] 	 = trim(strip_tags($_POST['database-pass']));
 	if(empty($_POST['database-database'])) 	tk::xhrResult(1, 'Database name not set');				else $_POST['database-database'] = trim(strip_tags($_POST['database-database']));
 
-	$_pMessages		 =	CMessages::instance();
-	$_pMessages		->	initialize(CMS_PROTOCOL_REPORTING, CMS_DEBUG_REPORTING);
+	$_pMessages		 =	CMessages::initialize();
 
 	$databases 	 = 	[];
 	$databases[] = 	[

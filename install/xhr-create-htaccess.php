@@ -31,8 +31,7 @@
 
 
 
-	$_pMessages		 =	CMessages::instance();
-	$_pMessages		->	initialize(CMS_PROTOCOL_REPORTING, CMS_DEBUG_REPORTING);
+	$_pMessages		 =	CMessages::initialize();
 	#$db = new mysqli($_POST['database-server'], $_POST['database-user'], $_POST['database-pass'], $_POST['database-database']);
 
 

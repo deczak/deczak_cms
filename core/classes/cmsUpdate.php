@@ -66,7 +66,6 @@ class cmsUpdate
 
 			echo "The System can't find the VERSION-FS file for the update process<br><br>System halted";
 			exit;
-
 		}
 
 		if((int)$versionFS !== (int)$versionDB)

@@ -28,6 +28,7 @@ class	CMessages extends CSingleton
 	{
 		$instance  = static::instance();
 		$instance -> m_aStorage				= [];
+		return $instance;
 	}
 
 	/**

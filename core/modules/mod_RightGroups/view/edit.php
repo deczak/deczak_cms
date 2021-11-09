@@ -102,7 +102,7 @@ $activeModulesList = CModules::instance() -> getModules();
 
 		$pModulesInstall = new CModulesInstall;
 
-		$moduleData = $pModulesInstall -> getMmoduleData($_moduleData, $_module -> module_location, $_module -> module_type);
+		$moduleData = $pModulesInstall -> getModuleData($_moduleData, $_module -> module_location, $_module -> module_type);
 
 		if($moduleData === false)
 		{

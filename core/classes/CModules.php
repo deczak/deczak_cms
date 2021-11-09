@@ -101,7 +101,7 @@ class CModules extends CSingleton
 							$moduleConfig 	= ($moduleConfig !== false ? json_decode($moduleConfig) : [] );	
 
 							$pModulesInstall = new CModulesInstall;
-							$moduleData = $pModulesInstall -> getMmoduleData($moduleConfig, $moduleInstance -> module_location, $moduleInstance -> module_type);
+							$moduleData = $pModulesInstall -> getModuleData($moduleConfig, $moduleInstance -> module_location, $moduleInstance -> module_type);
 
 							if($moduleData === false)
 							{
@@ -126,7 +126,7 @@ class CModules extends CSingleton
 							$moduleConfig 	= ($moduleConfig !== false ? json_decode($moduleConfig) : [] );	
 
 							$pModulesInstall = new CModulesInstall;
-							$moduleData = $pModulesInstall -> getMmoduleData($moduleConfig, $moduleInstance -> module_location, $moduleInstance -> module_type);
+							$moduleData = $pModulesInstall -> getModuleData($moduleConfig, $moduleInstance -> module_location, $moduleInstance -> module_type);
 
 							if($moduleData === false)
 							{
@@ -177,16 +177,15 @@ class CModules extends CSingleton
 		return false;
 	}
 
-
-
-
-
-
-
-
-
+	/**
+	 * 	Return a module info by his controller name
+	 * 	
+	 * 	@param string $_moduleController The controller name (the class name).
+	 * 	@param mixed $_moduleIinstance A reference to the destination where the info will be written.
+	 * 	@return bool true if controller was found and written to the reference, otherwise false.
+	 */
 	public function
-	getModuleByController(string $_moduleController, &$_moduleIinstance)
+	getModuleByController(string $_moduleController, &$_moduleIinstance) : bool
 	{
 		$modulesCount = count($this -> modulesList);
 
@@ -204,8 +203,14 @@ class CModules extends CSingleton
 		return false;
 	}
 
+	/**
+	 * 	Returns the list of all installes modules
+	 * 
+	 * 	@param bool $_onlyFrontend if true, it returns only frontend modules
+	 * 	@return array A list of modules
+	 */
 	public function
-	&getModules(bool $_onlyFrontend = false)
+	getModules(bool $_onlyFrontend = false) : array
 	{
 		if($_onlyFrontend)
 		{
@@ -231,8 +236,13 @@ class CModules extends CSingleton
 		return $this -> modulesList;
 	}
 	
+	/**
+	 * 	Returns a List avaiable modules for core and mantle that is not installed
+	 * 
+	 * 	@return array A list of not installed modules
+	 */
 	public function
-	getAvailableModules()
+	getAvailableModules() : array
 	{
 		$moduleList_core 	= [];
 		$moduleList_mantle 	= [];
@@ -261,14 +271,11 @@ class CModules extends CSingleton
 
 				$moduleConfig = json_decode($moduleConfig);
 
-
-
 				// Determine Sheme
 
 				$pModulesInstall = new CModulesInstall;
 
-
-				$moduleData = $pModulesInstall -> getMmoduleData($moduleConfig, $directory, 'core');
+				$moduleData = $pModulesInstall -> getModuleData($moduleConfig, $directory, 'core');
 
 				if($moduleData === false)
 				{
@@ -276,9 +283,6 @@ class CModules extends CSingleton
 				}
 
 				$moduleData = json_decode(json_encode($moduleData));
-
-
-
 
 				$moduleData -> module -> module_location = $directory;
 
@@ -293,7 +297,6 @@ class CModules extends CSingleton
 			$_dirIterator 	= new DirectoryIterator($procPath);
 			foreach($_dirIterator as $_dirItem)
 			{
-
 				if($_dirItem -> isDot() || $_dirItem -> getType() !== 'dir')
 					continue;
 
@@ -304,9 +307,6 @@ class CModules extends CSingleton
 
 				$moduleFilepath = $procPath . $directory .'/module.json'; 
 
-
-
-
 				$moduleConfig	= file_get_contents($moduleFilepath);
 
 				if($moduleConfig === false)
@@ -314,34 +314,18 @@ class CModules extends CSingleton
 
 				$moduleConfig = json_decode($moduleConfig);
 
-
-
-
-
-
-
-
 				// Determine Sheme
 
 				$pModulesInstall = new CModulesInstall;
 
-
-				$moduleData = $pModulesInstall -> getMmoduleData($moduleConfig, $directory, 'mantle');
+				$moduleData = $pModulesInstall -> getModuleData($moduleConfig, $directory, 'mantle');
 
 				if($moduleData === false)
 				{
 					continue;
 				}
 
-
 				$moduleData = json_decode(json_encode($moduleData));
-
-
-
-
-
-
-
 
 				$moduleData -> module -> module_location = $directory;
 
@@ -405,8 +389,18 @@ class CModules extends CSingleton
 		return $availableList;
 	}
 
+	/**
+	 * 	Installs a module
+	 * 
+	 *	@param CDatabaseConnection $_dbConnection Database Connection object
+	 *	@param string $moduleLocation Folder name of that module
+	 * 	@param string $moduleType Module type, core or mantle
+	 * 	@param string $errorMsg A reference to a string where the error message will be written
+	 * 	@param bool $updateRoutes true to update the routing system, otherwise false
+	 * 	@return bool true if successful, otherwise false
+	 */
 	public function
-	install(CDatabaseConnection &$_dbConnection, $moduleLocation, $moduleType, &$errorMsg, bool $updateRoutes = true)
+	install(CDatabaseConnection &$_dbConnection, string $moduleLocation, string $moduleType, string &$errorMsg, bool $updateRoutes = true) : bool
 	{
 		$_dbConnection -> beginTransaction();
 				
@@ -433,8 +427,16 @@ class CModules extends CSingleton
 		return true;
 	}
 
+	/**
+	 * 	Uninstall a module
+	 * 
+	 *	@param CDatabaseConnection $_dbConnection Database Connection object
+	 *	@param int $_moduleId Module ID that will be uninstalled
+	 * 	@param string $errorMsg A reference to a string where the error message will be written
+	 * 	@return bool true if successful, otherwise false
+	 */
 	public function
-	uninstall(CDatabaseConnection &$_dbConnection, $_moduleId, &$errorMsg)
+	uninstall(CDatabaseConnection &$_dbConnection, int $_moduleId, &$errorMsg) : bool
 	{
 		$_dbConnection -> beginTransaction();
 
@@ -455,12 +457,18 @@ class CModules extends CSingleton
 		return true;
 	}
 
+	/**
+	 * 	Check the user his rights to the module rights
+	 * 
+	 *	@param int $_moduleId Module ID that will be uninstalled
+	 * 	@param string $_rightsId Module right name
+	 * 	@return bool true if the user owns the module right, otherwise false
+	 */ 
 	public function
-	existsRights(int $_moduleId, string $_rightsId)
+	existsRights(int $_moduleId, string $_rightsId) : bool
 	{
 		return $this -> m_pUserRights -> existsRight($_moduleId, $_rightsId);
 	}
-
 
 	/**
 	 * 	Static wrapper function for resource generation 
@@ -474,6 +482,10 @@ class CModules extends CSingleton
 	}
 }
 
+
+/**
+ * 	This class un-/installs the modules 
+ */
 class CModulesInstall 
 {
 	public function
@@ -481,8 +493,17 @@ class CModulesInstall
 	{
 	}
 
+	/**
+	 * 	Installs a module
+	 * 
+	 *	@param CDatabaseConnection $_dbConnection Database Connection object
+	 *	@param string $moduleLocation Folder name of that module
+	 * 	@param string $moduleType Module type, core or mantle
+	 * 	@param string $errorMsg A reference to a string where the error message will be written
+	 * 	@return bool true if successful, otherwise false
+	 */
 	public function
-	install(CDatabaseConnection &$_dbConnection, $moduleLocation, $moduleType, &$errorMsg)
+	install(CDatabaseConnection &$_dbConnection, string $moduleLocation, string $moduleType, &$errorMsg) : bool
 	{
 		// Read module.json
 
@@ -492,10 +513,6 @@ class CModulesInstall
 
 		if($moduleConfig === false)
 		{
-
-
-
-
 			$errorMsg = 'Could not find module config';
 			return false;
 		}
@@ -504,19 +521,13 @@ class CModulesInstall
 
 		// Determine Sheme
 
-		$moduleData = $this -> getMmoduleData($moduleConfig, $moduleLocation, $moduleType);
+		$moduleData = $this -> getModuleData($moduleConfig, $moduleLocation, $moduleType);
 
 		if($moduleData === false)
 		{
-
-
-
 			$errorMsg = 'Invalid module config format';
 			return false;
 		}
-
-
-
 
 		## insert module, shemes
 
@@ -557,10 +568,6 @@ class CModulesInstall
 
 					if(!$sheme -> createTable($_dbConnection))
 					{
-
-
-
-
 						return false;
 					}
 				}
@@ -568,34 +575,16 @@ class CModulesInstall
 		}
 		else
 		{
-
-
 			$errorMsg = 'Could not find module information';
 			return false;
 		}
 
 		## insert page if requested
 
-
-
-
-
-
 		if($moduleData['page'] !== false)
 		{
-
-
 			if(isset($moduleData['module']['is_frontend']) && $moduleData['module']['is_frontend'] === '0')
 			{
-
-
-
-
-
-
-
-
-
 				## Check if page is start page
 
 				if(empty($moduleData['page']['page_path']))
@@ -609,30 +598,20 @@ class CModulesInstall
 					$modelBackendPagePath = new modelBackendPagePath;
 					$modelBackendPagePath -> load($_dbConnection, $modelCondition);
 
-
 					if(count($modelBackendPagePath -> getResult()) !== 1)
 					{
-
-
-
 						return false;
 					}
 
 					$moduleData['page']['node_id'] = reset($modelBackendPagePath -> getResult()) -> node_id;
-
-
 				}
 				else
 				{
-				
-
 					$modelBackendPage  = new modelBackendPage;
 					$nodeId = $modelBackendPage -> insert($_dbConnection, $moduleData['page']);
 
 					if($nodeId === false)
 					{
-
-
 						$errorMsg = 'Error on insert page for module';
 						return false;
 					}
@@ -642,11 +621,6 @@ class CModulesInstall
 			}
 			else
 			{
-
-
-
-
-
 				## Check if page is start page
 
 				if(empty($moduleData['page']['path']))
@@ -664,33 +638,21 @@ class CModulesInstall
 					$modelPagePath = new modelPagePath;
 					$modelPagePath -> load($_dbConnection, $modelCondition);
 
-
 					if(count($modelPagePath -> getResult()) !== 1)
 					{
-
 						$errorMsg = 'Could not find node for requested page path';
-
-
 						return false;
 					}
 
-
 					$moduleData['page']['node_id'] = reset($modelBackendPagePath -> getResult()) -> node_id;
-
-
 				}
 				else
 				{
-				
-
-
 					$modelPage  = new modelPage;
 					$nodeId = $modelPage -> insert($_dbConnection, $moduleData['page']);
 
 					if($nodeId === false)
 					{
-
-
 						$errorMsg = 'Error on insert page for module';
 						return false;
 					}
@@ -704,8 +666,6 @@ class CModulesInstall
 
 		if(isset($moduleData['objects']) && $moduleData['objects'] !== false)
 		{
-
-
 			foreach($moduleData['objects'] as $index => $object)
 			{
 				switch($moduleConfig -> sheme)
@@ -729,11 +689,6 @@ class CModulesInstall
 
 						$modulesList = $modelModules -> getResult();
 
-
-
-
-
-
 						if(count($modulesList) !== 1)
 						{
 							continue 2;
@@ -747,10 +702,6 @@ class CModulesInstall
 						break;
 				}
 
-
-
-
-
 				$moduleCondition  = new CModelCondition();
 				$moduleCondition -> where('module_id', $object['module_id']);
 
@@ -760,10 +711,6 @@ class CModulesInstall
 				$modulesList = $modelModules -> getResult();
 
 				$moduleInfo = reset($modulesList); 
-
-
-
-
 
 				$contentId = 0;
 
@@ -778,12 +725,8 @@ class CModulesInstall
 					$contentId = $modelPageObject -> insert($_dbConnection, $object);
 				}
 
-
-
 				if($moduleInfo -> module_group === 'backend')
 					continue;
-
-
 
 				$objectData = new stdClass();
 				$objectData -> page_version 	= '1';
@@ -798,53 +741,36 @@ class CModulesInstall
  				$controller = $moduleInfo -> module_controller;
 				$controllerFilepath = CMS_SERVER_ROOT . $moduleInfo -> module_type .'/'. DIR_MODULES . $moduleInfo -> module_location .'/'. $controller .'.php';
 
-
-
 				if(!file_exists($controllerFilepath))
 				{
 					continue;
 				}
 
+				$objectModuleFilepath 	= CMS_SERVER_ROOT . $moduleInfo -> module_type .'/'. DIR_MODULES . $moduleInfo -> module_location .'/module.json';
 
+				$objectModuleConfig	= file_get_contents($objectModuleFilepath);
 
+				if($objectModuleConfig === false)
+				{
+					continue;
+				}
 
+				$objectModuleConfig = json_decode($objectModuleConfig);
 
+				// Determine Sheme
 
+				$objectModuleData = $this -> getModuleData($objectModuleConfig, $moduleInfo -> module_location, $moduleInfo -> module_type);
 
-		$objectModuleFilepath 	= CMS_SERVER_ROOT . $moduleInfo -> module_type .'/'. DIR_MODULES . $moduleInfo -> module_location .'/module.json';
+				if($objectModuleData === false)
+				{
+					continue;
+				}
 
-		$objectModuleConfig	= file_get_contents($objectModuleFilepath);
-
-		if($objectModuleConfig === false)
-		{
-			continue;
-		}
-
-		$objectModuleConfig = json_decode($objectModuleConfig);
-
-		// Determine Sheme
-
-		$objectModuleData = $this -> getMmoduleData($objectModuleConfig, $moduleInfo -> module_location, $moduleInfo -> module_type);
-
-		if($objectModuleData === false)
-		{
-			continue;
-		}
-
-
-
-			$moduleABC = json_decode(json_encode($objectModuleData));
-
-
+				$moduleABC = json_decode(json_encode($objectModuleData));
 
 				$isBackendCall = false;
 				if($moduleData['module']['module_group'] === 'backend')
 					$isBackendCall  = true;
-
-
-
-
-
 
 				require_once $controllerFilepath;
 				$objectInstance = new $controller($moduleABC, $objectData, $isBackendCall);
@@ -897,8 +823,16 @@ class CModulesInstall
 		return true;
 	}
 
+	/**
+	 * 	Uninstall a module
+	 * 
+	 *	@param CDatabaseConnection $_dbConnection Database Connection object
+	 *	@param int $_moduleId Module ID that will be uninstalled
+	 * 	@param string $errorMsg A reference to a string where the error message will be written
+	 * 	@return bool true if successful, otherwise false
+	 */
 	public function
-	uninstall(CDatabaseConnection &$_dbConnection, $_moduleId, &$errorMsg)
+	uninstall(CDatabaseConnection &$_dbConnection, int $_moduleId, &$errorMsg) : bool
 	{
 		##	get module info
 
@@ -934,7 +868,7 @@ class CModulesInstall
 
 		// Determine Sheme
 
-		$moduleData = $this -> getMmoduleData($moduleConfig, $moduleInfo -> module_location, $moduleInfo -> module_type);
+		$moduleData = $this -> getModuleData($moduleConfig, $moduleInfo -> module_location, $moduleInfo -> module_type);
 
 		if($moduleData === false)
 		{
@@ -1015,8 +949,15 @@ class CModulesInstall
 		return $modelModules -> delete($_dbConnection, $moduleCondition);
 	}
 
+	/**
+	 *	Get the module data based on their json sheme format in a normalized structure
+	 *	@param stdClass $_moduleConfig the module config data
+	 *	@param string $moduleLocation Folder name of that module
+	 * 	@param string $moduleType Module type, core or mantle
+	 * 	@return mixed normalized module info or false if failed
+	 */
 	public function
-	getMmoduleData(stdClass $_moduleConfig, $moduleLocation, $moduleType)
+	getModuleData(stdClass $_moduleConfig, $moduleLocation, $moduleType)
 	{
 		$moduleData = false;
 
@@ -1030,14 +971,14 @@ class CModulesInstall
 			case 1:
 
 				$pModulesInstallS1 = new CModulesInstallS1;
-				$moduleData = $pModulesInstallS1 -> getMmoduleData($_moduleConfig, $moduleLocation, $moduleType);
+				$moduleData = $pModulesInstallS1 -> getModuleData($_moduleConfig, $moduleLocation, $moduleType);
 
 				break;
 
 			case 2:
 
 				$pModulesInstallS2 = new CModulesInstallS2;
-				$moduleData = $pModulesInstallS2 -> getMmoduleData($_moduleConfig, $moduleLocation, $moduleType);
+				$moduleData = $pModulesInstallS2 -> getModuleData($_moduleConfig, $moduleLocation, $moduleType);
 			
 				break;
 		}
@@ -1064,7 +1005,7 @@ class CModulesInstallS1 // Module Sheme 1
 	 * 	@param string $moduleType Module Type of that module, mantle or core
 	 */
 	public function
-	getMmoduleData(stdClass $_moduleConfig, string $moduleLocation, string $moduleType)
+	getModuleData(stdClass $_moduleConfig, string $moduleLocation, string $moduleType)
 	{
 		$timestamp		= time();
 		$userId			= CSession::instance() -> getValue('user_id');
@@ -1201,7 +1142,7 @@ class CModulesInstallS2 // Module Sheme 2
 	 * 	@param string $moduleType Module Type of that module, mantle or core
 	 */
 	public function
-	getMmoduleData(stdClass $_moduleConfig, string $moduleLocation, string $moduleType)
+	getModuleData(stdClass $_moduleConfig, string $moduleLocation, string $moduleType)
 	{
 		$timestamp		= time();
 		$userId			= CSession::instance() -> getValue('user_id');
@@ -1363,7 +1304,7 @@ class CModulesResources
 						$moduleConfig 	= ($moduleConfig !== false ? json_decode($moduleConfig) : [] );	
 
 						$pModulesInstall = new CModulesInstall;
-						$moduleData = $pModulesInstall -> getMmoduleData($moduleConfig, $module -> module_location, $module -> module_type);
+						$moduleData = $pModulesInstall -> getModuleData($moduleConfig, $module -> module_location, $module -> module_type);
 
 						if($moduleData === false)
 							continue 2;
@@ -1377,7 +1318,7 @@ class CModulesResources
 						$moduleConfig 	= ($moduleConfig !== false ? json_decode($moduleConfig) : [] );	
 
 						$pModulesInstall = new CModulesInstall;
-						$moduleData = $pModulesInstall -> getMmoduleData($moduleConfig, $module -> module_location, $module -> module_type);
+						$moduleData = $pModulesInstall -> getModuleData($moduleConfig, $module -> module_location, $module -> module_type);
 
 						if($moduleData === false)
 							continue 2;
