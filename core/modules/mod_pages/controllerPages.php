@@ -40,13 +40,13 @@ class	controllerPages extends CController
 			if($_xhrInfo !== null && $_xhrInfo -> action === 'update-site') // update-site check benötigt weil im bearbeitungs modus zwei controller actions erzeugt werden wenn ein modul bearbeitet wird.
 			{
 				$validationErr =	true;
-				$validationMsg =	CLanguage::get() -> string('ERR_PERMISSON');
+				$validationMsg =	CLanguage::string('ERR_PERMISSON');
 				$responseData = 	[];
 		
 				tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
 			}
 
-			CMessages::add(CLanguage::get() -> string('ERR_PERMISSON') , MSG_WARNING);
+			CMessages::add(CLanguage::string('ERR_PERMISSON') , MSG_WARNING);
 			return false;
 		}
 
@@ -145,7 +145,7 @@ class	controllerPages extends CController
 		$modelSitemap  = new modelSitemap();
 		if(!$modelSitemap -> load($_pDatabase, $modelCondition))
 		{
-			$validationMsg .= CLanguage::get() -> string('ERR_SQL_ERROR');
+			$validationMsg .= CLanguage::string('ERR_SQL_ERROR');
 			$validationErr = true;
 		}											
 
@@ -175,7 +175,7 @@ class	controllerPages extends CController
 		$modelPage  = new modelPage();
 		if(!$modelPage -> load($_pDatabase, $modelCondition))
 		{
-			$validationMsg .= CLanguage::get() -> string('ERR_SQL_ERROR');
+			$validationMsg .= CLanguage::string('ERR_SQL_ERROR');
 			$validationErr = true;
 		}											
 
@@ -280,10 +280,10 @@ class	controllerPages extends CController
 										$_pFormVariables-> retrieve($requestList, false, true); // POST 
 										$urlVarList		 = $_pFormVariables ->getArray();
 
-										if(empty($urlVarList['page_name'])) 		{ 	$validationErr = true; 	$responseData['page_name'] = CLanguage::get() -> string('BEPE_PANEL_MSG_PAGENAME');			}
-										if(empty($urlVarList['page_title'])) 		{ 	$validationErr = true; 	$responseData['page_title'] = CLanguage::get() -> string('BEPE_PANEL_MSG_PAGETITLE');	}
+										if(empty($urlVarList['page_name'])) 		{ 	$validationErr = true; 	$responseData['page_name'] = CLanguage::string('BEPE_PANEL_MSG_PAGENAME');			}
+										if(empty($urlVarList['page_title'])) 		{ 	$validationErr = true; 	$responseData['page_title'] = CLanguage::string('BEPE_PANEL_MSG_PAGETITLE');	}
 									#	if(empty($urlVarList['page_description'])) 	{ 	$validationErr = true; 	$responseData['page_description'] = 'Not valid value'; 	}
-										if(empty($urlVarList['page_template'])) 	{ 	$validationErr = true; 	$responseData['page_template'] = CLanguage::get() -> string('BEPE_PANEL_MSG_PAGETEMPLATE');	}
+										if(empty($urlVarList['page_template'])) 	{ 	$validationErr = true; 	$responseData['page_template'] = CLanguage::string('BEPE_PANEL_MSG_PAGETEMPLATE');	}
 
 										if(!isset($urlVarList['hidden_state']) || strlen($urlVarList['hidden_state']) == 0) 	{ 	$validationErr = true; 	$responseData['hidden_state'] 	= 'Not valid value'; 	}
 										if(!isset($urlVarList['cache_disabled']) || strlen($urlVarList['cache_disabled']) == 0) { 	$validationErr = true; 	$responseData['cache_disabled'] 	= 'Not valid value'; 	}
@@ -306,7 +306,7 @@ class	controllerPages extends CController
 										if($urlVarList['publish_until'] != 0 && $urlVarList['publish_until'] < $urlVarList['publish_from'])
 										{
 											$validationErr = true;
-											$responseData['publish_until'] = CLanguage::get() -> string('BEPE_PANEL_MSG_PUBEXPIRE');	
+											$responseData['publish_until'] = CLanguage::string('BEPE_PANEL_MSG_PUBEXPIRE');	
 										}
 
 										##	checking of languages to prevent alternative links to same language
@@ -324,7 +324,7 @@ class	controllerPages extends CController
 												if($pageItm -> page_language === $_logicResult['page_language'])
 												{
 													$urlVarList['page_id'] 		= false;
-													$responseData['page_id'] = CLanguage::get() -> string('BEPE_PANEL_MSG_ALTLANGEVEN');
+													$responseData['page_id'] = CLanguage::string('BEPE_PANEL_MSG_ALTLANGEVEN');
 													break;
 												}
 											}
@@ -423,13 +423,13 @@ class	controllerPages extends CController
 											}
 											else
 											{
-												$validationMsg .= CLanguage::get() -> string('ERR_SQL_ERROR');
+												$validationMsg .= CLanguage::string('ERR_SQL_ERROR');
 												$validationErr = true;
 											}											
 										}
 										else	// Validation Failed
 										{
-											$validationMsg .= CLanguage::get() -> string('ERR_VALIDATIONFAIL');
+											$validationMsg .= CLanguage::string('ERR_VALIDATIONFAIL');
 											$validationErr = true;
 										}
 
@@ -451,7 +451,7 @@ class	controllerPages extends CController
 		$pURLVariables -> retrieve($requestList, true, false); 
 		$urlVarList		 = $pURLVariables ->getArray();
 
-		$urlVarList['page_name'] = CLanguage::instance() -> getString('MOD_SITES_NEWPAGE_NAME');
+		$urlVarList['page_name'] = CLanguage::string('MOD_SITES_NEWPAGE_NAME');
 		$urlVarList['page_template'] = 'default';
 
 		$urlVarList['hidden_state']	=	4;
@@ -470,11 +470,11 @@ class	controllerPages extends CController
 			$sitemap  	 = new CXMLSitemap();
 			$sitemap 	-> generate($_pDatabase);	
 
-			CMessages::add(CLanguage::instance() -> getString('MOD_SITES_PAGECREATED') , MSG_OK);
+			CMessages::add(CLanguage::string('MOD_SITES_PAGECREATED') , MSG_OK);
 		}
 		else
 		{
-			CMessages::add(CLanguage::instance() -> getString('MOD_SITES_ERR_NOTCREATED') , MSG_WARNING);
+			CMessages::add(CLanguage::string('MOD_SITES_ERR_NOTCREATED') , MSG_WARNING);
 		}
 		return false;
 	}
@@ -501,11 +501,11 @@ class	controllerPages extends CController
 			$sitemap  	 = new CXMLSitemap();
 			$sitemap 	-> generate($_pDatabase);	
 
-			CMessages::add(CLanguage::instance() -> getString('MOD_SITES_PAGEDELETED') , MSG_OK);
+			CMessages::add(CLanguage::string('MOD_SITES_PAGEDELETED') , MSG_OK);
 		}
 		else
 		{
-			CMessages::add(CLanguage::instance() -> getString('MOD_SITES_ERR_NOTDELETED') , MSG_WARNING);
+			CMessages::add(CLanguage::string('MOD_SITES_ERR_NOTDELETED') , MSG_WARNING);
 		}
 		return false;
 	}	
@@ -532,11 +532,11 @@ class	controllerPages extends CController
 			$sitemap  	 = new CXMLSitemap();
 			$sitemap 	-> generate($_pDatabase);	
 			
-			CMessages::add(CLanguage::instance() -> getString('MOD_SITES_PAGEDELETED') , MSG_OK);
+			CMessages::add(CLanguage::string('MOD_SITES_PAGEDELETED') , MSG_OK);
 		}
 		else
 		{
-			CMessages::add(CLanguage::instance() -> getString('MOD_SITES_ERR_NOTDELETED') , MSG_WARNING);
+			CMessages::add(CLanguage::string('MOD_SITES_ERR_NOTDELETED') , MSG_WARNING);
 		}
 		return false;
 	}	

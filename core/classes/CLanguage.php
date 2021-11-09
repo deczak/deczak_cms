@@ -153,38 +153,12 @@ class	CLanguage extends CSingleton
 		}
 	}
 	
-	public function
-	getString(string $_StringID, string $_DefaultString = '???')
-	{
-		if(empty($this -> isInitialized)) return 'not_initialized';
-
-		$_StringID = explode(' ', $_StringID);
-
-		$returnValue = '';
-
-		foreach($_StringID as $key => $stringId)
-		{
-			$stringId = trim($stringId);
-
-			if($key !== 0)
-				$returnValue .= ' ';
-
-			if( isset( $this -> m_aStorage[$this -> m_activeLanguage][$stringId] ) )
-			{
-				$returnValue .= $this -> m_aStorage[$this -> m_activeLanguage][$stringId];
-			}
-			else
-			{
-				$returnValue .= $_DefaultString;
-			}
-		}
-		return $returnValue;
-	}	
-
-	public function
+	public static function
 	string(string $_StringID, string $_format = 'regular', bool $_preventUnknownKMark = false) : string
 	{
-		if(empty($this -> isInitialized)) return 'not_initialized';
+		$instance  = static::instance();
+
+		if(empty($instance -> isInitialized)) return 'not_initialized';
 
 		$_StringID 		= explode(' ', $_StringID);
 		$returnValue 	= '';
@@ -196,11 +170,11 @@ class	CLanguage extends CSingleton
 			if($key !== 0)
 				$returnValue .= ' ';
 
-			if( isset( $this -> m_aStorage[$this -> m_activeLanguage][$stringId] ) )
+			if( isset( $instance -> m_aStorage[$instance -> m_activeLanguage][$stringId] ) )
 			{
 
 
-				$returnValue .= $this -> m_aStorage[$this -> m_activeLanguage][$stringId];
+				$returnValue .= $instance -> m_aStorage[$instance -> m_activeLanguage][$stringId];
 			}
 			else
 			{
@@ -236,13 +210,7 @@ class	CLanguage extends CSingleton
 		}
 		return '???';
 	}
-
-	public function
-	stringExt(string $_StringID , array $_Replacement = array()) : string
-	{
-		return $this -> getStringExt($_StringID, $_Replacement);
-	}
-
+	
 	public function
 	getStringAlternates(string $_StringID) : array
 	{

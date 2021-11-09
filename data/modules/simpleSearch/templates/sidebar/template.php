@@ -1,7 +1,7 @@
 
 <form class="form-search-sidebar" id="trigger-form-submit-<?= $object -> object_id; ?>" action="<?= CMS_SERVER_URL.URL_LANG_PRREFIX.substr($parentNode -> page_path,1); ?>search/" method="get">
 	<div>
-		<input class="ui" type="text" name="q" value="" placeholder="<?= $language -> string('MOD_SEARCH_PLACEHOLDER'); ?>">
+		<input class="ui" type="text" name="q" value="" placeholder="<?= CLanguage::string('MOD_SEARCH_PLACEHOLDER'); ?>">
 		<button type="submit" id="trigger-search-button-<?= $object -> object_id; ?>"><i class="fas fa-search"></i> </button>
 	</div>
 </form>

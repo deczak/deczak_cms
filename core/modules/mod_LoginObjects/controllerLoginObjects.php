@@ -37,14 +37,14 @@ class	controllerLoginObjects extends CController
 			if($_xhrInfo !== null)
 			{
 				$validationErr =	true;
-				$validationMsg =	CLanguage::get() -> string('ERR_PERMISSON');
+				$validationMsg =	CLanguage::string('ERR_PERMISSON');
 				$responseData  = 	[];
 
 
 				tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
 			}
 
-			CMessages::add(CLanguage::get() -> string('ERR_PERMISSON') , MSG_WARNING);
+			CMessages::add(CLanguage::string('ERR_PERMISSON') , MSG_WARNING);
 			return false;
 		}
 
@@ -136,7 +136,7 @@ class	controllerLoginObjects extends CController
 
 									if(!$this -> m_pModel -> load($_pDatabase, $modelCondition))
 									{
-										$validationMsg .= CLanguage::get() -> string('ERR_SQL_ERROR');
+										$validationMsg .= CLanguage::string('ERR_SQL_ERROR');
 										$validationErr = true;
 									}											
 						
@@ -203,13 +203,13 @@ class	controllerLoginObjects extends CController
 
 				if(!$this -> m_pModel -> unique($_pDatabase, $modelCondition))
 				{
-					$validationMsg .= CLanguage::get() -> string('M_BERMADDR_MSG_OBJEXIST');
+					$validationMsg .= CLanguage::string('M_BERMADDR_MSG_OBJEXIST');
 					$validationErr = true;
 				}
 			}
 			else	// Validation Failed
 			{
-				$validationMsg .= CLanguage::get() -> string('ERR_VALIDATIONFAIL');
+				$validationMsg .= CLanguage::string('ERR_VALIDATIONFAIL');
 			}
 
 			if(!$validationErr)	// Validation OK
@@ -246,12 +246,12 @@ class	controllerLoginObjects extends CController
 					$_pPageRequest 	= CPageRequest::instance();
 
 
-					$validationMsg = CLanguage::get() -> string('MOD_LOGINO_OBJECT WAS_CREATED'). ' - '. CLanguage::get() -> string('WAIT_FOR_REDIRECT');
+					$validationMsg = CLanguage::string('MOD_LOGINO_OBJECT WAS_CREATED'). ' - '. CLanguage::string('WAIT_FOR_REDIRECT');
 					$responseData['redirect'] = CMS_SERVER_URL_BACKEND . $_pPageRequest -> urlPath .'object/'. $_pURLVariables -> getValue("object_id");
 				}
 				else
 				{
-					$validationMsg .= CLanguage::get() -> string('ERR_SQL_ERROR');
+					$validationMsg .= CLanguage::string('ERR_SQL_ERROR');
 				}
 			}
 
@@ -295,7 +295,7 @@ class	controllerLoginObjects extends CController
 			}
 		}
 
-		CMessages::add(CLanguage::get() -> string('MOD_LOGINO_ERR_OBJECT_ID_UK') , MSG_WARNING);
+		CMessages::add(CLanguage::string('MOD_LOGINO_ERR_OBJECT_ID_UK') , MSG_WARNING);
 		return false;
 	}
 
@@ -336,7 +336,7 @@ class	controllerLoginObjects extends CController
 										}
 										else	// Validation Failed
 										{
-											$validationMsg .= CLanguage::get() -> string('ERR_VALIDATIONFAIL');
+											$validationMsg .= CLanguage::string('ERR_VALIDATIONFAIL');
 										}
 
 										if(!$validationErr)	// Validation OK
@@ -381,17 +381,17 @@ class	controllerLoginObjects extends CController
 
 											if($this -> m_pModel -> update($_pDatabase, $_aFormData, $modelCondition))
 											{
-												$validationMsg = CLanguage::get() -> string('MOD_LOGINO_OBJECT WAS_UPDATED');
+												$validationMsg = CLanguage::string('MOD_LOGINO_OBJECT WAS_UPDATED');
 											}
 											else
 											{
-												$validationMsg .= CLanguage::get() -> string('ERR_SQL_ERROR');
+												$validationMsg .= CLanguage::string('ERR_SQL_ERROR');
 												$validationErr = true;
 											}											
 										}
 										else	// Validation Failed
 										{
-											$validationMsg .= CLanguage::get() -> string('ERR_VALIDATIONFAIL');
+											$validationMsg .= CLanguage::string('ERR_VALIDATIONFAIL');
 											$validationErr = true;
 										}
 
@@ -424,12 +424,12 @@ class	controllerLoginObjects extends CController
 
 										if($this -> m_pModel -> delete($_pDatabase, $modelCondition))
 										{
-											$validationMsg = CLanguage::get() -> string('MOD_LOGINO_OBJECT WAS_DELETED'). ' - '. CLanguage::get() -> string('WAIT_FOR_REDIRECT');
+											$validationMsg = CLanguage::string('MOD_LOGINO_OBJECT WAS_DELETED'). ' - '. CLanguage::string('WAIT_FOR_REDIRECT');
 											$responseData['redirect'] = CMS_SERVER_URL_BACKEND . CPageRequest::instance() -> urlPath;
 										}
 										else
 										{
-											$validationMsg .= CLanguage::get() -> string('ERR_SQL_ERROR');
+											$validationMsg .= CLanguage::string('ERR_SQL_ERROR');
 										}
 
 				tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call

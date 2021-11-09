@@ -30,7 +30,7 @@ class 	modelSessions extends CModel
 
 			for($i = 0; $i < $dtaCount; $i++)
 			{
-				$this -> m_resultList[$i] -> agent_name = tk::getValueFromArrayByValueI($agentsList, 'agent_suffix', $this -> m_resultList[$i] -> user_agent, 'agent_name',  CLanguage::GET() -> string('VISITOR'));
+				$this -> m_resultList[$i] -> agent_name = tk::getValueFromArrayByValueI($agentsList, 'agent_suffix', $this -> m_resultList[$i] -> user_agent, 'agent_name',  CLanguage::string('VISITOR'));
 			}
 		}
 

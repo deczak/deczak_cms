@@ -29,14 +29,14 @@ class	controllerCategories extends CController
 			if($_xhrInfo !== null)
 			{
 				$validationErr =	true;
-				$validationMsg =	CLanguage::get() -> string('ERR_PERMISSON');
+				$validationMsg =	CLanguage::string('ERR_PERMISSON');
 				$responseData  = 	[];
 
 
 				tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
 			}
 
-			CMessages::add(CLanguage::get() -> string('ERR_PERMISSON') , MSG_WARNING);
+			CMessages::add(CLanguage::string('ERR_PERMISSON') , MSG_WARNING);
 			return false;
 		}
 
@@ -124,7 +124,7 @@ class	controllerCategories extends CController
 
 		if(!$this -> m_pModel -> load($_pDatabase, $modelCondition, MODEL_CATEGORIES_ALLOCATION_COUNT))
 		{
-			$validationMsg .= CLanguage::get() -> string('ERR_SQL_ERROR');
+			$validationMsg .= CLanguage::string('ERR_SQL_ERROR');
 			$validationErr = true;
 		}											
 
@@ -172,7 +172,7 @@ class	controllerCategories extends CController
 		}
 		else	// Validation Failed 
 		{
-			$validationMsg .= CLanguage::get() -> string('ERR_VALIDATIONFAIL');
+			$validationMsg .= CLanguage::string('ERR_VALIDATIONFAIL');
 		}
 
 		if(!$validationErr)	// Validation OK
@@ -183,13 +183,13 @@ class	controllerCategories extends CController
 
 			if($dataId !== false)
 			{					
-				$validationMsg = CLanguage::get() -> string('MOD_BECATEGORIES_CATEGORY') .' '. CLanguage::get() -> string('WAS_CREATED') .' - '. CLanguage::get() -> string('WAIT_FOR_REDIRECT');
+				$validationMsg = CLanguage::string('MOD_BECATEGORIES_CATEGORY') .' '. CLanguage::string('WAS_CREATED') .' - '. CLanguage::string('WAIT_FOR_REDIRECT');
 										
 				$responseData['redirect'] = CMS_SERVER_URL_BACKEND . CPageRequest::instance() -> urlPath .'category/'.$dataId;
 			}
 			else
 			{
-				$validationMsg .= CLanguage::get() -> string('ERR_SQL_ERROR');
+				$validationMsg .= CLanguage::string('ERR_SQL_ERROR');
 			}
 		}
 
@@ -229,7 +229,7 @@ class	controllerCategories extends CController
 			}
 		}
 		
-		CMessages::add(CLanguage::get() -> string('MOD_BECATEGORIES_ERR_USERID_UK'), MSG_WARNING);
+		CMessages::add(CLanguage::string('MOD_BECATEGORIES_ERR_USERID_UK'), MSG_WARNING);
 		return false;
 	}
 
@@ -271,17 +271,17 @@ class	controllerCategories extends CController
 
 											if($this -> m_pModel -> update($_pDatabase, $_aFormData, $modelCondition))
 											{
-												$validationMsg = CLanguage::get() -> string('MOD_BECATEGORIES_CATEGORY') .' '. CLanguage::get() -> string('WAS_UPDATED');
+												$validationMsg = CLanguage::string('MOD_BECATEGORIES_CATEGORY') .' '. CLanguage::string('WAS_UPDATED');
 											}
 											else
 											{
-												$validationMsg .= CLanguage::get() -> string('ERR_SQL_ERROR');
+												$validationMsg .= CLanguage::string('ERR_SQL_ERROR');
 												$validationErr = true;
 											}											
 										}
 										else	// Validation Failed
 										{
-											$validationMsg .= CLanguage::get() -> string('ERR_VALIDATIONFAIL');
+											$validationMsg .= CLanguage::string('ERR_VALIDATIONFAIL');
 											$validationErr = true;
 										}
 
@@ -313,12 +313,12 @@ class	controllerCategories extends CController
 
 									if($this -> m_pModel -> delete($_pDatabase, $modelCondition))
 									{
-										$validationMsg = CLanguage::get() -> string('MOD_BECATEGORIES_CATEGORY') .' '. CLanguage::get() -> string('WAS_DELETED') .' - '. CLanguage::get() -> string('WAIT_FOR_REDIRECT');
+										$validationMsg = CLanguage::string('MOD_BECATEGORIES_CATEGORY') .' '. CLanguage::string('WAS_DELETED') .' - '. CLanguage::string('WAIT_FOR_REDIRECT');
 										$responseData['redirect'] = CMS_SERVER_URL_BACKEND . CPageRequest::instance() -> urlPath;
 									}
 									else
 									{
-										$validationMsg .= CLanguage::get() -> string('ERR_SQL_ERROR');
+										$validationMsg .= CLanguage::string('ERR_SQL_ERROR');
 									}
 
 			tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call

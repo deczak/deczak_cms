@@ -29,13 +29,13 @@ class	controllerModules extends CController
 			if($responseData !== false)
 			{
 				$validationErr =	true;
-				$validationMsg =	CLanguage::get() -> string('ERR_PERMISSON');
+				$validationMsg =	CLanguage::string('ERR_PERMISSON');
 				$responseData = 	[];
 
 				tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
 			}
 
-			CMessages::add(CLanguage::get() -> string('ERR_PERMISSON') , MSG_WARNING);
+			CMessages::add(CLanguage::string('ERR_PERMISSON') , MSG_WARNING);
 			return;
 		}
 
@@ -75,14 +75,14 @@ class	controllerModules extends CController
 			if($_xhrInfo !== null)
 			{
 				$validationErr =	true;
-				$validationMsg =	CLanguage::get() -> string('ERR_PERMISSON');
+				$validationMsg =	CLanguage::string('ERR_PERMISSON');
 				$responseData  = 	[];
 
 
 				tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
 			}
 
-			CMessages::add(CLanguage::get() -> string('ERR_PERMISSON') , MSG_WARNING);
+			CMessages::add(CLanguage::string('ERR_PERMISSON') , MSG_WARNING);
 			return false;
 		}
 
@@ -156,7 +156,7 @@ class	controllerModules extends CController
 
 									if(!$this -> m_pModel -> load($_pDatabase, $modelCondition))
 									{
-										$validationMsg .= CLanguage::get() -> string('ERR_SQL_ERROR');
+										$validationMsg .= CLanguage::string('ERR_SQL_ERROR');
 										$validationErr = true;
 									}											
 						
@@ -237,7 +237,7 @@ class	controllerModules extends CController
 			}
 		}
 
-		CMessages::add(CLanguage::get() -> string('MOD_BEUSER_ERR_USERID_UK') , MSG_WARNING);
+		CMessages::add(CLanguage::string('MOD_BEUSER_ERR_USERID_UK') , MSG_WARNING);
 		return false;
 	}
 
@@ -268,7 +268,7 @@ class	controllerModules extends CController
 											}
 											else	// Validation Failed 
 											{
-												$validationMsg .= CLanguage::get() -> string('ERR_VALIDATIONFAIL');
+												$validationMsg .= CLanguage::string('ERR_VALIDATIONFAIL');
 											}
 
 											if(!$validationErr)
@@ -281,17 +281,17 @@ class	controllerModules extends CController
 												
 												if($this -> m_pModel -> update($_pDatabase, $_aFormData, $modelCondition))
 												{
-													$validationMsg = CLanguage::get() -> string('M_BEMOULE_MSG_MODULE') .' '. CLanguage::get() -> string('WAS_UPDATED');
+													$validationMsg = CLanguage::string('M_BEMOULE_MSG_MODULE') .' '. CLanguage::string('WAS_UPDATED');
 												}
 												else
 												{
-													$validationMsg .= CLanguage::get() -> string('ERR_SQL_ERROR');
+													$validationMsg .= CLanguage::string('ERR_SQL_ERROR');
 													$validationErr = true;
 												}											
 											}
 											else	// Validation Failed
 											{
-												$validationMsg .= CLanguage::get() -> string('ERR_VALIDATIONFAIL');
+												$validationMsg .= CLanguage::string('ERR_VALIDATIONFAIL');
 												$validationErr = true;
 											}
 
@@ -316,7 +316,7 @@ class	controllerModules extends CController
 							
 									CModules::instance() -> uninstall($_pDatabase, $systemId, $validationMsg);
 
-									$validationMsg = CLanguage::get() -> string('M_BEMOULE_MSG_REMOVED') .' - '. CLanguage::get() -> string('WAIT_FOR_REDIRECT');
+									$validationMsg = CLanguage::string('M_BEMOULE_MSG_REMOVED') .' - '. CLanguage::string('WAIT_FOR_REDIRECT');
 									$responseData['redirect'] = CMS_SERVER_URL_BACKEND . CPageRequest::instance() -> urlPath;
 
 

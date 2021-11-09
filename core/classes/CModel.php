@@ -625,10 +625,10 @@ class	CModel
 				## Locked by same user but different pingId
 
 				$username = TK::getBackendUserName($_pDatabase, $resultItm -> lock_by);
-				$responseData['lockedByName'] = (!empty($username) ? $username : CLanguage::get() -> string('UNKNOWN'));
+				$responseData['lockedByName'] = (!empty($username) ? $username : CLanguage::string('UNKNOWN'));
 
 				$responseData['lockedState']	= 1;	
-				$responseData['lockedMessage']	= CLanguage::get() -> string('LOCK_IS_MISMATCH_ID');
+				$responseData['lockedMessage']	= CLanguage::string('LOCK_IS_MISMATCH_ID');
 				$responseData['lockedById'] 	= $_userId;
 			}
 			elseif($resultItm -> lock_by != $_userId && $timeOut <= $resultItm -> lock_time)
@@ -636,10 +636,10 @@ class	CModel
 				## Locked by other user
 
 				$username = TK::getBackendUserName($_pDatabase, $resultItm -> lock_by);
-				$responseData['lockedByName'] = (!empty($username) ? $username : CLanguage::get() -> string('UNKNOWN'));
+				$responseData['lockedByName'] = (!empty($username) ? $username : CLanguage::string('UNKNOWN'));
 
 				$responseData['lockedState']	= 1;	
-				$responseData['lockedMessage']	= CLanguage::get() -> string('LOCK_IS_LOCKED') .' <b>'. $responseData['lockedByName'] .'</b>';
+				$responseData['lockedMessage']	= CLanguage::string('LOCK_IS_LOCKED') .' <b>'. $responseData['lockedByName'] .'</b>';
 				$responseData['lockedById'] 	= $resultItm -> lock_by;
 			}
 			elseif(		$resultItm -> lock_by != $_userId && $timeOut > $resultItm -> lock_time
@@ -649,7 +649,7 @@ class	CModel
 				## Locked by other user but timed out
 
 				$username = TK::getBackendUserName($_pDatabase, $resultItm -> lock_by);
-				$responseData['lockedByName'] = (!empty($username) ? $username : CLanguage::get() -> string('UNKNOWN'));
+				$responseData['lockedByName'] = (!empty($username) ? $username : CLanguage::string('UNKNOWN'));
 
 				$responseData['lockedState']	= 2;	
 				$responseData['lockedMessage']	= '';

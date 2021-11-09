@@ -4,11 +4,11 @@
 		<thead>
 			<tr>
 				<td class="batch-selection-item"></td>
-				<td><?= CLanguage::get() -> string('MOD_RGROUPS_GROUP_ID'); ?></td>
-				<td><?= CLanguage::get() -> string('MOD_RGROUPS_GROUP_NAME'); ?></td>
-				<td style="text-align:center;"><?= CLanguage::get() -> string('MOD_RGROUPS_GROUP_ASSIGNMENT'); ?></td>
-				<td><?= CLanguage::get() -> string('TIME_CREATE_AT'); ?></td>
-				<td><?= CLanguage::get() -> string('CREATE_BY'); ?></td>
+				<td><?= CLanguage::string('MOD_RGROUPS_GROUP_ID'); ?></td>
+				<td><?= CLanguage::string('MOD_RGROUPS_GROUP_NAME'); ?></td>
+				<td style="text-align:center;"><?= CLanguage::string('MOD_RGROUPS_GROUP_ASSIGNMENT'); ?></td>
+				<td><?= CLanguage::string('TIME_CREATE_AT'); ?></td>
+				<td><?= CLanguage::string('CREATE_BY'); ?></td>
 				<td class="bach-item-menu"></td>
 			</tr>
 		</thead>
@@ -16,7 +16,7 @@
 		<tfoot>
 			<tr>
 				<td class="batch-selection-item"><input type="checkbox" class="trigger-batch-item-all-checkbox" id="item-all"><label for="item-all"></label></td>
-				<td><?= CLanguage::get() -> string('SELECT_ALL'); ?></td>
+				<td><?= CLanguage::string('SELECT_ALL'); ?></td>
 				<td></td>
 				<td></td>
 				<td></td>
@@ -37,7 +37,7 @@
 	<td style="text-align:center;">%num_assignments%</td>
 	<td>%create_time%</td>
 	<td>%creaty_by_name%</td>
-	<td class="bach-item-menu"><span>&equiv;</span><div class="dropdown-content"><div></div><a href="<?php echo CMS_SERVER_URL_BACKEND . $pageRequest -> urlPath; ?>group/%group_id%"><?php echo $language -> string('BUTTON_EDIT'); ?></a></div></td>
+	<td class="bach-item-menu"><span>&equiv;</span><div class="dropdown-content"><div></div><a href="<?php echo CMS_SERVER_URL_BACKEND . $pageRequest -> urlPath; ?>group/%group_id%"><?php echo CLanguage::string('BUTTON_EDIT'); ?></a></div></td>
 	
 </template>
 

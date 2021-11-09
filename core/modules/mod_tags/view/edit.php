@@ -8,17 +8,17 @@ else
 <div class="be-module-container forms-view">
 	<div>
 		<div class="ui inter-menu">
-			<h2><?= $language -> string('MENU'); ?></h2>
+			<h2><?= CLanguage::string('MENU'); ?></h2>
 			<hr>
 			<ul>
-			<li><a class="darkblue" href="#tag"><?= $language -> string('MOD_BETAGS_EDIT'); ?></a></li>
+			<li><a class="darkblue" href="#tag"><?= CLanguage::string('MOD_BETAGS_EDIT'); ?></a></li>
 			</ul>
 			<hr>
 			<div class="delete-box">
 				<?php if(isset($enableDelete) && $enableDelete && $dataset !== false) { ?>	
 					<fieldset class="ui fieldset" data-xhr-target="delete" data-xhr-overwrite-target="delete/<?= $dataset -> tag_id; ?>">	
 						<div class="submit-container button-only">
-							<button class="ui button icon labeled trigger-submit-fieldset" type="button" disabled><span><i class="fas fa-trash-alt" data-icon="fa-trash-alt"></i></span><?= $language -> string('BUTTON_DELETE'); ?></button>
+							<button class="ui button icon labeled trigger-submit-fieldset" type="button" disabled><span><i class="fas fa-trash-alt" data-icon="fa-trash-alt"></i></span><?= CLanguage::string('BUTTON_DELETE'); ?></button>
 							<div class="protector"><input type="checkbox" class="trigger-submit-protector" id="protector-agent-delete"><label for="protector-agent-delete"></label></div>
 						</div>
 						<div class="result-box" data-error=""></div>
@@ -34,34 +34,34 @@ else
 		
 		<fieldset class="ui fieldset submit-able" id="tag" data-xhr-target="<?= (!$dataset ? 'create' : 'edit'); ?>" <?= ($dataset !== false ? 'data-xhr-overwrite-target="edit/'. $dataset -> tag_id .'"' : ''); ?>>
 
-			<legend><?= $language -> string('MOD_BETAGS_EDIT'); ?></legend>
+			<legend><?= CLanguage::string('MOD_BETAGS_EDIT'); ?></legend>
 			<div>
 				<!-- field group -->
 				<div class="group width-100">
 
-					<div class="group-head width-100"><?= $language -> string('MOD_BETAGS_INFO'); ?></div>
+					<div class="group-head width-100"><?= CLanguage::string('MOD_BETAGS_INFO'); ?></div>
 
 					<div class="input width-50">
-						<label><?= $language -> string('MOD_BETAGS_NAME'); ?></label>
+						<label><?= CLanguage::string('MOD_BETAGS_NAME'); ?></label>
 						<input type="text" name="tag_name" value="" maxlength="50">
 					</div>
 			
 					<div class="input width-25">
-						<label><?= $language -> string('MOD_BETAGS_HIDDEN'); ?></label>
+						<label><?= CLanguage::string('MOD_BETAGS_HIDDEN'); ?></label>
 						<div class="select-wrapper">
 						<select name="tag_hidden">
-							<option value="0"><?= CLanguage::instance() -> getString('YES'); ?></option>
-							<option value="1"><?= CLanguage::instance() -> getString('NO'); ?></option>
+							<option value="0"><?= CLanguage::string('YES'); ?></option>
+							<option value="1"><?= CLanguage::string('NO'); ?></option>
 						</select>	
 						</div>
 					</div>
 
 					<div class="input width-25">
-						<label><?= $language -> string('MOD_BETAGS_DISABLED'); ?></label>
+						<label><?= CLanguage::string('MOD_BETAGS_DISABLED'); ?></label>
 						<div class="select-wrapper">
 						<select name="tag_disabled">
-							<option value="0"><?= CLanguage::instance() -> getString('YES'); ?></option>
-							<option value="1"><?= CLanguage::instance() -> getString('NO'); ?></option>
+							<option value="0"><?= CLanguage::string('YES'); ?></option>
+							<option value="1"><?= CLanguage::string('NO'); ?></option>
 						</select>	
 						</div>
 					</div>
@@ -77,7 +77,7 @@ else
 				<!-- Submit button - beware of fieldset name -->
 
 				<div class="submit-container">
-					<button class="ui button icon labeled trigger-submit-fieldset" type="button" disabled><span><i class="fas fa-save" data-icon="fa-save"></i></span><?= $language -> string('BUTTON_SAVE'); ?></button>
+					<button class="ui button icon labeled trigger-submit-fieldset" type="button" disabled><span><i class="fas fa-save" data-icon="fa-save"></i></span><?= CLanguage::string('BUTTON_SAVE'); ?></button>
 					<div class="protector"><input type="checkbox" class="trigger-submit-protector" id="protector-tag"><label for="protector-tag"></label></div>
 				</div>
 

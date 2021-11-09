@@ -56,7 +56,7 @@
 							echo '<span style="font-family:icons-solid">'. $menuGroup -> menu_icon .'</span> &nbsp; ';
 
 						if(!empty($menuGroup -> menu_name))
-							echo CLanguage::get()->string($menuGroup -> menu_name, 'regular', true);
+							echo CLanguage::string($menuGroup -> menu_name, 'regular', true);
 						
 						if(count($menuItemList) > 1)
 						{

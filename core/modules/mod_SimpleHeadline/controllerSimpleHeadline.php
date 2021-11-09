@@ -30,13 +30,13 @@ class	controllerSimpleHeadline extends CController
 			if($_xhrInfo !== null && $_xhrInfo -> isXHR)
 			{
 				$validationErr =	true;
-				$validationMsg =	CLanguage::get() -> string('ERR_PERMISSON');
+				$validationMsg =	CLanguage::string('ERR_PERMISSON');
 				$responseData = 	[];
 
 				tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
 			}
 
-			CMessages::add(CLanguage::get() -> string('ERR_PERMISSON') , MSG_WARNING);
+			CMessages::add(CLanguage::string('ERR_PERMISSON') , MSG_WARNING);
 			return false;
 		}
 

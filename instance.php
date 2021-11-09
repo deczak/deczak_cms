@@ -181,7 +181,7 @@ if(CMS_BACKEND)
 						}
 						else
 						{	##	Missing data for login
-							CMessages::add($_pLanguage -> getString('ERR_CR_LOGINDTAMM') , MSG_WARNING, '', true);							
+							CMessages::add(CLanguage::string('ERR_CR_LOGINDTAMM') , MSG_WARNING, '', true);							
 						}
 						break;
 

@@ -1,10 +1,10 @@
 <div class="be-module-container forms-view">
 	<div>
 		<div class="inter-menu">
-			<h2><?= CLanguage::get() -> string('MENU'); ?></h2>
+			<h2><?= CLanguage::string('MENU'); ?></h2>
 			<hr>
 			<ul>
-			<li><a class="darkblue" href="#user-create"><?= CLanguage::get() -> string('MOD_BEUSER_FM_CREATEUSER'); ?></a></li>
+			<li><a class="darkblue" href="#user-create"><?= CLanguage::string('MOD_BEUSER_FM_CREATEUSER'); ?></a></li>
 			</ul>
 			<hr>
 		</div>
@@ -13,27 +13,27 @@
 
 
 		<fieldset class="ui fieldset submit-able" id="user-create" data-xhr-target="create">
-			<legend><?= CLanguage::get() -> string('MOD_BEUSER_FM_CREATEUSER'); ?></legend>
+			<legend><?= CLanguage::string('MOD_BEUSER_FM_CREATEUSER'); ?></legend>
 
 			<div>
 
 				<!-- group -->
 
 				<div class="group width-100">
-					<div class="group-head width-100"><?= CLanguage::get() -> string('MOD_BEUSER_FM_USERINFO'); ?></div>
+					<div class="group-head width-100"><?= CLanguage::string('MOD_BEUSER_FM_USERINFO'); ?></div>
 
 					<div class="input width-25">
-						<label><?= CLanguage::get() -> string('MOD_BEUSER_FM_FIRSTNAME'); ?></label>
+						<label><?= CLanguage::string('MOD_BEUSER_FM_FIRSTNAME'); ?></label>
 						<input type="text" name="user_name_first" value="">
 					</div>
 
 					<div class="input width-25">
-						<label><?= CLanguage::get() -> string('MOD_BEUSER_FM_LASTNAME'); ?></label>
+						<label><?= CLanguage::string('MOD_BEUSER_FM_LASTNAME'); ?></label>
 						<input type="text" name="user_name_last" value="">
 					</div>
 
 					<div class="input width-50">
-						<label><?= CLanguage::get() -> string('MOD_BEUSER_FM_MAILADDRESS'); ?></label>
+						<label><?= CLanguage::string('MOD_BEUSER_FM_MAILADDRESS'); ?></label>
 						<input type="text" name="user_mail" value="">
 					</div>
 
@@ -42,20 +42,20 @@
 				<!-- group -->
 
 				<div class="group width-100">
-					<div class="group-head width-100"><?= CLanguage::get() -> string('MOD_BEUSER_FM_LOGININFO'); ?></div>
+					<div class="group-head width-100"><?= CLanguage::string('MOD_BEUSER_FM_LOGININFO'); ?></div>
 
 					<div class="input width-25">
-						<label><?= CLanguage::get() -> string('MOD_BEUSER_FM_LOGINUSERNAME'); ?></label>
+						<label><?= CLanguage::string('MOD_BEUSER_FM_LOGINUSERNAME'); ?></label>
 						<input type="text" name="login_name" value="">
 					</div>
 
 					<div class="input width-25">
-						<label><?= CLanguage::get() -> string('MOD_BEUSER_FM_LOGINPASSWORD'); ?></label>
+						<label><?= CLanguage::string('MOD_BEUSER_FM_LOGINPASSWORD'); ?></label>
 						<input type="password" name="login_pass_a" value="">
 					</div>
 
 					<div class="input width-25">
-						<label><?= CLanguage::get() -> string('MOD_BEUSER_FM_LOGINPASSWORD2'); ?></label>
+						<label><?= CLanguage::string('MOD_BEUSER_FM_LOGINPASSWORD2'); ?></label>
 						<input type="password" name="login_pass_b" value="">
 					</div>
 
@@ -64,10 +64,10 @@
 				<!-- group -->
 
 				<div class="group width-100">
-					<div class="group-head width-100"><?= CLanguage::get() -> string('MOD_BEUSER_FM_BACKENDSTTNGS'); ?></div>
+					<div class="group-head width-100"><?= CLanguage::string('MOD_BEUSER_FM_BACKENDSTTNGS'); ?></div>
 
 					<div class="input width-25">
-						<label><?= $language -> string('LANGUAGE'); ?></label>
+						<label><?= CLanguage::string('LANGUAGE'); ?></label>
 						<div class="select-wrapper">
 						<select name="language">
 							<option value="en">English</option>
@@ -78,11 +78,11 @@
 
 					<div class="input width-25">
 						<?php if(CFG::GET() -> USER_SYSTEM -> REMOTE_USER -> ENABLED) { ?>
-						<label><?= $language -> string('MOD_BEUSER_FM_REMOTEAUTH'); ?></label>
+						<label><?= CLanguage::string('MOD_BEUSER_FM_REMOTEAUTH'); ?></label>
 						<div class="select-wrapper">
 						<select name="allow_remote">
-							<option value="0"><?= $language -> string('MOD_BEUSER_FM_REMOTEAUTH_0_NOTALLOWED'); ?></option>
-							<option value="1"><?= $language -> string('MOD_BEUSER_FM_REMOTEAUTH_1_ALLOWED'); ?></option>
+							<option value="0"><?= CLanguage::string('MOD_BEUSER_FM_REMOTEAUTH_0_NOTALLOWED'); ?></option>
+							<option value="1"><?= CLanguage::string('MOD_BEUSER_FM_REMOTEAUTH_1_ALLOWED'); ?></option>
 						</select>	
 						</div>
 						<?php } ?>
@@ -102,7 +102,7 @@
 			<!-- Submit button - beware of fieldset name -->
 
 			<div class="submit-container">
-				<button class="ui button icon labeled trigger-submit-fieldset" type="button" disabled><span><i class="fas fa-save" data-icon="fa-save"></i></span><?= CLanguage::get() -> string('BUTTON_SAVE'); ?></button>
+				<button class="ui button icon labeled trigger-submit-fieldset" type="button" disabled><span><i class="fas fa-save" data-icon="fa-save"></i></span><?= CLanguage::string('BUTTON_SAVE'); ?></button>
 				<div class="protector"><input type="checkbox" class="trigger-submit-protector" id="protector-create-user"><label for="protector-create-user"></label></div>
 			</div>
 

@@ -25,7 +25,7 @@
 		
 		<div class="backend-title-container">
 			<a href="<?php echo CMS_SERVER_URL_BACKEND; ?>"><b>BACKYARD</b> // SYSTEM</a>		
-			<a class="yellow" style="display:block; margin-top:5px; font-size:0.95em;" href="<?php echo CMS_SERVER_URL_BACKEND . $_pageRequest['origin_index']; ?>"><?= CLanguage::GET() -> STRING('BEPE_PANEL_BACKLINK'); ?></a>			
+			<a class="yellow" style="display:block; margin-top:5px; font-size:0.95em;" href="<?php echo CMS_SERVER_URL_BACKEND . $_pageRequest['origin_index']; ?>"><?= CLanguage::string('BEPE_PANEL_BACKLINK'); ?></a>			
 		</div>
 		
 		<div style="height:calc(100% - 142px); overflow-y:auto; overflow-x:hidden; background-color:rgba(74,74,74,1);">
@@ -33,20 +33,20 @@
 			<!-- page information -->
 
 			<fieldset class="ui fieldset submit-able">
-				<legend><?= CLanguage::GET() -> STRING('BEPE_PANEL_GROUP_INFORMATION'); ?></legend>
+				<legend><?= CLanguage::string('BEPE_PANEL_GROUP_INFORMATION'); ?></legend>
 				<div>
 					<table id="table-page-informationen">
 						<tbody>
 							<tr>
-								<td><?= CLanguage::GET() -> STRING('BEPE_PANEL_NODEID'); ?></td>
+								<td><?= CLanguage::string('BEPE_PANEL_NODEID'); ?></td>
 								<td><?php echo $pageRequest -> node_id; ?></td>
 							</tr>
 							<tr>
-								<td><?= CLanguage::GET() -> STRING('BEPE_PANEL_PAGEID'); ?></td>
+								<td><?= CLanguage::string('BEPE_PANEL_PAGEID'); ?></td>
 								<td><?php echo $pageRequest -> page_id; ?></td>
 							</tr>
 							<tr>
-								<td><?= CLanguage::GET() -> STRING('BEPE_PANEL_LANGUAGE'); ?></td>
+								<td><?= CLanguage::string('BEPE_PANEL_LANGUAGE'); ?></td>
 								<td><?php echo $pageRequest -> page_language; ?></td>
 							</tr>
 						</tbody>
@@ -57,32 +57,32 @@
 			<!-- page name & description -->
 
 			<fieldset class="ui fieldset submit-able">
-				<legend><?= CLanguage::GET() -> STRING('BEPE_PANEL_GROUP_NAME'); ?></legend>
+				<legend><?= CLanguage::string('BEPE_PANEL_GROUP_NAME'); ?></legend>
 				<div>
 
 					<div class="input width-100">
-						<label><?= CLanguage::GET() -> STRING('BEPE_PANEL_PAGENAME'); ?></label>
+						<label><?= CLanguage::string('BEPE_PANEL_PAGENAME'); ?></label>
 						<input type="text" name="page_name" value="<?php echo $pageRequest -> page_name; ?>">
 					</div>
 
 					<div class="result-box" data-field="page_name" data-error=""></div>
 
 					<div class="input width-100">
-						<label><?= CLanguage::GET() -> STRING('BEPE_PANEL_PAGETITLE'); ?></label>
+						<label><?= CLanguage::string('BEPE_PANEL_PAGETITLE'); ?></label>
 					<input type="text" name="page_title" value="<?php echo $pageRequest -> page_title; ?>">
 					</div>
 
 					<div class="result-box" data-field="page_title" data-error=""></div>
 
 					<div class="input width-100">
-						<label><?= CLanguage::GET() -> STRING('BEPE_PANEL_PAGEDESCRIPTION'); ?></label>
+						<label><?= CLanguage::string('BEPE_PANEL_PAGEDESCRIPTION'); ?></label>
 						<textarea name="page_description"><?php echo $pageRequest -> page_description; ?></textarea>
 					</div>
 
 					<div class="result-box" data-field="page_description" data-error=""></div>
 
 					<div class="input width-100">
-						<label><?= CLanguage::GET() -> STRING('BEPE_PANEL_CRUMBNAME'); ?></label>
+						<label><?= CLanguage::string('BEPE_PANEL_CRUMBNAME'); ?></label>
 						<input type="text" name="crumb_name" value="<?php echo $pageRequest -> crumb_name; ?>">
 					</div>
 
@@ -94,7 +94,7 @@
 			<!-- page template select -->
 
 			<fieldset class="ui fieldset submit-able">
-				<legend><?= CLanguage::GET() -> STRING('BEPE_PANEL_GROUP_TEMPLATE'); ?></legend>
+				<legend><?= CLanguage::string('BEPE_PANEL_GROUP_TEMPLATE'); ?></legend>
 				<div style="padding-top:10px;">
 					<div class="input width-100">
 						<div class="select-wrapper">
@@ -117,7 +117,7 @@
 			<!-- page image -->
 
 			<fieldset class="ui fieldset submit-able">
-				<legend><?= CLanguage::GET() -> STRING('BEPE_PANEL_GROUP_IMAGE'); ?></legend>
+				<legend><?= CLanguage::string('BEPE_PANEL_GROUP_IMAGE'); ?></legend>
 				<div style="padding-top:10px;">
 
 					<div class="input width-100" id="panel-site-image-selector">
@@ -243,22 +243,22 @@
 			<!-- visibilty settings -->
 
 			<fieldset class="ui fieldset submit-able">
-				<legend><?= CLanguage::GET() -> STRING('BEPE_PANEL_GROUP_VISIBILTY'); ?></legend>
+				<legend><?= CLanguage::string('BEPE_PANEL_GROUP_VISIBILTY'); ?></legend>
 				<div style="padding-top:10px;">
 					<div class="input width-100">
-						<label><?= CLanguage::GET() -> STRING('BEPE_PANEL_ACCESSLEVEL'); ?></label>
+						<label><?= CLanguage::string('BEPE_PANEL_ACCESSLEVEL'); ?></label>
 						<div class="select-wrapper">
 						<?php
 						if($pageRequest -> page_path == '/')
 							echo '<input type="hidden" name="hidden_state" value="0">';
 						?>
 						<select name="hidden_state" id="select-visibleState" <?= ($pageRequest -> page_path == '/' ? 'disabled' : ''); ?>>
-							<option value="0" <?= ($pageRequest -> hidden_state == 0 ? 'selected' : ''); ?>><?= CLanguage::GET() -> STRING('BEPE_PANEL_HIDDEN_0_VISIBLE'); ?></option>
-							<option value="5" <?= ($pageRequest -> hidden_state == 5 ? 'selected' : ''); ?>><?= CLanguage::GET() -> STRING('BEPE_PANEL_HIDDEN_5_VISIBLEFROM'); ?></option>
-							<option value="1" <?= ($pageRequest -> hidden_state == 1 ? 'selected' : ''); ?>><?= CLanguage::GET() -> STRING('BEPE_PANEL_HIDDEN_1_LOCKED'); ?></option>
-							<option value="4" <?= ($pageRequest -> hidden_state == 4 ? 'selected' : ''); ?>><?= CLanguage::GET() -> STRING('BEPE_PANEL_HIDDEN_4_LOCKED'); ?></option>
-							<option value="2" <?= ($pageRequest -> hidden_state == 2 ? 'selected' : ''); ?>><?= CLanguage::GET() -> STRING('BEPE_PANEL_HIDDEN_2_HIDDEN'); ?></option>
-							<!--<option value="3" <?= ($pageRequest -> hidden_state == 3 ? 'selected' : ''); ?>><?= CLanguage::GET() -> STRING('BEPE_PANEL_HIDDEN_3_REGISTERED'); ?></option>-->
+							<option value="0" <?= ($pageRequest -> hidden_state == 0 ? 'selected' : ''); ?>><?= CLanguage::string('BEPE_PANEL_HIDDEN_0_VISIBLE'); ?></option>
+							<option value="5" <?= ($pageRequest -> hidden_state == 5 ? 'selected' : ''); ?>><?= CLanguage::string('BEPE_PANEL_HIDDEN_5_VISIBLEFROM'); ?></option>
+							<option value="1" <?= ($pageRequest -> hidden_state == 1 ? 'selected' : ''); ?>><?= CLanguage::string('BEPE_PANEL_HIDDEN_1_LOCKED'); ?></option>
+							<option value="4" <?= ($pageRequest -> hidden_state == 4 ? 'selected' : ''); ?>><?= CLanguage::string('BEPE_PANEL_HIDDEN_4_LOCKED'); ?></option>
+							<option value="2" <?= ($pageRequest -> hidden_state == 2 ? 'selected' : ''); ?>><?= CLanguage::string('BEPE_PANEL_HIDDEN_2_HIDDEN'); ?></option>
+							<!--<option value="3" <?= ($pageRequest -> hidden_state == 3 ? 'selected' : ''); ?>><?= CLanguage::string('BEPE_PANEL_HIDDEN_3_REGISTERED'); ?></option>-->
 						</select>
 						</div>
 						<div class="result-box" data-field="hidden_state" data-error=""></div>
@@ -276,25 +276,25 @@
 		
 
 					<div class="input width-100">
-						<label><?= CLanguage::GET() -> STRING('BEPE_PANEL_PUBLISHFROM'); ?></label>
+						<label><?= CLanguage::string('BEPE_PANEL_PUBLISHFROM'); ?></label>
 						<input type="text" class="datepicker-from" name="publish_from" id="" value="<?php echo $pageRequest -> publish_from; ?>">
 					</div>
 
 					<div class="result-box" data-field="publish_from" data-error=""></div>
 
 					<div class="input width-100">
-						<label><?= CLanguage::GET() -> STRING('BEPE_PANEL_PUBLISHUNTIL'); ?></label>
+						<label><?= CLanguage::string('BEPE_PANEL_PUBLISHUNTIL'); ?></label>
 						<input type="text" class="datepicker-until" name="publish_until" id="" value="<?php echo $pageRequest -> publish_until; ?>">
 					</div>
 
 					<div class="result-box" data-field="publish_until" data-error=""></div>
 
 					<div class="input width-100">
-						<label><?= CLanguage::GET() -> STRING('BEPE_PANEL_PUBLISHUNTIL_STATE'); ?></label>
+						<label><?= CLanguage::string('BEPE_PANEL_PUBLISHUNTIL_STATE'); ?></label>
 						<div class="select-wrapper">
 						<select name="publish_expired" <?= ($pageRequest -> page_path == '/' ? 'disabled' : ''); ?>>
-							<option value="0" <?= ($pageRequest -> publish_expired == 0 ? 'selected' : ''); ?>><?= CLanguage::GET() -> STRING('BEPE_PANEL_PUBLISHUNTIL_0_HIDDEN'); ?></option>
-							<option value="1" <?= ($pageRequest -> publish_expired == 1 ? 'selected' : ''); ?>><?= CLanguage::GET() -> STRING('BEPE_PANEL_PUBLISHUNTIL_1_LOCKED'); ?></option>
+							<option value="0" <?= ($pageRequest -> publish_expired == 0 ? 'selected' : ''); ?>><?= CLanguage::string('BEPE_PANEL_PUBLISHUNTIL_0_HIDDEN'); ?></option>
+							<option value="1" <?= ($pageRequest -> publish_expired == 1 ? 'selected' : ''); ?>><?= CLanguage::string('BEPE_PANEL_PUBLISHUNTIL_1_LOCKED'); ?></option>
 						</select>
 						</div>
 					</div>
@@ -359,14 +359,14 @@
 
 
 					<div class="input width-100">
-						<label><?= CLanguage::GET() -> STRING('BEPE_PANEL_AUTHOBJECT'); ?></label>
+						<label><?= CLanguage::string('BEPE_PANEL_AUTHOBJECT'); ?></label>
 						<div class="select-wrapper">
 						<?php
 						if($pageRequest -> page_path == '/')
 							echo '<input type="hidden" name="page_auth" value="0">';
 						?>
 						<select name="page_auth" id="select-authobject" <?= ($pageRequest -> page_path == '/' ? 'disabled' : ''); ?>>
-							<option value="0" <?= ($pageRequest -> page_auth == 0 ? 'selected' : ''); ?>><?= CLanguage::GET() -> STRING('BEPE_PANEL_AUTHOBJECT_0_NONE'); ?></option>
+							<option value="0" <?= ($pageRequest -> page_auth == 0 ? 'selected' : ''); ?>><?= CLanguage::string('BEPE_PANEL_AUTHOBJECT_0_NONE'); ?></option>
 							<?php
 							$modelLoginObjects	 = new modelLoginObjects();
 							$modelLoginObjects	-> load($pDatabase);
@@ -383,7 +383,7 @@
 					<div class="input width-100">
 
 					<input type="checkbox" name="apply_childs_auth" value="1" id="apply_childs_auth">
-					<label for="apply_childs_auth"><?= CLanguage::GET() -> STRING('BEPE_PANEL_AUTHAPPLYCHILDS'); ?></label>	
+					<label for="apply_childs_auth"><?= CLanguage::string('BEPE_PANEL_AUTHAPPLYCHILDS'); ?></label>	
 
 
 
@@ -392,13 +392,13 @@
 			<!-- search machines settings -->
 
 			<fieldset class="ui fieldset submit-able">
-				<legend><?= CLanguage::GET() -> STRING('BEPE_PANEL_GROUP_SEARCHMACHINE'); ?></legend>
+				<legend><?= CLanguage::string('BEPE_PANEL_GROUP_SEARCHMACHINE'); ?></legend>
 				<div style="padding-top:10px;">
 					<div class="input width-100">
 						<div class="select-wrapper">
 						<select name="crawler_index">
-							<option value="1" <?= ($pageRequest -> crawler_index == 1 ? 'selected' : ''); ?>><?= CLanguage::GET() -> STRING('BEPE_PANEL_CRAWLER_1_INDEX'); ?></option>
-							<option value="0" <?= ($pageRequest -> crawler_index == 0 ? 'selected' : ''); ?>><?= CLanguage::GET() -> STRING('BEPE_PANEL_CRAWLER_0_NOINDEX'); ?></option>
+							<option value="1" <?= ($pageRequest -> crawler_index == 1 ? 'selected' : ''); ?>><?= CLanguage::string('BEPE_PANEL_CRAWLER_1_INDEX'); ?></option>
+							<option value="0" <?= ($pageRequest -> crawler_index == 0 ? 'selected' : ''); ?>><?= CLanguage::string('BEPE_PANEL_CRAWLER_0_NOINDEX'); ?></option>
 						</select>
 						</div>
 						<div class="result-box" data-field="crawler_index" data-error=""></div>
@@ -406,8 +406,8 @@
 					<div class="input width-100">
 						<div class="select-wrapper">
 						<select name="crawler_follow">
-							<option value="1" <?= ($pageRequest -> crawler_follow == 1 ? 'selected' : ''); ?>><?= CLanguage::GET() -> STRING('BEPE_PANEL_CRAWLER_1_FOLLOW'); ?></option>
-							<option value="0" <?= ($pageRequest -> crawler_follow == 0 ? 'selected' : ''); ?>><?= CLanguage::GET() -> STRING('BEPE_PANEL_CRAWLER_0_NOFOLLOW'); ?></option>
+							<option value="1" <?= ($pageRequest -> crawler_follow == 1 ? 'selected' : ''); ?>><?= CLanguage::string('BEPE_PANEL_CRAWLER_1_FOLLOW'); ?></option>
+							<option value="0" <?= ($pageRequest -> crawler_follow == 0 ? 'selected' : ''); ?>><?= CLanguage::string('BEPE_PANEL_CRAWLER_0_NOFOLLOW'); ?></option>
 						</select>
 						</div>
 						<div class="result-box" data-field="crawler_follow" data-error=""></div>
@@ -415,8 +415,8 @@
 					<div class="input width-100">
 						<div class="select-wrapper">
 						<select name="menu_follow">
-							<option value="1" <?= ($pageRequest -> menu_follow == 1 ? 'selected' : ''); ?>><?= CLanguage::GET() -> STRING('BEPE_PANEL_CRAWLER_1_MENUFOLLOW'); ?></option>
-							<option value="0" <?= ($pageRequest -> menu_follow == 0 ? 'selected' : ''); ?>><?= CLanguage::GET() -> STRING('BEPE_PANEL_CRAWLER_0_MENUNOFOLLOW'); ?></option>
+							<option value="1" <?= ($pageRequest -> menu_follow == 1 ? 'selected' : ''); ?>><?= CLanguage::string('BEPE_PANEL_CRAWLER_1_MENUFOLLOW'); ?></option>
+							<option value="0" <?= ($pageRequest -> menu_follow == 0 ? 'selected' : ''); ?>><?= CLanguage::string('BEPE_PANEL_CRAWLER_0_MENUNOFOLLOW'); ?></option>
 						</select>
 						</div>
 						<div class="result-box" data-field="menu_follow" data-error=""></div>
@@ -427,7 +427,7 @@
 			<!-- categories & tags -->
 
 			<fieldset class="ui fieldset submit-able">
-				<legend><?= CLanguage::GET() -> STRING('BEPE_PANEL_GROUP_TAGSCATS'); ?></legend>
+				<legend><?= CLanguage::string('BEPE_PANEL_GROUP_TAGSCATS'); ?></legend>
 				<div style="padding-top:10px;">
 
 					<?php
@@ -437,7 +437,7 @@
 					?>
 
 					<div class="input width-100">
-						<label><?php echo CLanguage::instance() -> getString('BEPE_PANEL_CATEGORIES'); ?></label>
+						<label><?php echo CLanguage::string('BEPE_PANEL_CATEGORIES'); ?></label>
 						<div class="select-wrapper">
 						<select name="page_categories[]" class="dropdown" data-preset="<?= implode(',', $selectedCategories); ?>">
 							<option value=""></option>
@@ -459,7 +459,7 @@
 					?>
 
 					<div class="input width-100">
-						<label><?php echo CLanguage::instance() -> getString('BEPE_PANEL_TAGS'); ?></label>
+						<label><?php echo CLanguage::string('BEPE_PANEL_TAGS'); ?></label>
 						<div class="select-wrapper">
 						<select name="page_tags[]" class="dropdown" data-preset="<?= implode(',', $selectedTags); ?>">
 							<option value=""></option>
@@ -480,14 +480,14 @@
 			<!-- extended settings -->
 
 			<fieldset class="ui fieldset submit-able">
-				<legend><?= CLanguage::GET() -> STRING('BEPE_PANEL_GROUP_EXTSETTINGS'); ?></legend>
+				<legend><?= CLanguage::string('BEPE_PANEL_GROUP_EXTSETTINGS'); ?></legend>
 				<div style="padding-top:10px;">
 					<div class="input width-100">
-						<label><?= CLanguage::GET() -> STRING('BEPE_PANEL_BROWSERCACHING'); ?></label>
+						<label><?= CLanguage::string('BEPE_PANEL_BROWSERCACHING'); ?></label>
 						<div class="select-wrapper">
 						<select name="cache_disabled">
-							<option value="0" <?= ($pageRequest -> cache_disabled == 0 ? 'selected' : ''); ?>><?= CLanguage::GET() -> STRING('BEPE_PANEL_CACHING_0_ENABLED'); ?></option>
-							<option value="1" <?= ($pageRequest -> cache_disabled == 1 ? 'selected' : ''); ?>><?= CLanguage::GET() -> STRING('BEPE_PANEL_CACHING_1_DISABLED'); ?></option>
+							<option value="0" <?= ($pageRequest -> cache_disabled == 0 ? 'selected' : ''); ?>><?= CLanguage::string('BEPE_PANEL_CACHING_0_ENABLED'); ?></option>
+							<option value="1" <?= ($pageRequest -> cache_disabled == 1 ? 'selected' : ''); ?>><?= CLanguage::string('BEPE_PANEL_CACHING_1_DISABLED'); ?></option>
 						</select>
 						</div>
 						<div class="result-box" data-field="cache_disabled" data-error=""></div>
@@ -498,7 +498,7 @@
 			<!-- alternate languages -->
 
 			<fieldset class="ui fieldset submit-able">
-				<legend><?= CLanguage::GET() -> STRING('BEPE_PANEL_GROUP_ALTLANG'); ?></legend>
+				<legend><?= CLanguage::string('BEPE_PANEL_GROUP_ALTLANG'); ?></legend>
 
 
 				<?php if($pageRequest -> page_id != 1) { ?>
@@ -506,7 +506,7 @@
 					<div style="padding-top:10px;">
 
 						<div class="input width-100">
-							<label><?= CLanguage::GET() -> STRING('BEPE_PANEL_ALTLANGNODEID'); ?></label>
+							<label><?= CLanguage::string('BEPE_PANEL_ALTLANGNODEID'); ?></label>
 							<input type="text" name="page_id" id="alt_page_id" value="">
 						</div>
 
@@ -569,7 +569,7 @@
 						}
 
 						if(numValid == 0)
-							altList.innerHTML = '<span style="font-size:0.75em;"><?= CLanguage::GET() -> STRING('BEPE_PANEL_NOALTLANGEXIST'); ?></span>';
+							altList.innerHTML = '<span style="font-size:0.75em;"><?= CLanguage::string('BEPE_PANEL_NOALTLANGEXIST'); ?></span>';
 					}
 
 					document.addEventListener("DOMContentLoaded", function() {
@@ -583,12 +583,12 @@
 			<!-- redirect settings -->
 
 			<fieldset class="ui fieldset submit-able">
-				<legend><?= CLanguage::GET() -> STRING('BEPE_PANEL_GROUP_REDIRECT'); ?></legend>
+				<legend><?= CLanguage::string('BEPE_PANEL_GROUP_REDIRECT'); ?></legend>
 
 					<div style="padding-top:10px;">
 
 						<div class="input width-100">
-							<label><?= CLanguage::GET() -> STRING('BEPE_PANEL_REDIRECTNODEID'); ?></label>
+							<label><?= CLanguage::string('BEPE_PANEL_REDIRECTNODEID'); ?></label>
 							<input type="text" name="page_redirect" id="page_redirect" value="<?= $pageRequest -> page_redirect; ?>" placehoder="node-id">
 						</div>
 
@@ -604,7 +604,7 @@
 
 			<?php
 			if($enableEdit)
-				echo '<button class="ui button labeled icon trigger-submit-site-edit" id="trigger-submit-site-edit" type="button"><span><i class="fas fa-save" data-icon="fa-save"></i></span>'.  CLanguage::GET() -> STRING('BUTTON_SAVE') .'</button>';
+				echo '<button class="ui button labeled icon trigger-submit-site-edit" id="trigger-submit-site-edit" type="button"><span><i class="fas fa-save" data-icon="fa-save"></i></span>'.  CLanguage::string('BUTTON_SAVE') .'</button>';
 			?>
 
 		</div>	

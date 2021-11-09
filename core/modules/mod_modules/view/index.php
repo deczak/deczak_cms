@@ -6,10 +6,10 @@
 			<tr>
 				<td class="batch-selection-item"></td>
 				<td class="column-icon"></td>
-				<td><?php echo $language -> string('M_BEMOULE_NAME'); ?></td>
-				<td><?php echo $language -> string('M_BEMOULE_DESC'); ?></td>
-				<td><?php echo $language -> string('M_BEMOULE_SECTION'); ?></td>
-				<td class="column-state"><?php echo $language -> string('M_BEMOULE_STATE'); ?></td>
+				<td><?php echo CLanguage::string('M_BEMOULE_NAME'); ?></td>
+				<td><?php echo CLanguage::string('M_BEMOULE_DESC'); ?></td>
+				<td><?php echo CLanguage::string('M_BEMOULE_SECTION'); ?></td>
+				<td class="column-state"><?php echo CLanguage::string('M_BEMOULE_STATE'); ?></td>
 				<td class="column-button"></td>
 				<td class="bach-item-menu"></td>
 			</tr>
@@ -18,7 +18,7 @@
 		<tfoot>
 			<tr>
 				<td class="batch-selection-item"><input type="checkbox" class="trigger-batch-item-all-checkbox" id="item-all"><label for="item-all"></label></td>
-				<td colspan="6"><?php echo $language -> string('SELECT_ALL'); ?></td>
+				<td colspan="6"><?php echo CLanguage::string('SELECT_ALL'); ?></td>
 				<td></td>
 			</tr>			
 		</tfoot>
@@ -32,7 +32,7 @@
 
 
 	<div class="ui"><div class="result-box big" data-error="2">
-		<b><?= $language -> string('NOTE'); ?>:</b> &nbsp;<?= $language -> string('M_BEMOULE_MSG_INSTALLNOTICE'); ?>		
+		<b><?= CLanguage::string('NOTE'); ?>:</b> &nbsp;<?= CLanguage::string('M_BEMOULE_MSG_INSTALLNOTICE'); ?>		
 	</div></div>
 
 	<br><br>
@@ -56,7 +56,7 @@
 	<td>%is_frontend% / %module_type%</td>
 	<td><div class="color-indicator positive" data-state="%is_active%"></div></td>
 	<td class="column-button"></td>
-	<td class="bach-item-menu"><span>&equiv;</span><div class="dropdown-content"><div></div><a href="<?php echo CMS_SERVER_URL_BACKEND . $pageRequest -> urlPath; ?>module/%module_id%"><?php echo $language -> string('BUTTON_EDIT'); ?></a></div></td>
+	<td class="bach-item-menu"><span>&equiv;</span><div class="dropdown-content"><div></div><a href="<?php echo CMS_SERVER_URL_BACKEND . $pageRequest -> urlPath; ?>module/%module_id%"><?php echo CLanguage::string('BUTTON_EDIT'); ?></a></div></td>
 	
 </template>
 

@@ -5,10 +5,10 @@
 			<tr>
 				<td class="batch-selection-item"></td>
 				<td></td>
-				<td>IP <?php echo $language -> string('ADDRESS'); ?></td>
-				<td><?php echo $language -> string('DATE'); ?></td>
-				<td class="assignments"><?php echo $language -> string('M_BESESSION_VISITEDPAGES'); ?></td>
-				<td class=""><?php echo $language -> string('M_BESESSION_ACTIVEPAGE'); ?></td>
+				<td>IP <?php echo CLanguage::string('ADDRESS'); ?></td>
+				<td><?php echo CLanguage::string('DATE'); ?></td>
+				<td class="assignments"><?php echo CLanguage::string('M_BESESSION_VISITEDPAGES'); ?></td>
+				<td class=""><?php echo CLanguage::string('M_BESESSION_ACTIVEPAGE'); ?></td>
 				<td class="bach-item-menu"></td>
 			</tr>
 		</thead>
@@ -16,7 +16,7 @@
 		<tfoot>
 			<tr>
 				<td class="batch-selection-item"><input type="checkbox" class="trigger-batch-item-all-checkbox" id="item-all"><label for="item-all"></label></td>
-				<td><?php echo $language -> string('SELECT_ALL'); ?></td>
+				<td><?php echo CLanguage::string('SELECT_ALL'); ?></td>
 				<td></td>
 				<td></td>
 				<td></td>
@@ -41,7 +41,7 @@
 	<td>%time_create%</td>
 	<td class="assignments">%num_pages%</td>
 	<td>%latest_page%</td>
-	<td class="bach-item-menu"><span>&equiv;</span><div class="dropdown-content"><div></div><a href="<?php echo CMS_SERVER_URL_BACKEND . $pageRequest -> urlPath; ?>session/%data_id%"><?php echo $language -> string('BUTTON_EDIT'); ?></a></div></td>
+	<td class="bach-item-menu"><span>&equiv;</span><div class="dropdown-content"><div></div><a href="<?php echo CMS_SERVER_URL_BACKEND . $pageRequest -> urlPath; ?>session/%data_id%"><?php echo CLanguage::string('BUTTON_EDIT'); ?></a></div></td>
 	
 </template>
 

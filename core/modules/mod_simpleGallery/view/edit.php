@@ -40,7 +40,7 @@ $destList = [];
 MEDIATHEK::getItemsList($object -> body.'/', $destList, true);
 ?>
 
-<div class="simple-gallery-images-list" id="simple-gallery-list-<?php echo $object -> object_id; ?>">
+<div class="simple-gallery-images-list" data-tile-size="6" id="simple-gallery-list-<?php echo $object -> object_id; ?>">
 	<?php
 	do {
 
@@ -128,11 +128,23 @@ MEDIATHEK::getItemsList($object -> body.'/', $destList, true);
 
 <style>
 div.simple-gallery-images-list { display:flex; flex-wrap:wrap; }
-div.simple-gallery-images-list > a { flex-shrink:0; display:block; outline:1px solid white; transition: transform .1s; height: 175px; }
-div.simple-gallery-images-list > a:hover { /*transform: scale(1.1);*/ }
-div.simple-gallery-images-list > a.orient-0 { width:25%; }
-div.simple-gallery-images-list > a.orient-1 { width:12.5%; }
-div.simple-gallery-images-list > a:last-child { width:12.5%; }
+div.simple-gallery-images-list > a { flex-shrink:0; display:block; border:1px solid white; height: 175px; }
+
+div.simple-gallery-images-list[data-tile-size="4"] > a { height: 300px;}
+div.simple-gallery-images-list[data-tile-size="4"] > a.orient-0 { width:50%; }
+div.simple-gallery-images-list[data-tile-size="4"] > a.orient-1,
+div.simple-gallery-images-list[data-tile-size="4"] > a:last-child { width:25%; }
+
+div.simple-gallery-images-list[data-tile-size="6"] > a { height: 250px;}
+div.simple-gallery-images-list[data-tile-size="6"] > a.orient-0 { width:33.33%; }
+div.simple-gallery-images-list[data-tile-size="6"] > a.orient-1,
+div.simple-gallery-images-list[data-tile-size="6"] > a:last-child { width:16.66%; }
+
+div.simple-gallery-images-list[data-tile-size="8"] > a { height: 175px;}
+div.simple-gallery-images-list[data-tile-size="8"] > a.orient-0 { width:25%; }
+div.simple-gallery-images-list[data-tile-size="8"] > a.orient-1,
+div.simple-gallery-images-list[data-tile-size="8"] > a:last-child { width:12.5%; }
+
 div.simple-gallery-images-list > a > img { width: 100%; height:100%; object-fit: cover; object-position: 50% 50%; }
 
 

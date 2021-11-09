@@ -151,7 +151,7 @@ class	CSession extends CSingleton
 					$_pHTAccess -> writeHTAccess($_db);
 
 					CSysMailer::instance() 	-> sendMail(
-														CLanguage::instance() -> getString('SYSMAIL_SESSDENIED_SUBJ'), 
+														CLanguage::string('SYSMAIL_SESSDENIED_SUBJ'), 
 														CLanguage::instance() -> getStringExt(
 																							'SYSMAIL_SESSDENIED_TEXT',
 																							[

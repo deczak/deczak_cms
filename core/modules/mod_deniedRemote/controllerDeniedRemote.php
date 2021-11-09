@@ -27,14 +27,14 @@ class	controllerDeniedRemote extends CController
 			if($_xhrInfo !== null)
 			{
 				$validationErr =	true;
-				$validationMsg =	CLanguage::get() -> string('ERR_PERMISSON');
+				$validationMsg =	CLanguage::string('ERR_PERMISSON');
 				$responseData  = 	[];
 
 
 				tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
 			}
 
-			CMessages::add(CLanguage::get() -> string('ERR_PERMISSON') , MSG_WARNING);
+			CMessages::add(CLanguage::string('ERR_PERMISSON') , MSG_WARNING);
 			return false;
 		}
 
@@ -126,7 +126,7 @@ class	controllerDeniedRemote extends CController
 
 									if(!$this -> m_pModel -> load($_pDatabase, $modelCondition))
 									{
-										$validationMsg .= CLanguage::get() -> string('ERR_SQL_ERROR');
+										$validationMsg .= CLanguage::string('ERR_SQL_ERROR');
 										$validationErr = true;
 									}											
 						
@@ -183,14 +183,14 @@ class	controllerDeniedRemote extends CController
 
 				if(!$this -> m_pModel -> unique($_pDatabase, $uniqueCondition))
 				{
-					$validationMsg .= CLanguage::get() -> string('M_BERMADDR_MSG_DENIEDEXIST');
+					$validationMsg .= CLanguage::string('M_BERMADDR_MSG_DENIEDEXIST');
 					$validationErr = true;
 				}
 
 
 				if(strpos($_aFormData['denied_ip'], ':') === false && strpos($_aFormData['denied_ip'], '.') === false)
 				{
-					$validationMsg .= CLanguage::get() -> string('ERR_VALIDATIONFAIL');
+					$validationMsg .= CLanguage::string('ERR_VALIDATIONFAIL');
 					$validationErr = true;
 				}
 				else
@@ -203,7 +203,7 @@ class	controllerDeniedRemote extends CController
 						
 						if(filter_var($_aFormData['denied_ip'], FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) === false)
 						{
-							$validationMsg .= CLanguage::get() -> string('ERR_VALIDATIONFAIL');
+							$validationMsg .= CLanguage::string('ERR_VALIDATIONFAIL');
 							$responseData[] = 'denied_ip'; 
 							$validationErr = true;
 						}
@@ -220,13 +220,13 @@ class	controllerDeniedRemote extends CController
 
 						if(count($ipSegements) !== 4)
 						{
-							$validationMsg .= CLanguage::get() -> string('ERR_VALIDATIONFAIL');
+							$validationMsg .= CLanguage::string('ERR_VALIDATIONFAIL');
 							$responseData[] = 'denied_ip'; 
 							$validationErr = true;
 						}			
 						elseif(filter_var($ipBuffer[0],FILTER_VALIDATE_IP) === false)
 						{
-							$validationMsg .= CLanguage::get() -> string('ERR_VALIDATIONFAIL');
+							$validationMsg .= CLanguage::string('ERR_VALIDATIONFAIL');
 							$responseData[] = 'denied_ip'; 
 							$validationErr = true;
 						}
@@ -236,7 +236,7 @@ class	controllerDeniedRemote extends CController
 			}
 			else	// Validation Failed 
 			{
-				$validationMsg .= CLanguage::get() -> string('ERR_VALIDATIONFAIL');
+				$validationMsg .= CLanguage::string('ERR_VALIDATIONFAIL');
 			}
 
 			if(!$validationErr)	// Validation OK
@@ -249,7 +249,7 @@ class	controllerDeniedRemote extends CController
 
 				if($dataId !== false)
 				{
-					$validationMsg = CLanguage::get() -> string('MOD_BE_RMADDR_DENIEDADDR WAS_CREATED') .' - '. CLanguage::get() -> string('WAIT_FOR_REDIRECT');
+					$validationMsg = CLanguage::string('MOD_BE_RMADDR_DENIEDADDR WAS_CREATED') .' - '. CLanguage::string('WAIT_FOR_REDIRECT');
 					$responseData['redirect'] = CMS_SERVER_URL_BACKEND . CPageRequest::instance() -> urlPath .'address/'.$dataId;
 
 					$_pHTAccess  = new CHTAccess();
@@ -258,7 +258,7 @@ class	controllerDeniedRemote extends CController
 				}
 				else
 				{
-					$validationMsg .= CLanguage::get() -> string('ERR_SQL_ERROR');
+					$validationMsg .= CLanguage::string('ERR_SQL_ERROR');
 				}
 			}
 
@@ -298,7 +298,7 @@ class	controllerDeniedRemote extends CController
 			}
 		}
 
-		CMessages::add(CLanguage::get() -> string('M_BERMADDR_MSG_DENIEDUK') , MSG_WARNING);
+		CMessages::add(CLanguage::string('M_BERMADDR_MSG_DENIEDUK') , MSG_WARNING);
 		return false;
 	}
 
@@ -342,7 +342,7 @@ class	controllerDeniedRemote extends CController
 
 												if(!$this -> m_pModel -> unique($_pDatabase, $uniqueCondition))
 												{
-													$validationMsg .= CLanguage::get() -> string('M_BERMADDR_MSG_DENIEDEXIST');
+													$validationMsg .= CLanguage::string('M_BERMADDR_MSG_DENIEDEXIST');
 													$validationErr = true;
 												}
 
@@ -350,7 +350,7 @@ class	controllerDeniedRemote extends CController
 
 												if(strpos($_aFormData['denied_ip'], ':') === false && strpos($_aFormData['denied_ip'], '.') === false)
 												{
-													$validationMsg .= CLanguage::get() -> string('ERR_VALIDATIONFAIL');
+													$validationMsg .= CLanguage::string('ERR_VALIDATIONFAIL');
 													$validationErr = true;
 												}
 												else
@@ -363,7 +363,7 @@ class	controllerDeniedRemote extends CController
 														
 														if(filter_var($_aFormData['denied_ip'], FILTER_VALIDATE_IP, FILTER_FLAG_IPV6) === false)
 														{
-															$validationMsg .= CLanguage::get() -> string('ERR_VALIDATIONFAIL');
+															$validationMsg .= CLanguage::string('ERR_VALIDATIONFAIL');
 															$responseData[] = 'denied_ip'; 
 															$validationErr = true;
 														}
@@ -380,13 +380,13 @@ class	controllerDeniedRemote extends CController
 
 														if(count($ipSegements) !== 4)
 														{
-														#	$validationMsg .= CLanguage::get() -> string('ERR_VALIDATIONFAIL');
+														#	$validationMsg .= CLanguage::string('ERR_VALIDATIONFAIL');
 															$responseData[] = 'denied_ip'; 
 															$validationErr = true;
 														}			
 														elseif(filter_var($ipBuffer[0],FILTER_VALIDATE_IP) === false)
 														{
-														#	$validationMsg .= CLanguage::get() -> string('ERR_VALIDATIONFAIL');
+														#	$validationMsg .= CLanguage::string('ERR_VALIDATIONFAIL');
 															$responseData[] = 'denied_ip'; 
 															$validationErr = true;
 														}
@@ -397,7 +397,7 @@ class	controllerDeniedRemote extends CController
 											}
 											else	// Validation Failed 
 											{
-												$validationMsg .= CLanguage::get() -> string('ERR_VALIDATIONFAIL');
+												$validationMsg .= CLanguage::string('ERR_VALIDATIONFAIL');
 											}
 
 											if(!$validationErr)
@@ -410,7 +410,7 @@ class	controllerDeniedRemote extends CController
 
 												if($this -> m_pModel -> update($_pDatabase, $_aFormData, $modelCondition))
 												{
-													$validationMsg = CLanguage::get() -> string('MOD_BE_RMADDR_DENIEDADDR WAS_UPDATED');
+													$validationMsg = CLanguage::string('MOD_BE_RMADDR_DENIEDADDR WAS_UPDATED');
 
 													$_pHTAccess  = new CHTAccess();
 													$_pHTAccess -> generatePart4DeniedAddress($_pDatabase);
@@ -419,13 +419,13 @@ class	controllerDeniedRemote extends CController
 												}
 												else
 												{
-													$validationMsg .= CLanguage::get() -> string('ERR_SQL_ERROR');
+													$validationMsg .= CLanguage::string('ERR_SQL_ERROR');
 													$validationErr = true;
 												}											
 											}
 											else	// Validation Failed
 											{
-												$validationMsg .= CLanguage::get() -> string('ERR_VALIDATIONFAIL');
+												$validationMsg .= CLanguage::string('ERR_VALIDATIONFAIL');
 												$validationErr = true;
 											}
 
@@ -457,7 +457,7 @@ class	controllerDeniedRemote extends CController
 
 									if($this -> m_pModel -> delete($_pDatabase, $modelCondition))
 									{
-										$validationMsg = CLanguage::get() -> string('MOD_BE_RMADDR_DENIEDADDR WAS_DELETED') .' - '. CLanguage::get() -> string('WAIT_FOR_REDIRECT');
+										$validationMsg = CLanguage::string('MOD_BE_RMADDR_DENIEDADDR WAS_DELETED') .' - '. CLanguage::string('WAIT_FOR_REDIRECT');
 										$responseData['redirect'] = CMS_SERVER_URL_BACKEND . CPageRequest::instance() -> urlPath;
 
 										$_pHTAccess  = new CHTAccess();
@@ -466,7 +466,7 @@ class	controllerDeniedRemote extends CController
 									}
 									else
 									{
-										$validationMsg .= CLanguage::get() -> string('ERR_SQL_ERROR');
+										$validationMsg .= CLanguage::string('ERR_SQL_ERROR');
 									}
 
 			tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call

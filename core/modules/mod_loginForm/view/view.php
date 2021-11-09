@@ -52,7 +52,7 @@
 
 				<div class="input width-100">
 					<br>
-					<button><?= CLanguage::GET() -> string('LOGIN'); ?></button>
+					<button><?= CLanguage::string('LOGIN'); ?></button>
 				</div>
 
 			</div>

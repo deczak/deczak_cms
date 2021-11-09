@@ -29,14 +29,14 @@ class	controllerSessions extends CController
 			if($_xhrInfo !== null)
 			{
 				$validationErr =	true;
-				$validationMsg =	CLanguage::get() -> string('ERR_PERMISSON');
+				$validationMsg =	CLanguage::string('ERR_PERMISSON');
 				$responseData  = 	[];
 
 
 				tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
 			}
 
-			CMessages::add(CLanguage::get() -> string('ERR_PERMISSON') , MSG_WARNING);
+			CMessages::add(CLanguage::string('ERR_PERMISSON') , MSG_WARNING);
 			return false;
 		}
 			
@@ -118,7 +118,7 @@ class	controllerSessions extends CController
 
 									if(!$this -> m_pModel -> load($_pDatabase, $modelCondition, MODEL_SESSIONS_APPEND_ACCESS_DATA | MODEL_SESSIONS_APPEND_AGENT_NAME))
 									{
-										$validationMsg .= CLanguage::get() -> string('ERR_SQL_ERROR');
+										$validationMsg .= CLanguage::string('ERR_SQL_ERROR');
 										$validationErr = true;
 									}											
 						
@@ -164,7 +164,7 @@ class	controllerSessions extends CController
 			}
 		}
 
-		CMessages::add(CLanguage::get() -> string('SESSION IS_UNKNOWN') , MSG_WARNING);
+		CMessages::add(CLanguage::string('SESSION IS_UNKNOWN') , MSG_WARNING);
 		return false;
 	}
 
@@ -189,7 +189,7 @@ class	controllerSessions extends CController
 
 										if($this -> m_pModel -> delete($_pDatabase, $modelCondition))
 										{
-											$validationMsg = CLanguage::get() -> string('SESSION WAS_DELETED') .' - '. CLanguage::get() -> string('WAIT_FOR_REDIRECT');
+											$validationMsg = CLanguage::string('SESSION WAS_DELETED') .' - '. CLanguage::string('WAIT_FOR_REDIRECT');
 											$responseData['redirect'] = CMS_SERVER_URL_BACKEND . CPageRequest::instance() -> urlPath;
 
 											$_pHTAccess  = new CHTAccess();
@@ -199,7 +199,7 @@ class	controllerSessions extends CController
 										}
 										else
 										{
-											$validationMsg .= CLanguage::get() -> string('ERR_SQL_ERROR');
+											$validationMsg .= CLanguage::string('ERR_SQL_ERROR');
 										}
 
 				tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
@@ -207,7 +207,7 @@ class	controllerSessions extends CController
 		
 		}
 
-		CMessages::add(CLanguage::get() -> string('SESSION IS_UNKNOWN') , MSG_WARNING);
+		CMessages::add(CLanguage::string('SESSION IS_UNKNOWN') , MSG_WARNING);
 		return false;
 	}
 }

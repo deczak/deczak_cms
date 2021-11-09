@@ -5,9 +5,9 @@
 		<thead>
 			<tr>
 				<td class="batch-selection-item"></td>
-				<td><?php echo $language -> string('LANGUAGE'); ?></td>
-				<td class="column-state"><?php echo $language -> string('M_BELANG_HIDDEN'); ?></td>
-				<td class="column-state"><?php echo $language -> string('M_BELANG_LOCKED'); ?></td>
+				<td><?php echo CLanguage::string('LANGUAGE'); ?></td>
+				<td class="column-state"><?php echo CLanguage::string('M_BELANG_HIDDEN'); ?></td>
+				<td class="column-state"><?php echo CLanguage::string('M_BELANG_LOCKED'); ?></td>
 				<td class="column-button"></td>
 				<td class="bach-item-menu"></td>
 			</tr>
@@ -16,7 +16,7 @@
 		<tfoot>
 			<tr>
 				<td class="batch-selection-item"><input type="checkbox" class="trigger-batch-item-all-checkbox" id="item-all"><label for="item-all"></label></td>
-				<td colspan="4"><?php echo $language -> string('SELECT_ALL'); ?></td>
+				<td colspan="4"><?php echo CLanguage::string('SELECT_ALL'); ?></td>
 				<td></td>
 			</tr>			
 		</tfoot>
@@ -42,7 +42,7 @@
 	<td><div class="color-indicator negative" data-state="%lang_hidden%"></div></td>
 	<td><div class="color-indicator negative" data-state="%lang_locked%"></div></td>
 	<td class="column-button"></td>
-	<td class="bach-item-menu"><span>&equiv;</span><div class="dropdown-content"><div></div><a href="<?php echo CMS_SERVER_URL_BACKEND . $pageRequest -> urlPath; ?>language/%lang_key%"><?php echo $language -> string('BUTTON_EDIT'); ?></a></div></td>
+	<td class="bach-item-menu"><span>&equiv;</span><div class="dropdown-content"><div></div><a href="<?php echo CMS_SERVER_URL_BACKEND . $pageRequest -> urlPath; ?>language/%lang_key%"><?php echo CLanguage::string('BUTTON_EDIT'); ?></a></div></td>
 	
 </template>
 

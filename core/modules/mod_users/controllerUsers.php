@@ -33,13 +33,13 @@ class	controllerUsers extends CController
 			if($_xhrInfo !== null)
 			{
 				$validationErr =	true;
-				$validationMsg =	CLanguage::get() -> string('ERR_PERMISSON');
+				$validationMsg =	CLanguage::string('ERR_PERMISSON');
 				$responseData  = 	[];
 
 				tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
 			}
 
-			CMessages::add(CLanguage::get() -> string('ERR_PERMISSON') , MSG_WARNING);
+			CMessages::add(CLanguage::string('ERR_PERMISSON') , MSG_WARNING);
 			return false;
 		}
 
@@ -127,7 +127,7 @@ class	controllerUsers extends CController
 
 		if(!$this -> m_pModel -> load($_pDatabase, $modelCondition, MODEL_USERS_STRIP_SENSITIVE_DATA))
 		{
-			$validationMsg .= CLanguage::get() -> string('ERR_SQL_ERROR');
+			$validationMsg .= CLanguage::string('ERR_SQL_ERROR');
 			$validationErr = true;
 		}											
 
@@ -201,13 +201,13 @@ class	controllerUsers extends CController
 			} 
 			elseif(isset($_aFormData['login_pass_a']) && isset($_aFormData['login_pass_b']) && $_aFormData['login_pass_a'] !== $_aFormData['login_pass_b'])
 			{
-				$validationMsg .= CLanguage::get() -> string('M_BEUSER_MSG_PASSNOTEQUAL');
+				$validationMsg .= CLanguage::string('M_BEUSER_MSG_PASSNOTEQUAL');
 				$validationErr = true;
 			}
 		}
 		else	// Validation Failed
 		{
-			$validationMsg .= CLanguage::get() -> string('ERR_VALIDATIONFAIL');
+			$validationMsg .= CLanguage::string('ERR_VALIDATIONFAIL');
 		}
 
 		if(!$validationErr)	// Validation OK
@@ -218,12 +218,12 @@ class	controllerUsers extends CController
 
 			if($this -> m_pModel -> insert($_pDatabase, $_aFormData))
 			{
-				$validationMsg = CLanguage::get() -> string('USER WAS_CREATED') .' - '. CLanguage::get() -> string('WAIT_FOR_REDIRECT');
+				$validationMsg = CLanguage::string('USER WAS_CREATED') .' - '. CLanguage::string('WAIT_FOR_REDIRECT');
 				$responseData['redirect'] = CMS_SERVER_URL_BACKEND . CPageRequest::instance() -> urlPath .'user/'.$_aFormData['user_id'];
 			}
 			else
 			{
-				$validationMsg .= CLanguage::get() -> string('ERR_SQL_ERROR');
+				$validationMsg .= CLanguage::string('ERR_SQL_ERROR');
 
 				$modelUsersRegister -> removeUserId($_pDatabase, $_aFormData['user_id']);
 			}
@@ -271,7 +271,7 @@ class	controllerUsers extends CController
 			}
 		}
 
-		CMessages::add(CLanguage::get() -> string('MOD_BEUSER_ERR_USERID_UK') , MSG_WARNING);
+		CMessages::add(CLanguage::string('MOD_BEUSER_ERR_USERID_UK') , MSG_WARNING);
 		return false;
 	}
 
@@ -325,11 +325,11 @@ class	controllerUsers extends CController
 
 									if($this -> m_pModel -> update($_pDatabase, $_aFormData, $modelCondition))
 									{
-										$validationMsg = CLanguage::get() -> string('USER WAS_UPDATED');
+										$validationMsg = CLanguage::string('USER WAS_UPDATED');
 									}
 									else
 									{
-										$validationMsg .= CLanguage::get() -> string('ERR_SQL_ERROR');
+										$validationMsg .= CLanguage::string('ERR_SQL_ERROR');
 									}	
 
 
@@ -380,7 +380,7 @@ class	controllerUsers extends CController
 
 										if(!$this -> m_pModel -> unique($_pDatabase, $uniqueCondition))
 										{
-											$validationMsg .= CLanguage::get() -> string('M_BEUSER_MSG_USERNAMEEXIST');
+											$validationMsg .= CLanguage::string('M_BEUSER_MSG_USERNAMEEXIST');
 											$validationErr = true;
 										}
 
@@ -395,7 +395,7 @@ class	controllerUsers extends CController
 										} 
 										elseif(isset($_aFormData['login_pass_a']) && isset($_aFormData['login_pass_b']) && $_aFormData['login_pass_a'] !== $_aFormData['login_pass_b'])
 										{
-											$validationMsg .= CLanguage::get() -> string('M_BEUSER_MSG_PASSNOTEQUAL');
+											$validationMsg .= CLanguage::string('M_BEUSER_MSG_PASSNOTEQUAL');
 											$validationErr = true;
 										}
 									}
@@ -410,17 +410,17 @@ class	controllerUsers extends CController
 
 										if($this -> m_pModel -> update($_pDatabase, $_aFormData, $modelCondition))
 										{
-											$validationMsg = CLanguage::get() -> string('USER WAS_UPDATED');
+											$validationMsg = CLanguage::string('USER WAS_UPDATED');
 										}
 										else
 										{
-											$validationMsg .= CLanguage::get() -> string('ERR_SQL_ERROR');
+											$validationMsg .= CLanguage::string('ERR_SQL_ERROR');
 											$validationErr = true;
 										}											
 									}
 									else	// Validation Failed
 									{
-										$validationMsg .= CLanguage::get() -> string('ERR_VALIDATIONFAIL');
+										$validationMsg .= CLanguage::string('ERR_VALIDATIONFAIL');
 										$validationErr = true;
 									}
 
@@ -468,17 +468,17 @@ class	controllerUsers extends CController
 
 										if($this -> m_pModel -> update($_pDatabase, $_aFormData, $modelCondition))
 										{
-											$validationMsg = CLanguage::get() -> string('USER WAS_UPDATED');
+											$validationMsg = CLanguage::string('USER WAS_UPDATED');
 										}
 										else
 										{
-											$validationMsg .= CLanguage::get() -> string('ERR_SQL_ERROR');
+											$validationMsg .= CLanguage::string('ERR_SQL_ERROR');
 											$validationErr = true;
 										}											
 									}
 									else	// Validation Failed
 									{
-										$validationMsg .= CLanguage::get() -> string('ERR_VALIDATIONFAIL');
+										$validationMsg .= CLanguage::string('ERR_VALIDATIONFAIL');
 										$validationErr = true;
 									}
 
@@ -508,7 +508,7 @@ class	controllerUsers extends CController
 
 										if($this -> m_pModel -> delete($_pDatabase, $modelCondition))
 										{
-											$validationMsg = CLanguage::get() -> string('USER WAS_DELETED') .' - '. CLanguage::get() -> string('WAIT_FOR_REDIRECT');
+											$validationMsg = CLanguage::string('USER WAS_DELETED') .' - '. CLanguage::string('WAIT_FOR_REDIRECT');
 											$responseData['redirect'] = CMS_SERVER_URL_BACKEND . CPageRequest::instance() -> urlPath;
 
 											$modelUsersRegister  = new modelUsersRegister();
@@ -520,7 +520,7 @@ class	controllerUsers extends CController
 										}
 										else
 										{
-											$validationMsg .= CLanguage::get() -> string('ERR_SQL_ERROR');
+											$validationMsg .= CLanguage::string('ERR_SQL_ERROR');
 										}
 
 
@@ -529,7 +529,7 @@ class	controllerUsers extends CController
 			}		
 	
 
-		CMessages::add(CLanguage::get() -> string('MOD_BEUSER_ERR_USERID_UK') , MSG_WARNING);
+		CMessages::add(CLanguage::string('MOD_BEUSER_ERR_USERID_UK') , MSG_WARNING);
 		return false;
 	}
 	

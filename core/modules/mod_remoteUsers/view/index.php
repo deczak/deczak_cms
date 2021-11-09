@@ -4,11 +4,11 @@
 		<thead>
 			<tr>
 				<td class="batch-selection-item"></td>
-				<td><?= $language -> string('USER'); ?></td>
-				<td><?= $language -> string('MOD_BEREMOTEU_USERORIGIN'); ?></td>
-				<td style="text-align:center;"><?= $language -> string('MOD_BEREMOTEU_ALLOCATED'); ?></td>
-				<td><?= CLanguage::get() -> string('TIME_UPDATE_AT'); ?></td>
-				<td><?= CLanguage::get() -> string('UPDATE_BY'); ?></td>
+				<td><?= CLanguage::string('USER'); ?></td>
+				<td><?= CLanguage::string('MOD_BEREMOTEU_USERORIGIN'); ?></td>
+				<td style="text-align:center;"><?= CLanguage::string('MOD_BEREMOTEU_ALLOCATED'); ?></td>
+				<td><?= CLanguage::string('TIME_UPDATE_AT'); ?></td>
+				<td><?= CLanguage::string('UPDATE_BY'); ?></td>
 				<td class="bach-item-menu"></td>
 			</tr>
 		</thead>
@@ -16,7 +16,7 @@
 		<tfoot>
 			<tr>
 				<td class="batch-selection-item"><input type="checkbox" class="trigger-batch-item-all-checkbox" id="item-all"><label for="item-all"></label></td>
-				<td><?= $language -> string('SELECT_ALL'); ?></td>
+				<td><?= CLanguage::string('SELECT_ALL'); ?></td>
 				<td></td>
 				<td></td>
 				<td></td>
@@ -36,7 +36,7 @@
 	<td style="text-align:center;">%allocations%</td>
 	<td>%update_time%</td>
 	<td>%update_by%</td>
-	<td class="bach-item-menu"><span>&equiv;</span><div class="dropdown-content"><div></div><a href="<?php echo CMS_SERVER_URL_BACKEND . $pageRequest -> urlPath; ?>user/%id%"><?php echo $language -> string('BUTTON_EDIT'); ?></a></div></td>
+	<td class="bach-item-menu"><span>&equiv;</span><div class="dropdown-content"><div></div><a href="<?php echo CMS_SERVER_URL_BACKEND . $pageRequest -> urlPath; ?>user/%id%"><?php echo CLanguage::string('BUTTON_EDIT'); ?></a></div></td>
 	
 </template>
 

@@ -71,7 +71,7 @@ class	CController
 			if(empty($sub -> url_name) || empty($sub -> menu_name))
 				continue;
 
-			$sectionInfo[] = [ "page_path" => $sub -> url_name .'/', "menu_name" => CLanguage::instance() -> getString($sub -> menu_name) ];
+			$sectionInfo[] = [ "page_path" => $sub -> url_name .'/', "menu_name" => CLanguage::string($sub -> menu_name) ];
 	
 		}	
 		return $sectionInfo;	
@@ -177,7 +177,7 @@ class	CController
 		{
 			switch($locked['lockedState'])
 			{
-				default: $_bValidationMsg = CLanguage::get() -> string('LOCK_IS_LOCKED');
+				default: $_bValidationMsg = CLanguage::string('LOCK_IS_LOCKED');
 			}
 
 			tk::xhrResult(1, $_bValidationMsg, []);
@@ -192,7 +192,7 @@ class	CController
 		{		
 
 			CPageRequest::instance() -> addCrumb(
-													(!empty($_customMenuName) ? $_customMenuName : CLanguage::get() -> string($this -> moduleInfo -> sections[$_sectionIndex] -> menu_name)),
+													(!empty($_customMenuName) ? $_customMenuName : CLanguage::string($this -> moduleInfo -> sections[$_sectionIndex] -> menu_name)),
 													(!$_noLink ? $this -> moduleInfo -> sections[$_sectionIndex] -> url_name .'/' : false)
 												);
 		}

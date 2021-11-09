@@ -33,13 +33,13 @@ class	controllerRemoteUsers extends CController
 			if($_isXHRequest !== false)
 			{
 				$validationErr =	true;
-				$validationMsg =	CLanguage::get() -> string('ERR_PERMISSON');
+				$validationMsg =	CLanguage::string('ERR_PERMISSON');
 				$responseData = 	[];
 
 				tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
 			}
 
-			CMessages::add(CLanguage::get() -> string('ERR_PERMISSON') , MSG_WARNING);
+			CMessages::add(CLanguage::string('ERR_PERMISSON') , MSG_WARNING);
 			return;
 		}
 
@@ -78,13 +78,13 @@ class	controllerRemoteUsers extends CController
 			if($_xhrInfo !== null)
 			{
 				$validationErr =	true;
-				$validationMsg =	CLanguage::get() -> string('ERR_PERMISSON');
+				$validationMsg =	CLanguage::string('ERR_PERMISSON');
 				$responseData  = 	[];
 
 				tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
 			}
 
-			CMessages::add(CLanguage::get() -> string('ERR_PERMISSON') , MSG_WARNING);
+			CMessages::add(CLanguage::string('ERR_PERMISSON') , MSG_WARNING);
 			return false;
 		}
 
@@ -334,7 +334,7 @@ class	controllerRemoteUsers extends CController
 			}
 		}
 		
-		CMessages::add(CLanguage::get() -> string('MOD_BECATEGORIES_ERR_USERID_UK'), MSG_WARNING);
+		CMessages::add(CLanguage::string('MOD_BECATEGORIES_ERR_USERID_UK'), MSG_WARNING);
 		return false;
 	}
 
@@ -405,18 +405,18 @@ class	controllerRemoteUsers extends CController
 												}
 
 										
-												$validationMsg = CLanguage::get() -> string('USER') .' '. CLanguage::get() -> string('WAS_UPDATED');
+												$validationMsg = CLanguage::string('USER') .' '. CLanguage::string('WAS_UPDATED');
 											}
 											else
 											{
-												$validationMsg .= CLanguage::get() -> string('ERR_SQL_ERROR');
+												$validationMsg .= CLanguage::string('ERR_SQL_ERROR');
 												$validationErr = true;
 											}	
 
 										}
 										else	// Validation Failed
 										{
-											$validationMsg .= CLanguage::get() -> string('ERR_VALIDATIONFAIL');
+											$validationMsg .= CLanguage::string('ERR_VALIDATIONFAIL');
 											$validationErr = true;
 										}
 

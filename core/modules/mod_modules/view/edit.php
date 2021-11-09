@@ -13,10 +13,10 @@ else
 <div class="be-module-container forms-view">
 	<div>
 		<div class="ui inter-menu">
-			<h2><?php echo $language -> string('MENU'); ?></h2>
+			<h2><?php echo CLanguage::string('MENU'); ?></h2>
 			<hr>
 			<ul>
-			<li><a class="darkblue" href="#module-data"><?php echo $language -> string('M_BEMOULE_MODULEINFO'); ?></a></li>
+			<li><a class="darkblue" href="#module-data"><?php echo CLanguage::string('M_BEMOULE_MODULEINFO'); ?></a></li>
 			</ul>
 			<hr>
 
@@ -30,34 +30,34 @@ else
 
 			<input type="hidden" name="data_id" value="<?php echo $dataset -> data_id; ?>">
 
-			<legend><?php echo $language -> string('M_BEMOULE_MODULEINFO'); ?></legend>
+			<legend><?php echo CLanguage::string('M_BEMOULE_MODULEINFO'); ?></legend>
 			<div>
 
 
 				<div class="group width-100">
 
-					<div class="group-head width-100"><?php echo $language -> string('M_BEMOULE_MODULEINFO'); ?> </div>
+					<div class="group-head width-100"><?php echo CLanguage::string('M_BEMOULE_MODULEINFO'); ?> </div>
 
 					<div class="input width-25">
-						<label><?php echo $language -> string('M_BEMOULE_NAME'); ?></label>
+						<label><?php echo CLanguage::string('M_BEMOULE_NAME'); ?></label>
 						<input type="text" name="" disabled value="<?php echo $dataset -> module_name; ?>">
 						<i class="fas fa-lock"></i>
 					</div>
 					
 					<div class="input width-25">
-						<label><?php echo $language -> string('M_BEMOULE_MODULETYPE'); ?></label>
+						<label><?php echo CLanguage::string('M_BEMOULE_MODULETYPE'); ?></label>
 						<input type="text" name="" disabled value="<?= ucfirst($dataset -> module_type); ?> / <?= ucfirst($dataset -> module_group); ?>" maxlength="250">
 						<i class="fas fa-lock"></i>
 					</div>
 
 					<div class="input width-25">
-						<label><?php echo $language -> string('M_BEMOULE_MODULELOC'); ?></label>
+						<label><?php echo CLanguage::string('M_BEMOULE_MODULELOC'); ?></label>
 						<input type="text" name="" disabled value="<?php echo $dataset -> module_location; ?>" maxlength="250">
 						<i class="fas fa-lock"></i>
 					</div>
 
 					<div class="input width-25">
-						<label><?php echo $language -> string('M_BEMOULE_MODULEID'); ?></label>
+						<label><?php echo CLanguage::string('M_BEMOULE_MODULEID'); ?></label>
 						<input type="text" name="" disabled value="<?php echo $dataset -> module_id; ?>" maxlength="250">
 						<i class="fas fa-lock"></i>
 					</div>
@@ -84,11 +84,11 @@ else
 					?>
 
 					<div class="input width-25">
-						<label><?php echo CLanguage::instance() -> getString('M_BEMOULE_MODULEACTIVATED'); ?></label>
+						<label><?php echo CLanguage::string('M_BEMOULE_MODULEACTIVATED'); ?></label>
 						<div class="select-wrapper">
 						<select name="is_active" <?= (isset($disableSelect) && $disableSelect ? 'disabled' : ''); ?>>
-							<option value="0" <?php echo ($dataset -> is_active == 0 ? 'selected' : ''); ?>><?php echo CLanguage::get() -> string('NO'); ?></option>
-							<option value="1" <?php echo ($dataset -> is_active == 1 ? 'selected' : ''); ?>><?php echo CLanguage::get() -> string('YES'); ?></option>
+							<option value="0" <?php echo ($dataset -> is_active == 0 ? 'selected' : ''); ?>><?php echo CLanguage::string('NO'); ?></option>
+							<option value="1" <?php echo ($dataset -> is_active == 1 ? 'selected' : ''); ?>><?php echo CLanguage::string('YES'); ?></option>
 						</select>	
 						</div>
 					</div>
@@ -110,7 +110,7 @@ else
 				<!-- Submit button - beware of fieldset name -->
 
 				<div class="submit-container">
-					<button class="ui button icon labeled trigger-submit-fieldset" type="button" disabled><span><i class="fas fa-save" data-icon="fa-save"></i></span><?php echo $language -> string('BUTTON_SAVE'); ?></button>
+					<button class="ui button icon labeled trigger-submit-fieldset" type="button" disabled><span><i class="fas fa-save" data-icon="fa-save"></i></span><?php echo CLanguage::string('BUTTON_SAVE'); ?></button>
 					<div class="protector"><input type="checkbox" class="trigger-submit-protector" id="protector-module-data"><label for="protector-module-data"></label></div>
 				</div>
 
@@ -126,13 +126,13 @@ else
 				<div style="width:213px;border:2px solid white; border-radius:3px; background:white; padding:4px;">
 				<fieldset class="ui fieldset" data-xhr-target="delete" data-xhr-overwrite-target="delete/<?php echo $dataset -> module_id; ?>" style="margin:0px;">	
 					<div class="submit-container button-only">
-						<button class="ui button icon labeled trigger-submit-fieldset" type="button" disabled><span><i class="fas fa-trash-alt" data-icon="fa-trash-alt"></i></span><?php echo $language -> string('BUTTON_DELETE'); ?></button>
+						<button class="ui button icon labeled trigger-submit-fieldset" type="button" disabled><span><i class="fas fa-trash-alt" data-icon="fa-trash-alt"></i></span><?php echo CLanguage::string('BUTTON_DELETE'); ?></button>
 						<div class="protector"><input type="checkbox" class="trigger-submit-protector" id="protector-module-delete"><label for="protector-module-delete"></label></div>
 					</div>
 				</fieldset>
 				</div>
 				<div style="color:white; font-weight:500; margin-left:20px;">
-					<b><?php echo $language -> string('WARNING'); ?>:</b> <?php echo $language -> string('M_BEMOULE_MSG_WARNINGNOTICE'); ?>
+					<b><?php echo CLanguage::string('WARNING'); ?>:</b> <?php echo CLanguage::string('M_BEMOULE_MSG_WARNINGNOTICE'); ?>
 				</div>
 			</div>
 		<?php } ?>

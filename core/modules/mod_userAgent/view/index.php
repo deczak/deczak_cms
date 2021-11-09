@@ -4,12 +4,12 @@
 		<thead>
 			<tr>
 				<td class="batch-selection-item"></td>
-				<td><?php echo $language -> string('M_BEUSERAG_AGENTNAME'); ?></td>
-				<td><?php echo $language -> string('M_BEUSERAG_AGENTSUFFIX'); ?></td>
-				<td><?php echo $language -> string('DESCRIPTION'); ?></td>
-				<td style="text-align:center;"><?php echo $language -> string('ALLOWED'); ?></td>
-				<td><?php echo $language -> string('TIME_CREATE_AT'); ?></td>
-				<td><?php echo $language -> string('CREATE_BY'); ?></td>
+				<td><?php echo CLanguage::string('M_BEUSERAG_AGENTNAME'); ?></td>
+				<td><?php echo CLanguage::string('M_BEUSERAG_AGENTSUFFIX'); ?></td>
+				<td><?php echo CLanguage::string('DESCRIPTION'); ?></td>
+				<td style="text-align:center;"><?php echo CLanguage::string('ALLOWED'); ?></td>
+				<td><?php echo CLanguage::string('TIME_CREATE_AT'); ?></td>
+				<td><?php echo CLanguage::string('CREATE_BY'); ?></td>
 				<td class="bach-item-menu"></td>
 			</tr>
 		</thead>
@@ -17,7 +17,7 @@
 		<tfoot>
 			<tr>
 				<td class="batch-selection-item"><input type="checkbox" class="trigger-batch-item-all-checkbox" id="item-all"><label for="item-all"></label></td>
-				<td><?php echo $language -> string('SELECT_ALL'); ?></td>
+				<td><?php echo CLanguage::string('SELECT_ALL'); ?></td>
 				<td></td>
 				<td></td>
 				<td></td>
@@ -40,7 +40,7 @@
 	<td><div class="color-indicator positive" data-state="%agent_allowed%"></div></td>
 	<td>%create_time%</td>
 	<td>%creaty_by_name%</td>
-	<td class="bach-item-menu"><span>&equiv;</span><div class="dropdown-content"><div></div><a href="<?php echo CMS_SERVER_URL_BACKEND . $pageRequest -> urlPath; ?>agent/%data_id%"><?php echo $language -> string('BUTTON_EDIT'); ?></a></div></td>
+	<td class="bach-item-menu"><span>&equiv;</span><div class="dropdown-content"><div></div><a href="<?php echo CMS_SERVER_URL_BACKEND . $pageRequest -> urlPath; ?>agent/%data_id%"><?php echo CLanguage::string('BUTTON_EDIT'); ?></a></div></td>
 	
 </template>
 

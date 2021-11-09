@@ -16,18 +16,18 @@ $activeModulesList = CModules::instance() -> getModules();
 <div class="be-module-container forms-view">
 	<div>
 		<div class="inter-menu">
-			<h2><?php echo CLanguage::get() -> string('MENU'); ?></h2>
+			<h2><?php echo CLanguage::string('MENU'); ?></h2>
 			<hr>
 			<ul>
-			<li><a class="darkblue" href="#group-data"><?php echo CLanguage::get() -> string('MOD_RGROUPS_GROUP_INFO'); ?></a></li>
-			<li><a class="darkblue" href="#group-rights"><?php echo CLanguage::get() -> string('MOD_RGROUPS_GROUP_RIGHTS'); ?></a></li>
+			<li><a class="darkblue" href="#group-data"><?php echo CLanguage::string('MOD_RGROUPS_GROUP_INFO'); ?></a></li>
+			<li><a class="darkblue" href="#group-rights"><?php echo CLanguage::string('MOD_RGROUPS_GROUP_RIGHTS'); ?></a></li>
 			</ul>
 			<hr>
 			<div class="delete-box">	
 				<?php if(isset($enableDelete) && $enableDelete && $dataset !== false) { ?>	
 					<fieldset class="ui fieldset" data-xhr-target="delete" data-xhr-overwrite-target="delete/<?php echo $dataset -> group_id; ?>">	
 						<div class="submit-container button-only">
-							<button class="ui button icon labeled trigger-submit-fieldset" type="button" disabled><span><i class="fas fa-trash-alt" data-icon="fa-trash-alt"></i></span><?php echo CLanguage::get() -> string('BUTTON_DELETE'); ?></button>
+							<button class="ui button icon labeled trigger-submit-fieldset" type="button" disabled><span><i class="fas fa-trash-alt" data-icon="fa-trash-alt"></i></span><?php echo CLanguage::string('BUTTON_DELETE'); ?></button>
 							<div class="protector"><input type="checkbox" class="trigger-submit-protector" id="protector-user-delete"><label for="protector-user-delete"></label></div>
 						</div>
 						<div class="ui result-box" data-error=""></div>
@@ -43,18 +43,18 @@ $activeModulesList = CModules::instance() -> getModules();
 	<div>
 		
 		<fieldset class="ui fieldset submit-able" id="group-data" data-xhr-target="<?= (!$dataset ? 'create' : 'edit'); ?>" <?= ($dataset !== false ? 'data-xhr-overwrite-target="edit/'. $dataset -> group_id .'"' : ''); ?>>
-			<legend><?php echo CLanguage::get() -> string('MOD_RGROUPS_GROUP_INFO'); ?></legend>
+			<legend><?php echo CLanguage::string('MOD_RGROUPS_GROUP_INFO'); ?></legend>
 			<div>
 				<!-- group -->
 				<div class="group width-100">
 					<div class="input width-25">
-						<label><?php echo CLanguage::get() -> string('MOD_RGROUPS_GROUP_ID'); ?></label>
+						<label><?php echo CLanguage::string('MOD_RGROUPS_GROUP_ID'); ?></label>
 						<input name="group_id" type="text" <?= ($dataset !== false ? 'disabled' : ''); ?> value="<?php echo $dataset -> group_id; ?>">
 						<?= ($dataset !== false ? '<i class="fas fa-lock"></i>' : ''); ?>
 					</div>
 
 					<div class="input width-25">
-						<label><?php echo CLanguage::get() -> string('MOD_RGROUPS_GROUP_NAME'); ?></label>
+						<label><?php echo CLanguage::string('MOD_RGROUPS_GROUP_NAME'); ?></label>
 						<input type="text" name="group_name" value="<?php echo $dataset -> group_name; ?>">
 					</div>
 
@@ -126,8 +126,8 @@ $activeModulesList = CModules::instance() -> getModules();
 												?>
 												<div class="ui pick-item">
 													<input type="checkbox" id="<?php echo $_module -> module_id .'-'. $_right -> name; ?>" name="group_rights[<?php echo $_module -> module_id; ?>][]" value="<?php echo $_right -> name; ?>">
-													<label for="<?php echo $_module -> module_id .'-'. $_right -> name; ?>" title="<?php echo CLanguage::get() -> string($_right -> desc); ?>">
-														<?php echo CLanguage::get() -> string($_right -> desc); ?>
+													<label for="<?php echo $_module -> module_id .'-'. $_right -> name; ?>" title="<?php echo CLanguage::string($_right -> desc); ?>">
+														<?php echo CLanguage::string($_right -> desc); ?>
 													</label>
 												</div>
 												<?php
@@ -165,7 +165,7 @@ $activeModulesList = CModules::instance() -> getModules();
 				<!-- Submit button - beware of fieldset name -->
 
 				<div class="submit-container">
-					<button class="ui button icon labeled trigger-submit-fieldset " type="button" disabled><span><i class="fas fa-save" data-icon="fa-save"></i></span><?php echo CLanguage::get() -> string('BUTTON_SAVE'); ?></button>
+					<button class="ui button icon labeled trigger-submit-fieldset " type="button" disabled><span><i class="fas fa-save" data-icon="fa-save"></i></span><?php echo CLanguage::string('BUTTON_SAVE'); ?></button>
 					<div class="protector"><input type="checkbox" class="trigger-submit-protector" id="protector-group-rights"><label for="protector-group-rights"></label></div>
 				</div>
 

@@ -17,10 +17,10 @@ foreach($tableGroup as $table)
 <div class="be-module-container forms-view">
 	<div>
 		<div class="inter-menu">
-			<h2><?= CLanguage::get() -> string('MENU'); ?></h2>
+			<h2><?= CLanguage::string('MENU'); ?></h2>
 			<hr>
 			<ul>
-			<li><a class="darkblue" href="#group-data"><?= CLanguage::get() -> string('MOD_LOGINO_OBJECT_INFO'); ?></a></li>
+			<li><a class="darkblue" href="#group-data"><?= CLanguage::string('MOD_LOGINO_OBJECT_INFO'); ?></a></li>
 			</ul>
 			<hr>
 			<div class="delete-box">	
@@ -30,29 +30,29 @@ foreach($tableGroup as $table)
 	<div>
 		
 		<fieldset class="ui fieldset submit-able" id="group-data" data-xhr-target="create">
-			<legend><?= CLanguage::get() -> string('MOD_LOGINO_SUB_CREATE_NAME'); ?></legend>
+			<legend><?= CLanguage::string('MOD_LOGINO_SUB_CREATE_NAME'); ?></legend>
 			<div>
 				<!-- group -->
 				<div class="group width-100">
 
-					<div class="group-head width-100"><?= CLanguage::get() -> string('MOD_LOGINO_OBJECT_INFO'); ?></div>
+					<div class="group-head width-100"><?= CLanguage::string('MOD_LOGINO_OBJECT_INFO'); ?></div>
 
 					<div class="input width-25">
-						<label><?= CLanguage::get() -> string('MOD_LOGINO_OBJECT_NAME'); ?></label>
+						<label><?= CLanguage::string('MOD_LOGINO_OBJECT_NAME'); ?></label>
 						<input type="text" name="object_id" value="">
 					</div>
 
 					<div class="input width-50">
-						<label><?= CLanguage::get() -> string('MOD_LOGINO_OBJECT_DESC'); ?></label>
+						<label><?= CLanguage::string('MOD_LOGINO_OBJECT_DESC'); ?></label>
 						<input type="text" name="object_description" maxlength="200" value="">
 					</div>
 			
 					<div class="input width-25">
-						<label><?= CLanguage::get() -> string('MOD_LOGINO_OBJECT_DISABLED'); ?></label>
+						<label><?= CLanguage::string('MOD_LOGINO_OBJECT_DISABLED'); ?></label>
 						<div class="select-wrapper">
 						<select name="is_disabled">
-							<option value="0"><?= CLanguage::get() -> string('NO'); ?></option>
-							<option value="1"><?= CLanguage::get() -> string('YES'); ?></option>
+							<option value="0"><?= CLanguage::string('NO'); ?></option>
+							<option value="1"><?= CLanguage::string('YES'); ?></option>
 						</select>	
 						</div>
 					</div>
@@ -63,10 +63,10 @@ foreach($tableGroup as $table)
 				<!-- group -->
 				<div class="group width-100">
 
-					<div class="group-head width-100"><?= CLanguage::get() -> string('MOD_LOGINO_OBJECT_DATABASE'); ?></div>
+					<div class="group-head width-100"><?= CLanguage::string('MOD_LOGINO_OBJECT_DATABASE'); ?></div>
 
 					<div class="input width-100">
-						<label><?= CLanguage::get() -> string('MOD_LOGINO_OBJECT_DATABASE_SELECT'); ?></label>
+						<label><?= CLanguage::string('MOD_LOGINO_OBJECT_DATABASE_SELECT'); ?></label>
 						<div class="select-wrapper">
 						<select name="object_databases[]" class="dropdown">
 							<option></option>
@@ -84,7 +84,7 @@ foreach($tableGroup as $table)
 				<div class="group width-100">
 					<div class="input width-100">
 			
-					<div class="group-head width-100"><?= CLanguage::get() -> string('MOD_LOGINO_OBJECT_FIELDS'); ?></div>
+					<div class="group-head width-100"><?= CLanguage::string('MOD_LOGINO_OBJECT_FIELDS'); ?></div>
 
 					<div id="container-authentication-fields" style="margin-bottom:15px;"></div>
 				
@@ -104,7 +104,7 @@ foreach($tableGroup as $table)
 				<div class="group width-100">
 					<div class="input width-100">
 			
-					<div class="group-head width-100"><?= CLanguage::get() -> string('MOD_LOGINO_OBJECT_SESS_EXTENT'); ?></div>
+					<div class="group-head width-100"><?= CLanguage::string('MOD_LOGINO_OBJECT_SESS_EXTENT'); ?></div>
 				
 					<div id="container-extend-session-fields" style="margin-bottom:15px;"></div>
 									
@@ -123,7 +123,7 @@ foreach($tableGroup as $table)
 			<!-- Submit button - beware of fieldset name -->
 
 			<div class="submit-container">
-				<button class="ui button icon labeled trigger-submit-fieldset" type="button" disabled><span><i class="fas fa-save" data-icon="fa-save"></i></span><?= CLanguage::get() -> string('BUTTON_SAVE'); ?></button>
+				<button class="ui button icon labeled trigger-submit-fieldset" type="button" disabled><span><i class="fas fa-save" data-icon="fa-save"></i></span><?= CLanguage::string('BUTTON_SAVE'); ?></button>
 				<div class="protector"><input type="checkbox" class="trigger-submit-protector" id="protector-group-rights"><label for="protector-group-rights"></label></div>
 			</div>
 
@@ -699,12 +699,12 @@ foreach($tableGroup as $table)
 			let pRemoveButton				= instance.createRemoveButton('35px');
 			let pMoveUpButton				= instance.createMoveUpButton('35px');
 			let pMoveDownButton				= instance.createMoveDownButton('35px');
-			let pLoginFormDropdown_table 	= instance.createDropdown(nextFieldSetIndex,'object_fields','formTable', 'assignTable','<?= CLanguage::get() -> string('MODULE_LOGOBJ_LFORMTABLE'); ?>', tablesList.assignment, fieldWrapperWidth, instance.onChangeAssignFormTable);
-			let pLoginFormDropdown_text		= instance.createDropdown(nextFieldSetIndex,'object_fields','formText', 'assignColumnText','<?= CLanguage::get() -> string('MODULE_LOGOBJ_LFORMTEXT'); ?>', [], fieldWrapperWidth, null);
-			let pLoginFormDropdown_value	= instance.createDropdown(nextFieldSetIndex,'object_fields','formValue', 'assignColumnValue','<?= CLanguage::get() -> string('MODULE_LOGOBJ_LFORMVALUE'); ?>', [], fieldWrapperWidth, null);
+			let pLoginFormDropdown_table 	= instance.createDropdown(nextFieldSetIndex,'object_fields','formTable', 'assignTable','<?= CLanguage::string('MODULE_LOGOBJ_LFORMTABLE'); ?>', tablesList.assignment, fieldWrapperWidth, instance.onChangeAssignFormTable);
+			let pLoginFormDropdown_text		= instance.createDropdown(nextFieldSetIndex,'object_fields','formText', 'assignColumnText','<?= CLanguage::string('MODULE_LOGOBJ_LFORMTEXT'); ?>', [], fieldWrapperWidth, null);
+			let pLoginFormDropdown_value	= instance.createDropdown(nextFieldSetIndex,'object_fields','formValue', 'assignColumnValue','<?= CLanguage::string('MODULE_LOGOBJ_LFORMVALUE'); ?>', [], fieldWrapperWidth, null);
 
-			let pLoginAssign_table			= instance.createDropdown(nextFieldSetIndex,'object_fields','assignTable', 'assignTableRef','<?= CLanguage::get() -> string('MODULE_LOGOBJ_LASSIGNTABLE'); ?>', tablesList.assignment, fieldWrapperWidth, instance.onChangeAssignCheckTable);
-			let pLoginAssign_column			= instance.createDropdown(nextFieldSetIndex,'object_fields','assignColumn', 'assignTableColumn','<?= CLanguage::get() -> string('MODULE_LOGOBJ_LASSIGNCOLUMN'); ?>', [], fieldWrapperWidth);
+			let pLoginAssign_table			= instance.createDropdown(nextFieldSetIndex,'object_fields','assignTable', 'assignTableRef','<?= CLanguage::string('MODULE_LOGOBJ_LASSIGNTABLE'); ?>', tablesList.assignment, fieldWrapperWidth, instance.onChangeAssignCheckTable);
+			let pLoginAssign_column			= instance.createDropdown(nextFieldSetIndex,'object_fields','assignColumn', 'assignTableColumn','<?= CLanguage::string('MODULE_LOGOBJ_LASSIGNCOLUMN'); ?>', [], fieldWrapperWidth);
 
 			let pFieldSetContainer = instance.createFieldSetContainer(nextFieldSetIndex);
 				pFieldSetContainer.appendChild(pRemoveButton);
@@ -751,12 +751,12 @@ foreach($tableGroup as $table)
 
 
 			let pRemoveButton				= instance.createRemoveButton('35px');
-			let pExtendedSourceTable 		= instance.createDropdown(nextFieldSetIndex,'object_session_ext','checkTable', 'checkTable','<?= CLanguage::get() -> string('MODULE_LOGOBJ_LASSIGNTABLE'); ?>', tablesList.assignment, fieldWrapperWidth, instance.onChangeAssignSessionCheckTable);
-			let pExtendedSourceColumn		= instance.createDropdown(nextFieldSetIndex,'object_session_ext','checkColumn','checkColumn','<?= CLanguage::get() -> string('MODULE_LOGOBJ_ASSIGNCOLUMN'); ?>', [], fieldWrapperWidth, null);
+			let pExtendedSourceTable 		= instance.createDropdown(nextFieldSetIndex,'object_session_ext','checkTable', 'checkTable','<?= CLanguage::string('MODULE_LOGOBJ_LASSIGNTABLE'); ?>', tablesList.assignment, fieldWrapperWidth, instance.onChangeAssignSessionCheckTable);
+			let pExtendedSourceColumn		= instance.createDropdown(nextFieldSetIndex,'object_session_ext','checkColumn','checkColumn','<?= CLanguage::string('MODULE_LOGOBJ_ASSIGNCOLUMN'); ?>', [], fieldWrapperWidth, null);
 
-			let pExtendedAssignTable		= instance.createDropdown(nextFieldSetIndex,'object_session_ext','infoTable','infoTable','<?= CLanguage::get() -> string('MODULE_LOGOBJ_SOURCETABLE'); ?>', tablesList.assignment, fieldWrapperWidth, instance.onChangeAssignSessionInfoTable);
-			let pExtendedAssignColumn		= instance.createDropdown(nextFieldSetIndex,'object_session_ext','infoAssignCol','infoAssignCol','<?= CLanguage::get() -> string('MODULE_LOGOBJ_SOURCECOLUMN2'); ?>', [], fieldWrapperWidth, null);
-			let pExtendedAssign2Column		= instance.createDropdown(nextFieldSetIndex,'object_session_ext','infoColumn','infoColumn','<?= CLanguage::get() -> string('MODULE_LOGOBJ_SOURCECOLUMN'); ?>', [], fieldWrapperWidth, null);
+			let pExtendedAssignTable		= instance.createDropdown(nextFieldSetIndex,'object_session_ext','infoTable','infoTable','<?= CLanguage::string('MODULE_LOGOBJ_SOURCETABLE'); ?>', tablesList.assignment, fieldWrapperWidth, instance.onChangeAssignSessionInfoTable);
+			let pExtendedAssignColumn		= instance.createDropdown(nextFieldSetIndex,'object_session_ext','infoAssignCol','infoAssignCol','<?= CLanguage::string('MODULE_LOGOBJ_SOURCECOLUMN2'); ?>', [], fieldWrapperWidth, null);
+			let pExtendedAssign2Column		= instance.createDropdown(nextFieldSetIndex,'object_session_ext','infoColumn','infoColumn','<?= CLanguage::string('MODULE_LOGOBJ_SOURCECOLUMN'); ?>', [], fieldWrapperWidth, null);
 
 			let pFieldSetContainer = instance.createFieldSetContainer(nextFieldSetIndex);
 				pFieldSetContainer.appendChild(pRemoveButton);

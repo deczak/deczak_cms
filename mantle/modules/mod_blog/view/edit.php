@@ -45,11 +45,11 @@ foreach($sitemap as $node)
 
 		<span class="categories"><?= implode(' / ', $categories); ?></span>
 		<h2><a href="<?= CMS_SERVER_URL_BACKEND .'pages/view/'. $node -> page_language .'/'. $node -> node_id; ?>"><?= $headline; ?></a></h2>
-		<span class="info"><?= CLanguage::get() -> string('TIME_CREATE_AT'); ?> <?= date("d.m.Y", $node -> create_time); ?></span>
+		<span class="info"><?= CLanguage::string('TIME_CREATE_AT'); ?> <?= date("d.m.Y", $node -> create_time); ?></span>
 
 		<p><?= $node -> text -> body; ?></p>
 
-		&nbsp;&nbsp;&bull;&nbsp; <a class="darkblue"  href="<?= CMS_SERVER_URL_BACKEND .'pages/view/'. $node -> page_language .'/'. $node -> node_id; ?>"> <?= CLanguage::get() -> string('READMORE'); ?></a>
+		&nbsp;&nbsp;&bull;&nbsp; <a class="darkblue"  href="<?= CMS_SERVER_URL_BACKEND .'pages/view/'. $node -> page_language .'/'. $node -> node_id; ?>"> <?= CLanguage::string('READMORE'); ?></a>
 			
 	</div>
 

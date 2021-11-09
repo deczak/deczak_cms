@@ -30,14 +30,14 @@ class	controllerRightGroups extends CController
 			if($_xhrInfo !== null)
 			{
 				$validationErr =	true;
-				$validationMsg =	CLanguage::get() -> string('ERR_PERMISSON');
+				$validationMsg =	CLanguage::string('ERR_PERMISSON');
 				$responseData  = 	[];
 
 
 				tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
 			}
 
-			CMessages::add(CLanguage::get() -> string('ERR_PERMISSON') , MSG_WARNING);
+			CMessages::add(CLanguage::string('ERR_PERMISSON') , MSG_WARNING);
 			return false;
 		}
 
@@ -126,7 +126,7 @@ class	controllerRightGroups extends CController
 
 									if(!$this -> modelRightGroups -> load($_pDatabase, $modelCondition, MODEL_RIGHTGROUPS_NUM_ASSIGNMENTS))
 									{
-										$validationMsg .= CLanguage::get() -> string('ERR_SQL_ERROR');
+										$validationMsg .= CLanguage::string('ERR_SQL_ERROR');
 										$validationErr = true;
 									}											
 						
@@ -177,7 +177,7 @@ class	controllerRightGroups extends CController
 			}
 			else	// Validation Failed
 			{
-				$validationMsg .= CLanguage::get() -> string('ERR_VALIDATIONFAIL');
+				$validationMsg .= CLanguage::string('ERR_VALIDATIONFAIL');
 			}
 
 			if(!$validationErr)	// Validation OK
@@ -195,12 +195,12 @@ class	controllerRightGroups extends CController
 				{
 					$_pPageRequest 	= CPageRequest::instance();
 
-					$validationMsg = CLanguage::get() -> string('MOD_RGROUPS_GROUP_RIGHTS') .' '. CLanguage::get() -> string('WAS_CREATED'). ' - '. CLanguage::get() -> string('WAIT_FOR_REDIRECT');
+					$validationMsg = CLanguage::string('MOD_RGROUPS_GROUP_RIGHTS') .' '. CLanguage::string('WAS_CREATED'). ' - '. CLanguage::string('WAIT_FOR_REDIRECT');
 					$responseData['redirect'] = CMS_SERVER_URL_BACKEND . $_pPageRequest -> urlPath .'group/'.$groupId;
 				}
 				else
 				{
-					$validationMsg .= CLanguage::get() -> string('ERR_SQL_ERROR');
+					$validationMsg .= CLanguage::string('ERR_SQL_ERROR');
 				}
 			}
 
@@ -247,7 +247,7 @@ class	controllerRightGroups extends CController
 			}
 		}
 
-		CMessages::add(CLanguage::get() -> string('MOD_RGROUP_ERR_RGROUP_ID_UK') , MSG_WARNING);
+		CMessages::add(CLanguage::string('MOD_RGROUP_ERR_RGROUP_ID_UK') , MSG_WARNING);
 		return false;
 	}
 
@@ -287,17 +287,17 @@ class	controllerRightGroups extends CController
 
 										if($this -> modelRightGroups -> update($_pDatabase, $_aFormData, $modelCondition))
 										{
-											$validationMsg = CLanguage::get() -> string('MOD_RGROUPS_GROUP_RIGHTS') .' '. CLanguage::get() -> string('WAS_UPDATED');
+											$validationMsg = CLanguage::string('MOD_RGROUPS_GROUP_RIGHTS') .' '. CLanguage::string('WAS_UPDATED');
 										}
 										else
 										{
-											$validationMsg .= CLanguage::get() -> string('ERR_SQL_ERROR');
+											$validationMsg .= CLanguage::string('ERR_SQL_ERROR');
 											$validationErr = true;
 										}											
 									}
 									else	// Validation Failed
 									{
-										$validationMsg .= CLanguage::get() -> string('ERR_VALIDATIONFAIL');
+										$validationMsg .= CLanguage::string('ERR_VALIDATIONFAIL');
 										$validationErr = true;
 									}
 
@@ -331,12 +331,12 @@ class	controllerRightGroups extends CController
 
 										if($this -> modelRightGroups -> delete($_pDatabase, $modelCondition))
 										{
-											$validationMsg = CLanguage::get() -> string('MOD_RGROUPS_GROUP_RIGHTS') .' '. CLanguage::get() -> string('WAS_DELETED'). ' - '. CLanguage::get() -> string('WAIT_FOR_REDIRECT');
+											$validationMsg = CLanguage::string('MOD_RGROUPS_GROUP_RIGHTS') .' '. CLanguage::string('WAS_DELETED'). ' - '. CLanguage::string('WAIT_FOR_REDIRECT');
 											$responseData['redirect'] = CMS_SERVER_URL_BACKEND . CPageRequest::instance() -> urlPath;
 										}
 										else
 										{
-											$validationMsg .= CLanguage::get() -> string('ERR_SQL_ERROR');
+											$validationMsg .= CLanguage::string('ERR_SQL_ERROR');
 										}
 
 				tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call

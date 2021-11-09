@@ -70,9 +70,8 @@ function onXHRSuccessSimpleGalleryQueryItems(response, srcInstance)
 	}
 
 
+	let ts = sgilNOde.getAttribute('data-tile-size');
 
-	console.log('onXHRSuccessSimpleGalleryQueryItems');
-	console.log(processList);
 
 
 
@@ -108,10 +107,10 @@ function onXHRSuccessSimpleGalleryQueryItems(response, srcInstance)
 
 
 
-			if((rp + rp2) > 8)
+			if((rp + rp2) > ts)
 			{
 
-				if(rp == 7 && bp.length > 0)
+				if(rp == (ts - 1) && bp.length > 0)
 				{
 					let itemp = bp.pop();
 
