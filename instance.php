@@ -59,6 +59,8 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CUserRights.php';
 	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CNodesSearch.php';
 
+	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'cmsUpdate.php';
+
 ##	M E S S A G E   S Y S T E M
 
 	CMessages::initialize();
@@ -80,6 +82,15 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 	{	##	create connection failed
 		CPageRequest::instance() -> setResponseCode(920);
 	}	
+
+##  S Y S T E M   U P D A T E R
+
+if(CMS_BACKEND)
+{
+	$cmsUpdate  = new cmsUpdate;
+	if($cmsUpdate -> detectUpdate())
+		$cmsUpdate -> updateDatabase();
+}
 
 ##	L A N G U A G E   S Y S T E M   /   I N I T I A L   F I L E S
 

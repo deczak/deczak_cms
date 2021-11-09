@@ -13,7 +13,7 @@ class shemeCategoriesAllocation extends CSheme
 
 		$this -> addColumn('category_name', DB_COLUMN_TYPE_STRING) -> setVirtual();
 
-		$this -> addConstraing('category_id', 'category_id', 'tb_categories', 'category_id', 'CASCADE', 'CASCADE');
-		$this -> addConstraing('cat_page_alloc', 'node_id', 'tb_page', 'node_id', 'CASCADE', 'CASCADE');
+		$this -> addConstraint('category_id', 'category_id', 'tb_categories', 'category_id', 'CASCADE', 'CASCADE');
+		$this -> addConstraint('cat_page_alloc', 'node_id', 'tb_page', 'node_id', 'CASCADE', 'CASCADE');
 	}
 }

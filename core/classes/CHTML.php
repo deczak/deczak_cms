@@ -89,7 +89,7 @@ class	CHTML
 			@include $templatePath . $_file;	
 
 		if(!CMS_BACKEND && file_exists(CMS_SERVER_ROOT.DIR_PUBLIC .'css/cms.css'))
-			echo "\t<link href=\"".CMS_SERVER_URL.DIR_PUBLIC ."css/cms.css\" rel=\"stylesheet\" title=\"default\" media=\"screen\">";
+			echo "\t<link href=\"".CMS_SERVER_URL."css/cms.css\" rel=\"stylesheet\" title=\"default\" media=\"screen\">";
 
 		if(CMS_BACKEND && file_exists(CMS_SERVER_ROOT.DIR_BACKEND .'css/cms.css'))
 			echo "\t<link href=\"".CMS_SERVER_URL.DIR_BACKEND ."css/cms.css\" rel=\"stylesheet\" title=\"default\" media=\"screen\">";
@@ -133,7 +133,7 @@ class	CHTML
 		} 
 
 		if(!CMS_BACKEND && file_exists(CMS_SERVER_ROOT.DIR_PUBLIC .'js/cms.js'))
-			echo "\t<script src=\"". CMS_SERVER_URL.DIR_PUBLIC ."js/cms.js\"></script>";
+			echo "\t<script src=\"". CMS_SERVER_URL."js/cms.js\"></script>";
 
 		if(CMS_BACKEND && file_exists(CMS_SERVER_ROOT.DIR_BACKEND .'js/cms.js'))
 			echo "\t<script src=\"". CMS_SERVER_URL.DIR_BACKEND ."js/cms.js\"></script>";

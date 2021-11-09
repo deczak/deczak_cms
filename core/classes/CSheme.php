@@ -236,13 +236,6 @@ class	CSheme
 		$this -> m_constraintsList[] = new CShemeConstraints($_constraintName, $_keyName, $_refTable, $_refColumn, $_onDelete, $_onUpdate);
 	}
 
-	protected function
-	addConstraing($_constraintName, $_keyName, $_refTable, $_refColumn, $_onDelete, $_onUpdate)
-	{
-		// function name typo  .. remove later
-		$this -> addConstraint($_constraintName, $_keyName, $_refTable, $_refColumn, $_onDelete, $_onUpdate);
-	}
-
 	public function
 	existsColumn(string $_columnName, bool $_excludeVirtual = true)
 	{
@@ -304,4 +297,123 @@ class	CSheme
 		$this -> m_seedList[] = $seedItm;
 	}
 
+	/**
+	 * 	This function checks the table and his columns, it will update the table to the has-to-be-state
+	 * 
+	 * 	@param CDatabaseConnection $_dbConnection Database Connection object
+	 */
+	public function
+	updateTable(CDatabaseConnection &$_dbConnection) : bool
+	{
+		CLog::add('CSheme::updateTable -- Call');
+
+		if($this -> m_isVirtual === true)
+			return true;
+
+		CLog::add('CSheme::updateTable -- Update table '. $this -> m_tableName);
+
+		$tableInfoList 	= $_dbConnection -> query(DB_COLUMNS) 
+										 -> table($this -> m_tableName)
+										 -> exec();
+
+		if(empty($tableInfoList))
+		{
+			CLog::add('CSheme::updateTable -- Table does not exist, create table '. $this -> m_tableName);
+			return $_dbConnection -> query(DB_CREATE) -> sheme($this) -> exec();
+		}
+
+		$shemeColumnList = $this -> m_columnsList;
+
+		##	Compare tables
+
+		foreach($shemeColumnList as $columnInfoSOLL_KEY => $columnInfoSOLL)
+		{
+			foreach($tableInfoList as $columnInfoIST_KEY => $columnInfoIST)
+			{
+				if($columnInfoSOLL -> m_columnName === $columnInfoIST -> COLUMN_NAME)
+				{
+					// TODO :: Check column settings, update if required
+
+					/*
+					[TABLE_CATALOG] => def
+					[TABLE_SCHEMA] => ***** db name
+					[TABLE_NAME] => tb_modules
+					[COLUMN_NAME] => module_id
+					[ORDINAL_POSITION] => 1
+					[COLUMN_DEFAULT] => 
+					[IS_NULLABLE] => NO
+					[DATA_TYPE] => int
+					[CHARACTER_MAXIMUM_LENGTH] => 
+					[CHARACTER_OCTET_LENGTH] => 
+					[NUMERIC_PRECISION] => 10
+					[NUMERIC_SCALE] => 0
+					[DATETIME_PRECISION] => 
+					[CHARACTER_SET_NAME] => 
+					[COLLATION_NAME] => 
+					[COLUMN_TYPE] => int(10) unsigned
+					[COLUMN_KEY] => PRI
+					[EXTRA] => auto_increment
+					[PRIVILEGES] => select,insert,update,references
+					[COLUMN_COMMENT] => 
+					*/
+					
+					unset($shemeColumnList[$columnInfoSOLL_KEY]);
+					unset($tableInfoList[$columnInfoIST_KEY]);
+				}
+			}
+		}
+
+		##	Add Columns that not exists
+
+		foreach($shemeColumnList as $columnInfoSOLL)
+		{
+			if($columnInfoSOLL -> m_isVirtual)
+				continue;
+
+			CLog::add('CSheme::updateTable -- Add column '. $columnInfoSOLL -> m_columnName);
+
+			$execResult = $_dbConnection -> query(DB_ALTER_TABLE_COLUMN_ADD) -> table($this -> m_tableName) -> shemeColumn($columnInfoSOLL) -> exec();
+
+			if($execResult === false)
+			{
+				// add column failed
+				CLog::add('CSheme::updateTable -- Add column '. $columnInfoSOLL -> m_columnName .' ... aborted');
+				return false;
+			}
+			else
+			{
+				// add successful
+				CLog::add('CSheme::updateTable -- Add column '. $columnInfoSOLL -> m_columnName .' ... successful');
+			}
+		}
+
+		##	Drop Columns that still exists
+
+		foreach($tableInfoList as $columnInfoIST)
+		{
+			CLog::add('CSheme::updateTable -- Add column '. $columnInfoIST -> COLUMN_NAME);
+
+			$execResult = $_dbConnection -> query(DB_ALTER_TABLE_COLUMN_DROP) 
+										 -> table($this -> m_tableName)
+										 -> selectColumns([$columnInfoIST -> COLUMN_NAME]) // Only one column per call
+										 -> exec();
+
+			if($execResult === false)
+			{
+				// drop column failed
+				CLog::add('CSheme::updateTable -- Drop column '. $columnInfoIST -> COLUMN_NAME .' ... aborted');
+				return false;
+			}
+			else
+			{
+				// drop successful
+				CLog::add('CSheme::updateTable -- Drop column '. $columnInfoIST -> COLUMN_NAME .' ... successful');
+			}		
+		}
+
+
+		CLog::add('CSheme::updateTable -- Update table successful');
+
+		return true;
+	}
 }

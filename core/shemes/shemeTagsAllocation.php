@@ -13,7 +13,7 @@ class shemeTagsAllocation extends CSheme
 
 		$this -> addColumn('tag_name', DB_COLUMN_TYPE_STRING) -> setVirtual();
 
-		$this -> addConstraing('tag_id', 'tag_id', 'tb_tags', 'tag_id', 'CASCADE', 'CASCADE');
-		$this -> addConstraing('tag_page_alloc', 'node_id', 'tb_page', 'node_id', 'CASCADE', 'CASCADE');
+		$this -> addConstraint('tag_id', 'tag_id', 'tb_tags', 'tag_id', 'CASCADE', 'CASCADE');
+		$this -> addConstraint('tag_page_alloc', 'node_id', 'tb_page', 'node_id', 'CASCADE', 'CASCADE');
 	}
 }

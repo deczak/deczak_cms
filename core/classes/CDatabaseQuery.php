@@ -7,10 +7,11 @@ define('DB_DELETE',0x4);
 define('DB_DROP',0x5);
 define('DB_TRUNCATE',0x6);
 define('DB_DESCRIBE',0x7);
-define('DB_ALTER_TABLE',0x8);
+define('DB_ALTER_TABLE_COLUMN_DROP',0x8);
 define('DB_CREATE',0x9);
 define('DB_CONSTRAINTS',0x10);
 define('DB_COLUMNS',0x11);
+define('DB_ALTER_TABLE_COLUMN_ADD',0x12);
 
 class	CDatabaseQuery
 {
@@ -24,6 +25,7 @@ class	CDatabaseQuery
 	private	$m_printException;
 
 	private	$m_tableSheme;
+	private	$m_tableShemeColumn;
 	private	$m_dtaObject;
 	private	$m_dtaObjectName;
 
@@ -106,6 +108,13 @@ class	CDatabaseQuery
 	sheme($_sheme)
 	{
 		$this -> m_tableSheme = $_sheme;
+		return $this;
+	}
+
+	public function
+	shemeColumn($_shemeColumn)
+	{
+		$this -> m_tableShemeColumn = $_shemeColumn;
 		return $this;
 	}
 
@@ -201,6 +210,26 @@ class	CDatabaseQuery
 
 					break;
 
+
+			case 	DB_ALTER_TABLE_COLUMN_DROP:
+
+					if(empty($this -> m_tableColumns))
+						return false;
+
+					$tableName = ($this -> m_tableSheme != null && !empty($this -> m_tableSheme -> getTableName()) ? $this -> m_tableSheme -> getTableName() : current($this -> m_tableName) -> name);
+
+					$queryString[]	= 'ALTER TABLE ';
+					$queryString[]	= '`'. $this -> m_pDatabase -> getDatabaseName() .'`.`'. $tableName .'`';
+					$queryString[]	= 'DROP COLUMN';
+					$queryString[]	= reset($this -> m_tableColumns);
+
+					break;
+
+			case 	DB_ALTER_TABLE_COLUMN_ADD:
+
+					return $this -> _createColumn();
+					break;
+
 			case 	DB_DESCRIBE:
 
 					$tableName = ($this -> m_tableSheme != null && !empty($this -> m_tableSheme -> getTableName()) ? $this -> m_tableSheme -> getTableName() : current($this -> m_tableName) -> name);
@@ -213,10 +242,11 @@ class	CDatabaseQuery
 
 					$tableName = ($this -> m_tableSheme != null && !empty($this -> m_tableSheme -> getTableName()) ? $this -> m_tableSheme -> getTableName() : current($this -> m_tableName) -> name);
 
-					$queryString[]	= 'SELECT DISTINCT COLUMN_NAME FROM';
+					$queryString[]	= 'SELECT DISTINCT * FROM';
 					$queryString[]	= 'INFORMATION_SCHEMA.COLUMNS';
 					$queryString[]	= 'WHERE';
 					$queryString[]	= 'TABLE_NAME = \''. $tableName .'\'';
+					$queryString[]	= 'AND TABLE_SCHEMA = \''. $this -> m_pDatabase -> getDatabaseName() .'\'';
 					break;
 
 			case 	DB_CREATE:
@@ -423,6 +453,89 @@ class	CDatabaseQuery
 			return false;
 		}
 		
+		return true;
+	}
+
+
+
+	private function
+	_createColumn()
+	{
+		CLog::add('CDatabaseQuery::_createColumn -- Call');
+
+		$dbConnection = &$this -> m_pDatabase -> getConnection();
+
+		if(empty($this -> m_tableName))
+		{
+			CLog::add('CDatabaseQuery::_createColumn -- Table name not set, abort call', true);
+			return false;
+		}
+
+		$sqlString 		= [];
+		$sqlString[] 	= "ALTER TABLE `". reset($this -> m_tableName) -> name ."`";
+
+		$columnData = $this -> m_tableShemeColumn;
+		$columnName = $columnData -> m_columnName;
+
+		if($columnData -> m_isVirtual)
+		{
+			CLog::add('CDatabaseQuery::_createColumn -- Table is virtual, abort call');
+			return true;
+		}
+			
+		$sqlString[] 	= "ADD";
+		$sqlString[] 	= "`". $columnData -> m_columnName ."`";
+
+		switch($columnData -> m_columnType)
+		{
+			case DB_COLUMN_TYPE_BIGINT    :	$sqlString[] 	= 'BIGINT' . ($columnData -> m_length !== 0 ? "(". $columnData -> m_length .")" : ""); break;
+			case DB_COLUMN_TYPE_MEDIUMINT : $sqlString[] 	= 'MEDIUMINT' . ($columnData -> m_length !== 0 ? "(". $columnData -> m_length .")" : ""); break;
+			case DB_COLUMN_TYPE_BOOL      : 
+			case DB_COLUMN_TYPE_TINYINT	  : $sqlString[] 	= 'TINYINT' . ($columnData -> m_length !== 0 ? "(". $columnData -> m_length .")" : ""); break;
+			case DB_COLUMN_TYPE_INT	      : $sqlString[] 	= 'INT' . ($columnData -> m_length !== 0 ? "(". $columnData -> m_length .")" : ""); break;			
+			case DB_COLUMN_TYPE_ARRAY     : 
+			case DB_COLUMN_TYPE_JSON      : 
+			case DB_COLUMN_TYPE_TEXT      : $sqlString[] 	= 'TEXT' . ($columnData -> m_length !== 0 ? "(". $columnData -> m_length .")" : ""); break;
+			case DB_COLUMN_TYPE_STRING    : $sqlString[] 	= 'VARCHAR' . ($columnData -> m_length !== 0 ? "(". $columnData -> m_length .")" : ""); break;			
+			case DB_COLUMN_TYPE_DECIMAL   : $sqlString[] 	= 'DECIMAL' . ($columnData -> m_length !== 0 ? "(". $columnData -> m_length .")" : ""); break;				
+			case DB_COLUMN_TYPE_FLOAT     :	$sqlString[] 	= 'FLOAT' . ($columnData -> m_length !== 0 ? "(". $columnData -> m_length .")" : ""); break;				
+		}
+
+		switch($columnData -> m_attribute)
+		{
+			case DB_COLUMN_ATTR_UNSIGNED : $sqlString[] 	= 'UNSIGNED'; break;
+		}
+			
+		if(!$columnData -> m_isNull && $columnData -> m_defaultValue === NULL)
+
+			$sqlString[] 	= "NOT NULL";
+
+		elseif($columnData -> m_isNull && $columnData -> m_defaultValue === NULL)
+
+			$sqlString[] 	= "DEFAULT NULL";
+
+		elseif(!$columnData -> m_isNull && $columnData -> m_defaultValue === true)
+
+			$sqlString[] 	= "DEFAULT '1'";
+
+		else
+
+			$sqlString[] 	= "DEFAULT '". $columnData -> m_defaultValue ."'";
+
+		if($columnData -> m_isAutoIncrement)
+			$sqlString[] 	= "AUTO_INCREMENT";
+	
+		try
+		{
+			$dbConnection -> query(implode(' ', $sqlString));
+		}
+		catch(PDOException $exception)
+		{
+			CLog::add('CDatabaseQuery::_createColumn -- query failed. Exception: '. $exception -> getMessage(), true);
+			return false;
+		}
+
+		CLog::add('CDatabaseQuery::_createColumn -- Call successful');
 		return true;
 	}
 
