@@ -152,7 +152,7 @@ class	CSession extends CSingleton
 
 					CSysMailer::instance() 	-> sendMail(
 														CLanguage::string('SYSMAIL_SESSDENIED_SUBJ'), 
-														CLanguage::instance() -> getStringExt(
+														CLanguage::stringExt(
 																							'SYSMAIL_SESSDENIED_TEXT',
 																							[
 																								'[USER_IP]' => $_SERVER['REMOTE_ADDR']

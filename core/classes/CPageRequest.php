@@ -275,7 +275,7 @@ class CPageRequest extends CSingleton
 
 			##	Add detailed Language information
 
-			$languagesList = CLanguage::instance() -> getLanguages();
+			$languagesList = CLanguage::getLanguages();
 			if(isset($languagesList[$_language]))
 				$this -> languageInfo = $languagesList[$_language];
 			else

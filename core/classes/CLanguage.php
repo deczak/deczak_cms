@@ -13,13 +13,15 @@ class	CLanguage extends CSingleton
 
 	private		$languagesList;
 
-	public function
+	public static function
 	initialize(?CDatabaseConnection &$_dbConnection, string $_activeLanguage = '') : bool
 	{
 		if($_dbConnection === null)
 			return false;
 
-		$this -> languagesList = [];
+		$instance  = static::instance();
+
+		$instance -> languagesList = [];
 
 		$modelLanguages = new modelLanguages();
 		$modelLanguages -> load($_dbConnection);
@@ -28,50 +30,54 @@ class	CLanguage extends CSingleton
 		foreach($srcLanguages as $lang)
 		{
 			if($lang -> lang_default)
-				$this -> m_defaultLanguage = $lang -> lang_key;
+				$instance -> m_defaultLanguage = $lang -> lang_key;
 
-			$this -> languagesList[$lang -> lang_key] = $lang;
+			$instance -> languagesList[$lang -> lang_key] = $lang;
 		}
 
-		$_activeLanguage = (empty($_activeLanguage) ? $this -> m_defaultLanguage : $_activeLanguage);
+		$_activeLanguage = (empty($_activeLanguage) ? $instance -> m_defaultLanguage : $_activeLanguage);
 
-		$this -> m_activeLanguage		= $_activeLanguage;
+		$instance -> m_activeLanguage		= $_activeLanguage;
 
-		if(!isset($this -> languagesList[$_activeLanguage]))
-			$this -> m_activeLanguage = $this -> m_defaultLanguage;
+		if(!isset($instance -> languagesList[$_activeLanguage]))
+			$instance -> m_activeLanguage = $instance -> m_defaultLanguage;
 
-		$this -> isInitialized			= true;
+		$instance -> isInitialized			= true;
 
 		return true;
 	}
 
-	public function
+	public static function
 	getLanguages() : array
 	{
-		if(empty($this -> isInitialized)) return [];
-		return $this -> languagesList;
+		$instance  = static::instance();
+		if(empty($instance -> isInitialized)) return [];
+		return $instance -> languagesList;
 	}
 
-	public function
+	public static function
 	getDefault() : string
 	{
-		return $this -> m_defaultLanguage;
+		$instance  = static::instance();
+		return $instance -> m_defaultLanguage;
 	}
 
-	public function
+	public static function
 	loadLanguageFile(string $_Filelocation , $_LanguageKey = false, array $_compareData = [] ) : void
 	{ 
+		$instance  = static::instance();
+
 		if( !file_exists( $_Filelocation . $_LanguageKey .'.lang' ) )
 		{
-			if( !file_exists( $_Filelocation . $this -> m_defaultLanguage .'.lang' ) )
+			if( !file_exists( $_Filelocation . $instance -> m_defaultLanguage .'.lang' ) )
 			{
 				return;
 			}
-			$_LanguageKey = $this -> m_defaultLanguage;
+			$_LanguageKey = $instance -> m_defaultLanguage;
 		}
 
 		if($_LanguageKey === false)
-			$_LanguageKey = $this -> getDefault();
+			$_LanguageKey = $instance -> getDefault();
 		
 		$_aFilepaths[] = $_Filelocation . $_LanguageKey .'.lang';
 		
@@ -146,7 +152,7 @@ class	CLanguage extends CSingleton
 				$fi_aStringData[1] = explode('#', $fi_aStringData[1])[0];
 
 				if(!$_bIgnoreString)
-				$this -> m_aStorage[$_LanguageKey][ trim($fi_aStringData[0]) ] = trim($fi_aStringData[1]);
+				$instance -> m_aStorage[$_LanguageKey][ trim($fi_aStringData[0]) ] = trim($fi_aStringData[1]);
 			}		
 			
 			fclose($_pFileHandler);
@@ -193,30 +199,33 @@ class	CLanguage extends CSingleton
 		return $returnValue;
 	}
 
-	public function
-	getStringExt(string $_StringID , array $_Replacement = array()) : string
+	public static function
+	stringExt(string $_StringID , array $_Replacement = array(), bool $_preventUnknownKMark = false) : string
 	{
-		if(empty($this -> isInitialized)) return 'not_initialized';
-		if( isset( $this -> m_aStorage[$this -> m_activeLanguage][$_StringID] ) )
+		$instance  = static::instance();
+		if(empty($instance -> isInitialized)) return 'not_initialized';
+		if( isset( $instance -> m_aStorage[$instance -> m_activeLanguage][$_StringID] ) )
 		{
 			if(!empty($_Replacement))
 			{
 				$_arrayKeys 	= array_keys($_Replacement);
 				$_arrayValues 	= array_values($_Replacement);
-				$_tempString	= str_replace($_arrayKeys,$_arrayValues,$this -> m_aStorage[$this -> m_activeLanguage][$_StringID]);
+				$_tempString	= str_replace($_arrayKeys,$_arrayValues,$instance -> m_aStorage[$instance -> m_activeLanguage][$_StringID]);
 				$_tempString	= str_replace('\r\n',"\r\n",$_tempString);
 				return $_tempString;
 			}	
 		}
-		return '???';
+				
+		return (!$_preventUnknownKMark ? '(!) ' : '') . $_StringID;
 	}
 	
-	public function
+	public static function
 	getStringAlternates(string $_StringID) : array
 	{
+		$instance  = static::instance();
 		$_aReturnData = [];
-		if(empty($this -> isInitialized)) return $_aReturnData;
-		foreach($this -> m_aStorage as $_langKey => $_stringsData)
+		if(empty($instance -> isInitialized)) return $_aReturnData;
+		foreach($instance -> m_aStorage as $_langKey => $_stringsData)
 		{
 			if(isset($_stringsData[$_StringID]))
 				$_aReturnData[$_langKey] = $_stringsData[$_StringID];
@@ -224,47 +233,50 @@ class	CLanguage extends CSingleton
 		return $_aReturnData;
 	}
 
-	public function
+	public static function
 	getActiveLanguage()
 	{
-		if(empty($this -> isInitialized)) return false;
-		return $this -> m_activeLanguage;
+		$instance  = static::instance();
+		if(empty($instance -> isInitialized)) return false;
+		return $instance -> m_activeLanguage;
 	}
 
-	public function
+	public static function
 	getActive()
 	{
-		if(empty($this -> isInitialized)) return false;
-		return $this -> m_activeLanguage;
+		$instance  = static::instance();
+		if(empty($instance -> isInitialized)) return false;
+		return $instance -> m_activeLanguage;
 	}
 
-	public function
+	public static function
 	setActiveLanguage(string $_activeLanguage)
 	{
-		if(empty($this -> isInitialized))
+		$instance  = static::instance();
+		if(empty($instance -> isInitialized))
 			return false;
 
 		if(!CMS_BACKEND)
 		{
-			if(!isset($this -> languagesList[$_activeLanguage]))
+			if(!isset($instance -> languagesList[$_activeLanguage]))
 
-				$this -> m_activeLanguage = $this -> m_defaultLanguage;	
+				$instance -> m_activeLanguage = $instance -> m_defaultLanguage;	
 
 			else
 
-				$this -> m_activeLanguage = $_activeLanguage;
+				$instance -> m_activeLanguage = $_activeLanguage;
 		}
 		else
 		{
 			if(!isset(CFG::GET() -> LANGUAGE -> BACKEND[$_activeLanguage]))
 
-				$this -> m_activeLanguage = 'en';	
+				$instance -> m_activeLanguage = 'en';	
 
 			else
 
-				$this -> m_activeLanguage = $_activeLanguage;
+				$instance -> m_activeLanguage = $_activeLanguage;
 		}
 
-		return $this -> m_activeLanguage;
+		return $instance -> m_activeLanguage;
 	}	
 }

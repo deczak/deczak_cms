@@ -74,7 +74,7 @@
 
 
 	$pRouter  = CRouter::instance();
-	$pRouter -> initialize('de', CLanguage::instance() -> getLanguages());
+	$pRouter -> initialize('de', CLanguage::getLanguages());
 
 
 	$_pHTAccess  = new CHTAccess();

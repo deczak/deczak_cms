@@ -115,7 +115,7 @@ class CModules extends CSingleton
 							$this -> modulesList[$moduleIndex] -> user_rights = $this -> m_pUserRights -> getModuleRights($_moduleId);
 
 							$_modLocation	= CMS_SERVER_ROOT . DIR_CORE . DIR_MODULES . $moduleInstance -> module_location .'/';	
-							CLanguage::instance() -> loadLanguageFile($_modLocation.'lang/', $_pageLanguage);
+							CLanguage::loadLanguageFile($_modLocation.'lang/', $_pageLanguage);
 
 							$this -> loadedList[] = $this -> modulesList[$moduleIndex];
 							return $this -> modulesList[$moduleIndex];
@@ -140,7 +140,7 @@ class CModules extends CSingleton
 							$this -> modulesList[$moduleIndex] -> user_rights = $this -> m_pUserRights -> getModuleRights($_moduleId);
 
 							$_modLocation	= CMS_SERVER_ROOT . DIR_MANTLE . DIR_MODULES . $moduleInstance -> module_location .'/';
-							CLanguage::instance() -> loadLanguageFile($_modLocation.'lang/', $_pageLanguage);
+							CLanguage::loadLanguageFile($_modLocation.'lang/', $_pageLanguage);
 
 							$this -> loadedList[] = $this -> modulesList[$moduleIndex];
 							return $this -> modulesList[$moduleIndex];

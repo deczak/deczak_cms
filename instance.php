@@ -97,14 +97,13 @@ if(CMS_BACKEND)
 	//	CLanguage is a singleton class
 	// 	Loads and manage language files
 
-	$_pLanguage		 = 	CLanguage::instance();		
-	$_pLanguage		-> 	initialize($pDBInstance -> getConnection(CFG::GET() -> MYSQL -> PRIMARY_DATABASE));	
-	$_pLanguage		->	loadLanguageFile(CMS_SERVER_ROOT.DIR_CORE.DIR_LANGUAGES.CLanguage::instance() -> getDefault() .'/');
+	CLanguage::initialize($pDBInstance -> getConnection(CFG::GET() -> MYSQL -> PRIMARY_DATABASE));		
+	CLanguage::loadLanguageFile(CMS_SERVER_ROOT.DIR_CORE.DIR_LANGUAGES.CLanguage::getDefault() .'/');
 
 ##	R O U T I N G
 
 	$pRouter  = CRouter::instance();
-	$pRouter -> initialize(CFG::GET() -> LANGUAGE, CLanguage::instance() -> getLanguages());
+	$pRouter -> initialize(CFG::GET() -> LANGUAGE, CLanguage::getLanguages());
 
 	if(CMS_URL_BASE !== false)
 		$_SERVER['REQUEST_URI'] = str_replace('/'. CMS_URL_BASE, '', $_SERVER['REQUEST_URI']);
@@ -139,7 +138,7 @@ if(CMS_BACKEND)
 
 	$_pURLVariables	 =	new CURLVariables();
 
-	$_request[] 	 = 	[	"input" => "cms-lang", 		  	"validate" => "strip_tags|strip_whitespaces|lowercase|!empty",      	"use_default" => true, "default_value" => CLanguage::instance() -> getDefault() ]; // language key
+	$_request[] 	 = 	[	"input" => "cms-lang", 		  	"validate" => "strip_tags|strip_whitespaces|lowercase|!empty",      	"use_default" => true, "default_value" => CLanguage::getDefault() ]; // language key
 	$_request[] 	 = 	[	"input" => "cms-node",  		"validate" => "strip_tags|strip_whitespaces|lowercase|is_digit|!empty", "use_default" => true, "default_value" => false     ]; // node_id
 	$_request[] 	 = 	[	"input" => "cms-ctrl-action",	"validate" => "strip_tags|strip_whitespaces|lowercase|!empty", 			"use_default" => true, "default_value" => []	]; // requested controller action
 	$_request[] 	 = 	[	"input" => "cms-error",			"validate" => "strip_tags|strip_whitespaces|lowercase|!empty", 			"use_default" => true, "default_value" => false	]; // url rewrite error redirect (eg 403,404)
@@ -198,11 +197,11 @@ if(CMS_BACKEND)
 	if(CMS_BACKEND && CSession::instance() -> getValue('language') !== NULL)
 		$activeLanguage  = CSession::instance() -> getValue('language');
 
-	#if(CMS_BACKEND && $activeLanguage !== NULL && CLanguage::instance() -> getDefault() !== $activeLanguage)
-	if($activeLanguage !== NULL && CLanguage::instance() -> getDefault() !== $activeLanguage)
-		$_pLanguage		-> loadLanguageFile(CMS_SERVER_ROOT.DIR_CORE.DIR_LANGUAGES.$activeLanguage .'/', $activeLanguage );
+	#if(CMS_BACKEND && $activeLanguage !== NULL && CLanguage::getDefault() !== $activeLanguage)
+	if($activeLanguage !== NULL && CLanguage::getDefault() !== $activeLanguage)
+		CLanguage::loadLanguageFile(CMS_SERVER_ROOT.DIR_CORE.DIR_LANGUAGES.$activeLanguage .'/', $activeLanguage );
 
-	$_pLanguage		-> 	setActiveLanguage($activeLanguage);		
+	CLanguage::setActiveLanguage($activeLanguage);		
 
 ##	M O D U L E S   L O A D E R	
 
@@ -214,7 +213,7 @@ if(CMS_BACKEND)
 	$pageRequest 	-> 	init(
 							$pDBInstance 		-> getConnection(CFG::GET() -> MYSQL -> PRIMARY_DATABASE),
 							$_pURLVariables 	-> getValue("cms-node"),
-							$_pLanguage			-> getActiveLanguage(),
+							CLanguage::getActiveLanguage(),
 							$_pURLVariables 	-> getValue("cms-node-version"),
 							$_pURLVariables 	-> getValue("cms-xhrequest")
 							);				
@@ -222,7 +221,7 @@ if(CMS_BACKEND)
 	if($_pURLVariables -> getValue("cms-error") !== false)
 		CPageRequest::instance() -> setResponseCode($_pURLVariables -> getValue("cms-error"));
 			
-	define('URL_LANG_PRREFIX', ((CFG::GET() -> LANGUAGE -> DEFAULT_IN_URL || $pageRequest -> page_language !== CLanguage::instance() -> getDefault()) ? $pageRequest -> page_language .'/' : '') );
+	define('URL_LANG_PRREFIX', ((CFG::GET() -> LANGUAGE -> DEFAULT_IN_URL || $pageRequest -> page_language !== CLanguage::getDefault()) ? $pageRequest -> page_language .'/' : '') );
 
 	$pImperator	 =	new CImperator( $pDBInstance -> getConnection(CFG::GET() -> MYSQL -> PRIMARY_DATABASE) );
 	$pImperator	->	logic($pageRequest, $_rcaTarget, CMS_BACKEND, $pUserRights);

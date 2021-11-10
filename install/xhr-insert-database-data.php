@@ -78,7 +78,7 @@
 										]; 	
 
 	$pRouter  = CRouter::instance();
-	$pRouter -> initialize(CFG::GET() -> LANGUAGE, CLanguage::instance() -> getLanguages());
+	$pRouter -> initialize(CFG::GET() -> LANGUAGE, CLanguage::getLanguages());
 
 ##	Insert Languages and base nodes
 

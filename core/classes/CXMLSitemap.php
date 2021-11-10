@@ -24,13 +24,13 @@ class CXMLSitemap
 			fwrite($_hFile, '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">');
 			fwrite($_hFile, "\r\n");
 
-			foreach(CLanguage::instance() -> getLanguages() as $_lang)
+			foreach(CLanguage::getLanguages() as $_lang)
 			{
 				if($_lang -> lang_hidden)	continue;
 				if($_lang -> lang_locked)	continue;
 
 				$_langSuffix = $_lang -> lang_key .'/';
-				$_langSuffix = (!CFG::GET() -> LANGUAGE -> DEFAULT_IN_URL && CLanguage::instance() -> getDefault() === $_lang -> lang_key ? '' : $_langSuffix);
+				$_langSuffix = (!CFG::GET() -> LANGUAGE -> DEFAULT_IN_URL && CLanguage::getDefault() === $_lang -> lang_key ? '' : $_langSuffix);
 
 
 				$modelCondition = new CModelCondition();

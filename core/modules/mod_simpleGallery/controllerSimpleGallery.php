@@ -122,8 +122,8 @@ class	controllerSimpleGallery extends CController
 		$pURLVariables =	new CURLVariables();
 		$requestList		 =	[];
 		$requestList[] 	 = 	[	"input" => "simple-gallery-path", "validate" => "!empty" ]; 
-	#	$requestList[] 	 = 	[	"input" => "simple-notify-icon", "validate" => "!empty" ]; 
-	#	$requestList[] 	 = 	[	"input" => "simple-notify-color", "validate" => "!empty" ]; 
+		$requestList[] 	 = 	[	"input" => "simple-gallery-display-divider", "validate" => "!empty" ];
+		$requestList[] 	 = 	[	"input" => "simple-gallery-format", "validate" => "!empty" ];
 		$pURLVariables-> retrieve($requestList, false, true); // POST 
 		$urlVarList		 = $pURLVariables ->getArray();
 
@@ -139,8 +139,8 @@ class	controllerSimpleGallery extends CController
 			$valuesList = [];
 
 			$valuesList['params']	= 	[
-		#									"icon"		=> $urlVarList['simple-notify-icon'],
-		#									"color"		=> $urlVarList['simple-notify-color']
+											"display_divider"		=> $urlVarList['simple-gallery-display-divider'],
+											"format"		=> $urlVarList['simple-gallery-format'],
 										];
 			
 

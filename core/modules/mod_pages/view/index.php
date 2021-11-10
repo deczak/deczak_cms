@@ -2,7 +2,7 @@
 
 	<div class="language-select-container">
 		<?php
-		foreach(CLanguage::instance() -> getLanguages() as $language)
+		foreach(CLanguage::getLanguages() as $language)
 		{
 			if(!$language -> lang_frontend)
 				continue;
@@ -61,8 +61,8 @@
 	<td class="time-create">%CREATE_TIME%</td>
 	<td class="time-update">%UPDATE_TIME%</td>
 	<td class="bach-item-menu"><span>&equiv;</span><div class="dropdown-content"><div></div>
-		<a data-right="view" href="<?php echo CMS_SERVER_URL_BACKEND . $pageRequest -> urlPath; ?>view/%PAGE_LANGUAGE%/%NODE_ID%?language=<?= CLanguage::get() -> getActive(); ?>"><?php echo CLanguage::string('VIEW'); ?></a>
-		<a data-right="edit" href="<?php echo CMS_SERVER_URL_BACKEND . $pageRequest -> urlPath; ?>view/%PAGE_LANGUAGE%/%NODE_ID%?language=<?= CLanguage::get() -> getActive(); ?>"><?php echo CLanguage::string('EDIT'); ?></a>
+		<a data-right="view" href="<?php echo CMS_SERVER_URL_BACKEND . $pageRequest -> urlPath; ?>view/%PAGE_LANGUAGE%/%NODE_ID%?language=<?= CLanguage::getActive(); ?>"><?php echo CLanguage::string('VIEW'); ?></a>
+		<a data-right="edit" href="<?php echo CMS_SERVER_URL_BACKEND . $pageRequest -> urlPath; ?>view/%PAGE_LANGUAGE%/%NODE_ID%?language=<?= CLanguage::getActive(); ?>"><?php echo CLanguage::string('EDIT'); ?></a>
 		<a data-right="edit" class="trigger-page-option" data-xhr-overwrite-target="create/%PAGE_LANGUAGE%/%NODE_ID%"><?php echo CLanguage::string('MOD_SITES_OV_TABLE_PAGECREATE'); ?></a>
 		<a data-right="edit" class="trigger-page-option" data-xhr-overwrite-target="delete/%NODE_ID%"><?php echo CLanguage::string('DELETE'); ?></a>
 		<a data-right="edit" class="trigger-page-option" data-xhr-overwrite-target="deletetree/%NODE_ID%"><?php echo CLanguage::string('MOD_SITES_OV_TABLE_PAGEDELETETREE'); ?></a>
@@ -74,7 +74,7 @@
 
 	var indexList 		= null;
 	var	activeLanguage 	= '';
-	var	languagesList   = <?= json_encode(CLanguage::instance() -> getLanguages()); ?>;
+	var	languagesList   = <?= json_encode(CLanguage::getLanguages()); ?>;
 
 	document.addEventListener("DOMContentLoaded", function(){
 

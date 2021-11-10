@@ -19,7 +19,6 @@ class	CView
 	{
 		$pDatabase 		= CDatabase::instance() -> getConnection(CFG::GET() -> MYSQL -> PRIMARY_DATABASE);
 		$pageRequest 	= CPageRequest::instance();
-		$language		= CLanguage::instance();
 
 		##	Required for XHR Functions
 
@@ -39,7 +38,6 @@ class	CView
 	getHTML($pageRequest = null)
 	{
 		$pDatabase 		= CDatabase::instance() -> getConnection(CFG::GET() -> MYSQL -> PRIMARY_DATABASE);
-		$language		= CLanguage::instance();
 
 		if(is_file($this -> m_templatePath .'.php'))
 		{

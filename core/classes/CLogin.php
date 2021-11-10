@@ -452,7 +452,7 @@ class	CLogin extends CSingleton
 
 
 
-						CSysMailer::instance() -> sendMail( CLanguage::string('SYSMAIL_ACCLOCKED_SUBJ') , CLanguage::instance() -> getStringExt('SYSMAIL_ACCLOCKED_TEXT', ['[TIMESTAMP]' => date(CFG::GET() -> SYSTEM_MAILER -> MAIL_TIME_FORMAT), '[DATABASE]' => $_dbName, '[DATAID]' => $_sqlLoginFail['data_id'], '[REMOTE]' => $_SERVER['REMOTE_ADDR']]) , true , 'loginfail-userid-'. $_sqlLoginFail['data_id'] );
+						CSysMailer::instance() -> sendMail( CLanguage::string('SYSMAIL_ACCLOCKED_SUBJ') , CLanguage::stringExt('SYSMAIL_ACCLOCKED_TEXT', ['[TIMESTAMP]' => date(CFG::GET() -> SYSTEM_MAILER -> MAIL_TIME_FORMAT), '[DATABASE]' => $_dbName, '[DATAID]' => $_sqlLoginFail['data_id'], '[REMOTE]' => $_SERVER['REMOTE_ADDR']]) , true , 'loginfail-userid-'. $_sqlLoginFail['data_id'] );
 					}
 				}
 

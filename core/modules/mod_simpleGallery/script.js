@@ -33,6 +33,71 @@ window.addEventListener('click', function(event)
 	}
 });
 
+window.addEventListener('change', function(event)
+{
+	if(typeof event.target === 'undefined')
+		return false;
+
+	let eventTagName = event.target.tagName;
+
+	switch(eventTagName)
+	{
+		case 'SELECT':
+		case 'INPUT':
+
+			let inputName = event.target.name;
+
+
+
+	let parentNode = event.target.closest('.simple-gallery-control');
+
+	let	sgilId = parentNode.getAttribute('data-target-list');
+
+	let sgilNOde = document.getElementById(sgilId);
+
+
+
+
+			switch(inputName)
+			{
+				case 'simple-gallery-display-divider':
+
+
+
+
+
+						sgilNOde.setAttribute('data-tile-size', event.target.value);
+
+
+
+
+					break;
+
+
+				case 'simple-gallery-format':
+
+
+
+
+
+						sgilNOde.setAttribute('data-tile-format', event.target.value);
+
+
+
+
+					break;
+
+
+
+					
+
+
+			}
+
+			break;
+	}
+});
+
 
 function onXHRSuccessSimpleGalleryQueryItems(response, srcInstance)
 {
