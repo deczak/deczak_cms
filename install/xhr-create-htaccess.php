@@ -3,9 +3,13 @@
 	error_reporting(E_ALL);
 	ini_set('display_errors', true);
 	
-	include_once '../core/classes/toolkit.php';
 	include_once '../config/directories.php';
 	include_once '../config/standard.php';
+
+	include_once '../core/classes/CLog.php';
+	CLog::initialize();
+
+	include_once '../core/classes/toolkit.php';
 	include_once '../core/classes/CSheme.php';
 	include_once '../core/classes/CModel.php';
 	include_once '../core/classes/CSession.php';

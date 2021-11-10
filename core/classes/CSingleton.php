@@ -17,6 +17,6 @@ class CSingleton
 
 	private function __construct()	{}
 	private function __clone() 		{}
-	private function __sleep() 		{}
-	private function __wakeup() 	{}
+	#private function __sleep() 		{}
+	#private function __wakeup() 	{}
 }

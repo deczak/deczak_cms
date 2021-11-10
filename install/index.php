@@ -52,6 +52,7 @@
 		?>
 
 		<script src="../backend/js/toolkit.js"></script>
+		<script src="../backend/js2/cms-toolkit.js"></script>
 		
 		<script>
 		(function() {

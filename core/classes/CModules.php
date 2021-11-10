@@ -731,7 +731,7 @@ class CModulesInstall
 				$objectData = new stdClass();
 				$objectData -> page_version 	= '1';
 				$objectData -> module_id 		= $object['module_id'];
-				$objectData -> object_id 		= $contentId;
+				$objectData -> object_id 		= (int)$contentId;
 				#$objectData -> content_id 		= $contentId;
 				$objectData -> object_order_by 	= $index + 1;
 				$objectData -> node_id 			= $moduleData['page']['node_id'];
@@ -788,7 +788,7 @@ class CModulesInstall
 
 				$objectInstance -> logic(
 											$_dbConnection, 
-											[ $objectData -> object_id => 'create' ],
+											[ (int)$objectData -> object_id => 'create' ],
 											$xhrInfo, 
 											$logicResult, 
 											true
@@ -811,7 +811,7 @@ class CModulesInstall
 
 				$objectInstance -> logic(
 											$_dbConnection, 
-											[ $objectData -> object_id => 'edit' ],
+											[ (int)$objectData -> object_id => 'edit' ],
 											$xhrInfo, 
 											$logicResult, 
 											true
