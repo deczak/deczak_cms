@@ -88,6 +88,15 @@ $requestedSize = (!empty($requestedSize) ? $requestedSize : 'original');
 
 switch($requestedSize)
 {
+	case 'thumb':	
+		
+		$dstFilename = $jsonInfo -> sizes -> thumb ?? false; 
+		if($dstFilename !== false && file_exists($dstFilelocation.$dstFilename))
+		{
+			$dstFilename = $dstFilelocation.$dstFilename;
+			break;
+		}
+		
 	case 'small':	
 		
 		$dstFilename = $jsonInfo -> sizes -> small ?? false; 
