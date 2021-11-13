@@ -270,13 +270,20 @@ div.cms-modal table.cms-modal-path-select-list tr.path-selected { background:rgb
 div.mediathek-main table.mediathek-list { width:100%; border-spacing: 0px; font-size:0.9em;      }
 div.mediathek-main table.mediathek-list tr .fileicon { text-align:center; width:29px; padding:0px 3px 0px 8px; }
 div.mediathek-main table.mediathek-list tr .filename { text-align:left; }
-div.mediathek-main table.mediathek-list tr .filetype { text-align:left; }
-div.mediathek-main table.mediathek-list tr .filesize { text-align:right; }
+div.mediathek-main table.mediathek-list tr .filetype { text-align:left; width:125px; }
+div.mediathek-main table.mediathek-list tr .filetime { text-align:left; width:165px; }
+div.mediathek-main table.mediathek-list tr .filesize { text-align:right; width:125px; }
+div.mediathek-main table.mediathek-list tr .filemodify { text-align:center; width:41px; opacity:0.3;  }
+div.mediathek-main table.mediathek-list tr .filemodify i { transform: scale(1.18); }
+div.mediathek-main table.mediathek-list tr .filemodify:hover { opacity:1; }
 div.mediathek-main table.mediathek-list thead th { font-size:0.9em; font-weight:normal; }
 div.mediathek-main table.mediathek-list th,
 div.mediathek-main table.mediathek-list td { padding:5px 13px; }
 div.mediathek-main table.mediathek-list i { pointer-events:none; }
 div.mediathek-main table.mediathek-list th:nth-of-type(1):not(:empty):hover { background-color:rgba(0,0,0,0.07); cursor:pointer; font-weight:bold; }
+
+div.mediathek-main table.mediathek-list tbody tr { transition:0.05s; cursor:pointer; }
+div.mediathek-main table.mediathek-list tbody tr:hover { background-color:rgba(0,0,0,0.07); }
 
 div.mediathek-main.mediathek-work-select table.mediathek-list tbody tr:hover { background-color:rgba(0,0,0,0.07); cursor:pointer; }
 

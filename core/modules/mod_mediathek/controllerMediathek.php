@@ -66,6 +66,7 @@ class	controllerMediathek extends CController
 			case 'xhr_import': 			$logicDone = $this -> logicXHRImport($_pDatabase, $_xhrInfo, $enableEdit, $enableDelete, $enableUpload);
 			case 'xhr_directory_list': 	$logicDone = $this -> logicXHRDirectoryList();
 			case 'xhr_directory_items': $logicDone = $this -> logicXHRDirectoryItems();
+			case 'xhr_move_item':		$logicDone = $this -> logicXHRMoveItem();
 		}
 
 		if(!$logicDone) // Default
@@ -131,44 +132,27 @@ class	controllerMediathek extends CController
 
 			if($_dirItem -> isDir())
 			{
-
-
-
-
-
-
-
 				$itemInfoLocation = CMS_SERVER_ROOT.DIR_MEDIATHEK.$mediathekPath .$_dirItem -> getFilename().'/info.json';
 
 				if(file_exists($itemInfoLocation))
 				{
 
+					$mediaId = MEDIATHEK::getMediaIdFromItem($mediathekPath .$_dirItem -> getFilename());
 
+					if($mediaId === null)
+						continue;
 
+					$modelCondition = new CModelCondition();
+					$modelCondition -> where('media_id', $mediaId);
+					
+					$modelMediathek = new modelMediathek;
+					$modelMediathek	-> load($_pDatabase, $modelCondition);	
 
-			$mediaId = MEDIATHEK::getMediaIdFromItem($mediathekPath .$_dirItem -> getFilename());
+					$itemDBInfo = $modelMediathek -> getResult();
+					$itemDBInfo = (!empty($itemDBInfo) ? reset($itemDBInfo) : null);
 
-
-			if($mediaId === null)
-				continue;
-
-
-			$modelCondition = new CModelCondition();
-			$modelCondition -> where('media_id', $mediaId);
-			
-
-			$modelMediathek = new modelMediathek;
-			$modelMediathek	-> load($_pDatabase, $modelCondition);	
-
-			$itemDBInfo = $modelMediathek -> getResult();
-
-			$itemDBInfo = (!empty($itemDBInfo) ? reset($itemDBInfo) : null);
-
-
-
-			if($itemDBInfo === null)
-				continue;
-
+					if($itemDBInfo === null)
+						continue;
 
 					## is mediathek item
 
@@ -192,15 +176,7 @@ class	controllerMediathek extends CController
 					{
 						continue;
 					}
-						
-					$mediathekFilelocation 	= CMS_SERVER_ROOT.DIR_MEDIATHEK.$mediathekPath.$_dirItem -> getFilename().'/'.$itemInfo -> filename;
-					$mediathekFileInfo 		= new SplFileInfo($mediathekFilelocation);
-
-
-
-
-
-
+			
 					$mediathekItem  = new stdClass;
 					$mediathekItem -> type 	    = 'FILE';
 					$mediathekItem -> name 	    = $itemDBInfo -> media_filename;
@@ -208,7 +184,8 @@ class	controllerMediathek extends CController
 					$mediathekItem -> extension = $itemDBInfo -> media_extension;
 					$mediathekItem -> mime 		= $itemDBInfo -> media_mime;
 					$mediathekItem -> path 		= $mediathekPath.$_dirItem -> getFilename();
-					$mediathekItem -> media_id 		= $itemDBInfo -> media_id;
+					$mediathekItem -> media_id 	= $itemDBInfo -> media_id;
+					$mediathekItem -> time 		= date("Y-m-d H:i:s", $_dirItem -> getMTime());
 
 					switch($mediathekItem -> mime)
 					{
@@ -220,22 +197,12 @@ class	controllerMediathek extends CController
 							$mediathekItem -> exif -> LensModel		= ($itemDBInfo -> media_gear !== null ? $itemDBInfo -> media_gear -> lens : '');
 							$mediathekItem -> exif -> Artist		= $itemDBInfo -> media_author ?? '';
 							$mediathekItem -> exif -> Copyright		= $itemDBInfo -> media_license ?? '';
-						break;
+							break;
 
 						default:
 
 							$mediathekItem -> exif	= false;
 					}
-
-
-			
-
-
-
-
-
-
-
 
 					$itemsListFiles[] = $mediathekItem;	
 				}
@@ -251,6 +218,7 @@ class	controllerMediathek extends CController
 					$mediathekItem -> mime 		= 'dir';
 					$mediathekItem -> path 		= $mediathekPath.$_dirItem -> getFilename();
 					$mediathekItem -> exif 		= false;
+					$mediathekItem -> time 		= date("Y-m-d H:i:s", $_dirItem -> getMTime());
 
 					$itemsListDirs[] = $mediathekItem;
 				}
@@ -469,6 +437,136 @@ class	controllerMediathek extends CController
 
 		return false;
 	}
+
+	/**
+	 * 	XHR Call to move items
+	 */
+	private function
+	logicXHRMoveItem() : bool
+	{
+		$validationErr   = false;
+		$validationMsg   = 'OK';
+		$responseData    = [];
+
+		$pURLVariables	 =	new CURLVariables();
+		$requestList		 =	[];
+		$requestList[] 	 = 	[ "input" => 'mediathek-move-item-src', "validate" => "strip_tags|!empty", "use_default" => true, "default_value" => false ]; 		
+		$requestList[] 	 = 	[ "input" => 'mediathek-move-item-dst', "validate" => "strip_tags|!empty", "use_default" => true, "default_value" => false ]; 		
+		$pURLVariables -> retrieve($requestList, false, true);	
+
+		$urlVarList		 = $pURLVariables -> getArray();
+
+
+		if($urlVarList['mediathek-move-item-src'] === false || $urlVarList['mediathek-move-item-dst'] === false)
+		{
+			$validationErr =	true;
+			$validationMsg =	'Mediathek, not valid parameters to move item';
+			$responseData  = 	[];
+
+			tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
+		}
+
+		$destLocation 	  = CMS_SERVER_ROOT.DIR_MEDIATHEK.trim($urlVarList['mediathek-move-item-dst'],'/');
+
+		if(!file_exists($destLocation))
+		{
+			$validationErr =	true;
+			$validationMsg =	'Mediathek item destination does not exists';
+			$responseData  = 	[];
+
+			tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
+		}
+
+		$itemLocation 	  = CMS_SERVER_ROOT.DIR_MEDIATHEK.trim($urlVarList['mediathek-move-item-src'],'/');
+		$itemInfoLocation = $itemLocation.'/info.json';
+
+		if(!file_exists($itemLocation))
+		{
+			$validationErr =	true;
+			$validationMsg =	'Mediathek item does not exists';
+			$responseData  = 	[];
+
+			tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
+		}
+
+		$itemFilename = trim($urlVarList['mediathek-move-item-src'],'/');
+		$itemFilename = explode('/', $itemFilename);
+		$itemFilename = end($itemFilename);
+
+		if(file_exists($destLocation.'/'. $itemFilename))
+		{
+			$validationErr =	true;
+			$validationMsg =	'Mediathek item on destination exists already';
+			$responseData  = 	[];
+
+			tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
+		}
+
+
+		if(!file_exists($itemInfoLocation))
+		{
+			// possible dir 
+
+
+			/*
+			
+				does not work with rename if new file already exists by duplicated files (php warning)
+
+					this also means the other file has his own media-id.
+					
+					this also means there is could be content or a page with the media-id 
+
+					remove / overwrite results in media-id conflict
+
+
+
+
+
+				once solution is, move file by adding a suffix to his name if the file already exists
+
+					loope recursive all DIRs and check the file on exists
+
+				
+				
+			
+			*/
+
+
+
+		}
+		else
+		{
+			// possible file
+
+			$mediaId = MEDIATHEK::getMediaIdFromItem(trim($urlVarList['mediathek-move-item-src'],'/'));
+
+			if($mediaId === null)
+			{
+				$validationErr =	true;
+				$validationMsg =	'Mediathek item is not a valid item, Media-ID missing';
+				$responseData  = 	[];
+
+				tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
+			}
+
+			if(!rename(
+				$itemLocation,
+				$destLocation.'/'. $itemFilename))
+			{
+				$validationErr =	true;
+				$validationMsg =	'Mediathek move file failed on exec';
+				$responseData  = 	[];
+
+				tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
+			}
+		}
+
+		tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
+
+		return false;
+	}
+
+	
 
 	
 }

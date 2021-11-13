@@ -24,9 +24,9 @@ class	cmsMediathek
 		{
 			document.cmsMediathek = {};
 			document.cmsMediathek.viewMode = viewMode
-		}
-		
+		}		
 
+		window.addEventListener('event-mediathek-file-move-select-forder-selected', this._onClickButtonMoveItemModalPathSuccess);
 
 		this.requestItems();
 	}
@@ -219,6 +219,13 @@ class	cmsMediathek
 
 	_generateHTML_List(itemsList, contentNode)
 	{
+
+
+
+		console.log('_generateHTML_List');
+		console.log(itemsList);
+
+
 		let tableBodyNode = document.createElement('tbody');
 
 		for(let i in itemsList)
@@ -227,8 +234,8 @@ class	cmsMediathek
 				continue;
 
 			let itemRowNode = document.createElement('tr');
-				itemRowNode.classList.add('item-'+ (itemsList[i].extension == 'dir' ? 'dir' : 'file'));
-				itemRowNode.setAttribute('data-event-click', 'item-'+ (itemsList[i].extension == 'dir' ? 'dir' : 'file'));
+				itemRowNode.classList.add('item-'+ (itemsList[i].type == 'DIR' ? 'dir' : 'file'));
+				itemRowNode.setAttribute('data-event-click', 'item-'+ (itemsList[i].type == 'DIR' ? 'dir' : 'file'));
 				itemRowNode.setAttribute('data-item-path', itemsList[i].path);
 				itemRowNode.itemInfo = JSON.parse(JSON.stringify(itemsList[i]));
 
@@ -250,7 +257,24 @@ class	cmsMediathek
 			itemRowHTML += '<td class="filename">'+ itemsList[i].name +'</td>';
 			itemRowHTML += '<td class="filetype">'+ itemsList[i].extension +'</td>';
 			itemRowHTML += '<td class="filesize">'+ (itemsList[i].size ?  cmstk.formatFilesize(itemsList[i].size) : '') +'</td>';
-	
+			itemRowHTML += '<td class="filetime">'+ itemsList[i].time  +'</td>';
+
+			if(this.workMode === cmsMediathek.WORKMODE_EDIT)
+			{
+				itemRowHTML += '<td class="filemodify" data-modify="fileedit" title="Edit item"><i class="fas fa-pen-square"></i></td>';
+
+				if(itemsList[i].type !== 'DIR')
+				{
+					itemRowHTML += '<td class="filemodify" data-modify="filemove" title="Move item"><i class="fas fa-share"></i></td>';
+				}
+				else
+				{
+					itemRowHTML += '<td class="filemodify"></td>';
+				}
+
+				itemRowHTML += '<td class="filemodify" data-modify="fileremove" title="Delete item"><i class="fas fa-trash-alt"></i></td>';
+			}
+
 			itemRowNode.innerHTML = itemRowHTML;
 
 			tableBodyNode.append(itemRowNode);
@@ -264,6 +288,15 @@ class	cmsMediathek
 		 	tableHeadHTML += '<th class="filename">Filename</th>';
 		 	tableHeadHTML += '<th class="filetype">File type</th>';
 		 	tableHeadHTML += '<th class="filesize">File size</th>';
+		 	tableHeadHTML += '<th class="filetime">Modified Date</th>';
+
+			if(this.workMode === cmsMediathek.WORKMODE_EDIT)
+			{
+				tableHeadHTML += '<th class="filemodify"></th>';
+				tableHeadHTML += '<th class="filemodify"></th>';
+				tableHeadHTML += '<th class="filemodify"></th>';
+			}
+
 		 	tableHeadHTML += '</tr>';
 			tableHeadNode.innerHTML = tableHeadHTML;
 
@@ -277,8 +310,6 @@ class	cmsMediathek
 
 	_onClick(event, srcInstance)
 	{
-		console.log(event.target);
-
 		let targetNode = event.target;
 
 		if(document.cmsMediathek.viewMode == cmsMediathek.VIEWMODE_LIST && (event.target.tagName == 'TD'))
@@ -288,7 +319,30 @@ class	cmsMediathek
 			targetNode = event.target.parentNode;
 		}
 
-		console.log(targetNode);
+		if(event.target.classList.contains('filemodify') && srcInstance.workMode === cmsMediathek.WORKMODE_EDIT)
+		{
+			let modifyMode = event.target.getAttribute('data-modify');
+
+			switch(modifyMode)
+			{
+				case 'fileremove':
+
+					srcInstance._onClickButtonRemoveItem(targetNode, event.target, srcInstance);
+					break;
+
+				case 'fileedit':
+
+					srcInstance._onClickButtonEditItem(targetNode, event.target, srcInstance);
+					break;
+
+				case 'filemove':
+
+					srcInstance._onClickButtonMoveItem(targetNode, event.target, srcInstance);
+					break;
+			}
+
+			return false;
+		}
 
 		// check event type for targetNode, is he eligible for click event
 
@@ -351,6 +405,91 @@ class	cmsMediathek
 	{
 		srcInstance.requestItems();
 	}
+
+	_onClickButtonRemoveItem(itemNode, eventNode, srcInstance)
+	{
+		/*	
+		  	itemNode	TR or DIV of whole item, contains a itemInfo property with info
+			eventNode	Node of event target, TD or DIV
+		*/
+
+		alert ('on my todo');
+
+		/*
+		
+			file	->	delete on confirm
+
+			dir 	->	ask to move content to parent dir if possible
+
+		*/
+	}
+
+	_onClickButtonEditItem(itemNode, eventNode, srcInstance)
+	{
+		/*	
+		  	itemNode	TR or DIV of whole item, contains a itemInfo property with info
+			eventNode	Node of event target, TD or DIV
+		*/
+		alert ('on my todo');
+
+
+		/*
+			open modal with inputs
+		*/
+	}
+
+
+
+
+
+
+
+
+	_onClickButtonMoveItemSuccess(response, srcInstance)
+	{
+		if(response.state !== 0)
+		{
+			console.log('Mediathek returns error on move file: '+ response.msg);
+			return false;
+		}
+
+		srcInstance.requestItems();
+	}
+
+	_onClickButtonMoveItemModalPathSuccess(event)
+	{
+		let	formData  = new FormData;
+			formData.append('mediathek-move-item-src', event.detail.sourceNode.itemNode.itemInfo.path);
+			formData.append('mediathek-move-item-dst', event.detail.select.path);
+
+		let	xhRequest = new cmsXhr;
+			xhRequest.request(CMS.SERVER_URL_BACKEND + 'mediathek/', formData, event.detail.sourceNode.srcInstance._onClickButtonMoveItemSuccess, event.detail.sourceNode.srcInstance, 'move_item');
+	}
+
+	_onClickButtonMoveItemModalPath(response, srcInstance)
+	{
+		if(response.state !== 0)
+		{
+			console.log('cmsMediathek.queryDirectories returned invalid value');
+			return false;
+		}
+
+		let	modalPath = new cmsModalPath;
+			modalPath.setEventNameOnSelected('event-mediathek-file-move-select-forder-selected');
+			modalPath.open('Select destination folder', response.data, srcInstance, 'fas fa-folder');
+	}
+
+	_onClickButtonMoveItem(itemNode, eventNode, srcInstance)
+	{
+		cmsMediathek.queryDirectories(srcInstance._onClickButtonMoveItemModalPath, {itemNode:itemNode, eventNode:eventNode, srcInstance:srcInstance});
+	}
+
+
+
+
+
+
+
 
 	static queryDirectories(onSuccessCallback, srcInstance)
 	{
