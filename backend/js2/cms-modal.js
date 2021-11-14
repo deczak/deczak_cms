@@ -33,6 +33,8 @@ class	cmsModal
 	 */
 	create(nodeContent, extInnerStyles = null)
 	{		
+		let srcInstance = this;
+
 		this.nodeModal = document.createElement('div');
 		this.nodeModal.classList.add('cms-modal', 'cms-modal-id-');
 
@@ -85,9 +87,13 @@ class	cmsModal
 			nodeButton.innerHTML += this.buttonsList[i].buttonText;
 
 			if(this.buttonsList[i].buttonCallback !== null)
-				nodeButton.onclick = this.buttonsList[i].buttonCallback;
+			{
+				nodeButton.onclick = function() { srcInstance.buttonsList[i].buttonCallback(srcInstance, srcInstance.buttonsList[i].dataInfo) };
+			}
 			else
+			{
 				nodeButton.onclick = this.close;
+			}
 
 			switch(this.buttonsList[i].buttonPos)
 			{
@@ -111,8 +117,6 @@ class	cmsModal
 		nodeModalChild.append(bottomButtonBox);
 
 		this.nodeModal.appendChild(nodeModalChild);
-
-		let srcInstance = this;
 
 		this.nodeModal.addEventListener('cms-modal-close', function(event) { srcInstance.close(event, srcInstance); });
 
@@ -151,21 +155,26 @@ class	cmsModal
 	/**
 	 * 	Close the created modal
 	 */
-	close(event)
+	close(event = null)
 	{
+
+		if(event === null)
+			event = { target:this.nodeModal };
+
 		event.target.closest('div.cms-modal').remove();
-			document.querySelector('body').classList.remove('noScroll');
+		document.querySelector('body').classList.remove('noScroll');
 	}
 }
 
 class	cmsModalCtrlButton
 {
-	constructor(buttonPos, buttonText, buttonCallback = null, buttonIcon = null)
+	constructor(buttonPos, buttonText, buttonCallback = null, buttonIcon = null, dataInfo = null)
 	{
 		this.buttonPos 		= buttonPos;
 		this.buttonText 	= buttonText;
 		this.buttonIcon 	= buttonIcon;
 		this.buttonCallback = buttonCallback;
+		this.dataInfo 		= dataInfo;
 	}
 }
 

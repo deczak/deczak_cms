@@ -32,39 +32,16 @@ class	cmsModalConfirm extends cmsModal
 
 }
 
-
 class	cmsModalConfirmDelete extends cmsModal
 {
-	constructor(modalTitle, modalText, modalButtonsList = null)
+	constructor(modalTitle, modalText, modalButtonsList)
 	{
 		super();
 		super.setTitle(modalTitle);
-		if(modalButtonsList !== null)
+
+		for(let i = 0; i < modalButtonsList.length; i++)
 		{
-			for(let i = 0; i < modalButtonsList.length; i++)
-			{
-				super.addButton(modalButtonsList[i]);
-			}
-		}
-		else
-		{
-			super.addButton(
-				new cmsModalCtrlButton(
-					cmsModal.BTN_LOCATION.BOTTOM_LEFT,
-					'Delete',
-					null,
-					'fas fa-trash-alt'
-				)
-			);
-			
-			super.addButton(
-				new cmsModalCtrlButton(
-					cmsModal.BTN_LOCATION.BOTTOM_LEFT,
-					'Cancel',
-					null,
-					'fas fa-times'
-				)
-			);
+			super.addButton(modalButtonsList[i]);
 		}
 
 		let nodeContent = document.createElement('p');
@@ -73,4 +50,7 @@ class	cmsModalConfirmDelete extends cmsModal
 		super.open();
 	}
 
+	
+
 }
+

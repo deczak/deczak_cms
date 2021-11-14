@@ -354,6 +354,8 @@ class 	MEDIATHEK
 	public static function 
 	getItemsList(string $path, array &$destList, bool $ignoreSubDirectory = false)
 	{
+		$path = ($path[ strlen($path) - 1 ] !== '/' ? $path.'/' : $path);
+
 		$directoryList = new DirectoryIterator(CMS_SERVER_ROOT.DIR_MEDIATHEK.$path);
 		foreach($directoryList as $directory)
 		{
@@ -495,6 +497,42 @@ class 	MEDIATHEK
 		}
 
 		return null;
+	}
+
+	/**
+	 * 	This Function collects all media-id from defined path and returns them in an array
+	 * 
+	 *	@param string $path Defined relative mediathek path
+	 * 	@return array List of found media-id in that path
+	 */
+	public static function
+	getMediaIdsFromPath(string $path) : array
+	{
+
+		$mediaIdList = [];
+		$itemsList = [];
+
+
+		MEDIATHEK::getItemsList($path, $itemsList);
+
+		foreach($itemsList as $item)
+		{
+
+			$itemLocation = new DirectoryIterator(CMS_SERVER_ROOT.DIR_MEDIATHEK.$item -> path);
+			foreach($itemLocation as $itemFiles)
+			{
+				if(!$itemFiles -> isFile())
+					continue;
+
+				if($itemFiles -> getExtension() === 'media-id')
+				{
+					$mediaIdList[] =  $itemFiles -> getBasename('.media-id');
+					break;
+				}
+			}
+		}
+
+		return $mediaIdList;
 	}
 
 	public static function

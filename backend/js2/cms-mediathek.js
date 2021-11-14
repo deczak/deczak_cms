@@ -261,14 +261,15 @@ class	cmsMediathek
 
 			if(this.workMode === cmsMediathek.WORKMODE_EDIT)
 			{
-				itemRowHTML += '<td class="filemodify" data-modify="fileedit" title="Edit item"><i class="fas fa-pen-square"></i></td>';
 
 				if(itemsList[i].type !== 'DIR')
 				{
+					itemRowHTML += '<td class="filemodify" data-modify="fileedit" title="Edit item"><i class="fas fa-pen-square"></i></td>';
 					itemRowHTML += '<td class="filemodify" data-modify="filemove" title="Move item"><i class="fas fa-share"></i></td>';
 				}
 				else
 				{
+					itemRowHTML += '<td class="filemodify"></td>';
 					itemRowHTML += '<td class="filemodify"></td>';
 				}
 
@@ -406,23 +407,60 @@ class	cmsMediathek
 		srcInstance.requestItems();
 	}
 
+
+
+
+
+
+
+	_onClickButtonRemoveItemSuccess(response, srcInstance)
+	{
+		if(response.state !== 0)
+		{
+			console.log('Mediathek returns error on remove file: '+ response.msg);
+			return false;
+		}
+
+		srcInstance.requestItems();
+	}
+
+
+
+
+	_onClickButtonRemoveItemModalConfirmSuccess(modalInstance, eventInfo)
+	{
+		modalInstance.close();
+		
+		let	formData  = new FormData;
+			formData.append('mediathek-remove-item-src', eventInfo.itemNode.itemInfo.path);
+
+		let	xhRequest = new cmsXhr;
+			xhRequest.request(CMS.SERVER_URL_BACKEND + 'mediathek/', formData, eventInfo.srcInstance._onClickButtonRemoveItemSuccess, eventInfo.srcInstance, 'remove_item');
+	}
+
+
+
+
+
 	_onClickButtonRemoveItem(itemNode, eventNode, srcInstance)
 	{
-		/*	
-		  	itemNode	TR or DIV of whole item, contains a itemInfo property with info
-			eventNode	Node of event target, TD or DIV
-		*/
-
-		alert ('on my todo');
-
-		/*
-		
-			file	->	delete on confirm
-
-			dir 	->	ask to move content to parent dir if possible
-
-		*/
+		let modalA = new cmsModalConfirm(
+			'Delete Mediathek item(s)',
+			'Do you really want delete this mediathek item(s)?',
+			[
+				new cmsModalCtrlButton(cmsModal.BTN_LOCATION.BOTTOM_RIGHT, 'Cancel', null, 'fas fa-times'),
+				new cmsModalCtrlButton(cmsModal.BTN_LOCATION.BOTTOM_RIGHT, 'Delete', srcInstance._onClickButtonRemoveItemModalConfirmSuccess,' fas fa-trash-alt', {itemNode:itemNode, eventNode:eventNode, srcInstance:srcInstance})
+			], 
+		);
 	}
+
+
+
+
+
+
+
+
 
 	_onClickButtonEditItem(itemNode, eventNode, srcInstance)
 	{

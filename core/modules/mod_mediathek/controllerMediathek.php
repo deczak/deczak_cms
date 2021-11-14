@@ -67,6 +67,7 @@ class	controllerMediathek extends CController
 			case 'xhr_directory_list': 	$logicDone = $this -> logicXHRDirectoryList();
 			case 'xhr_directory_items': $logicDone = $this -> logicXHRDirectoryItems();
 			case 'xhr_move_item':		$logicDone = $this -> logicXHRMoveItem();
+			case 'xhr_remove_item':		$logicDone = $this -> logicXHRRemoveItem($_pDatabase);
 		}
 
 		if(!$logicDone) // Default
@@ -566,7 +567,67 @@ class	controllerMediathek extends CController
 		return false;
 	}
 
-	
 
-	
+	/**
+	 * 	XHR Call to move items
+	 */
+	private function
+	logicXHRRemoveItem(CDatabaseConnection &$_pDatabase) : bool
+	{
+		$validationErr   = false;
+		$validationMsg   = 'OK';
+		$responseData    = [];
+
+		$pURLVariables	 =	new CURLVariables();
+		$requestList		 =	[];
+		$requestList[] 	 = 	[ "input" => 'mediathek-remove-item-src', "validate" => "strip_tags|!empty", "use_default" => true, "default_value" => false ]; 		
+		$pURLVariables -> retrieve($requestList, false, true);	
+
+		$urlVarList		 = $pURLVariables -> getArray();
+
+		if($urlVarList['mediathek-remove-item-src'] === false)
+		{
+			$validationErr =	true;
+			$validationMsg =	'Mediathek, not valid parameters to remove item';
+			$responseData  = 	[];
+
+			tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
+		}
+
+		$itemLocation 	  = CMS_SERVER_ROOT.DIR_MEDIATHEK.trim($urlVarList['mediathek-remove-item-src'],'/');
+
+		if(!file_exists($itemLocation))
+		{
+			$validationErr =	true;
+			$validationMsg =	'Mediathek item does not exists';
+			$responseData  = 	[];
+
+			tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
+		}
+
+		if($itemLocation === CMS_SERVER_ROOT.DIR_MEDIATHEK)
+			tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
+
+		$mediaId = MEDIATHEK::getMediaIdFromItem($urlVarList['mediathek-remove-item-src']);
+
+		if($mediaId !== null)
+			$mediaIdList[] = $mediaId;
+		else
+			$mediaIdList = MEDIATHEK::getMediaIdsFromPath(trim($urlVarList['mediathek-remove-item-src'],'/'));
+
+		if(!empty($mediaIdList))
+		{
+			$modelCondition = new CModelCondition();
+			$modelCondition -> whereIn('media_id', implode(',', $mediaIdList));
+			
+			$modelMediathek = new modelMediathek;
+			$modelMediathek	-> delete($_pDatabase, $modelCondition);	
+		}
+
+		tk::rrmdir($itemLocation);
+
+		tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
+
+		return false;
+	}
 }
