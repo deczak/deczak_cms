@@ -88,7 +88,7 @@ class	cmsModal
 
 			if(this.buttonsList[i].buttonCallback !== null)
 			{
-				nodeButton.onclick = function() { srcInstance.buttonsList[i].buttonCallback(srcInstance, srcInstance.buttonsList[i].dataInfo) };
+				nodeButton.onclick = function(event) { srcInstance.buttonsList[i].buttonCallback(event, srcInstance, srcInstance.buttonsList[i].dataInfo) };
 			}
 			else
 			{

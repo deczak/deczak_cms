@@ -356,6 +356,9 @@ class 	MEDIATHEK
 	{
 		$path = ($path[ strlen($path) - 1 ] !== '/' ? $path.'/' : $path);
 
+		if(!file_exists(CMS_SERVER_ROOT.DIR_MEDIATHEK.$path))
+			return;
+
 		$directoryList = new DirectoryIterator(CMS_SERVER_ROOT.DIR_MEDIATHEK.$path);
 		foreach($directoryList as $directory)
 		{

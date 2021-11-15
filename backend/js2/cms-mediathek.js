@@ -177,8 +177,6 @@ class	cmsMediathek
 		let parentNode = document.createElement('div');
 			parentNode.classList.add('mediathek', 'mediathek-square');
 
-		console.log('_generateHTML_Squares');
-		console.log(itemsList);
 
 		for(let i in itemsList)
 		{
@@ -220,10 +218,6 @@ class	cmsMediathek
 	_generateHTML_List(itemsList, contentNode)
 	{
 
-
-
-		console.log('_generateHTML_List');
-		console.log(itemsList);
 
 
 		let tableBodyNode = document.createElement('tbody');
@@ -417,7 +411,10 @@ class	cmsMediathek
 	{
 		if(response.state !== 0)
 		{
-			console.log('Mediathek returns error on remove file: '+ response.msg);
+			let modalConfirm = new cmsModalConfirm(
+				'Failed',
+				response.msg
+			);
 			return false;
 		}
 
@@ -427,7 +424,7 @@ class	cmsMediathek
 
 
 
-	_onClickButtonRemoveItemModalConfirmSuccess(modalInstance, eventInfo)
+	_onClickButtonRemoveItemModalConfirmSuccess(event, modalInstance, eventInfo)
 	{
 		modalInstance.close();
 		
@@ -487,7 +484,10 @@ class	cmsMediathek
 	{
 		if(response.state !== 0)
 		{
-			console.log('Mediathek returns error on move file: '+ response.msg);
+			let modalConfirm = new cmsModalConfirm(
+				'Failed',
+				response.msg
+			);
 			return false;
 		}
 
@@ -508,7 +508,10 @@ class	cmsMediathek
 	{
 		if(response.state !== 0)
 		{
-			console.log('cmsMediathek.queryDirectories returned invalid value');
+			let modalConfirm = new cmsModalConfirm(
+				'Failed',
+				'Mediathek received an error on collect informationen'
+			);
 			return false;
 		}
 

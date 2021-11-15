@@ -37,7 +37,7 @@ class	CDatabaseQuery
 		$this -> m_pDatabase 	 		= $_pDatabase;
 		$this -> m_queryType			= $_queryType;
 		$this -> m_tableColumns			= ['*'];
-		$this -> m_printException		= true;
+		$this -> m_printException		= PHP_ERROR_DISPLAY;
 		$this -> m_queryString			= '';
 		$this -> m_tableName			= [];
 	}
