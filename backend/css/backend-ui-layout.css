@@ -271,3 +271,17 @@ div.mediathek-main div.controls button:not([disabled]):hover { background:rgba(0
 div.mediathek-main div.controls label { padding:0 12px; font-size:0.87em; }
 div.mediathek-main div.controls button i,
 div.mediathek-main div.controls button span { pointer-events:none; }
+
+/*
+**	Mediathek Modal edit
+*/
+
+div.cms-modal-mediathek-edit fieldset > div { display:flex; padding-top:2px; }
+div.cms-modal-mediathek-edit fieldset > div > div.preview { height:200px; width:200px; flex-shrink:0; }
+div.cms-modal-mediathek-edit fieldset > div > div.fields { width:100%;display:flex; flex-wrap: wrap; padding-left:10px; }
+div.cms-modal-mediathek-edit fieldset > div > div.fields > div { padding:0 10px 5px 0; }
+div.cms-modal-mediathek-edit fieldset .fluid { width:100%; }
+div.cms-modal-mediathek-edit fieldset .fluid-50 { width:50%; }
+div.cms-modal-mediathek-edit fieldset input,
+div.cms-modal-mediathek-edit fieldset textarea { width:100%; resize:none; }
+div.cms-modal-mediathek-edit fieldset label { display:block; font-size:0.74em;  margin-bottom:4px; margin-left:4px; }

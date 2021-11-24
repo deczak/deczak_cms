@@ -584,6 +584,7 @@ class	cmsMediathek
 	_onClickButtonEditItem(itemNode, eventNode, srcInstance)
 	{
 		let contentNode = document.createElement('div');
+			contentNode.classList.add('cms-modal-mediathek-edit');
 
 		console.log(itemNode.itemInfo);
 
@@ -591,61 +592,39 @@ class	cmsMediathek
 
 
 
-			contentHTML += '<div style="display:flex;padding-top:5px;">';
+			contentHTML += '<div style="">';
 
-				contentHTML += '<div style="height:200px; width:200px;">';
+				contentHTML += '<div class="preview">';
 				contentHTML += '</div>';
 
-				contentHTML += '<div style="width:100%;display:flex; flex-wrap: wrap; padding-left:10px; ">';
+				contentHTML += '<div class="fields">';
 
 
 
-					contentHTML += '<div style="margin:0 10px 10px 0;">';
+					contentHTML += '<div class="fluid">';
 
-						contentHTML += '<label style="display:block; font-size:0.74em;  margin-bottom:4px; margin-left:4px;">Title</label>';
+						contentHTML += '<label>Title</label>';
 						contentHTML += '<input type="text" name="modal-media-item-title" value="" maxlength="150">';
 
 					contentHTML += '</div>';
 
 
-					contentHTML += '<div style="margin:0 10px 10px 0;">';
-
-						contentHTML += '<label style="display:block; font-size:0.74em;  margin-bottom:4px; margin-left:4px;">Camera</label>';
-						contentHTML += '<input type="text" name="modal-media-item-gear-camera" value="">';
-
-					contentHTML += '</div>';
 
 
-					contentHTML += '<div style="margin:0 10px 10px 0;">';
 
-						contentHTML += '<label style="display:block; font-size:0.74em;  margin-bottom:4px; margin-left:4px;">Lens</label>';
-						contentHTML += '<input type="text" name="modal-media-item-gear-lens" value="">';
+
+
+					contentHTML += '<div class="fluid">';
+
+						contentHTML += '<label>Caption</label>';
+						contentHTML += '<textarea name="modal-media-item-caption" maxlength="150"></textarea>';
 
 					contentHTML += '</div>';
 
 
+					contentHTML += '<div class="fluid-50">';
 
-					contentHTML += '<div style="margin:0 10px 10px 0;">';
-
-						contentHTML += '<label style="display:block; font-size:0.74em;  margin-bottom:4px; margin-left:4px;">License URL</label>';
-						contentHTML += '<input type="text" name="modal-media-item-license" value="" maxlength="150">';
-
-					contentHTML += '</div>';
-
-
-
-					contentHTML += '<div style="margin:0 10px 10px 0;">';
-
-						contentHTML += '<label style="display:block; font-size:0.74em;  margin-bottom:4px; margin-left:4px;">License</label>';
-						contentHTML += '<input type="text" name="modal-media-item-license-url" value="" maxlength="150">';
-
-					contentHTML += '</div>';
-
-
-
-					contentHTML += '<div style="margin:0 10px 10px 0;">';
-
-						contentHTML += '<label style="display:block; font-size:0.74em;  margin-bottom:4px; margin-left:4px;">Author</label>';
+						contentHTML += '<label style="">Author</label>';
 						contentHTML += '<input type="text" name="modal-media-item-author" value="" maxlength="150">';
 
 					contentHTML += '</div>';
@@ -653,11 +632,18 @@ class	cmsMediathek
 
 
 
+					contentHTML += '<div class="fluid-50">';
 
-					contentHTML += '<div style="margin:0 10px 10px 0;">';
+						contentHTML += '<label>License</label>';
+						contentHTML += '<input type="text" name="modal-media-item-license" value="" maxlength="150">';
 
-						contentHTML += '<label style="display:block; font-size:0.74em;  margin-bottom:4px; margin-left:4px;">Caption</label>';
-						contentHTML += '<textarea name="modal-media-item-caption" maxlength="150" style="resize:none;"></textarea>';
+					contentHTML += '</div>';
+
+
+					contentHTML += '<div class="fluid">';
+
+						contentHTML += '<label>License URL</label>';
+						contentHTML += '<input type="text" name="modal-media-item-license-url" value="" maxlength="150">';
 
 					contentHTML += '</div>';
 
@@ -665,10 +651,31 @@ class	cmsMediathek
 
 
 
-					contentHTML += '<div style="margin:0 10px 10px 0;">';
+					contentHTML += '<div class="fluid-50">';
 
-						contentHTML += '<label style="display:block; font-size:0.74em;  margin-bottom:4px; margin-left:4px;">Notice (not displayed)</label>';
-						contentHTML += '<textarea name="modal-media-item-notice" maxlength="150" style="resize:none;"></textarea>';
+						contentHTML += '<label>Camera</label>';
+						contentHTML += '<input type="text" name="modal-media-item-gear-camera" value="">';
+
+					contentHTML += '</div>';
+
+
+					contentHTML += '<div class="fluid-50">';
+
+						contentHTML += '<label>Lens</label>';
+						contentHTML += '<input type="text" name="modal-media-item-gear-lens" value="">';
+
+					contentHTML += '</div>';
+
+
+
+
+
+
+
+					contentHTML += '<div class="fluid">';
+
+						contentHTML += '<label>Notice (not displayed)</label>';
+						contentHTML += '<textarea name="modal-media-item-notice" maxlength="150"></textarea>';
 
 					contentHTML += '</div>';
 

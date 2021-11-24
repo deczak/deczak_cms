@@ -584,14 +584,14 @@ class	controllerMediathek extends CController
 		$pURLVariables	 =	new CURLVariables();
 		$requestList		 =	[];
 		$requestList[] 	 = 	[ "input" => 'media_id', "validate" => "strip_tags|trim|!empty", "use_default" => true, "default_value" => false ]; 		
-		$requestList[] 	 = 	[ "input" => 'media_gear_camera', "validate" => "strip_tags|trim|!empty", "use_default" => true, "default_value" => false ]; 		
-		$requestList[] 	 = 	[ "input" => 'media_gear_lens', "validate" => "strip_tags|trim|!empty", "use_default" => true, "default_value" => false ]; 	
-		$requestList[] 	 = 	[ "input" => 'media_author', "validate" => "strip_tags|trim|!empty", "use_default" => true, "default_value" => false ]; 		
-		$requestList[] 	 = 	[ "input" => 'media_caption', "validate" => "strip_tags|trim|!empty", "use_default" => true, "default_value" => false ]; 		
-		$requestList[] 	 = 	[ "input" => 'media_notice', "validate" => "strip_tags|trim|!empty", "use_default" => true, "default_value" => false ]; 			
-		$requestList[] 	 = 	[ "input" => 'media_title', "validate" => "strip_tags|trim|!empty", "use_default" => true, "default_value" => false ]; 			
-		$requestList[] 	 = 	[ "input" => 'media_license_url', "validate" => "strip_tags|trim|!empty", "use_default" => true, "default_value" => false ]; 			
-		$requestList[] 	 = 	[ "input" => 'media_license', "validate" => "strip_tags|trim|!empty", "use_default" => true, "default_value" => false ]; 			
+		$requestList[] 	 = 	[ "input" => 'media_gear_camera', "validate" => "strip_tags|trim|!empty", "use_default" => true, "default_value" => '' ]; 		
+		$requestList[] 	 = 	[ "input" => 'media_gear_lens', "validate" => "strip_tags|trim|!empty", "use_default" => true, "default_value" =>  '' ]; 	
+		$requestList[] 	 = 	[ "input" => 'media_author', "validate" => "strip_tags|trim|!empty", "use_default" => true, "default_value" =>  '' ]; 		
+		$requestList[] 	 = 	[ "input" => 'media_caption', "validate" => "strip_tags|trim|!empty", "use_default" => true, "default_value" =>  '' ]; 		
+		$requestList[] 	 = 	[ "input" => 'media_notice', "validate" => "strip_tags|trim|!empty", "use_default" => true, "default_value" =>  '' ]; 			
+		$requestList[] 	 = 	[ "input" => 'media_title', "validate" => "strip_tags|trim|!empty", "use_default" => true, "default_value" =>  '' ]; 			
+		$requestList[] 	 = 	[ "input" => 'media_license_url', "validate" => "strip_tags|trim|!empty", "use_default" => true, "default_value" =>  '' ]; 			
+		$requestList[] 	 = 	[ "input" => 'media_license', "validate" => "strip_tags|trim|!empty", "use_default" => true, "default_value" =>  '' ]; 			
 		$pURLVariables -> retrieve($requestList, false, true);	
 
 		$urlVarList		 = $pURLVariables -> getArray();
