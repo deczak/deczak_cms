@@ -258,7 +258,7 @@ class	cmsMediathek
 
 				if(itemsList[i].type !== 'DIR')
 				{
-					itemRowHTML += '<td class="filemodify" data-modify="fileedit" title="Edit item"><i class="fas fa-pen-square"></i></td>';
+					itemRowHTML += '<td class="filemodify" data-modify="fileedit" title="Edit item"><i class="fas fa-pen"></i></td>';
 					itemRowHTML += '<td class="filemodify" data-modify="filemove" title="Move item"><i class="fas fa-share"></i></td>';
 				}
 				else
@@ -601,7 +601,7 @@ class	cmsMediathek
 
 
 
-					contentHTML += '<div class="fluid">';
+					contentHTML += '<div class="input width-100">';
 
 						contentHTML += '<label>Title</label>';
 						contentHTML += '<input type="text" name="modal-media-item-title" value="" maxlength="150">';
@@ -614,7 +614,7 @@ class	cmsMediathek
 
 
 
-					contentHTML += '<div class="fluid">';
+					contentHTML += '<div class="input width-100">';
 
 						contentHTML += '<label>Caption</label>';
 						contentHTML += '<textarea name="modal-media-item-caption" maxlength="150"></textarea>';
@@ -622,7 +622,7 @@ class	cmsMediathek
 					contentHTML += '</div>';
 
 
-					contentHTML += '<div class="fluid-50">';
+					contentHTML += '<div class="input width-50">';
 
 						contentHTML += '<label style="">Author</label>';
 						contentHTML += '<input type="text" name="modal-media-item-author" value="" maxlength="150">';
@@ -632,7 +632,7 @@ class	cmsMediathek
 
 
 
-					contentHTML += '<div class="fluid-50">';
+					contentHTML += '<div class="input width-50">';
 
 						contentHTML += '<label>License</label>';
 						contentHTML += '<input type="text" name="modal-media-item-license" value="" maxlength="150">';
@@ -640,7 +640,7 @@ class	cmsMediathek
 					contentHTML += '</div>';
 
 
-					contentHTML += '<div class="fluid">';
+					contentHTML += '<div class="input width-100">';
 
 						contentHTML += '<label>License URL</label>';
 						contentHTML += '<input type="text" name="modal-media-item-license-url" value="" maxlength="150">';
@@ -651,7 +651,7 @@ class	cmsMediathek
 
 
 
-					contentHTML += '<div class="fluid-50">';
+					contentHTML += '<div class="input width-50">';
 
 						contentHTML += '<label>Camera</label>';
 						contentHTML += '<input type="text" name="modal-media-item-gear-camera" value="">';
@@ -659,7 +659,7 @@ class	cmsMediathek
 					contentHTML += '</div>';
 
 
-					contentHTML += '<div class="fluid-50">';
+					contentHTML += '<div class="input width-50">';
 
 						contentHTML += '<label>Lens</label>';
 						contentHTML += '<input type="text" name="modal-media-item-gear-lens" value="">';
@@ -672,7 +672,7 @@ class	cmsMediathek
 
 
 
-					contentHTML += '<div class="fluid">';
+					contentHTML += '<div class="input width-100">';
 
 						contentHTML += '<label>Notice (not displayed)</label>';
 						contentHTML += '<textarea name="modal-media-item-notice" maxlength="150"></textarea>';
@@ -693,7 +693,7 @@ class	cmsMediathek
 
 
 			
-			contentNode.innerHTML = '<fieldset>'+ contentHTML +'</fieldset>';
+			contentNode.innerHTML = '<fieldset class="ui fieldset simply">'+ contentHTML +'</fieldset>';
 
 
 
