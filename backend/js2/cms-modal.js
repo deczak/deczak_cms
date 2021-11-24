@@ -55,16 +55,12 @@ class	cmsModal
 			nodeTitle.innerHTML = this.modalTitle.trim();
 			nodeModalChild.append(nodeTitle);
 
-			let titleHline = document.createElement('hr');
-			nodeModalChild.append(titleHline);
 		}
 
 		nodeContent.classList.add('cms-modal-content-userdefined')
 
 		nodeModalChild.append(nodeContent);
 
-		let hline = document.createElement('hr');
-		nodeModalChild.append(hline);
 
 		let bottomButtonBox = document.createElement('div');
 		bottomButtonBox.classList.add('cms-modal-buttons-bottom');
@@ -74,7 +70,7 @@ class	cmsModal
 		let bottomButtonBoxLeft = document.createElement('div');
 
 		for(let i = 0; i < this.buttonsList.length; i++)
-		{
+		{ console.log(srcInstance.buttonsList[i]);
 			let nodeButton = document.createElement('button');
 			nodeButton.type = 'button'
 			nodeButton.classList.add('ui', 'button');
@@ -163,6 +159,14 @@ class	cmsModal
 
 		event.target.closest('div.cms-modal').remove();
 		document.querySelector('body').classList.remove('noScroll');
+	}
+
+	getFieldList()
+	{
+		let fieldsetNode = this.nodeModal.querySelector('fieldset');
+		if(fieldsetNode === null)
+			return [];
+		return cmsForms.collectFields(fieldsetNode);
 	}
 }
 

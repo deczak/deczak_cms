@@ -459,19 +459,294 @@ class	cmsMediathek
 
 
 
-	_onClickButtonEditItem(itemNode, eventNode, srcInstance)
-	{
-		/*	
-		  	itemNode	TR or DIV of whole item, contains a itemInfo property with info
-			eventNode	Node of event target, TD or DIV
-		*/
-		alert ('on my todo');
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	_onClickButtonEditItemSuccess(response, eventInfo)
+	{
+		console.log('_onClickButtonEditItemSuccess');
+		console.log(response);
+
+		eventInfo.modalInstance.close();
 
 		/*
-			open modal with inputs
+
+		response.data
+		response.msg
+		response.state
+		
+		eventInfo.eventNode			TD
+		eventInfo.itemNode			TR
+		eventInfo.modalInstance		cmsModal
+		eventInfo.srcInstance		cmsMediathek
+		
 		*/
+
 	}
+
+	_onClickButtonEditItemModalEditSuccess(event, modalInstance, eventInfo)
+	{
+
+
+		console.log('_onClickButtonEditItemModalEditSuccess');
+
+		eventInfo.modalInstance = modalInstance;
+
+		let fieldList = modalInstance.getFieldList();
+		
+
+		let	formData  = new FormData;
+
+			formData.append('media_id', fieldList['modal-media-item-id']);
+			formData.append('media_license', fieldList['modal-media-item-license']);
+			formData.append('media_license_url', fieldList['modal-media-item-license-url']);
+			formData.append('media_gear_camera', fieldList['modal-media-item-gear-camera']);
+			formData.append('media_gear_lens', fieldList['modal-media-item-gear-lens']);
+			formData.append('media_author', fieldList['modal-media-item-author']);
+			formData.append('media_caption', fieldList['modal-media-item-caption']);
+			formData.append('media_notice', fieldList['modal-media-item-notice']);
+			formData.append('media_title', fieldList['modal-media-item-title']);
+	
+
+
+		let	xhRequest = new cmsXhr;
+			xhRequest.request(CMS.SERVER_URL_BACKEND + 'mediathek/', formData, eventInfo.srcInstance._onClickButtonEditItemSuccess, eventInfo, 'edit_item');
+
+
+	}
+
+
+
+
+	_onClickButtonEditItemRequestItem(response, srcInfo)
+	{
+		
+
+		console.log('_onClickButtonEditItemRequestItem');
+		console.log(response);
+		console.log(srcInfo);
+
+		let inputItemId = srcInfo.modalContentNode.querySelector('[name="modal-media-item-id"]');
+		if(inputItemId !== null) inputItemId.value = response.media_id;
+
+		let inputItemTitle = srcInfo.modalContentNode.querySelector('[name="modal-media-item-title"]');
+		if(inputItemTitle !== null) inputItemTitle.value = response.media_title;
+
+		let inputItemNotice = srcInfo.modalContentNode.querySelector('[name="modal-media-item-notice"]');
+		if(inputItemNotice !== null) inputItemNotice.value = response.media_notice;
+		
+		let inputItemCaption = srcInfo.modalContentNode.querySelector('[name="modal-media-item-caption"]');
+		if(inputItemCaption !== null) inputItemCaption.value = response.media_caption;
+		
+		let inputItemAuthor = srcInfo.modalContentNode.querySelector('[name="modal-media-item-author"]');
+		if(inputItemAuthor !== null) inputItemAuthor.value = response.media_author;
+		
+		let inputItemGearLens = srcInfo.modalContentNode.querySelector('[name="modal-media-item-gear-lens"]');
+		if(inputItemGearLens !== null) inputItemGearLens.value = response.media_gear.lens;
+		
+		let inputItemGearCamera = srcInfo.modalContentNode.querySelector('[name="modal-media-item-gear-camera"]');
+		if(inputItemGearCamera !== null) inputItemGearCamera.value = response.media_gear.camera;
+		
+		let inputItemLicense = srcInfo.modalContentNode.querySelector('[name="modal-media-item-license"]');
+		if(inputItemLicense !== null) inputItemLicense.value = response.media_license;
+		
+		let inputItemLicenseUrl = srcInfo.modalContentNode.querySelector('[name="modal-media-item-license-url"]');
+		if(inputItemLicenseUrl !== null) inputItemLicenseUrl.value = response.media_license_url;
+
+
+	}
+
+
+
+	_onClickButtonEditItem(itemNode, eventNode, srcInstance)
+	{
+		let contentNode = document.createElement('div');
+
+		console.log(itemNode.itemInfo);
+
+		let contentHTML  = '';
+
+
+
+			contentHTML += '<div style="display:flex;padding-top:5px;">';
+
+				contentHTML += '<div style="height:200px; width:200px;">';
+				contentHTML += '</div>';
+
+				contentHTML += '<div style="width:100%;display:flex; flex-wrap: wrap; padding-left:10px; ">';
+
+
+
+					contentHTML += '<div style="margin:0 10px 10px 0;">';
+
+						contentHTML += '<label style="display:block; font-size:0.74em;  margin-bottom:4px; margin-left:4px;">Title</label>';
+						contentHTML += '<input type="text" name="modal-media-item-title" value="" maxlength="150">';
+
+					contentHTML += '</div>';
+
+
+					contentHTML += '<div style="margin:0 10px 10px 0;">';
+
+						contentHTML += '<label style="display:block; font-size:0.74em;  margin-bottom:4px; margin-left:4px;">Camera</label>';
+						contentHTML += '<input type="text" name="modal-media-item-gear-camera" value="">';
+
+					contentHTML += '</div>';
+
+
+					contentHTML += '<div style="margin:0 10px 10px 0;">';
+
+						contentHTML += '<label style="display:block; font-size:0.74em;  margin-bottom:4px; margin-left:4px;">Lens</label>';
+						contentHTML += '<input type="text" name="modal-media-item-gear-lens" value="">';
+
+					contentHTML += '</div>';
+
+
+
+					contentHTML += '<div style="margin:0 10px 10px 0;">';
+
+						contentHTML += '<label style="display:block; font-size:0.74em;  margin-bottom:4px; margin-left:4px;">License URL</label>';
+						contentHTML += '<input type="text" name="modal-media-item-license" value="" maxlength="150">';
+
+					contentHTML += '</div>';
+
+
+
+					contentHTML += '<div style="margin:0 10px 10px 0;">';
+
+						contentHTML += '<label style="display:block; font-size:0.74em;  margin-bottom:4px; margin-left:4px;">License</label>';
+						contentHTML += '<input type="text" name="modal-media-item-license-url" value="" maxlength="150">';
+
+					contentHTML += '</div>';
+
+
+
+					contentHTML += '<div style="margin:0 10px 10px 0;">';
+
+						contentHTML += '<label style="display:block; font-size:0.74em;  margin-bottom:4px; margin-left:4px;">Author</label>';
+						contentHTML += '<input type="text" name="modal-media-item-author" value="" maxlength="150">';
+
+					contentHTML += '</div>';
+
+
+
+
+
+					contentHTML += '<div style="margin:0 10px 10px 0;">';
+
+						contentHTML += '<label style="display:block; font-size:0.74em;  margin-bottom:4px; margin-left:4px;">Caption</label>';
+						contentHTML += '<textarea name="modal-media-item-caption" maxlength="150" style="resize:none;"></textarea>';
+
+					contentHTML += '</div>';
+
+
+
+
+
+					contentHTML += '<div style="margin:0 10px 10px 0;">';
+
+						contentHTML += '<label style="display:block; font-size:0.74em;  margin-bottom:4px; margin-left:4px;">Notice (not displayed)</label>';
+						contentHTML += '<textarea name="modal-media-item-notice" maxlength="150" style="resize:none;"></textarea>';
+
+					contentHTML += '</div>';
+
+
+
+
+				contentHTML += '</div>';
+
+
+			contentHTML += '</div>';
+
+
+
+			contentHTML += '<input type="hidden" name="modal-media-item-id" value="">';
+
+
+			
+			contentNode.innerHTML = '<fieldset>'+ contentHTML +'</fieldset>';
+
+
+
+		let modal = new cmsModal;
+			modal
+				.addButton(new cmsModalCtrlButton(cmsModal.BTN_LOCATION.BOTTOM_LEFT, 'Save', srcInstance._onClickButtonEditItemModalEditSuccess, 'fas fa-save', {itemNode:itemNode, eventNode:eventNode, srcInstance:srcInstance}))
+				.addButton(new cmsModalCtrlButton(cmsModal.BTN_LOCATION.BOTTOM_LEFT, 'Cancel', null, 'fas fa-times'))
+				.setTitle('Mediathek item')
+				.create(contentNode)
+				.open();
+
+
+
+		let formData = new FormData;
+			formData.append('media_id', itemNode.itemInfo.media_id);
+
+
+		let index = new cmsIndex(
+				CMS.SERVER_URL_BACKEND + 'mediathek/',
+				srcInstance._onClickButtonEditItemRequestItem,
+				'get_item'
+			);
+			index.request({srcInstance:srcInstance, modalContentNode:contentNode}, formData);
+
+	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

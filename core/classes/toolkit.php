@@ -350,6 +350,33 @@ class 	MEDIATHEK
 
 		return null;
 	}
+
+	public static function 
+	getItemFSPath(int $mediaId, string $itemPath = '') : ?string
+	{
+		if(empty($mediaId))
+			return null;
+
+		$directoryList = new DirectoryIterator(CMS_SERVER_ROOT.DIR_MEDIATHEK.$itemPath);
+		foreach($directoryList as $directory)
+		{
+			if($directory -> isDot())
+				continue;
+
+			if(file_exists(CMS_SERVER_ROOT.DIR_MEDIATHEK.$itemPath.$directory -> getFilename().'/'.$mediaId.'.media-id'))
+				return CMS_SERVER_ROOT.DIR_MEDIATHEK.$itemPath.$directory -> getFilename().'/';
+
+			if($directory -> isDir() && !file_exists(CMS_SERVER_ROOT.DIR_MEDIATHEK.$itemPath.$directory -> getFilename().'/info.json'))
+			{
+				$response = MEDIATHEK::getItemFSPath($mediaId, $itemPath .$directory -> getFilename().'/');
+				if($response !== null)
+					return $response;
+			}
+		}
+
+		return null;
+	}
+ 
  
 	public static function 
 	getItemsList(string $path, array &$destList, bool $ignoreSubDirectory = false)

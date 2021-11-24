@@ -68,6 +68,8 @@ class	controllerMediathek extends CController
 			case 'xhr_directory_items': $logicDone = $this -> logicXHRDirectoryItems();
 			case 'xhr_move_item':		$logicDone = $this -> logicXHRMoveItem();
 			case 'xhr_remove_item':		$logicDone = $this -> logicXHRRemoveItem($_pDatabase);
+			case 'xhr_edit_item':		$logicDone = $this -> logicXHREditItem($_pDatabase, $_xhrInfo, $enableEdit, $enableDelete, $enableUpload);
+			case 'xhr_get_item':		$logicDone = $this -> logicXHRGetItem($_pDatabase, $_xhrInfo);
 		}
 
 		if(!$logicDone) // Default
@@ -233,42 +235,23 @@ class	controllerMediathek extends CController
 		return false;
 	}
 
-
 	/**
 	 * 	XHR Call to import all new (unprocessed) files in mediathek directory
 	 */
 	private function
 	logicXHRImport(CDatabaseConnection &$_pDatabase, ?object $_xhrInfo, bool $_enableEdit = false, bool $_enableDelete = false, bool $_enableUpload = false) : bool
 	{
-
-
 		$validationErr   = false;
 		$validationMsg   = 'OK';
 		$responseData    = [];
-
-
-
-
 
 		$itemsList = [];
 
 		MEDIATHEK::getRawItemsList($itemsList);
 
-
-
-
-
 		foreach($itemsList as $item)
 		{
-
-
-
-
-
 			$itemPath = CMS_SERVER_ROOT.DIR_MEDIATHEK.$item -> filelocation . $item -> filenameBase .'/';
-
-
-
 
 			if(!file_exists($itemPath))
 			if(!mkdir($itemPath, 0777, true))
@@ -277,17 +260,11 @@ class	controllerMediathek extends CController
 				continue;
 			}
 
-
-
 			if(!rename(CMS_SERVER_ROOT.DIR_MEDIATHEK.$item -> filepath, $itemPath . $item -> filename))
 			{
 				// TODO ERR
 				continue;
 			}
-
-
-
-
 
 			switch($item -> mime)
 			{
@@ -297,13 +274,7 @@ class	controllerMediathek extends CController
 					break;
 			}
 
-
-
-
-
-
 			$itemInfo = new stdClass;
-
 
 			$itemInfo -> sheme		   = 1;
 			$itemInfo -> filename	   = $item -> filename;
@@ -322,35 +293,23 @@ class	controllerMediathek extends CController
 			$itemInfo -> notice		   = '';
 			$itemInfo -> timeAdd	   = time();
 
-
-
 			switch($item -> mime)
 			{
 				case 'image/png': 
 				case 'image/webp': 
 				case 'image/jpeg':
 
-
-				$itemInfo -> sizes = MEDIATHEK::createResizedImages($itemPath, $item -> filename, $item -> mime, $this -> imageSizesList);
-				$itemInfo -> sizes = $itemInfo -> sizes ?? [];
+					$itemInfo -> sizes = MEDIATHEK::createResizedImages($itemPath, $item -> filename, $item -> mime, $this -> imageSizesList);
+					$itemInfo -> sizes = $itemInfo -> sizes ?? [];
 		
-
-
-										break;
+					break;
 
 				default: // ...................	Add file for download
 
 					// todo
-
 			}
 
-
-
-
-
-				file_put_contents($itemPath.'info.json', json_encode($itemInfo, JSON_UNESCAPED_UNICODE));
-
-
+			file_put_contents($itemPath.'info.json', json_encode($itemInfo, JSON_UNESCAPED_UNICODE));
 
 			$modelMediathek = new modelMediathek;
 			$mediaId = $modelMediathek -> insert($_pDatabase, [
@@ -365,33 +324,18 @@ class	controllerMediathek extends CController
 				'media_gear_settings' => $itemInfo -> gear_settings ?? [],
 				'media_size' 		  => $item -> size,
 				'media_extension' 	  => $item -> extension,
-				'media_mime' 		  => $item -> mime
+				'media_mime' 		  => $item -> mime,
+				'create_by' 		  => CSession::instance() -> getValue('user_id'),
+				'create_time' 		  => time()
 			]);
 
-
 			file_put_contents($itemPath. $mediaId .'.media-id', $mediaId);
-
-
-
-
-
-
-
 		}
-
-
-
-
-
-		
-
-
 
 		tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
 
 		return false;
 	}
-
 
 	/**
 	 * 	XHR Call to retrieve a multidimensional array of mediathek directory
@@ -420,17 +364,12 @@ class	controllerMediathek extends CController
 		$validationMsg   = 'OK';
 		$responseData    = [];
 
-
-
-
 		$pURLVariables	 =	new CURLVariables();
 		$requestList		 =	[];
 		$requestList[] 	 = 	[ "input" => 'simple-gallery-path', "validate" => "strip_tags|!empty", "use_default" => true, "default_value" => '/' ]; 		
 		$pURLVariables -> retrieve($requestList, false, true);	
 
 		$urlVarList		 = $pURLVariables -> getArray();
-
-	
 	
 		MEDIATHEK::getItemsList($urlVarList['simple-gallery-path'].'/', $responseData, true);
 
@@ -567,7 +506,6 @@ class	controllerMediathek extends CController
 		return false;
 	}
 
-
 	/**
 	 * 	XHR Call to move items
 	 */
@@ -630,4 +568,193 @@ class	controllerMediathek extends CController
 
 		return false;
 	}
+
+	/**
+	 *
+	 */
+	private function
+	logicXHREditItem(CDatabaseConnection &$_pDatabase, ?object $_xhrInfo, bool $_enableEdit = false, bool $_enableDelete = false, bool $_enableUpload = false) : bool
+	{
+		$validationErr   = false;
+		$validationMsg   = 'OK';
+		$responseData    = [];
+
+
+
+		$pURLVariables	 =	new CURLVariables();
+		$requestList		 =	[];
+		$requestList[] 	 = 	[ "input" => 'media_id', "validate" => "strip_tags|trim|!empty", "use_default" => true, "default_value" => false ]; 		
+		$requestList[] 	 = 	[ "input" => 'media_gear_camera', "validate" => "strip_tags|trim|!empty", "use_default" => true, "default_value" => false ]; 		
+		$requestList[] 	 = 	[ "input" => 'media_gear_lens', "validate" => "strip_tags|trim|!empty", "use_default" => true, "default_value" => false ]; 	
+		$requestList[] 	 = 	[ "input" => 'media_author', "validate" => "strip_tags|trim|!empty", "use_default" => true, "default_value" => false ]; 		
+		$requestList[] 	 = 	[ "input" => 'media_caption', "validate" => "strip_tags|trim|!empty", "use_default" => true, "default_value" => false ]; 		
+		$requestList[] 	 = 	[ "input" => 'media_notice', "validate" => "strip_tags|trim|!empty", "use_default" => true, "default_value" => false ]; 			
+		$requestList[] 	 = 	[ "input" => 'media_title', "validate" => "strip_tags|trim|!empty", "use_default" => true, "default_value" => false ]; 			
+		$requestList[] 	 = 	[ "input" => 'media_license_url', "validate" => "strip_tags|trim|!empty", "use_default" => true, "default_value" => false ]; 			
+		$requestList[] 	 = 	[ "input" => 'media_license', "validate" => "strip_tags|trim|!empty", "use_default" => true, "default_value" => false ]; 			
+		$pURLVariables -> retrieve($requestList, false, true);	
+
+		$urlVarList		 = $pURLVariables -> getArray();
+
+
+		if($urlVarList['media_id'] === false)
+		{
+			$validationErr =	true;
+			$validationMsg =	'Mediathek, media-id missing';
+			$responseData  = 	[];
+
+			tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
+		}
+				
+
+
+
+		$urlVarList['media_gear'] = [
+			'camera' => $urlVarList['media_gear_camera'],
+			'lens'   => $urlVarList['media_gear_lens']
+		];
+
+
+
+
+		$urlVarList['update_by'] = CSession::instance() -> getValue('user_id');
+		$urlVarList['update_time'] = time();
+
+
+
+
+
+
+		$modelCondition = new CModelCondition();
+		$modelCondition -> where('media_id', $urlVarList['media_id']);
+
+		
+		$modelMediathek  = new modelMediathek;
+		if($modelMediathek -> update($_pDatabase, $urlVarList, $modelCondition) === false)
+		{
+
+			$validationErr =	true;
+			$validationMsg =	'Mediathek, update media item failed';
+			$responseData  = 	[];
+
+			tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
+		}
+
+
+		$itemFSPath = MEDIATHEK::getItemFSPath($urlVarList['media_id']);
+
+
+
+		$itemInfoPath = $itemFSPath.'info.json';
+
+		if(!file_exists($itemInfoPath))
+		{
+			$validationErr =	true;
+			$validationMsg =	'Mediathek, media info file missing';
+			$responseData  = 	[];
+
+			tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
+
+		}
+
+					$itemInfo = file_get_contents($itemInfoPath);
+
+					if($itemInfo === false)
+					{
+			$validationErr =	true;
+			$validationMsg =	'Mediathek, media info file failure';
+			$responseData  = 	[];
+
+			tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
+					}
+
+					$itemInfo = json_decode($itemInfo);
+
+					if($itemInfo === null)
+					{
+			$validationErr =	true;
+			$validationMsg =	'Mediathek, media info file content failure';
+			$responseData  = 	[];
+
+			tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
+					}
+
+
+
+			$itemInfo -> title 		 = $urlVarList['media_title'];
+			$itemInfo -> caption 	 = $urlVarList['media_caption'];
+			$itemInfo -> license 	 = $urlVarList['media_license'];
+			$itemInfo -> license_url = $urlVarList['media_license_url'];
+			$itemInfo -> author 	 = $urlVarList['media_author'];
+			$itemInfo -> notice 	 = $urlVarList['media_notice'];
+
+			$itemInfo -> gear -> camera = $urlVarList['media_gear_camera'];
+			$itemInfo -> gear -> lens 	= $urlVarList['media_gear_lens'];
+
+
+					$itemInfo = file_put_contents($itemInfoPath, json_encode($itemInfo, JSON_UNESCAPED_UNICODE));
+
+
+
+		$responseData = $urlVarList;
+
+
+		tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
+
+		return false;
+	}
+
+	/**
+	 *
+	 */
+	private function
+	logicXHRGetItem(CDatabaseConnection &$_pDatabase, ?object $_xhrInfo, bool $_enableEdit = false, bool $_enableDelete = false, bool $_enableUpload = false) : bool
+	{
+		$validationErr   = false;
+		$validationMsg   = 'OK';
+		$responseData    = [];
+
+		$pURLVariables	 =	new CURLVariables();
+		$requestList		 =	[];
+		$requestList[] 	 = 	[ "input" => 'media_id', "validate" => "strip_tags|trim|!empty", "use_default" => true, "default_value" => false ]; 				
+		$pURLVariables -> retrieve($requestList, false, true);	
+
+		$urlVarList		 = $pURLVariables -> getArray();
+
+		if($urlVarList['media_id'] === false)
+		{
+			$validationErr =	true;
+			$validationMsg =	'Mediathek, media-id missing';
+			$responseData  = 	[];
+
+			tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
+		}
+		
+		$modelCondition = new CModelCondition();
+		$modelCondition -> where('media_id', $urlVarList['media_id']);
+		
+		$modelMediathek  = new modelMediathek;
+		$modelMediathek -> load($_pDatabase, $modelCondition);
+
+		$itemDBInfo = $modelMediathek -> getResult();
+		$itemDBInfo = (!empty($itemDBInfo) ? reset($itemDBInfo) : null);
+
+		$responseData = (array)$itemDBInfo;
+
+		if($itemDBInfo === null)
+		{
+			$validationErr =	true;
+			$validationMsg =	'Mediathek, could not find item';
+			$responseData  = 	[];
+
+			tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
+		}
+
+		$responseData['media_url'] = MEDIATHEK::getItemUrl($urlVarList['media_id']);
+		
+		tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
+
+		return false;
+	}
+
 }
