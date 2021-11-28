@@ -217,9 +217,6 @@ class	cmsMediathek
 
 	_generateHTML_List(itemsList, contentNode)
 	{
-
-
-
 		let tableBodyNode = document.createElement('tbody');
 
 		for(let i in itemsList)
@@ -401,12 +398,6 @@ class	cmsMediathek
 		srcInstance.requestItems();
 	}
 
-
-
-
-
-
-
 	_onClickButtonRemoveItemSuccess(response, srcInstance)
 	{
 		if(response.state !== 0)
@@ -421,9 +412,6 @@ class	cmsMediathek
 		srcInstance.requestItems();
 	}
 
-
-
-
 	_onClickButtonRemoveItemModalConfirmSuccess(event, modalInstance, eventInfo)
 	{
 		modalInstance.close();
@@ -434,10 +422,6 @@ class	cmsMediathek
 		let	xhRequest = new cmsXhr;
 			xhRequest.request(CMS.SERVER_URL_BACKEND + 'mediathek/', formData, eventInfo.srcInstance._onClickButtonRemoveItemSuccess, eventInfo.srcInstance, 'remove_item');
 	}
-
-
-
-
 
 	_onClickButtonRemoveItem(itemNode, eventNode, srcInstance)
 	{
@@ -451,73 +435,17 @@ class	cmsMediathek
 		);
 	}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 	_onClickButtonEditItemSuccess(response, eventInfo)
 	{
-		console.log('_onClickButtonEditItemSuccess');
-		console.log(response);
-
 		eventInfo.modalInstance.close();
-
-		/*
-
-		response.data
-		response.msg
-		response.state
-		
-		eventInfo.eventNode			TD
-		eventInfo.itemNode			TR
-		eventInfo.modalInstance		cmsModal
-		eventInfo.srcInstance		cmsMediathek
-		
-		*/
-
 	}
 
 	_onClickButtonEditItemModalEditSuccess(event, modalInstance, eventInfo)
 	{
-
-
-		console.log('_onClickButtonEditItemModalEditSuccess');
-
 		eventInfo.modalInstance = modalInstance;
 
 		let fieldList = modalInstance.getFieldList();
 		
-
 		let	formData  = new FormData;
 
 			formData.append('media_id', fieldList['modal-media-item-id']);
@@ -530,25 +458,12 @@ class	cmsMediathek
 			formData.append('media_notice', fieldList['modal-media-item-notice']);
 			formData.append('media_title', fieldList['modal-media-item-title']);
 	
-
-
 		let	xhRequest = new cmsXhr;
 			xhRequest.request(CMS.SERVER_URL_BACKEND + 'mediathek/', formData, eventInfo.srcInstance._onClickButtonEditItemSuccess, eventInfo, 'edit_item');
-
-
 	}
-
-
-
 
 	_onClickButtonEditItemRequestItem(response, srcInfo)
 	{
-		
-
-		console.log('_onClickButtonEditItemRequestItem');
-		console.log(response);
-		console.log(srcInfo);
-
 		let inputItemId = srcInfo.modalContentNode.querySelector('[name="modal-media-item-id"]');
 		if(inputItemId !== null) inputItemId.value = response.media_id;
 
@@ -576,20 +491,36 @@ class	cmsMediathek
 		let inputItemLicenseUrl = srcInfo.modalContentNode.querySelector('[name="modal-media-item-license-url"]');
 		if(inputItemLicenseUrl !== null) inputItemLicenseUrl.value = response.media_license_url;
 
+		let previewNode = srcInfo.modalContentNode.querySelector('div.preview');
+		if(previewNode !== null) {
 
+			switch(response.media_mime)
+			{
+				case 'image/png': 
+				case 'image/webp': 
+				case 'image/jpeg':
+
+					let previewInner = document.createElement('div');
+						previewInner.classList.add('preview-inner');
+						previewInner.style.backgroundImage = 'url("'+ response.media_url +'?binary&size=small")';
+				
+					previewNode.append(previewInner);
+					previewNode.classList.add('grid');
+
+					break;
+
+				default: 
+			}
+		}
 	}
-
-
 
 	_onClickButtonEditItem(itemNode, eventNode, srcInstance)
 	{
 		let contentNode = document.createElement('div');
 			contentNode.classList.add('cms-modal-mediathek-edit');
 
-		console.log(itemNode.itemInfo);
 
 		let contentHTML  = '';
-
 
 
 			contentHTML += '<div style="">';
@@ -702,7 +633,7 @@ class	cmsMediathek
 				.addButton(new cmsModalCtrlButton(cmsModal.BTN_LOCATION.BOTTOM_LEFT, 'Save', srcInstance._onClickButtonEditItemModalEditSuccess, 'fas fa-save', {itemNode:itemNode, eventNode:eventNode, srcInstance:srcInstance}))
 				.addButton(new cmsModalCtrlButton(cmsModal.BTN_LOCATION.BOTTOM_LEFT, 'Cancel', null, 'fas fa-times'))
 				.setTitle('Mediathek item')
-				.create(contentNode)
+				.create(contentNode, { width:'1100px', maxWidth:'1100px' })
 				.open();
 
 
@@ -719,48 +650,6 @@ class	cmsMediathek
 			index.request({srcInstance:srcInstance, modalContentNode:contentNode}, formData);
 
 	}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 	_onClickButtonMoveItemSuccess(response, srcInstance)
 	{
@@ -806,13 +695,6 @@ class	cmsMediathek
 	{
 		cmsMediathek.queryDirectories(srcInstance._onClickButtonMoveItemModalPath, {itemNode:itemNode, eventNode:eventNode, srcInstance:srcInstance});
 	}
-
-
-
-
-
-
-
 
 	static queryDirectories(onSuccessCallback, srcInstance)
 	{
