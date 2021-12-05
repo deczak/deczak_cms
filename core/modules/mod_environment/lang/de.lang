@@ -17,6 +17,9 @@ M_BEENV_SESSION_SPAMTIMEOUT	= Zeitlimit des Zugriffsschutz gegen Massenzugriff i
 M_BEENV_SESSION_SPAMLIMIT	= Session Anzahl des Zugriffsschutz gegen Massenzugriff
 M_BEENV_SESSION_TIMEOUT		= Gültigkeitsdauer der Session in Sekunden
 
+M_BEENV_HEADER				= Header Einstellungen
+M_BEENV_HEADER_X_FRAME		= X-Frame-Options: Ausgabeeinstellung für Frames, Embed und Object
+M_BEENV_HEADER_X_CONTENTTO	= X-Content-Type-Options: Verbietet dem Browser das erraten des MIME Typ wenn nicht übermittelt.
 
 M_BEENV_ERROR				= Error Reporting
 M_BEENV_ERROR_ENABLE_EFILE	= Enable error log file for PHP related errors.

@@ -7,7 +7,7 @@ require_once 'CSingleton.php';
  * 
  * 	This is a singleton class.
  */
-class CLog extends CSingleton
+class cmsLog extends CSingleton
 {
 	/**
 	 * 	Initialize function to setup the log system

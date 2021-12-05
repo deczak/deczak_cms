@@ -461,13 +461,13 @@ class	CDatabaseQuery
 	private function
 	_createColumn()
 	{
-		CLog::add('CDatabaseQuery::_createColumn -- Call');
+		cmsLog::add('CDatabaseQuery::_createColumn -- Call');
 
 		$dbConnection = &$this -> m_pDatabase -> getConnection();
 
 		if(empty($this -> m_tableName))
 		{
-			CLog::add('CDatabaseQuery::_createColumn -- Table name not set, abort call', true);
+			cmsLog::add('CDatabaseQuery::_createColumn -- Table name not set, abort call', true);
 			return false;
 		}
 
@@ -479,7 +479,7 @@ class	CDatabaseQuery
 
 		if($columnData -> m_isVirtual)
 		{
-			CLog::add('CDatabaseQuery::_createColumn -- Table is virtual, abort call');
+			cmsLog::add('CDatabaseQuery::_createColumn -- Table is virtual, abort call');
 			return true;
 		}
 			
@@ -531,11 +531,11 @@ class	CDatabaseQuery
 		}
 		catch(PDOException $exception)
 		{
-			CLog::add('CDatabaseQuery::_createColumn -- query failed. Exception: '. $exception -> getMessage(), true);
+			cmsLog::add('CDatabaseQuery::_createColumn -- query failed. Exception: '. $exception -> getMessage(), true);
 			return false;
 		}
 
-		CLog::add('CDatabaseQuery::_createColumn -- Call successful');
+		cmsLog::add('CDatabaseQuery::_createColumn -- Call successful');
 		return true;
 	}
 

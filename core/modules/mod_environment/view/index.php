@@ -8,6 +8,7 @@
 				<li><a class="darkblue" href="#backend"><?php echo CLanguage::string('M_BEENV_BACKENDGENERAL'); ?></a></li>
 				<li><a class="darkblue" href="#error"><?php echo CLanguage::string('M_BEENV_ERROR'); ?></a></li>
 				<li><a class="darkblue" href="#remote-system"><?php echo CLanguage::string('M_BEENV_REMOTEUSER'); ?></a></li>
+				<li><a class="darkblue" href="#header"><?php echo CLanguage::string('M_BEENV_HEADER'); ?></a></li>
 				<li><a class="darkblue" href="#update-sitemap"><?php echo CLanguage::string('M_BEENV_GENERATE'); ?></a></li>
 			</ul>
 	
@@ -208,6 +209,63 @@
 			<div class="submit-container">
 				<button class="ui button icon labeled trigger-submit-fieldset" type="button" disabled><span><i class="fas fa-save" data-icon="fa-save"></i></span><?php echo CLanguage::string('BUTTON_SAVE'); ?></button>
 				<div class="protector"><input type="checkbox" class="trigger-submit-protector" id="protector-login-objects"><label for="protector-login-objects"></label></div>
+			</div>
+
+
+			<?php } ?>
+
+		</fieldset>
+		
+		<fieldset class="ui fieldset submit-able" id="header" data-xhr-target="edit_header" data-xhr-overwrite-target="edit/1">
+
+			<div>
+
+				<div class="group width-100">
+
+					<div class="group-head width-100" style="margin-bottom:15px;"><?= CLanguage::string('M_BEENV_HEADER'); ?></div>
+
+					<div style="display:flex; align-items:center; margin-bottom:15px;  width:100%;">
+						<div class="input" style="width:221px; flex-shrink:0;">
+							<div class="select-wrapper">
+							<select name="header_x_frame_options" style="width:100%;" <?= (!$enableEdit ? 'disabled' : ''); ?>>
+								<option value="0" <?= (CFG::GET() -> FRONTEND -> HEADER -> X_FRAME_OPTIONS === '0' ? 'selected' : ''); ?>>UNSET</option>
+								<option value="DENY" <?= (CFG::GET() -> FRONTEND -> HEADER -> X_FRAME_OPTIONS === 'DENY' ? 'selected' : ''); ?>>DENY</option>
+								<option value="SAMEORIGIN" <?= (CFG::GET() -> FRONTEND -> HEADER -> X_FRAME_OPTIONS === 'SAMEORIGIN' ? 'selected' : ''); ?>>SAMEORIGIN</option>
+							</select>	
+							</div>
+						</div>
+						<div style="font-weight:500; margin-left:20px; width:100%; padding-bottom:8px;">
+							<?= CLanguage::string('M_BEENV_HEADER_X_FRAME'); ?>
+						</div>
+					</div>
+
+					<div style="display:flex; align-items:center; margin-bottom:15px; width:100%;">
+						<div class="input" style="width:221px; flex-shrink:0;">
+							<div class="select-wrapper">
+							<select name="header_x_content_type_options" style="width:100%;" <?= (!$enableEdit ? 'disabled' : ''); ?>>
+								<option value="0" <?= (CFG::GET() -> FRONTEND -> HEADER -> X_CONTENT_TYPE_OPTIONS === '0' ? 'selected' : ''); ?>>UNSET</option>
+								<option value="NOSNIFF" <?= (CFG::GET() -> FRONTEND -> HEADER -> X_CONTENT_TYPE_OPTIONS === 'DENY' ? 'selected' : ''); ?>>NOSNIFF</option>
+							</select>	
+							</div>
+						</div>
+						<div style="font-weight:500; margin-left:20px; width:100%; padding-bottom:8px;">
+							<?= CLanguage::string('M_BEENV_HEADER_X_CONTENTTO'); ?>
+						</div>
+					</div>
+
+				</div>
+
+			</div>
+
+			<?php if($enableEdit) { ?>
+
+			<div class="result-box" data-error=""></div>
+
+			<!-- Submit button - beware of fieldset name -->
+
+			<div class="submit-container">
+				<button class="ui button icon labeled trigger-submit-fieldset" type="button" disabled><span><i class="fas fa-save" data-icon="fa-save"></i></span><?php echo CLanguage::string('BUTTON_SAVE'); ?></button>
+				<div class="protector"><input type="checkbox" class="trigger-submit-protector" id="protector-header"><label for="protector-header"></label></div>
 			</div>
 
 

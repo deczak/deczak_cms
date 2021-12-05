@@ -51,6 +51,12 @@
 													"ENABLED"		: false,
 													"LOG_MODE"		: 1
 												}
+						},
+	"FRONTEND"		:	{
+							"HEADER"	:	{
+													"X_FRAME_OPTIONS"			: "0",
+													"X_CONTENT_TYPE_OPTIONS"	: "0"
+												}
 						}
 
 

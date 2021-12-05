@@ -23,9 +23,9 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 
 ##	L O G   S Y S T E M
 
-	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CLog.php';
+	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'cmsLog.php';
 
-	CLog::initialize();
+	cmsLog::initialize();
 
 ##	I N C L U D E   C L A S S E S   &   F U N C T O N S	
 
@@ -82,6 +82,7 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 	{	##	create connection failed
 		CPageRequest::instance() -> setResponseCode(920);
 	}	
+	CDatabase::setActiveConnectionName(CFG::GET() -> MYSQL -> PRIMARY_DATABASE);
 
 ##  S Y S T E M   U P D A T E R
 

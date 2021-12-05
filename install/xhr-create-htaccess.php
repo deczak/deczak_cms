@@ -6,8 +6,8 @@
 	include_once '../config/directories.php';
 	include_once '../config/standard.php';
 
-	include_once '../core/classes/CLog.php';
-	CLog::initialize();
+	include_once '../core/classes/cmsLog.php';
+	cmsLog::initialize();
 
 	include_once '../core/classes/toolkit.php';
 	include_once '../core/classes/CSheme.php';

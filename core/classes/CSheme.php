@@ -305,12 +305,12 @@ class	CSheme
 	public function
 	updateTable(CDatabaseConnection &$_dbConnection) : bool
 	{
-		CLog::add('CSheme::updateTable -- Call');
+		cmsLog::add('CSheme::updateTable -- Call');
 
 		if($this -> m_isVirtual === true)
 			return true;
 
-		CLog::add('CSheme::updateTable -- Update table '. $this -> m_tableName);
+		cmsLog::add('CSheme::updateTable -- Update table '. $this -> m_tableName);
 
 		$tableInfoList 	= $_dbConnection -> query(DB_COLUMNS) 
 										 -> table($this -> m_tableName)
@@ -318,7 +318,7 @@ class	CSheme
 
 		if(empty($tableInfoList))
 		{
-			CLog::add('CSheme::updateTable -- Table does not exist, create table '. $this -> m_tableName);
+			cmsLog::add('CSheme::updateTable -- Table does not exist, create table '. $this -> m_tableName);
 			return $_dbConnection -> query(DB_CREATE) -> sheme($this) -> exec();
 		}
 
@@ -370,20 +370,20 @@ class	CSheme
 			if($columnInfoSOLL -> m_isVirtual)
 				continue;
 
-			CLog::add('CSheme::updateTable -- Add column '. $columnInfoSOLL -> m_columnName);
+			cmsLog::add('CSheme::updateTable -- Add column '. $columnInfoSOLL -> m_columnName);
 
 			$execResult = $_dbConnection -> query(DB_ALTER_TABLE_COLUMN_ADD) -> table($this -> m_tableName) -> shemeColumn($columnInfoSOLL) -> exec();
 
 			if($execResult === false)
 			{
 				// add column failed
-				CLog::add('CSheme::updateTable -- Add column '. $columnInfoSOLL -> m_columnName .' ... aborted');
+				cmsLog::add('CSheme::updateTable -- Add column '. $columnInfoSOLL -> m_columnName .' ... aborted');
 				return false;
 			}
 			else
 			{
 				// add successful
-				CLog::add('CSheme::updateTable -- Add column '. $columnInfoSOLL -> m_columnName .' ... successful');
+				cmsLog::add('CSheme::updateTable -- Add column '. $columnInfoSOLL -> m_columnName .' ... successful');
 			}
 		}
 
@@ -391,7 +391,7 @@ class	CSheme
 
 		foreach($tableInfoList as $columnInfoIST)
 		{
-			CLog::add('CSheme::updateTable -- Add column '. $columnInfoIST -> COLUMN_NAME);
+			cmsLog::add('CSheme::updateTable -- Add column '. $columnInfoIST -> COLUMN_NAME);
 
 			$execResult = $_dbConnection -> query(DB_ALTER_TABLE_COLUMN_DROP) 
 										 -> table($this -> m_tableName)
@@ -401,18 +401,18 @@ class	CSheme
 			if($execResult === false)
 			{
 				// drop column failed
-				CLog::add('CSheme::updateTable -- Drop column '. $columnInfoIST -> COLUMN_NAME .' ... aborted');
+				cmsLog::add('CSheme::updateTable -- Drop column '. $columnInfoIST -> COLUMN_NAME .' ... aborted');
 				return false;
 			}
 			else
 			{
 				// drop successful
-				CLog::add('CSheme::updateTable -- Drop column '. $columnInfoIST -> COLUMN_NAME .' ... successful');
+				cmsLog::add('CSheme::updateTable -- Drop column '. $columnInfoIST -> COLUMN_NAME .' ... successful');
 			}		
 		}
 
 
-		CLog::add('CSheme::updateTable -- Update table successful');
+		cmsLog::add('CSheme::updateTable -- Update table successful');
 
 		return true;
 	}

@@ -44,7 +44,7 @@ class CModules extends CSingleton
 
 		$instance -> m_pUserRights	 = &$_pUserRights;
 
-		CLog::add('CModules::initialize -- Initialized CModules Instance');
+		cmsLog::add('CModules::initialize -- Initialized CModules Instance');
 
 		return $instance;
 	}
@@ -62,11 +62,11 @@ class CModules extends CSingleton
 		$moduleInstance = NULL;
 		$moduleIndex = false;
 
-		CLog::add('CModules::loadModule -- Load defined Module with ID '. $_moduleId .' and language '.$_pageLanguage);
+		cmsLog::add('CModules::loadModule -- Load defined Module with ID '. $_moduleId .' and language '.$_pageLanguage);
 
 		if(!$this -> getModule($_moduleId, $moduleInstance, $moduleIndex))
 		{
-			CLog::add('CModules::loadModule -- Aborted, could not find module with ID '. $_moduleId, true);
+			cmsLog::add('CModules::loadModule -- Aborted, could not find module with ID '. $_moduleId, true);
 			return null;
 		}
 
@@ -105,7 +105,7 @@ class CModules extends CSingleton
 
 							if($moduleData === false)
 							{
-								CLog::add('CModules::loadModule -- Unable to retrieve modul info for module-ID '. $_moduleId, true);
+								cmsLog::add('CModules::loadModule -- Unable to retrieve modul info for module-ID '. $_moduleId, true);
 								return null;
 							}
 
@@ -130,7 +130,7 @@ class CModules extends CSingleton
 
 							if($moduleData === false)
 							{
-								CLog::add('CModules::loadModule -- Unable to retrieve modul info for module-ID '. $_moduleId, true);
+								cmsLog::add('CModules::loadModule -- Unable to retrieve modul info for module-ID '. $_moduleId, true);
 								return null;
 							}
 

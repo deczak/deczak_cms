@@ -14,6 +14,12 @@ class	CHTML
 			$this -> disableCaching();
 		
 		header("Permissions-Policy: interest-cohort=()");	
+
+		if(CFG::GET() -> FRONTEND -> HEADER -> X_FRAME_OPTIONS !== '0')
+			header("X-Frame-Options: ". CFG::GET() -> FRONTEND -> HEADER -> X_FRAME_OPTIONS);
+
+		if(CFG::GET() -> FRONTEND -> HEADER -> X_CONTENT_TYPE_OPTIONS !== '0')
+			header("X-Content-Type-Options: ". CFG::GET() -> FRONTEND -> HEADER -> X_CONTENT_TYPE_OPTIONS);
 		
 		switch($pageRequest -> responseCode)
 		{

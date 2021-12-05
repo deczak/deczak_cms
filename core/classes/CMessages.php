@@ -54,7 +54,7 @@ class	CMessages extends CSingleton
 
 								if(!$_toLogFile) break;
 
-			case MSG_LOG:		CLog::add($_msgContent);
+			case MSG_LOG:		cmsLog::add($_msgContent);
 		}
 	}
 

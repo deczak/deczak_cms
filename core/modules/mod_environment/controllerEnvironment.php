@@ -66,6 +66,7 @@ class	controllerEnvironment extends CController
 			case 'xhr_update_sitemap': 	 $logicDone = $this -> logicXHRUpdateSitemap($_pDatabase); break;	
 			case 'xhr_update_resources': $logicDone = $this -> logicXHRUpdateResources($_pDatabase); break;	
 			case 'xhr_error_clear': 	 $logicDone = $this -> logicXHRClearError($_pDatabase);	break;	
+			case 'xhr_edit_header': 	 $logicDone = $this -> logicXHREditHeader($_pDatabase);	break;	
 		
 		
 		}
@@ -173,8 +174,6 @@ class	controllerEnvironment extends CController
 		return false;
 	}
 
-
-
 	private function
 	logicXHREditError(CDatabaseConnection &$_dbConnection) : bool
 	{	
@@ -237,8 +236,6 @@ class	controllerEnvironment extends CController
 		return false;
 	}
 
-
-
 	private function
 	logicXHRUpdateHTAccess(CDatabaseConnection &$_dbConnection) : bool
 	{	
@@ -282,8 +279,6 @@ class	controllerEnvironment extends CController
 		return false;
 	}
 
-
-
 	private function
 	logicXHRUpdateResources(CDatabaseConnection &$_dbConnection) : bool
 	{	
@@ -302,4 +297,43 @@ class	controllerEnvironment extends CController
 
 		return false;
 	}
+
+	private function
+	logicXHREditHeader(CDatabaseConnection &$_dbConnection) : bool
+	{	
+		$systemId = $this -> querySystemId();
+
+		if($systemId !== false)
+		{	
+			$validationErr 	= false;
+			$validationMsg 	= '';
+			$responseData 	= [];
+
+			$_pFormVariables	 =	new CURLVariables();
+			$_request		 =	[];
+			$_request[] 	 = 	[	"input" => "header_x_content_type_options", "validate" => "strip_tags|strip_whitespaces|!empty", "use_default" => true, "default_value" => '0'  ];
+			$_request[] 	 = 	[	"input" => "header_x_frame_options", "validate" => "strip_tags|strip_whitespaces|!empty", "use_default" => true, "default_value" => '0'  ];
+			$_pFormVariables -> retrieve($_request, false, true);
+			$_aFormData		 = $_pFormVariables ->getArray();
+
+			$configuration = file_get_contents(CMS_SERVER_ROOT.DIR_DATA.'configuration.json');
+			$configuration = json_decode($configuration);
+
+			$configuration -> FRONTEND -> HEADER -> X_FRAME_OPTIONS	 	   = $_aFormData['header_x_frame_options'];
+			$configuration -> FRONTEND -> HEADER -> X_CONTENT_TYPE_OPTIONS = $_aFormData['header_x_content_type_options'];
+
+			$configuration = json_encode($configuration, JSON_FORCE_OBJECT | JSON_UNESCAPED_UNICODE | JSON_HEX_QUOT);
+			file_put_contents(CMS_SERVER_ROOT.DIR_DATA.'configuration.json', $configuration);
+
+			tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
+		}
+
+		return false;
+	}
+
+
+
+
+
 }
+

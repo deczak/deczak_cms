@@ -9,16 +9,17 @@ M_BEENV_REMOTEUSER_ENABLE	= Enable remote user system to allow users from other 
 M_BEENV_REMOTEUSER_TIMEOUT	= Term of validity of the assigned rights in days, 0 days indefinitely.
 M_BEENV_REMOTEUSER_REPORT	= Send system notification when the term of a right for a remote user has expired.
 
-
 M_BEENV_BACKENDGENERAL		= Backend settings
 M_BEENV_BACKGEN_TIMEFORMAT	= Display of the time format, details correspond to the date function.
-
 
 M_BEENV_SESSION				= Session settings
 M_BEENV_SESSION_SPAMTIMEOUT	= Time limit of access protection against mass access in seconds
 M_BEENV_SESSION_SPAMLIMIT	= Session Number of access protection against mass access
 M_BEENV_SESSION_TIMEOUT		= The session is valid in seconds
 
+M_BEENV_HEADER				= Header settings
+M_BEENV_HEADER_X_FRAME		= X-Frame-Options: Render content in frames, embed and object.
+M_BEENV_HEADER_X_CONTENTTO	= X-Content-Type-Options: Avoiding MIME type sniffing.
 
 M_BEENV_ERROR				= Error Reporting
 M_BEENV_ERROR_ENABLE_EFILE	= Enable error log file for PHP related errors.

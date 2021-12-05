@@ -34,7 +34,7 @@ class cmsUpdate
 	public function
 	detectUpdate() : bool
 	{
-		CLog::add('cmsUpdate::detectUpdate -- Call');
+		cmsLog::add('cmsUpdate::detectUpdate -- Call');
 
 		if(!file_exists(CMS_SERVER_ROOT.'VERSION-DB'))
 			return true;		
@@ -45,8 +45,8 @@ class cmsUpdate
 		{
 			// File exists but trying to read it failed
 
-			CLog::add('cmsUpdate::detectUpdate -- Read error on VERSION-DB but file exists', true);
-			CLog::add('cmsUpdate::detectUpdate -- Return true to initiate update process');
+			cmsLog::add('cmsUpdate::detectUpdate -- Read error on VERSION-DB but file exists', true);
+			cmsLog::add('cmsUpdate::detectUpdate -- Return true to initiate update process');
 
 			// Try to update
 
@@ -59,8 +59,8 @@ class cmsUpdate
 		{
 			// File exists but trying to read it failed
 
-			CLog::add('cmsUpdate::detectUpdate -- Read error on VERSION-FS. File has to be exists and must be readable!', true);
-			CLog::add('cmsUpdate::detectUpdate -- System halted!', true);
+			cmsLog::add('cmsUpdate::detectUpdate -- Read error on VERSION-FS. File has to be exists and must be readable!', true);
+			cmsLog::add('cmsUpdate::detectUpdate -- System halted!', true);
 
 			// This File is required
 
@@ -82,7 +82,7 @@ class cmsUpdate
 	public function
 	updateDatabase() : bool
 	{
-		CLog::add('cmsUpdate::updateDatabase -- Call');
+		cmsLog::add('cmsUpdate::updateDatabase -- Call');
 
 		$pDBInstance  = CDatabase::instance();
 		$dbConnection = $pDBInstance -> getConnection(CFG::GET() -> MYSQL -> PRIMARY_DATABASE);
@@ -118,7 +118,7 @@ class cmsUpdate
 				##	Transaction fails when changing the table schema due to PHP behavior
 				##	$dbConnection -> rollBack();
 
-				CLog::add('cmsUpdate::updateDatabase -- Update Table aborted, update process stopped');
+				cmsLog::add('cmsUpdate::updateDatabase -- Update Table aborted, update process stopped');
 
 				return false;
 			}	
@@ -133,7 +133,7 @@ class cmsUpdate
 		if($versionFS !== false)
 			file_put_contents(CMS_SERVER_ROOT.'VERSION-DB', $versionFS);
 
-		CLog::add('cmsUpdate::updateDatabase -- update Process successful, update VERSION-DB');
+		cmsLog::add('cmsUpdate::updateDatabase -- update Process successful, update VERSION-DB');
 
 		return true;
 	}
