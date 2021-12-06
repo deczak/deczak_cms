@@ -4,8 +4,11 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 
 ##  I N C L U D E   C O F I G U R A T I O N   F I L E S
 
+	require_once	'core/classes/cfg.php';
 	require_once    'config/directories.php';
 	require_once    'config/standard.php';
+
+	CFG::initialize();	
 
 ##	B E N C H M A R K ( not in use )
 
@@ -14,7 +17,7 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 
 ##	P H P   E R R O R   R E P O R T I N G
 
-	if(CFG::GET() -> ERROR_SYSTEM -> ERROR_FILE -> ENABLE || PHP_ERROR_DISPLAY)
+	if(CFG::GET() -> ERROR_SYSTEM -> ERROR_FILE -> ENABLED || PHP_ERROR_DISPLAY)
 		error_reporting(E_ALL);
 	else
 		error_reporting(0);
