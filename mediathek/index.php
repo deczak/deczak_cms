@@ -34,6 +34,7 @@
 	
 */
 
+require_once '../core/classes/cfg.php';
 require_once '../config/directories.php';
 require_once '../config/standard.php';
 
