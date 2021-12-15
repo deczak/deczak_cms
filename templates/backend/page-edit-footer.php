@@ -43,6 +43,7 @@ else
 	<script src="<?php echo CMS_SERVER_URL_BACKEND; ?>js2/cms-modal-mediathek.js"></script>
 	<script src="<?php echo CMS_SERVER_URL_BACKEND; ?>js2/cms-modal-confirm.js"></script>
 	<script src="<?php echo CMS_SERVER_URL_BACKEND; ?>js2/cms-modal-path.js"></script>
+	<script src="<?php echo CMS_SERVER_URL_BACKEND; ?>js2/cms-modal-node.js"></script>
 	<script src="<?php echo CMS_SERVER_URL_BACKEND; ?>js2/cms-forms.js"></script>
 	<script src="<?php echo CMS_SERVER_URL_BACKEND; ?>js2/cms-index.js"></script>
 	

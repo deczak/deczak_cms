@@ -50,7 +50,7 @@ class cmstk extends cmstkOld
 		}
 		return result;
 	}
-	
+
 }
 
 
@@ -126,3 +126,70 @@ class cmsTabInstance
  
 cmsTabInstance.register();
 addEventListener("beforeunload", function(){ cmsTabInstance.unregister() }, false);
+
+
+
+class cmsNode
+{
+
+
+	static getNodeList(language, onSuccessCallback, srcInstance)
+	{
+		let formData 		= new FormData();
+			formData.append('language', language ?? 'en');
+
+		let	requestTarget	= CMS.SERVER_URL_BACKEND +'pages';
+	
+		cmstk.callXHR(requestTarget, formData, onSuccessCallback, cmstk.onXHRError, srcInstance, 'index');
+	}
+
+	/**
+	 * Create a multidimensional array from a nested set node list
+	 * 
+	 * @param list _srcList Source node list as array or object with properties
+	 * @param array _dstList Destination structured node list
+	 * @param int _loop Array index to start
+	 * @param int _level Node Level
+	 * @return int Last processed array index, -1 if params are not valid types
+	 */
+	static createNestedNodeStructure(_srcList, _dstList, _loop, _level = 1)
+	{
+		if(!Array.isArray(_dstList) || !Number.isInteger(_loop) || !Number.isInteger(_level))
+			return -1;
+		let remLoop = 0;
+		for(let i in _srcList)
+		{
+			remLoop = parseInt(i);
+			if(parseInt(i) < _loop || typeof _srcList[i] === 'function')
+				continue;
+			if(_srcList[i].level < _level)
+				break;
+		
+			if(_srcList[i].level > _level)
+			{
+				_loop = cmsNode.createNestedNodeStructure(_srcList, _dstList[_dstList.length - 1].childs, parseInt(i), _srcList[i].level);
+				remLoop = _loop;
+				if(remLoop == Object.keys(_srcList).length - 1)
+					break;
+				continue;
+			}
+			let item = {
+						level:   _srcList[i].level,
+						name:    _srcList[i].page_name,
+						path:    _srcList[i].page_path,
+						icon:    (_srcList[i].offspring > 0 ? 'fas fa-copy' : null),
+						node_id: _srcList[i].node_id,
+						page_id: _srcList[i].page_id,
+						lang:    _srcList[i].page_language,
+						childs:[]
+					};
+					
+			_dstList.push(item);
+		}
+		return remLoop;
+	}
+
+}
+
+
+

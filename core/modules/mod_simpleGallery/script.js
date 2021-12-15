@@ -51,6 +51,9 @@ window.addEventListener('change', function(event)
 
 	let parentNode = event.target.closest('.simple-gallery-control');
 
+	if(parentNode === null)
+		break;
+
 	let	sgilId = parentNode.getAttribute('data-target-list');
 
 	let sgilNOde = document.getElementById(sgilId);

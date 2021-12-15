@@ -102,7 +102,11 @@
 .ui .input > div.select-wrapper > select,
 .ui .input > select,
 .ui .input > textarea,
-.ui .input > input { width:100%; padding:7px 10px; outline:none; border-radius:3px; }
+.ui .input > input,
+.ui .input > div.input-inner > input  { width:100%; padding:7px 10px; outline:none; border-radius:3px; }
+
+.ui .input > div.input-inner { display:flex; /* box-shadow: 0 0 3px 1px rgb(0 0 0 / 35%); */ border: 1px solid gray; border-radius:3px; }
+.ui .input > div.input-inner  > input { border:0px; border-top-right-radius:0px; border-bottom-right-radius:0px; }
 
 .ui .input > div.select-wrapper > select,
 .ui .input > select { padding:6px 10px; }

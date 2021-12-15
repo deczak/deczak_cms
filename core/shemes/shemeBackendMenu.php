@@ -13,8 +13,8 @@ class shemeBackendMenu extends CSheme
 		$this -> addColumn('menu_icon', DB_COLUMN_TYPE_STRING) -> setLength(10) -> setDefault('');
 		$this -> addColumn('menu_order_by', DB_COLUMN_TYPE_INT) -> setAttribute(DB_COLUMN_ATTR_UNSIGNED);
 
-		$this -> seed(['menu_group' => 1, 'menu_name' => 'PLACEHOLDER', 'menu_icon' => '', 'menu_order_by' => 1]);
-		$this -> seed(['menu_group' => 2, 'menu_name' => 'PLACEHOLDER', 'menu_icon' => '', 'menu_order_by' => 2]);
+		$this -> seed(['menu_group' => 1, 'menu_name' => 'Pages & Content', 'menu_icon' => '', 'menu_order_by' => 1]);
+		$this -> seed(['menu_group' => 2, 'menu_name' => 'Users & Access', 'menu_icon' => '', 'menu_order_by' => 2]);
 		$this -> seed(['menu_group' => 3, 'menu_name' => '', 'menu_icon' => '&#xf87c;', 'menu_order_by' => 3]);
 		$this -> seed(['menu_group' => 4, 'menu_name' => '', 'menu_icon' => '&#xf085;', 'menu_order_by' => 4]);
 	}

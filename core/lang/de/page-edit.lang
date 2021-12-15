@@ -67,6 +67,6 @@
 	BEPE_PANEL_AUTHOBJECT_0_NONE	=	Keine Authentifizierung
 	BEPE_PANEL_AUTHAPPLYCHILDS		= 	Auth auf Unterseiten anwenden
 
-	BEPE_PANEL_REDIRECTNODEID		=	Interne Weiterleitung (Node-ID)
+	BEPE_PANEL_REDIRECTNODEID		=	Interne Weiterleitung
 
 

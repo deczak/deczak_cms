@@ -267,7 +267,7 @@
 
 			
 
-				<div id="publish_settings" style="<?= ($pageRequest -> hidden_state != 5 ? 'display:none;' : ''); ?>">
+				<div id="publish_settings" <?= ($pageRequest -> hidden_state != 5 ? 'style="display:none;"' : ''); ?>>
 
 					<?php
 						$pageRequest -> publish_from = ($pageRequest -> publish_from != 0 ? date('Y-m-d', $pageRequest -> publish_from) : '');
@@ -503,7 +503,7 @@
 
 				<?php if($pageRequest -> page_id != 1) { ?>
 
-					<div style="padding-top:10px;">
+					<div style="padding-top:10px;" id="panel-alternate-language">
 
 						<div class="input width-100">
 							<label><?= CLanguage::string('BEPE_PANEL_ALTLANGNODEID'); ?></label>
@@ -512,7 +512,17 @@
 
 						<div class="result-box" data-field="page_id" data-error=""></div>
 
+
+
+
+
+
 					</div>
+
+
+	
+
+
 
 					<hr>
 
@@ -585,16 +595,58 @@
 			<fieldset class="ui fieldset submit-able">
 				<legend><?= CLanguage::string('BEPE_PANEL_GROUP_REDIRECT'); ?></legend>
 
-					<div style="padding-top:10px;">
+					<div style="padding-top:10px;" id="panel-redirect-selection">
 
-						<div class="input width-100">
+						<div class="input width-100 append-button-panel">
 							<label><?= CLanguage::string('BEPE_PANEL_REDIRECTNODEID'); ?></label>
-							<input type="text" name="page_redirect" id="page_redirect" value="<?= $pageRequest -> page_redirect; ?>" placehoder="node-id">
+
+							<div class="input-inner">
+
+								<input type="hidden" name="page_redirect" id="page_redirect_node_id" value="<?= $pageRequest -> page_redirect; ?>">
+								
+								<input type="text" id="page_redirect_node_name" readonly value="<?= (!empty($pageRequest -> page_redirect) ? '['. $pageRequest -> page_redirect .']' : '') ?>">
+
+								<div class="button-panel">
+									<button class="ui button icon button-select button-select-redirect-node"><span><i class="fas fa-ellipsis-h"></i></span></button> 
+									<button class="ui button icon button-remove button-remove-redirect-node"><i class="far fa-trash-alt"></i></button> 
+								</div>
+
+							</div>
+
 						</div>
+
+
+
+
+
+						<style>
+
+							#panel-alternate-language .button-panel { display:flex; }
+							#panel-alternate-language .button-panel span,
+							#panel-alternate-language .button-panel i { pointer-events:none; }
+
+							#panel-alternate-language .button-select { border:0px; flex-shrink:0; border-radius:0px !important; }
+							#panel-alternate-language .button-remove { border:0px; background:red; flex-shrink:0; color:white; border-top-left-radius: 0px !important; border-bottom-left-radius:0px !important; }
+
+							#panel-redirect-selection .button-panel { display:flex; }
+							#panel-redirect-selection .button-panel span,
+							#panel-redirect-selection .button-panel i { pointer-events:none; }
+
+							#panel-redirect-selection .button-select { border:0px; flex-shrink:0; border-radius:0px !important; }
+							#panel-redirect-selection .button-remove { border:0px; background:red; flex-shrink:0; color:white; border-top-left-radius: 0px !important; border-bottom-left-radius:0px !important; }
+
+
+						</style>
+
+
 
 						<div class="result-box" data-field="page_redirect" data-error=""></div>
 
 					</div>
+
+
+
+					
 				
 			</fieldset>	
 
@@ -612,3 +664,66 @@
 	</div>
 
 </div>	
+
+
+<script> // Select Nodes for redirect
+	
+	// Redirect Node
+
+	function openModalSelectRedirectNodeSuccess(event)
+	{
+		document.getElementById('page_redirect_node_id').value   = event.detail.select.node_id
+		document.getElementById('page_redirect_node_name').value = '['+ event.detail.select.node_id +'] '+ event.detail.select.name;
+	}
+
+	function openModalSelectRedirectNode()
+	{
+
+		let	modalNode = new cmsModalNode;
+			modalNode.setEventNameOnSelected('event-page-panel-redirect-node-select-selected');
+			modalNode.open(
+				'Select page as redirect target', 
+				this, 
+				'fas fa-file',
+				<?= json_encode(CLanguage::getLanguages()) ?>
+			);
+	}
+
+	function openModalRemoveRedirectNode()
+	{
+		document.getElementById('page_redirect_node_id').value   = '';
+		document.getElementById('page_redirect_node_name').value = '';		
+	}
+
+	// Listener
+
+	window.addEventListener('click', function(event)
+	{
+		if(typeof event.target === 'undefined')
+			return false;
+
+		let eventTagName = event.target.tagName;
+
+		switch(eventTagName)
+		{
+			case 'BUTTON':
+
+				if(event.target.classList.contains('button-select-redirect-node'))
+				{
+					openModalSelectRedirectNode();
+					return true;
+				}
+
+				if(event.target.classList.contains('button-remove-redirect-node'))
+				{
+					openModalRemoveRedirectNode();
+					return true;
+				}
+
+				break;
+		}
+	});
+
+	window.addEventListener('event-page-panel-redirect-node-select-selected', openModalSelectRedirectNodeSuccess);
+
+</script>

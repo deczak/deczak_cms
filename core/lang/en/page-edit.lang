@@ -69,4 +69,4 @@
 	BEPE_PANEL_AUTHOBJECT_0_NONE	=	No Authentication
 	BEPE_PANEL_AUTHAPPLYCHILDS		=	Apply auth on sub-pages
 
-	BEPE_PANEL_REDIRECTNODEID		=	Internal redirection (Node-ID)
+	BEPE_PANEL_REDIRECTNODEID		=	Internal redirection
