@@ -8,10 +8,15 @@ createMenu(&$sitemap, $_pos = 1, $_level = 2 )
 {
 	$timestamp = time();
 	echo '<ul id="'. ($_pos === 1 ? 'menu-stucture' : '') .'">';
+	$locrr = 0;
 	for($i = $_pos; $i < count($sitemap); $i++)
 	{
-		if($_level !== intval($sitemap[$i] -> level)) 
+		if($_level !== intval($sitemap[$i] -> level))
+		{
+			if(!CMS_BACKEND)
+				$locrr = ($sitemap[$i-1] -> offspring ?? 1) - 1;
 			break;
+		}
 
 		if(
 				($sitemap[$i] -> hidden_state == 0)
@@ -21,19 +26,22 @@ createMenu(&$sitemap, $_pos = 1, $_level = 2 )
 				)
 			||  CMS_BACKEND
 		  ); else continue;
-			
+
 		if(CMS_BACKEND)
 			echo '<li><a href="'. CMS_SERVER_URL_BACKEND .'pages/view/'. $sitemap[$i] -> page_language .'/'. $sitemap[$i] -> node_id .'" title="'. $sitemap[$i] -> page_title .'">'. $sitemap[$i] -> page_name  .'</a>';
 		else
 			echo '<li><a href="'. CMS_SERVER_URL . URL_LANG_PRREFIX . substr($sitemap[$i] -> page_path, 1) .'" title="'. $sitemap[$i] -> page_title .'" '. ($sitemap[$i] -> menu_follow == 0 ? 'rel="nofollow"' : '') .'>'. $sitemap[$i] -> page_name  .'</a>';
 
 		if($sitemap[$i] -> offspring != 0)
+		{
 			$i = createMenu($sitemap, ($i + 1), ($_level + 1));
+		}
 
 		echo '</li>';
 	}
 	echo '</ul>';
-	return $i - 1;
+
+	return (!$locrr ? $i - 1 : $i + $locrr);
 }
 
 ?>
