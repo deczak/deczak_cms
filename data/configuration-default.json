@@ -28,8 +28,8 @@
 							"FAIL_LIMIT"			: 5
 						},
 	"SYSTEM_MAILER"	:	{
-							"RECEIVER_NAME"			: "%SYSMAIL_NAME%",
-							"RECEIVER_ADDRESS"		: "%SYSMAIL_MAIL%",
+							"RECEIVER_NAME"			: "",
+							"RECEIVER_ADDRESS"		: "",
 							"SUBJECT_PREFIX"		: "",
 							"LOCK_TIMEOUT"			: 3600,
 							"MAIL_TIME_FORMAT"		: "Y-m-d @ H:i:s",

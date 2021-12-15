@@ -137,4 +137,26 @@ class cmsUpdate
 
 		return true;
 	}
+
+	public function 
+	execUpdate()
+	{
+		$this -> updateDatabase();
+		$this -> updateConfiguration();
+	}
+
+	public function
+	updateConfiguration()
+	{
+		$defConfigInfo = file_get_contents('../data/configuration-default.json');
+		$defConfigInfo = json_decode($defConfigInfo);
+
+		$actConfigInfo = file_get_contents('../data/configuration.json');
+		$actConfigInfo = json_decode($actConfigInfo);
+
+		tk::object_merge($defConfigInfo, $actConfigInfo);
+
+		$actConfigInfo = json_encode($defConfigInfo);
+		file_put_contents('../data/configuration.json', $actConfigInfo);
+	}
 }

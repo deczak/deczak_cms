@@ -227,6 +227,23 @@ class	TK
 			rmdir($dir); 
 		} 
 	}
+
+	public static function
+	object_merge(object &$dstObject, object $srcObject)
+	{
+		foreach($srcObject as $prop => $value)
+		{
+			if(!is_object($value))
+			{
+				$dstObject -> $prop = $value;
+				continue;
+			}
+			else
+			{
+				tk::object_merge($dstObject -> $prop, $value);
+			}
+		}
+	}
 }
 
 class	CRYPT

@@ -18,6 +18,7 @@
 	if(empty($_POST['server-subpath'])) $_POST['server-subpath'] = 'false'; else $_POST['server-subpath'] = "'". $_POST['server-subpath'] ."'";
 
 	##	standard.php
+
 	$configFile = file_get_contents('template-config.php');
 
 	$configFile = str_replace('%SERVER_ROOT%',$_POST['server-root'], $configFile);
@@ -38,15 +39,17 @@
 
 	file_put_contents('../config/standard.php', $configFile);
 
-
 	##	configuration.json
 
-	$configFile = file_get_contents('configuration.json');
+	$configFile = file_get_contents('../data/configuration-default.json');
 
-	$configFile = str_replace('%SYSMAIL_NAME%',$_POST['mail-name'], $configFile);
-	$configFile = str_replace('%SYSMAIL_MAIL%',$_POST['mail-mail'], $configFile);
+	$configInfo = json_decode($configFile);
+
+	$configInfo -> SYSTEM_MAILER -> RECEIVER_NAME    = trim(strip_tags($_POST['mail-name'] ?? ''));
+	$configInfo -> SYSTEM_MAILER -> RECEIVER_ADDRESS = trim(strip_tags($_POST['mail-mail'] ?? ''));
+
+	$configFile = json_encode($configInfo);
 
 	file_put_contents('../data/configuration.json', $configFile);
 
 	tk::xhrResult(0, 'OK');
-?>
