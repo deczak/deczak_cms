@@ -263,6 +263,12 @@ class 	modelPage extends CModel
 	}	
 
 	public function
+	updateRestricted(CDatabaseConnection &$_pDatabase, array $_insertData, CModelCondition &$_pCondition, $_execFlags = NULL)
+	{	
+		return parent::update($_pDatabase, $_insertData, $_pCondition, $_execFlags);
+	}	
+
+	public function
 	updateChilds(CDatabaseConnection &$_pDatabase, $_insertData, CModelCondition $_condition = NULL)
 	{
 		if($_condition === NULL || !$_condition -> isSet()) return false;

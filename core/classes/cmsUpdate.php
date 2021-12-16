@@ -75,10 +75,10 @@ class cmsUpdate
 	}
 
 	/**
-	 * 	This Function updates the database tables to their has to be state.
+	 * 	This function updates the database tables to their has to be state.
 	 * 	
 	 * 	@return bool true if the updates ends successful, otherwise false
-	*/
+	 */
 	public function
 	updateDatabase() : bool
 	{
@@ -143,20 +143,173 @@ class cmsUpdate
 	{
 		$this -> updateDatabase();
 		$this -> updateConfiguration();
+		$this -> updateBEMenu();
 	}
 
+
+
+
+
+	/**
+	 * 	This function updates the /data/configuration.json file with new added settings
+	 * 
+	 * 	@return bool true if the updates ends successful, otherwise false
+	 */
 	public function
-	updateConfiguration()
+	updateConfiguration() : bool
 	{
+		cmsLog::add('cmsUpdate::updateConfiguration -- Call');
+
 		$defConfigInfo = file_get_contents('../data/configuration-default.json');
+
+		if($defConfigInfo === false)
+		{
+			cmsLog::add('cmsUpdate::updateConfiguration -- aborted, can not read default configuration');
+			return false;
+		}
+
 		$defConfigInfo = json_decode($defConfigInfo);
 
+		if($defConfigInfo === null)
+		{
+			cmsLog::add('cmsUpdate::updateConfiguration -- aborted, default configuration not valid');
+			return false;
+		}
+
 		$actConfigInfo = file_get_contents('../data/configuration.json');
+
+		if($defConfigInfo === false)
+		{
+			cmsLog::add('cmsUpdate::updateConfiguration -- aborted, can not read configuration');
+			return false;
+		}
+
 		$actConfigInfo = json_decode($actConfigInfo);
+
+		if($defConfigInfo === null)
+		{
+			cmsLog::add('cmsUpdate::updateConfiguration -- aborted, configuration is not valid');
+			return false;
+		}
 
 		tk::object_merge($defConfigInfo, $actConfigInfo);
 
 		$actConfigInfo = json_encode($defConfigInfo);
 		file_put_contents('../data/configuration.json', $actConfigInfo);
+
+		return true;
+	}
+
+	/**
+	 * 	This function updates the backend menu for core modules
+	 * 
+	 * 	@return bool true if the updates ends successful, otherwise false
+	 */
+	public function
+	updateBEMenu() : bool
+	{
+		cmsLog::add('cmsUpdate::updateBEMenu -- Call');
+
+		$pDBInstance  	 = CDatabase::instance();
+		$dbConnection 	 = $pDBInstance -> getConnection(CFG::GET() -> MYSQL -> PRIMARY_DATABASE);
+
+		# Update backend menu groups
+
+		include_once	CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelBackendMenu.php';
+
+		$modelBackendMenu	 = new modelBackendMenu();
+		$modelBackendMenu	-> load($dbConnection);
+		$backendMenuList 	 = $modelBackendMenu -> getResult();
+
+		$shemeBackendMenu 	 = new shemeBackendMenu;
+
+		$seedList = $shemeBackendMenu -> getSeedList();
+		foreach($seedList as $seed)
+		{
+			$groupExists = false;
+
+			foreach($backendMenuList as $beML)
+			{
+				if($beML -> menu_group === $seed['menu_group'])
+				{
+					$groupExists = true;
+					break;
+				}
+			}
+
+			if($groupExists)
+			{
+				$condition		     = new CModelCondition();
+				$condition			-> where('id', $beML -> id);
+
+				$modelBackendMenu	-> update(
+					$dbConnection,
+					$seed, 
+					$condition);
+			}
+			else
+			{
+				$modelBackendMenu	-> insert(
+					$dbConnection,
+					$seed);
+			}
+		}
+
+		# Find backend core modules and loop them
+
+		$condition		 = new CModelCondition();
+		$condition		-> where('module_type', 'core')
+						-> where('is_frontend', '0');
+
+		$modelModules	 = new modelModules();
+		$modelModules	-> load($dbConnection, $condition);
+		$modulesList 	 = $modelModules -> getResult();
+
+		foreach($modulesList as $module)
+		{
+			# Read backend module.json
+
+			$moduleConfig 	= file_get_contents( CMS_SERVER_ROOT.DIR_CORE.DIR_MODULES. $module -> module_location .'/module.json');
+			$moduleConfig 	= ($moduleConfig !== false ? json_decode($moduleConfig) : [] );	
+
+			$pModulesInstall = new CModulesInstall;
+			$moduleData = $pModulesInstall -> getModuleData($moduleConfig, $module -> module_location, $module -> module_type);
+	
+			$moduleData = json_decode(json_encode($moduleData));
+
+			# Check for page -> menu group info
+
+			if(property_exists($moduleData, 'page') && property_exists($moduleData -> page, 'menu_group') && !empty($moduleData -> page -> menu_group))
+			{
+				# Get Node-ID by Module-ID
+
+				$condition		 = new CModelCondition();
+				$condition		-> where('module_id', $module -> module_id);
+
+				$modelBackendPageObject	 = new modelBackendPageObject();
+				$modelBackendPageObject	-> load($dbConnection, $condition);
+
+				$beObjektInfo 	 = $modelBackendPageObject -> getResult();
+				$beObjektInfo	 = (!empty($beObjektInfo) ? reset($beObjektInfo) : null);
+
+				if(empty($beObjektInfo))
+					continue;
+
+				# Set menu group info by Node-ID
+
+				$condition		     = new CModelCondition();
+				$condition			-> where('tb_backend_page.node_id', $beObjektInfo -> node_id);
+
+				$modelBackendPage	 = new modelBackendPage();
+				$modelBackendPage	-> updateRestricted(
+					$dbConnection,
+					[
+						'menu_group' => $moduleData -> page -> menu_group
+					], 
+					$condition);
+			}
+		}
+
+		return true;
 	}
 }

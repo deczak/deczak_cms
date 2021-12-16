@@ -297,6 +297,12 @@ class	CSheme
 		$this -> m_seedList[] = $seedItm;
 	}
 
+	public function 
+	getSeedList() : array
+	{
+		return $this -> m_seedList;
+	}
+
 	/**
 	 * 	This function checks the table and his columns, it will update the table to the has-to-be-state
 	 * 
