@@ -3,8 +3,11 @@
 #	error_reporting(E_ALL);
 #	ini_set('display_errors', 1);
 
+	require_once 	'../core/classes/cfg.php';
 	require_once    '../config/directories.php';
 	require_once    '../config/standard.php';
+	CFG::initialize();	
+
 
 	require_once	CMS_SERVER_ROOT.DIR_CORE. 'toolkit.php';
 

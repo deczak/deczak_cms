@@ -3,8 +3,10 @@
 	error_reporting(E_ALL);
 	ini_set('display_errors', true);
 	
+	include_once '../core/classes/cfg.php';
 	include_once '../config/directories.php';
 	include_once '../config/standard.php';
+	CFG::initialize();	
 
 	include_once '../core/classes/cmsLog.php';
 	cmsLog::initialize();

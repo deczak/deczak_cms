@@ -3,9 +3,12 @@
 	error_reporting(E_ALL);
 	ini_set('display_errors', true);
 
-	include '../core/classes/toolkit.php';
+	include '../core/classes/cfg.php';
 	include '../config/directories.php';
 	include '../config/standard.php';
+	CFG::initialize();	
+
+	include '../core/classes/toolkit.php';
 	include '../core/classes/CSheme.php';
 	include '../core/classes/CModel.php';
 	include '../core/classes/CDatabase.php';
