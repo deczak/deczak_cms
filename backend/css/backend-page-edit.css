@@ -194,3 +194,15 @@
 	div.rte-code-tools button.rte-button:hover, 
 	div.rte-headline-tools button.rte-button:hover, 
 	div.rte-tools button.rte-button:hover { background:rgb(200,200,200); color:rgb(80,80,80) !important; transition:all 0.15s; }
+
+/**	Module Edit Control Panel
+**/
+
+	.page-edit-module-controls-panel { display:flex; justify-content:space-between; align-items:center; width:calc(100% - 1px); background:rgba(194, 214, 214, 0.4); font-weight: 300; font-size: 0.84em; flex-wrap:wrap; }
+	.page-edit-module-controls-panel > div:not(.ignore-flex) { display:flex; align-items:center; }
+	.page-edit-module-controls-panel > div.right { text-align:right; }
+	.page-edit-module-controls-panel button { border-radius:0px; border:0px; background:transparent; font-family: 'Open Sans',sans-serif; font-size:0.9em; font-weight:600; white-space:nowrap; }
+	.page-edit-module-controls-panel button:not([disabled]):hover { background:rgba(0,0,0,0.1); }
+	.page-edit-module-controls-panel label { padding:0 12px; font-size:0.9em; white-space:nowrap; }
+	.page-edit-module-controls-panel button i,
+	.page-edit-module-controls-panel button span { pointer-events:none; }

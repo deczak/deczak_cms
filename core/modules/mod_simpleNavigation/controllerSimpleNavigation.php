@@ -82,22 +82,38 @@ class	controllerSimpleNavigation extends CController
 
 		$parentNode = (empty($this -> m_modelSimple -> getResult()[0] -> params -> parent_node_id) ? $this -> objectInfo -> node_id : $this -> m_modelSimple -> getResult()[0] -> params -> parent_node_id);
 
+/*
 		$modelCondition  = new CModelCondition();
 		$modelCondition -> where('node_id', $parentNode);		
 
 		$modelSitemap    = new modelSitemap();
 		$modelSitemap 	-> load($_pDatabase, $modelCondition, NULL, SITEMAP_OWN_CHILDS_ONLY);	
-
+*/
 		$moduleTemplate	 = new CModulesTemplates();
 		$moduleTemplate	-> load('simpleNavigation', $this -> m_modelSimple -> getResult()[0] -> params -> template);
+
+
+
+
+		if(empty($this -> m_modelSimple -> getResult()[0] -> params -> nodeList))
+			$this -> m_modelSimple -> getResult()[0] -> params -> nodeList = [];
+
+		$this -> m_modelSimple -> getResult()[0] -> params -> nodeList = (array)$this -> m_modelSimple -> getResult()[0] -> params -> nodeList;
+
+
+
+
+
+
 
 		$this -> setView(	
 						'view',	
 						'',
 						[
 							'object' 		  => $this -> m_modelSimple -> getResult()[0],
-							'sitemap'		  => $modelSitemap -> getResult(),
-							'currentTemplate' => $moduleTemplate -> templatesList
+							'sitemap'		  => null,
+							'currentTemplate' => $moduleTemplate -> templatesList,
+							'nodeList'		  => $this -> processNavigationItems($_pDatabase, $this -> m_modelSimple -> getResult()[0] -> params -> nodeList),
 						]
 						);
 
@@ -114,18 +130,11 @@ class	controllerSimpleNavigation extends CController
 
 		$this -> m_modelSimple -> load($_pDatabase, $modelCondition);
 
-
 		$this -> m_modelSimple -> getResult()[0] -> params = json_decode($this -> m_modelSimple -> getResult()[0] -> params);
 
 		##	gathering child nodes
 
 		$parentNode = (empty($this -> m_modelSimple -> getResult()[0] -> params -> parent_node_id) ? $this -> objectInfo -> node_id : $this -> m_modelSimple -> getResult()[0] -> params -> parent_node_id);
-
-		$modelCondition = new CModelCondition();
-		$modelCondition -> where('node_id', $parentNode);		
-
-		$modelSitemap  = new modelSitemap();
-		$modelSitemap -> load($_pDatabase, $modelCondition, NULL, SITEMAP_OWN_CHILDS_ONLY);	
 
 		$moduleTemplate = new CModulesTemplates();
 		$moduleTemplate ->	load('simpleNavigation', $this -> m_modelSimple -> getResult()[0] -> params -> template);
@@ -133,18 +142,104 @@ class	controllerSimpleNavigation extends CController
 		$moduleTemplates = new CModulesTemplates();
 		$moduleTemplates ->	load('simpleNavigation');
 
+
+
+
+
+
+		if(empty($this -> m_modelSimple -> getResult()[0] -> params -> nodeList))
+			$this -> m_modelSimple -> getResult()[0] -> params -> nodeList = [];
+
+		$this -> m_modelSimple -> getResult()[0] -> params -> nodeList = (array)$this -> m_modelSimple -> getResult()[0] -> params -> nodeList;
+
+
+
+
+
+
+
+
+
+
 		$this -> setView(	
 						'edit',	
 						'',
 						[
 							'object' 			=> $this -> m_modelSimple -> getResult()[0],
-							'sitemap'			=> $modelSitemap -> getResult(),
+							'sitemap'			=> null,
 							'currentTemplate'	=> $moduleTemplate -> templatesList,
-							'avaiableTemplates'	=> $moduleTemplates -> templatesList
+							'avaiableTemplates'	=> $moduleTemplates -> templatesList,
+							'nodeList'			=> $this -> processNavigationItems($_pDatabase, $this -> m_modelSimple -> getResult()[0] -> params -> nodeList),
 						]
 						);
 
 		return true;
+	}
+
+	private function
+	processNavigationItems(CDatabaseConnection &$_pDatabase, &$itemsList) : array
+	{
+		
+		$nodeList = [];
+		foreach($itemsList as $nodeIndex => $node)
+		{
+
+					$modelCondition = new CModelCondition();
+					$modelCondition -> where('node_id', $node -> {'node-id'});		
+
+					$modelSitemap  = new modelSitemap();
+					$modelSitemap -> load($_pDatabase, $modelCondition, NULL, SITEMAP_OWN_CHILDS_ONLY);	
+
+
+			switch($node -> {'listing-type'})
+			{
+				case 'page':
+
+
+
+					if(!empty($modelSitemap -> getResult()))
+					{
+						$sitemapNode = reset($modelSitemap -> getResult());
+
+						$itemsList[$nodeIndex] -> page_name = $sitemapNode -> page_name;
+
+						$sitemapNode -> listing_hidden = $node -> {'listing-hidden'};
+						$sitemapNode -> listing_type = $node -> {'listing-type'};
+
+
+						$nodeList[] = [$sitemapNode];
+
+					}
+
+					break;
+
+				case 'subpages':
+
+
+					foreach($modelSitemap -> getResult() as &$sitemapNode)
+					{
+
+						if((int)$sitemapNode -> node_id === (int)$node -> {'node-id'})
+						{
+							$itemsList[$nodeIndex] -> page_name = $sitemapNode -> page_name;
+						
+						}
+
+						$sitemapNode -> listing_hidden = $node -> {'listing-hidden'};
+						$sitemapNode -> listing_type = $node -> {'listing-type'};
+					}
+
+
+
+					$nodeList[] = $modelSitemap -> getResult();
+					if(isset($sitemapNode))
+						unset($sitemapNode);
+
+					break;
+			}
+
+		}
+		return $nodeList;
 	}
 
 	private function
@@ -156,9 +251,10 @@ class	controllerSimpleNavigation extends CController
 
 		$pURLVariables	 =	new CURLVariables();
 		$requestList	 =	[];
-		$requestList[] 	 = 	[	"input" => "navigation-template",  		"validate" => "strip_tags|!empty" ]; 
-		$requestList[] 	 = 	[	"input" => "navigation-display-hidden", 	"validate" => "strip_tags|!empty" ]; 
-		$requestList[] 	 = 	[	"input" => "navigation-parent-node-id", 	"validate" => "strip_tags|!empty" ]; 
+		$requestList[] 	 = 	[	"input" => "simple-navigation-template",  		"validate" => "strip_tags|!empty" ]; 
+		$requestList[] 	 = 	[	"input" => "simple-navigation-item",  			"validate" => "!empty",	"use_default" => true, "default_value" => [] ]; 
+	//	$requestList[] 	 = 	[	"input" => "navigation-display-hidden", 	"validate" => "strip_tags|!empty" ]; 
+	//	$requestList[] 	 = 	[	"input" => "navigation-parent-node-id", 	"validate" => "strip_tags|!empty" ]; 
 
 		$pURLVariables-> retrieve($requestList, false, true); // POST 
 		$urlVarList		 = $pURLVariables -> getArray();
@@ -171,9 +267,10 @@ class	controllerSimpleNavigation extends CController
 			$modelCondition -> where('object_id', $_xhrInfo -> objectId);
 
 			$urlVarList['params']	= 	[
-											"template"			=> $urlVarList['navigation-template'],
-											"display_hidden"	=> $urlVarList['navigation-display-hidden'],
-											"parent_node_id"	=> $urlVarList['navigation-parent-node-id']
+											"template"			=> $urlVarList['simple-navigation-template'],
+											"nodeList"			=> $urlVarList['simple-navigation-item'],
+	//										"display_hidden"	=> $urlVarList['navigation-display-hidden'],
+	//										"parent_node_id"	=> $urlVarList['navigation-parent-node-id']
 										];
 			$urlVarList['params']	 = 	json_encode($urlVarList['params'], JSON_FORCE_OBJECT);
 
@@ -237,11 +334,14 @@ class	controllerSimpleNavigation extends CController
 
 			##	gathering child nodes
 
+
 			$modelCondition = new CModelCondition();
 			$modelCondition -> where('node_id', $this -> objectInfo -> node_id);		
 
 			$modelSitemap = new modelSitemap();
 			$modelSitemap -> load($_pDatabase, $modelCondition, NULL, SITEMAP_OWN_CHILDS_ONLY);	
+
+
 
 			$moduleTemplate = new CModulesTemplates();
 			$moduleTemplate ->	load('simpleNavigation', $this -> m_modelSimple -> getResult()[0] -> params -> template);
@@ -254,9 +354,10 @@ class	controllerSimpleNavigation extends CController
 							'',
 							[
 								'object' 	=> $this -> m_modelSimple -> getResult()[0],
-								'sitemap'	=> $modelSitemap -> getResult(),
+								'sitemap'	=> null,
 						'currentTemplate'	=> $moduleTemplate -> templatesList,
-						'avaiableTemplates'	=> $moduleTemplates -> templatesList
+						'avaiableTemplates'	=> $moduleTemplates -> templatesList,
+						'nodeList'			=> [],
 							]
 							);
 

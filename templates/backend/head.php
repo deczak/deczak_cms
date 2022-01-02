@@ -25,7 +25,8 @@
 						"SERVER_URL" 		 : "<?php echo CMS_SERVER_URL; ?>",
 						"SERVER_URL_BACKEND" : "<?php echo CMS_SERVER_URL_BACKEND; ?>",
 						"PAGE_PATH" 		 : "<?php echo $pageRequest -> urlPath; ?>",
-						"MODULE_TARGET"		 : ""
+						"MODULE_TARGET"		 : "",
+						"LANGUAGES"		 	 : <?= json_encode(CLanguage::getLanguages()) ?>
 					};
 		
 	</script>

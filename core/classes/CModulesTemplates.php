@@ -41,7 +41,8 @@ class CModulesTemplates
 																		$targetTemplate . 'template.php',
 																		$templateJson -> templateId,
 																		$templateJson -> templateName,
-																		$templateJson -> templateDescription
+																		$templateJson -> templateDescription,
+																		$templateJson -> templateIcon
 																	 );
 					}
 				}
@@ -77,7 +78,8 @@ class CModulesTemplates
 																		$templateLocation . 'template.php',
 																		$templateJson -> templateId,
 																		$templateJson -> templateName,
-																		$templateJson -> templateDescription
+																		$templateJson -> templateDescription,
+																		$templateJson -> templateIcon
 																	 );
 					}
 				}
@@ -92,14 +94,16 @@ class	moduleTemplate
 	public	$templateId;
 	public	$templateName;
 	public	$templateDescription;
+	public	$templateIcon;
 
 	public function
-	__construct(string $_templateFilepath, string $_templateId, string $_templateName, string $_templateDescription)
+	__construct(string $_templateFilepath, string $_templateId, string $_templateName, string $_templateDescription, string $_templateIcon)
 	{
 		$this -> templateFilepath		= $_templateFilepath;
 		$this -> templateId				= $_templateId;
 		$this -> templateName			= $_templateName;
 		$this -> templateDescription	= $_templateDescription;
+		$this -> templateIcon			= $_templateIcon;
 	}
 }
 

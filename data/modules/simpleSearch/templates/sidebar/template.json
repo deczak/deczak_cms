@@ -1,5 +1,6 @@
 {
 	"templateName"			: "Sidebar",
 	"templateId"			: "sidebar",
-	"templateDescription"	: "Fit to sidebar"
+	"templateDescription"	: "Fit to sidebar",
+	"templateIcon"			: ""
 }

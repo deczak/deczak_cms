@@ -14,7 +14,8 @@ else
 	 					"SERVER_URL" 		 : "<?php echo CMS_SERVER_URL; ?>",
 						"SERVER_URL_BACKEND" : "<?php echo CMS_SERVER_URL_BACKEND; ?>",
 						"PAGE_PATH" 		 : "<?php echo $pageRequest -> urlPath; ?>",
-						"MODULE_TARGET"		 : (typeof MODULE != "undefined" ? MODULE.TARGET : '')
+						"MODULE_TARGET"		 : (typeof MODULE != "undefined" ? MODULE.TARGET : ''),
+						"LANGUAGES"		 	 : <?= json_encode(CLanguage::getLanguages()) ?>
 					};
 
 		var	MODULES = <?php echo json_encode($modules); ?>;

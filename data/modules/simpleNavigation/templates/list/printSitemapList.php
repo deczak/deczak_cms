@@ -4,12 +4,19 @@ function printSitemapList(array &$_sitemap, int $_sitemapIndex, int $_sitemapLev
 {
 	$timestamp 		= time();
 
+	if(count($_sitemap) === 1)
+	{
+		$typeTest = reset($_sitemap);
+		if($typeTest -> listing_type === 'page')
+			$_sitemapIndex = 0;
+	}
+
 	$childIsActive 	= false;
 	for($i = $_sitemapIndex; $i < count($_sitemap); $i++)
 	{
 
 
-		if(	(		$_objectParams -> display_hidden == 1
+		if(	(		$_sitemap[$i] ->  listing_hidden == 1
 				&&	$_sitemap[$i] -> hidden_state === 2 
 				&& $_sitemap[$i] -> page_auth == 0
 			)
@@ -26,20 +33,16 @@ function printSitemapList(array &$_sitemap, int $_sitemapIndex, int $_sitemapLev
 
 		if(!$childIsActive)
 				$childIsActive = in_array($_sitemap[$i] -> node_id, array_column($_pagePath, 'nodeId'));
-
 	}
 
 	echo '<ul class="'. ($childIsActive ? 'active-path' : '') .' '. ($_sitemapIndex === (int)!$_printRoodNode ? 'simple-navigation template-list' : '') .'">';
 
 	for($i = $_sitemapIndex; $i < count($_sitemap); $i++)
 	{
-
-
-		if($_sitemapLevel !== $_sitemap[$i] -> level) 
+		if($_sitemapLevel !== $_sitemap[$i] -> level && $_sitemap[$i] -> listing_type == 'subpages')
 			break;
 
-
-		if(	(		$_objectParams -> display_hidden == 1
+		if(	(		$_sitemap[$i] -> listing_hidden == 1
 				&&	$_sitemap[$i] -> hidden_state === 2 
 				&& $_sitemap[$i] -> page_auth == 0
 			)
@@ -76,6 +79,3 @@ function printSitemapList(array &$_sitemap, int $_sitemapIndex, int $_sitemapLev
 	echo '</ul>';
 	return $i - 1;
 }
-
-
-?>

@@ -51,5 +51,14 @@
 												"query_var" :"cms-system-id"
 											 }
 							}
+						],
+	"include"			:[
+							{	
+								"type":"script",	
+								"file":"script.js",
+								"collect":true,
+								"backend":true,
+								"frontend":false
+							}
 						]
 }

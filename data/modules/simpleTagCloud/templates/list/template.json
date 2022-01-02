@@ -1,5 +1,6 @@
 {
 	"templateName"			: "List",
 	"templateId"			: "list",
-	"templateDescription"	: "Simple list"
+	"templateDescription"	: "Simple list",
+	"templateIcon"			: ""
 }
