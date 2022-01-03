@@ -257,14 +257,15 @@ console.log(itemRowNode);
 					newItem = newItem.replace(/\[LISTING_TYPE_TEXT\]/g, 'Subpages by');
 					break
 			}
+			console.log(snilNode.nodeList[i]);
 
 			switch(snilNode.nodeList[i].listingHidden)
 			{
-				case 0:
+				case '0':
 					newItem = newItem.replace(/\[INPUT_NAME_LISTING_HIDDEN_0\]/g, 'selected');
 					newItem = newItem.replace(/\[INPUT_NAME_LISTING_HIDDEN_1\]/g, '');
 					break;
-				case 1:
+				case '1':
 					newItem = newItem.replace(/\[INPUT_NAME_LISTING_HIDDEN_0\]/g, '');
 					newItem = newItem.replace(/\[INPUT_NAME_LISTING_HIDDEN_1\]/g, 'selected');
 					break

@@ -198,7 +198,7 @@
 /**	Module Edit Control Panel
 **/
 
-	.page-edit-module-controls-panel { display:flex; justify-content:space-between; align-items:center; width:calc(100% - 1px); background:rgba(194, 214, 214, 0.4); font-weight: 300; font-size: 0.84em; flex-wrap:wrap; }
+	.page-edit-module-controls-panel { display:flex; justify-content:space-between; align-items:center; width:calc(100% - 1px); background:rgba(194, 214, 214, 0.4); font-weight: 300; font-size: 0.84em; flex-wrap:wrap; margin-bottom:10px; }
 	.page-edit-module-controls-panel > div:not(.ignore-flex) { display:flex; align-items:center; }
 	.page-edit-module-controls-panel > div.right { text-align:right; }
 	.page-edit-module-controls-panel button { border-radius:0px; border:0px; background:transparent; font-family: 'Open Sans',sans-serif; font-size:0.9em; font-weight:600; white-space:nowrap; }
