@@ -4,29 +4,18 @@
 
 	<div class="left">
 
-		<button class="ui button icon labeled button-import simple-gallery-select-directory" type="button">
-			<span>
-				<i class="far fa-images"></i>
-			</span> 
-			Mediathek Directory
+
+		<div class="module-header" style="white-space:nowrap; padding:0 8px; font-weight:700; font-size:1.1em;">
+			<i class="fas fa-images"></i>&nbsp;&nbsp;&nbsp;Image Gallery
+		</div> 
+
+
+		<button class="ui button button-import simple-gallery-select-directory" type="button">
+			Select Mediathek Directory
 		</button>
 
 
 
-
-		<!--
-
-		<button class="ui button icon" type="button" disabled="">
-			<i class="fas"></i>
-		</button>
-		<label>View mode</label>
-		<button class="ui button icon button-view-list" type="button">
-			<i class="fas fa-bars"></i>
-		</button>
-		<button class="ui button icon button-view-square" type="button">
-			<i class="fas fa-th"></i>
-		</button>
-		-->
 
 	</div>
 
@@ -210,13 +199,5 @@ div.simple-gallery-images-list[data-tile-size="8"] > a:last-child { width:12.5%;
 
 div.simple-gallery-images-list > a > img { width: 100%; height:100%; object-fit: cover; object-position: 50% 50%; }
 
-.page-edit-module-controls-panel { display:flex; justify-content:space-between; align-items:center; width:calc(100% - 1px); background:rgba(194, 214, 214, 0.4); font-weight: 300; font-size: 0.84em; }
-.page-edit-module-controls-panel > div { display:flex; align-items:center; }
-.page-edit-module-controls-panel > div.right { text-align:right; }
-.page-edit-module-controls-panel button { border-radius:0px; border:0px; background:transparent; font-family: 'Open Sans',sans-serif; }
-.page-edit-module-controls-panel button:not([disabled]):hover { background:rgba(0,0,0,0.1); }
-.page-edit-module-controls-panel label { padding:0 12px; font-size:0.9em; }
-.page-edit-module-controls-panel button i,
-.page-edit-module-controls-panel button span { pointer-events:none; }
 
 </style>

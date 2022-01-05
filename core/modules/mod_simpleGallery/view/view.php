@@ -124,13 +124,13 @@ div.simple-gallery-images-list[data-tile-size="4"][data-tile-format="squares"] >
 div.simple-gallery-images-list[data-tile-size="4"] > a.orient-1,
 div.simple-gallery-images-list[data-tile-size="4"] > a:last-child { width:25%; }
 
-div.simple-gallery-images-list[data-tile-size="5"] > a { height: 275px;}
+div.simple-gallery-images-list[data-tile-size="5"] > a { height: 267px;}
 div.simple-gallery-images-list[data-tile-size="5"] > a.orient-0 { width:40%; }
 div.simple-gallery-images-list[data-tile-size="5"][data-tile-format="squares"] > a.orient-0,
 div.simple-gallery-images-list[data-tile-size="5"] > a.orient-1,
 div.simple-gallery-images-list[data-tile-size="5"] > a:last-child { width:20%; }
 
-div.simple-gallery-images-list[data-tile-size="6"] > a { height: 250px;}
+div.simple-gallery-images-list[data-tile-size="6"] > a { height: 223px;}
 div.simple-gallery-images-list[data-tile-size="6"] > a.orient-0 { width:33.33%; }
 div.simple-gallery-images-list[data-tile-size="6"][data-tile-format="squares"] > a.orient-0,
 div.simple-gallery-images-list[data-tile-size="6"] > a.orient-1,
@@ -327,4 +327,15 @@ div.simple-gallery-images-list[data-tile-size="8"] > a:last-child {  width:20%; 
 	div.simple-gallery-images-list[data-tile-size="8"] > a.orient-1,
 	div.simple-gallery-images-list[data-tile-size="8"] > a:last-child {width:50%; }
 }
+
+
+
+@media only screen and (max-width: 500px) {
+
+	div.simple-gallery-images-list > a { height: 300px; width:100% !important; }
+
+}
+
+
+
 </style>
