@@ -11,9 +11,13 @@ function printSitemapList(array &$_sitemap, int $_sitemapIndex, int $_sitemapLev
 			$_sitemapIndex = 0;
 	}
 	
+
 	$childIsActive 	= false;
 	for($i = $_sitemapIndex; $i < count($_sitemap); $i++)
 	{
+
+
+
 		if(	(		$_sitemap[$i] ->  listing_hidden == 1
 				&&	$_sitemap[$i] -> hidden_state === 2 
 				&& $_sitemap[$i] -> page_auth == 0
@@ -37,10 +41,16 @@ function printSitemapList(array &$_sitemap, int $_sitemapIndex, int $_sitemapLev
 
 	for($i = $_sitemapIndex; $i < count($_sitemap); $i++)
 	{
+
+
+
+
 		if($_sitemapLevel !== $_sitemap[$i] -> level && $_sitemap[$i] -> listing_type == 'subpages')
 		{
-			#$i = $_sitemap[$_sitemapIndex - 1] -> offspring + $_sitemapIndex - 1;
-			continue;
+			$i = $_sitemap[$_sitemapIndex - 1] -> offspring + $_sitemapIndex - 1;
+
+
+			break;
 		}
 
 		if(	(		$_sitemap[$i] -> listing_hidden == 1
@@ -56,7 +66,14 @@ function printSitemapList(array &$_sitemap, int $_sitemapIndex, int $_sitemapLev
 			||	$_sitemap[$i] -> hidden_state === 0 && $_sitemap[$i] -> page_auth == 0
 			||  CMS_BACKEND
 
-		); else continue;
+		) ; else { 
+
+
+			$i = $i + $_sitemap[$i] -> offspring;
+
+			continue;
+
+		}  
 
 		$issActive = in_array($_sitemap[$i] -> node_id, array_column($_pagePath, 'nodeId'));
 
@@ -72,6 +89,7 @@ function printSitemapList(array &$_sitemap, int $_sitemapIndex, int $_sitemapLev
 	}
 
 	echo '</ul>';
+
 
 	return $i;
 }
