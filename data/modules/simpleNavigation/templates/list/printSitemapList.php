@@ -10,7 +10,7 @@ function printSitemapList(array &$_sitemap, int $_sitemapIndex, int $_sitemapLev
 		if($typeTest -> listing_type === 'page')
 			$_sitemapIndex = 0;
 	}
-
+	
 	$childIsActive 	= false;
 	for($i = $_sitemapIndex; $i < count($_sitemap); $i++)
 	{
@@ -39,8 +39,8 @@ function printSitemapList(array &$_sitemap, int $_sitemapIndex, int $_sitemapLev
 	{
 		if($_sitemapLevel !== $_sitemap[$i] -> level && $_sitemap[$i] -> listing_type == 'subpages')
 		{
-			$i = $_sitemap[$_sitemapIndex - 1] -> offspring + $_sitemapIndex - 1;
-			break;
+			#$i = $_sitemap[$_sitemapIndex - 1] -> offspring + $_sitemapIndex - 1;
+			continue;
 		}
 
 		if(	(		$_sitemap[$i] -> listing_hidden == 1
@@ -72,5 +72,6 @@ function printSitemapList(array &$_sitemap, int $_sitemapIndex, int $_sitemapLev
 	}
 
 	echo '</ul>';
+
 	return $i;
 }
