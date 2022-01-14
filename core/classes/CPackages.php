@@ -246,7 +246,7 @@ class	CPackagesInstall
 		
 		$_rawPackageInfo -> info = (object)$_rawPackageInfo -> info;
 
-		if(!property_exists($_rawPackageInfo -> info, 'sheme'))
+		if(!property_exists($_rawPackageInfo -> info, 'scheme'))
 		{
 			// error
 			return null;
@@ -254,7 +254,7 @@ class	CPackagesInstall
 		
 		$packageInfo = null;
 
-		switch($_rawPackageInfo -> info -> sheme)
+		switch($_rawPackageInfo -> info -> scheme)
 		{
 			case 1:
 
@@ -278,7 +278,7 @@ class	CPackagesInstall
 	}
 }
 
-class	CPackagesInstallS1 // Package Sheme 1
+class	CPackagesInstallS1 // Package Scheme 1
 {
 	public function
 	__construct()
@@ -309,7 +309,7 @@ class	CPackagesInstallS1 // Package Sheme 1
 		
 		$packageInfo  = new stdClass;
 		$packageInfo -> info  = new stdClass;
-		$packageInfo -> info -> sheme =  $_rawPackageInfo -> info -> sheme;
+		$packageInfo -> info -> scheme =  $_rawPackageInfo -> info -> scheme;
 
 		$packageInfo -> exec  = new stdClass;
 		$packageInfo -> exec -> pull = [];

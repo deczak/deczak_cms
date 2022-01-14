@@ -2,7 +2,7 @@
 
 define('MODEL_RIGHTGROUPS_NUM_ASSIGNMENTS',0x101);
 
-include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SHEME.'shemeRightGroups.php';	
+include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SCHEME.'schemeRightGroups.php';	
 
 include_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelUserGroups.php';	
 
@@ -11,7 +11,7 @@ class 	modelRightGroups extends CModel
 	public function
 	__construct()
 	{		
-		parent::__construct('shemeRightGroups', 'rightGroup');	
+		parent::__construct('schemeRightGroups', 'rightGroup');	
 	}	
 
 	public function

@@ -9,7 +9,7 @@
 	CFG::initialize();	
 
 	include '../core/classes/toolkit.php';
-	include '../core/classes/CSheme.php';
+	include '../core/classes/CScheme.php';
 	include '../core/classes/CModel.php';
 	include '../core/classes/CDatabase.php';
 	include '../core/classes/CPackages.php';
@@ -37,47 +37,47 @@
 	
 	$db = $pDBInstance -> getConnection('primary');
 
-	$shemeInstance 	= [];
-	$_dirIterator 	= new DirectoryIterator('../core/shemes/');
+	$schemeInstance 	= [];
+	$_dirIterator 	= new DirectoryIterator('../core/schemes/');
 
-	##	loop sheme dir, get all class names and include the files
+	##	loop scheme dir, get all class names and include the files
 
-	$shemeList = [];
+	$schemeList = [];
 	foreach($_dirIterator as $_dirItem)
 	{
 		if($_dirItem -> isDot() || $_dirItem -> getType() === 'dir')
 			continue;
 
-		include_once	'../core/shemes/'. $_dirItem -> getFilename();
+		include_once	'../core/schemes/'. $_dirItem -> getFilename();
 
-		$shemeList[] = explode('.',$_dirItem -> getFilename())[0];
+		$schemeList[] = explode('.',$_dirItem -> getFilename())[0];
 	}
 
-	##	after this, because of extended shemes, create instances to create tables
+	##	after this, because of extended schemes, create instances to create tables
 
-	foreach($shemeList as $className)
+	foreach($schemeList as $className)
 	{
-		$instanceKey = count($shemeInstance);
-		$shemeInstance[$instanceKey] = new $className();
+		$instanceKey = count($schemeInstance);
+		$schemeInstance[$instanceKey] = new $className();
 
 		$errorMsg = '';
-		if(!$shemeInstance[$instanceKey] -> createTable($db, $errorMsg))
+		if(!$schemeInstance[$instanceKey] -> createTable($db, $errorMsg))
 		{
 			tk::xhrResult(1, $errorMsg);
 		}
 	}
 
-	foreach($shemeInstance as $instance)
+	foreach($schemeInstance as $instance)
 	{
 		$instance -> createConstraints($db);
 	}
 
-	foreach($shemeInstance as $instance)
+	foreach($schemeInstance as $instance)
 	{
 		foreach($instance -> m_seedList as $seed)
 		{
-			$shemeName	 = get_class($instance);
-			$pModel  	 = new CModel($shemeName, 'dta'. $shemeName);
+			$schemeName	 = get_class($instance);
+			$pModel  	 = new CModel($schemeName, 'dta'. $schemeName);
 			$pModel 	-> insert($db, $seed);
 		}
 	}

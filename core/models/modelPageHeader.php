@@ -1,13 +1,13 @@
 <?php
 
-include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SHEME.'shemePageHeader.php';	
+include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SCHEME.'schemePageHeader.php';	
 
 class 	modelPageHeader extends CModel
 {
 	public function
 	__construct()
 	{		
-		parent::__construct('shemePageHeader', 'pageHeader');
+		parent::__construct('schemePageHeader', 'pageHeader');
 	}	
 }
 
@@ -16,6 +16,6 @@ class 	modelBackendPageHeader extends CModel
 	public function
 	__construct()
 	{		
-		parent::__construct('shemeBackendPageHeader', 'backendPageHeader');
+		parent::__construct('schemeBackendPageHeader', 'backendPageHeader');
 	}	
 }

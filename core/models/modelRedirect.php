@@ -1,13 +1,13 @@
 <?php
 
-include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SHEME.'shemeRedirect.php';	
+include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SCHEME.'schemeRedirect.php';	
 
 class 	modelRedirect extends CModel
 {
 	public function
 	__construct()
 	{		
-		parent::__construct('shemeRedirect', 'redirect');
+		parent::__construct('schemeRedirect', 'redirect');
 	}	
 }
 

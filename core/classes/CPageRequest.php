@@ -348,7 +348,7 @@ class CPageRequest extends CSingleton
 			
 			$this -> addCrumb((empty($page -> crumb_name) ? $page -> page_name : $page -> crumb_name), $page -> page_path .'');
 
-			$shemeBackendPageObject		= new shemeBackendPageObject();
+			$schemeBackendPageObject		= new schemeBackendPageObject();
 
 			$modelPageObject = new modelPageObject();
 
@@ -356,7 +356,7 @@ class CPageRequest extends CSingleton
 
 			foreach($page -> objects as $_objectKey =>  $_objectData)
 			{
-				$pageObject = new $_className($_objectData, $shemeBackendPageObject -> getColumns());
+				$pageObject = new $_className($_objectData, $schemeBackendPageObject -> getColumns());
 
 				$modelCondition = new CModelCondition();
 				$modelCondition -> where('object_id', $pageObject -> object_id);

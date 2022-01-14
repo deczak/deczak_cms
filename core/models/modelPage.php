@@ -1,12 +1,12 @@
 <?php
 
-include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SHEME.'shemePageHeader.php';
-include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SHEME.'shemePagePath.php';
-include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SHEME.'shemePage.php';
+include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SCHEME.'schemePageHeader.php';
+include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SCHEME.'schemePagePath.php';
+include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SCHEME.'schemePage.php';
 
-include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SHEME.'shemeBackendPageHeader.php';
-include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SHEME.'shemeBackendPagePath.php';
-include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SHEME.'shemeBackendPage.php';
+include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SCHEME.'schemeBackendPageHeader.php';
+include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SCHEME.'schemeBackendPagePath.php';
+include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SCHEME.'schemeBackendPage.php';
 
 include_once 'modelPagePath.php';		
 include_once 'modelPageHeader.php';
@@ -18,18 +18,18 @@ include_once 'modelSitemap.php';
 
 class 	modelPage extends CModel
 {
-	protected	$m_shemePageHeader;
-	protected	$m_shemePagePath;
-	protected	$m_shemePage;
+	protected	$m_schemePageHeader;
+	protected	$m_schemePagePath;
+	protected	$m_schemePage;
 
 	public function
-	__construct(string $_shemeName = 'shemePage', string $_dataObjectName = 'page')
+	__construct(string $_schemeName = 'schemePage', string $_dataObjectName = 'page')
 	{
-		parent::__construct($_shemeName, $_dataObjectName);
+		parent::__construct($_schemeName, $_dataObjectName);
 
-		$this -> m_shemePageHeader 	= new shemePageHeader();
-		$this -> m_shemePagePath 	= new shemePagePath();
-		$this -> m_shemePage	 	= new shemePage();
+		$this -> m_schemePageHeader 	= new schemePageHeader();
+		$this -> m_schemePagePath 	= new schemePagePath();
+		$this -> m_schemePage	 	= new schemePage();
 
 		$this -> m_modelPageHeader	= 'modelPageHeader';
 		$this -> m_modelPagePath	= 'modelPagePath';
@@ -41,9 +41,9 @@ class 	modelPage extends CModel
 		if($_pDatabase === null)
 			return false;
 
-		$_tablePageHeader		=	$this -> m_shemePageHeader 	-> getTableName();
-		$_tablePagePath			=	$this -> m_shemePagePath 	-> getTableName();
-		$_tablePage				=	$this -> m_shemePage 		-> getTableName();
+		$_tablePageHeader		=	$this -> m_schemePageHeader 	-> getTableName();
+		$_tablePagePath			=	$this -> m_schemePagePath 	-> getTableName();
+		$_tablePage				=	$this -> m_schemePage 		-> getTableName();
 
 		$className 	= $this -> createPrototype();
 
@@ -101,7 +101,7 @@ class 	modelPage extends CModel
 			$page -> page_tags 		 = $this -> getTags($_pDatabase, $page -> node_id);
 			$page -> page_url 		 = $modelSitemap -> getPagePath($_pDatabase, $page -> node_id, $page -> page_language);
 		
-			$this -> m_resultList[] = new $className($page, $this -> m_shemePage -> getColumns());
+			$this -> m_resultList[] = new $className($page, $this -> m_schemePage -> getColumns());
 		}
 
 		if(count($this -> m_resultList) == 0)
@@ -205,7 +205,7 @@ class 	modelPage extends CModel
 					break;
 		}
 
-		$_tablePage				=	$this -> m_shemePage 		-> getTableName();
+		$_tablePage				=	$this -> m_schemePage 		-> getTableName();
 
 		if(empty($nodeIdList))
 			return true;
@@ -292,9 +292,9 @@ class 	modelPage extends CModel
 	public function
 	insert(CDatabaseConnection &$_pDatabase, array $_insertData, $_execFlags = NULL)
 	{
-		$_tablePageHeader		=	$this -> m_shemePageHeader 	-> getTableName();
-		$_tablePagePath			=	$this -> m_shemePagePath 	-> getTableName();
-		$_tablePage				=	$this -> m_shemePage 		-> getTableName();
+		$_tablePageHeader		=	$this -> m_schemePageHeader 	-> getTableName();
+		$_tablePagePath			=	$this -> m_schemePagePath 	-> getTableName();
+		$_tablePage				=	$this -> m_schemePage 		-> getTableName();
 
 		$m_modelPageHeader		=	$this -> m_modelPageHeader;
 		$m_modelPagePath		=	$this -> m_modelPagePath;
@@ -390,8 +390,8 @@ class 	modelPage extends CModel
 			return false;
 		}
 
-		$_tablePagePath			=	$this -> m_shemePagePath 	-> getTableName();
-		$_tablePage				=	$this -> m_shemePage 		-> getTableName();
+		$_tablePagePath			=	$this -> m_schemePagePath 	-> getTableName();
+		$_tablePage				=	$this -> m_schemePage 		-> getTableName();
 
 		$_pDatabase		-> query(DB_DELETE) -> table($_tablePage) -> condition($_pCondition) -> exec();
 
@@ -440,8 +440,8 @@ class 	modelPage extends CModel
 			return false;
 		}
 
-		$_tablePagePath			=	$this -> m_shemePagePath 	-> getTableName();
-		$_tablePage				=	$this -> m_shemePage 		-> getTableName();
+		$_tablePagePath			=	$this -> m_schemePagePath 	-> getTableName();
+		$_tablePage				=	$this -> m_schemePage 		-> getTableName();
 
 		$_nodeTree 	= [];
 		$this -> getNodeTree($_pDatabase, $nodeId, $_nodeTree);
@@ -485,7 +485,7 @@ class 	modelPage extends CModel
 	private function
 	getNodeData(CDatabaseConnection &$_pDatabase, int $_nodeID, array &$_nodeData)
 	{
-		$tablePagePath	 =	$this -> m_shemePagePath 	-> getTableName();
+		$tablePagePath	 =	$this -> m_schemePagePath 	-> getTableName();
 		$condition		 = new CModelCondition();
 		$condition		-> where('node_id', $_nodeID);
 
@@ -506,7 +506,7 @@ class 	modelPage extends CModel
 	private function
 	getNodeTree(CDatabaseConnection &$_pDatabase, int $_nodeID, array &$_nodeData)
 	{
-		$_tablePagePath	=	$this -> m_shemePagePath 	-> getTableName();
+		$_tablePagePath	=	$this -> m_schemePagePath 	-> getTableName();
 
 		/*
 			the directUse paramter is not a good practice
@@ -536,7 +536,7 @@ class 	modelPage extends CModel
 	private function
 	getFreePageID(CDatabaseConnection &$_pDatabase)
 	{
-		$tableName		=	$this -> m_shemePage 		-> getTableName();
+		$tableName		=	$this -> m_schemePage 		-> getTableName();
 
 		$condition		 = new CModelCondition();
 		$condition		-> limit(1);
@@ -582,8 +582,8 @@ class 	modelPage extends CModel
 	private function
 	getAlternatePaths(CDatabaseConnection &$_pDatabase, $_pageID)
 	{
-		$tablePagePath			=	$this -> m_shemePagePath 	-> getTableName();
-		$tablePage				=	$this -> m_shemePage 		-> getTableName();
+		$tablePagePath			=	$this -> m_schemePagePath 	-> getTableName();
+		$tablePage				=	$this -> m_schemePage 		-> getTableName();
 
 		$timestamp 		= 	time();
 		$_returnArray	=	[];
@@ -608,7 +608,7 @@ class 	modelPage extends CModel
 		foreach($sqlPagesRes as $_sqlPages)
 		{
 			if(
-					($_sqlPages -> hidden_state == 0)
+					($_sqlPages -> hidden_state == 0 || $_sqlPages -> hidden_state == 2)
 				&&	(empty($_sqlPages -> page_auth) || (!empty($_sqlPages -> page_auth) && CSession::instance() -> isAuthed($_sqlPages -> page_auth) === true))
 				||	(	($_sqlPages -> hidden_state == 5 && $_sqlPages -> publish_from  < $timestamp)
 					&&	($_sqlPages -> hidden_state == 5 && $_sqlPages -> publish_until > $timestamp && $_sqlPages -> publish_until != 0)
@@ -706,11 +706,11 @@ class 	modelBackendPage extends modelPage
 	public function
 	__construct()
 	{
-		parent::__construct('shemeBackendPage', 'backendPage');
+		parent::__construct('schemeBackendPage', 'backendPage');
 	
-		$this -> m_shemePageHeader 	= new shemeBackendPageHeader();
-		$this -> m_shemePagePath 	= new shemeBackendPagePath();
-		$this -> m_shemePage	 	= new shemeBackendPage();
+		$this -> m_schemePageHeader 	= new schemeBackendPageHeader();
+		$this -> m_schemePagePath 	= new schemeBackendPagePath();
+		$this -> m_schemePage	 	= new schemeBackendPage();
 
 
 		$this -> m_modelPageHeader	= 'modelBackendPageHeader';

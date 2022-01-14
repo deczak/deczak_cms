@@ -2,14 +2,14 @@
 
 define('MODEL_CATEGORIES_ALLOCATION_COUNT',0x101);
 
-include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SHEME.'shemeCategories.php';	
+include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SCHEME.'schemeCategories.php';	
 
 class 	modelCategories extends CModel
 {
 	public function
 	__construct()
 	{
-		parent::__construct('shemeCategories', 'categories');
+		parent::__construct('schemeCategories', 'categories');
 	}	
 
 	public function

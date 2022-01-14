@@ -1,13 +1,13 @@
 <?php
 
-include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SHEME.'shemeLoginObjects.php';	
+include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SCHEME.'schemeLoginObjects.php';	
 
 class 	modelLoginObjects extends CModel
 {
 	public function
 	__construct()
 	{		
-		parent::__construct('shemeLoginObjects', 'loginObject');
+		parent::__construct('schemeLoginObjects', 'loginObject');
 	}	
 
 	public function

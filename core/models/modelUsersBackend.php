@@ -3,14 +3,14 @@
 define('MODEL_USERSBACKEND_STRIP_SENSITIVE_DATA',0x101);
 define('MODEL_USERSBACKEND_APPEND_RIGHTGROUPS',0x102);
 
-include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SHEME.'shemeUsersBackend.php';	
+include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SCHEME.'schemeUsersBackend.php';	
 
 class 	modelUsersBackend extends CModel
 {
 	public function
 	__construct()
 	{			
-		parent::__construct('shemeUsersBackend', 'userBackend');
+		parent::__construct('schemeUsersBackend', 'userBackend');
 	}	
 
 	public function

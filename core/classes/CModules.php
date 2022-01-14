@@ -271,7 +271,7 @@ class CModules extends CSingleton
 
 				$moduleConfig = json_decode($moduleConfig);
 
-				// Determine Sheme
+				// Determine Scheme
 
 				$pModulesInstall = new CModulesInstall;
 
@@ -314,7 +314,7 @@ class CModules extends CSingleton
 
 				$moduleConfig = json_decode($moduleConfig);
 
-				// Determine Sheme
+				// Determine Scheme
 
 				$pModulesInstall = new CModulesInstall;
 
@@ -519,7 +519,7 @@ class CModulesInstall
 
 		$moduleConfig = json_decode($moduleConfig);
 
-		// Determine Sheme
+		// Determine Scheme
 
 		$moduleData = $this -> getModuleData($moduleConfig, $moduleLocation, $moduleType);
 
@@ -529,7 +529,7 @@ class CModulesInstall
 			return false;
 		}
 
-		## insert module, shemes
+		## insert module, schemes
 
 		if($moduleData['module'] !== false)
 		{
@@ -551,22 +551,22 @@ class CModulesInstall
 
 			$moduleData['module']['module_id'] = $modelModules -> insert($_dbConnection, $moduleData['module']);
 
-			if($moduleData['module']['shemes'] !== false)
+			if($moduleData['module']['schemes'] !== false)
 			{
-				foreach($moduleData['module']['shemes'] as $sheme)
+				foreach($moduleData['module']['schemes'] as $scheme)
 				{
-					$shemeFilepath = CMS_SERVER_ROOT . $moduleType .'/'. DIR_MODULES . $moduleLocation .'/'. $sheme -> filename .'.php';
+					$schemeFilepath = CMS_SERVER_ROOT . $moduleType .'/'. DIR_MODULES . $moduleLocation .'/'. $scheme -> filename .'.php';
 
-					if(!file_exists($shemeFilepath))
+					if(!file_exists($schemeFilepath))
 					{
-						$shemeFilepath = CMS_SERVER_ROOT . $moduleType .'/'. DIR_SHEME . $sheme -> filename .'.php';
+						$schemeFilepath = CMS_SERVER_ROOT . $moduleType .'/'. DIR_SCHEME . $scheme -> filename .'.php';
 					}
 
-					include $shemeFilepath;
+					include $schemeFilepath;
 					
-					$sheme  = new $sheme -> filename();
+					$scheme  = new $scheme -> filename();
 
-					if(!$sheme -> createTable($_dbConnection))
+					if(!$scheme -> createTable($_dbConnection))
 					{
 						return false;
 					}
@@ -668,7 +668,7 @@ class CModulesInstall
 		{
 			foreach($moduleData['objects'] as $index => $object)
 			{
-				switch($moduleConfig -> sheme)
+				switch($moduleConfig -> scheme)
 				{
 					case 1:
 
@@ -757,7 +757,7 @@ class CModulesInstall
 
 				$objectModuleConfig = json_decode($objectModuleConfig);
 
-				// Determine Sheme
+				// Determine Scheme
 
 				$objectModuleData = $this -> getModuleData($objectModuleConfig, $moduleInfo -> module_location, $moduleInfo -> module_type);
 
@@ -866,7 +866,7 @@ class CModulesInstall
 
 		$moduleConfig = json_decode($moduleConfig);
 
-		// Determine Sheme
+		// Determine Scheme
 
 		$moduleData = $this -> getModuleData($moduleConfig, $moduleInfo -> module_location, $moduleInfo -> module_type);
 
@@ -919,26 +919,26 @@ class CModulesInstall
 			return false;
 		}
 
-		## insert module, shemes
+		## insert module, schemes
 
 		if($moduleData['module'] !== false)
 		{
-			if($moduleData['module']['shemes'] !== false)
+			if($moduleData['module']['schemes'] !== false)
 			{
-				foreach($moduleData['module']['shemes'] as $sheme)
+				foreach($moduleData['module']['schemes'] as $scheme)
 				{
-					$shemeFilepath = CMS_SERVER_ROOT . $moduleInfo -> module_type .'/'. DIR_MODULES . $moduleInfo -> module_location .'/'. $sheme -> filename .'.php';
+					$schemeFilepath = CMS_SERVER_ROOT . $moduleInfo -> module_type .'/'. DIR_MODULES . $moduleInfo -> module_location .'/'. $scheme -> filename .'.php';
 
-					if(!file_exists($shemeFilepath))
+					if(!file_exists($schemeFilepath))
 					{
-						$shemeFilepath = CMS_SERVER_ROOT . $moduleInfo -> module_type .'/'. DIR_SHEME . $sheme -> filename .'.php';
+						$schemeFilepath = CMS_SERVER_ROOT . $moduleInfo -> module_type .'/'. DIR_SCHEME . $scheme -> filename .'.php';
 					}
 
-					include $shemeFilepath;
+					include $schemeFilepath;
 					
-					$sheme  = new $sheme -> filename();
+					$scheme  = new $scheme -> filename();
 
-					if(!$sheme -> dropTable($_dbConnection))
+					if(!$scheme -> dropTable($_dbConnection))
 					{
 						return false;
 					}
@@ -950,7 +950,7 @@ class CModulesInstall
 	}
 
 	/**
-	 *	Get the module data based on their json sheme format in a normalized structure
+	 *	Get the module data based on their json scheme format in a normalized structure
 	 *	@param stdClass $_moduleConfig the module config data
 	 *	@param string $moduleLocation Folder name of that module
 	 * 	@param string $moduleType Module type, core or mantle
@@ -961,12 +961,12 @@ class CModulesInstall
 	{
 		$moduleData = false;
 
-		if(!property_exists($_moduleConfig, 'sheme'))
-			$_moduleConfig -> sheme = 1;
+		if(!property_exists($_moduleConfig, 'scheme'))
+			$_moduleConfig -> scheme = 1;
 
 
 
-		switch($_moduleConfig -> sheme)
+		switch($_moduleConfig -> scheme)
 		{
 			case 1:
 
@@ -990,7 +990,7 @@ class CModulesInstall
 /**
  * 	This is a helper class to translate the module config into normalized module info
  */
-class CModulesInstallS1 // Module Sheme 1
+class CModulesInstallS1 // Module Scheme 1
 {
 	public function
 	__construct()
@@ -1033,10 +1033,10 @@ class CModulesInstallS1 // Module Sheme 1
 		else
 			$moduleData['module']['extends'] = false;
 
-		if(property_exists($_moduleConfig, 'module_sheme') && !empty($_moduleConfig -> module_sheme))
-			$moduleData['module']['shemes'] = $_moduleConfig -> module_sheme;
+		if(property_exists($_moduleConfig, 'module_scheme') && !empty($_moduleConfig -> module_scheme))
+			$moduleData['module']['schemes'] = $_moduleConfig -> module_scheme;
 		else
-			$moduleData['module']['shemes'] = false;
+			$moduleData['module']['schemes'] = false;
 
 		if($_moduleConfig -> module_frontend == 0)
 		{
@@ -1127,7 +1127,7 @@ class CModulesInstallS1 // Module Sheme 1
 /**
  * 	This is a helper class to translate the module config into normalized module info
  */
-class CModulesInstallS2 // Module Sheme 2
+class CModulesInstallS2 // Module Scheme 2
 {
 	public function
 	__construct()
@@ -1168,10 +1168,10 @@ class CModulesInstallS2 // Module Sheme 2
 			else
 				$moduleData['module']['extends'] = false;	
 
-			if(property_exists($_moduleConfig -> module, 'shemes') && !empty($_moduleConfig -> module -> shemes))
-				$moduleData['module']['shemes'] = $_moduleConfig -> module -> shemes;
+			if(property_exists($_moduleConfig -> module, 'schemes') && !empty($_moduleConfig -> module -> schemes))
+				$moduleData['module']['schemes'] = $_moduleConfig -> module -> schemes;
 			else
-				$moduleData['module']['shemes'] = false;
+				$moduleData['module']['schemes'] = false;
 		}
 		else
 			$moduleData['module'] = false;

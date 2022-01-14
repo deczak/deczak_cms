@@ -1,13 +1,13 @@
 <?php
 
-include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SHEME.'shemeSessionsAccess.php';	
+include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SCHEME.'schemeSessionsAccess.php';	
 
 class 	modelSessionsAccess extends CModel
 {
 	public function
 	__construct()
 	{		
-		parent::__construct('shemeSessionsAccess', 'sessionAccess');		
+		parent::__construct('schemeSessionsAccess', 'sessionAccess');		
 	}	
 
 	public function

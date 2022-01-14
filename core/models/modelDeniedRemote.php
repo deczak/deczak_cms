@@ -1,13 +1,13 @@
 <?php
 
-include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SHEME.'shemeDeniedRemote.php';	
+include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SCHEME.'schemeDeniedRemote.php';	
 
 class 	modelDeniedRemote extends CModel
 {
 	public function
 	__construct()
 	{		
-		parent::__construct('shemeDeniedRemote', 'deniedRemote');	
+		parent::__construct('schemeDeniedRemote', 'deniedRemote');	
 	}	
 }
 

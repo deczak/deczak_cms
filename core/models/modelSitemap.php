@@ -2,7 +2,7 @@
 
 define('SITEMAP_OWN_CHILDS_ONLY',0x1);
 
-include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SHEME.'shemeSitemap.php';	
+include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SCHEME.'schemeSitemap.php';	
 
 class 	modelSitemap extends CModel
 {
@@ -13,7 +13,7 @@ class 	modelSitemap extends CModel
 	public function
 	__construct()
 	{		
-        parent::__construct('shemeSitemap', 'sitemap');
+        parent::__construct('schemeSitemap', 'sitemap');
 
 		$this -> tbPage		 	= 'tb_page';
 		$this -> tbPagePath 	= 'tb_page_path';
@@ -124,7 +124,7 @@ class 	modelSitemap extends CModel
 		{
 			$_page -> alternate_path = $this -> getAlternatePaths($_pDatabase, $_page -> page_id);
 
-			$this -> m_resultList[] = new $_className($_page, $this -> m_pSheme -> getColumns());
+			$this -> m_resultList[] = new $_className($_page, $this -> m_pScheme -> getColumns());
 		}	
 
 		return true;

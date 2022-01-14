@@ -1,13 +1,13 @@
 <?php
 
-include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SHEME.'shemeUsersRegister.php';	
+include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SCHEME.'schemeUsersRegister.php';	
 
 class 	modelUsersRegister extends CModel
 {
 	public function
 	__construct()
 	{		
-        parent::__construct('shemeUsersRegister', 'userRegister');
+        parent::__construct('schemeUsersRegister', 'userRegister');
 	}	
 
 	public function

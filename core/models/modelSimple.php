@@ -1,14 +1,14 @@
 <?php
 
-include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SHEME.'shemeSimple.php';	
-include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SHEME.'shemeBackendSimple.php';	
+include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SCHEME.'schemeSimple.php';	
+include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SCHEME.'schemeBackendSimple.php';	
 
 class 	modelSimple extends CModel
 {
 	public function
 	__construct()
 	{		
-		parent::__construct('shemeSimple', 'simple');
+		parent::__construct('schemeSimple', 'simple');
 	}
 }
 
@@ -17,6 +17,6 @@ class 	modelBackendSimple extends CModel
 	public function
 	__construct()
 	{		
-		parent::__construct('shemeBackendSimple', 'backendSimple');
+		parent::__construct('schemeBackendSimple', 'backendSimple');
 	}
 }

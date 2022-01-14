@@ -249,7 +249,7 @@ define('MODEL_LOCK_UPDATE',0x51);
 
 class	CModel
 {
-	protected 	$m_pSheme;
+	protected 	$m_pScheme;
 	protected 	$m_dataObjectName;
 	protected 	$m_dataObjectExtends;
 	protected	$m_relationsList;
@@ -258,9 +258,9 @@ class	CModel
 	public		$m_resultList;
 
 	public function
-	__construct(string $_shemeName, string $_dataObjectName, string $_dataObjectExtends = '')
+	__construct(string $_schemeName, string $_dataObjectName, string $_dataObjectExtends = '')
 	{
-		$this -> m_pSheme 				= new $_shemeName();
+		$this -> m_pScheme 				= new $_schemeName();
 		$this -> m_dataObjectName 		= $_dataObjectName;
 		$this -> m_dataObjectExtends	= $_dataObjectExtends;
 		$this -> m_relationsList		= [];
@@ -270,9 +270,9 @@ class	CModel
 	}
 
 	public function
-	setSheme(string $_shemeName)
+	setScheme(string $_schemeName)
 	{
-		$this -> m_pSheme 				= new $_shemeName();
+		$this -> m_pScheme 				= new $_schemeName();
 	}
 	
 	public function
@@ -288,7 +288,7 @@ class	CModel
 		
 		if(!class_exists($className))
 		{
-			$columns = $this -> m_pSheme -> getColumns();
+			$columns = $this -> m_pScheme -> getColumns();
 
 			##	prototype 
 
@@ -312,7 +312,7 @@ class	CModel
 			
 				## constructor
 
-				$_objectString .= " public function __construct( \$_initialValues , \$_columnsSheme = [] ) { ";
+				$_objectString .= " public function __construct( \$_initialValues , \$_columnsScheme = [] ) { ";
 
 					$_objectString .= " foreach( \$_initialValues as \$_initialKey => \$_initialValue ) { ";
 
@@ -352,7 +352,7 @@ class	CModel
 
 					$_objectString .= " }";
 		
-					$_objectString .= " foreach(\$_columnsSheme as \$_column) { ";
+					$_objectString .= " foreach(\$_columnsScheme as \$_column) { ";
 
 						$_objectString .= " \$tmp = \$_column -> m_columnName;";
 						$_objectString .= " if( !property_exists(\$this, \$tmp ) ) continue; ";
@@ -406,7 +406,7 @@ class	CModel
 		$className 	= $this -> createPrototype();
 
 		$dbQuery 	= $_pDatabase		-> query(DB_SELECT) 
-										-> table($this -> m_pSheme -> getTableName()) 
+										-> table($this -> m_pScheme -> getTableName()) 
 										-> selectColumns($this -> m_selectList)
 										-> dtaObjectName($className)
 										-> condition($_pCondition)
@@ -449,10 +449,10 @@ class	CModel
 	{
 		$className = $this -> createPrototype(MODEL_PROTOTYPE_EXCEPT_AUTOINCREMENT | MODEL_PROTOTYPE_EXCEPT_VIRTUALCOLUMN | MODEL_PROTOTYPE_EXCEPT_UNKNOWNS, 'Insert');
 
-		$dtaObject = new $className($_dataset, $this -> m_pSheme -> getColumns());
+		$dtaObject = new $className($_dataset, $this -> m_pScheme -> getColumns());
 
 		$dbQuery 	= $_pDatabase		-> query(DB_INSERT) 
-										-> table($this -> m_pSheme -> getTableName()) 
+										-> table($this -> m_pScheme -> getTableName()) 
 										-> dtaObject($dtaObject);
 
 		if($_execFlags & MODEL_RESULT_RESET)	
@@ -476,7 +476,7 @@ class	CModel
 		$dtaObject = new $className($_insertData);
 
 		$dbQuery 	= $_pDatabase		-> query(DB_UPDATE) 
-										-> table($this -> m_pSheme -> getTableName()) 
+										-> table($this -> m_pScheme -> getTableName()) 
 										-> dtaObject($dtaObject)
 										-> condition($_pCondition);
 
@@ -493,7 +493,7 @@ class	CModel
 	truncate(CDatabaseConnection &$_pDatabase, $_execFlags = NULL)
 	{
 		$dbQuery 	= $_pDatabase		-> query(DB_TRUNCATE) 
-										-> table($this -> m_pSheme -> getTableName());
+										-> table($this -> m_pScheme -> getTableName());
 
 		return $dbQuery -> exec($_execFlags);
 	}
@@ -505,7 +505,7 @@ class	CModel
 			return false;
 
 		$dbQuery 	= $_pDatabase		-> query(DB_DELETE) 
-										-> table($this -> m_pSheme -> getTableName())
+										-> table($this -> m_pScheme -> getTableName())
 										-> condition($_pCondition);
 
 		return $dbQuery -> exec($_execFlags);		
@@ -518,7 +518,7 @@ class	CModel
 			return false;
 
 		$dbQuery 	= $_pDatabase		-> query(DB_SELECT) 
-										-> table($this -> m_pSheme -> getTableName()) 
+										-> table($this -> m_pScheme -> getTableName()) 
 										-> selectColumns($this -> m_selectList)
 										-> condition($_pCondition);
 
@@ -565,8 +565,8 @@ class	CModel
 	public function
 	ping(CDatabaseConnection &$_pDatabase, string $_userId, string $_systemId, string $_pingId, $_execFlags = NULL)
 	{
-		$tableName		=	$this -> m_pSheme -> getTableName();
-		$systemIdColumn	= 	$this -> m_pSheme -> getSystemIdColumnName();
+		$tableName		=	$this -> m_pScheme -> getTableName();
+		$systemIdColumn	= 	$this -> m_pScheme -> getSystemIdColumnName();
 
 		$timeStamp 		   = time();
 		$timeOut		   = $timeStamp - CFG::GET() -> USER_SYSTEM -> MODULE_LOCKING -> LOCK_TIMEOUT;
@@ -583,7 +583,7 @@ class	CModel
 		$selectCondition -> where($systemIdColumn, $_systemId);
 
 		$dbQuery 	= $_pDatabase		-> query(DB_SELECT) 
-										-> table($this -> m_pSheme -> getTableName()) 
+										-> table($this -> m_pScheme -> getTableName()) 
 										-> selectColumns(['lock_time', 'lock_by', 'lock_id'])
 										-> condition($selectCondition);
 
@@ -614,7 +614,7 @@ class	CModel
 					$updateCondition -> where($systemIdColumn, $_systemId);
 
 					$dbQuery 	= $_pDatabase		-> query(DB_UPDATE) 
-													-> table($this -> m_pSheme -> getTableName()) 
+													-> table($this -> m_pScheme -> getTableName()) 
 													-> dtaObject($dtaObject)
 													-> condition($updateCondition)
 													-> exec($_execFlags);
@@ -666,7 +666,7 @@ class	CModel
 					$updateCondition -> where($systemIdColumn, $_systemId);
 
 					$dbQuery 	= $_pDatabase		-> query(DB_UPDATE) 
-													-> table($this -> m_pSheme -> getTableName()) 
+													-> table($this -> m_pScheme -> getTableName()) 
 													-> dtaObject($dtaObject)
 													-> condition($updateCondition)
 													-> exec($_execFlags);

@@ -86,12 +86,12 @@ class cmsUpdate
 
 		$pDBInstance  = CDatabase::instance();
 		$dbConnection = $pDBInstance -> getConnection(CFG::GET() -> MYSQL -> PRIMARY_DATABASE);
-		$shemeList    = [];
+		$schemeList    = [];
 
-		##	Find core sheme files
+		##	Find core scheme files
 
-		$shemeDirIterator = new DirectoryIterator(CMS_SERVER_ROOT.'core/shemes/');
-		foreach($shemeDirIterator as $dirItem)
+		$schemeDirIterator = new DirectoryIterator(CMS_SERVER_ROOT.'core/schemes/');
+		foreach($schemeDirIterator as $dirItem)
 		{
 			if(!$dirItem -> isFile())
 				continue;
@@ -100,20 +100,20 @@ class cmsUpdate
 			if($dirItem -> getExtension() !== 'php')
 				continue;
 
-			include_once	CMS_SERVER_ROOT.'core/shemes/'. $dirItem -> getFilename();
+			include_once	CMS_SERVER_ROOT.'core/schemes/'. $dirItem -> getFilename();
 
-			$shemeList[] = $dirItem -> getBasename('.php');
+			$schemeList[] = $dirItem -> getBasename('.php');
 		}
 
 		##	Transaction fails when changing the table schema due to PHP behavior
 		##	$dbConnection -> beginTransaction();
 	
-		##	Update sheme files
+		##	Update scheme files
 
-		foreach($shemeList as $sheme)
+		foreach($schemeList as $scheme)
 		{
-			$shemeInstance = new $sheme;
-			if(!$shemeInstance -> updateTable($dbConnection))
+			$schemeInstance = new $scheme;
+			if(!$schemeInstance -> updateTable($dbConnection))
 			{
 				##	Transaction fails when changing the table schema due to PHP behavior
 				##	$dbConnection -> rollBack();
@@ -221,9 +221,9 @@ class cmsUpdate
 		$modelBackendMenu	-> load($dbConnection);
 		$backendMenuList 	 = $modelBackendMenu -> getResult();
 
-		$shemeBackendMenu 	 = new shemeBackendMenu;
+		$schemeBackendMenu 	 = new schemeBackendMenu;
 
-		$seedList = $shemeBackendMenu -> getSeedList();
+		$seedList = $schemeBackendMenu -> getSeedList();
 		foreach($seedList as $seed)
 		{
 			$groupExists = false;

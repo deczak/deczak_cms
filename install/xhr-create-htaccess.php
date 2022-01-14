@@ -12,14 +12,14 @@
 	cmsLog::initialize();
 
 	include_once '../core/classes/toolkit.php';
-	include_once '../core/classes/CSheme.php';
+	include_once '../core/classes/CScheme.php';
 	include_once '../core/classes/CModel.php';
 	include_once '../core/classes/CSession.php';
 	include_once '../core/classes/CRouter.php';
 	include_once '../core/classes/CModules.php';
 	include_once '../core/classes/CModelCondition.php';
 	include_once '../core/classes/CLanguage.php';
-	#include '../core/shemes/shemeSitemap.php';
+	#include '../core/schemes/schemeSitemap.php';
 	include_once '../core/classes/CHTAccess.php';
 	include_once '../core/classes/CUserRights.php';
 	include_once '../core/classes/CDatabase.php';

@@ -2,8 +2,8 @@
 
 include_once 'modelSitemap.php';
 
-include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SHEME.'shemePageObject.php';	
-include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SHEME.'shemeBackendPageObject.php';	
+include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SCHEME.'schemePageObject.php';	
+include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SCHEME.'schemeBackendPageObject.php';	
 
 define('SITEMAP_BACKEND_EXTDATA',0x2);
 

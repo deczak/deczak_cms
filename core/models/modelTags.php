@@ -2,14 +2,14 @@
 
 define('MODEL_TAGS_ALLOCATION_COUNT',0x101);
 
-include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SHEME.'shemeTags.php';	
+include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SCHEME.'schemeTags.php';	
 
 class 	modelTags extends CModel
 {
 	public function
 	__construct()
 	{		
-		parent::__construct('shemeTags', 'tags');
+		parent::__construct('schemeTags', 'tags');
 	}	
 
 	public function

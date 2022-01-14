@@ -193,7 +193,7 @@ The version number is the release date. A letter as suffix indicates fixes on sa
 
 **Changes**
 - Add two new fields in page edit toolbar for publish from / until
-- Add constraints support to Shemes handling
+- Add constraints support to Schemes handling
 
 
 ### 20200120

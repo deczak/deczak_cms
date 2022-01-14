@@ -1,13 +1,13 @@
 <?php
 
-include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SHEME.'shemePageObject.php';	
+include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SCHEME.'schemePageObject.php';	
 
 class 	modelPageObject extends CModel
 {
 	public function
 	__construct()
 	{		
-		parent::__construct('shemePageObject', 'pageObject');	
+		parent::__construct('schemePageObject', 'pageObject');	
 	}	
 
 	public function
@@ -22,7 +22,7 @@ class 	modelBackendPageObject extends CModel
 	public function
 	__construct()
 	{		
-		parent::__construct('shemeBackendPageObject', 'backendPageObject');	
+		parent::__construct('schemeBackendPageObject', 'backendPageObject');	
 	}	
 
 	public function

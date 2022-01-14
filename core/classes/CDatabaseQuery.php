@@ -24,8 +24,8 @@ class	CDatabaseQuery
 	private	$m_queryRelationsList;
 	private	$m_printException;
 
-	private	$m_tableSheme;
-	private	$m_tableShemeColumn;
+	private	$m_tableScheme;
+	private	$m_tableSchemeColumn;
 	private	$m_dtaObject;
 	private	$m_dtaObjectName;
 
@@ -105,16 +105,16 @@ class	CDatabaseQuery
 	}
 
 	public function
-	sheme($_sheme)
+	scheme($_scheme)
 	{
-		$this -> m_tableSheme = $_sheme;
+		$this -> m_tableScheme = $_scheme;
 		return $this;
 	}
 
 	public function
-	shemeColumn($_shemeColumn)
+	schemeColumn($_schemeColumn)
 	{
-		$this -> m_tableShemeColumn = $_shemeColumn;
+		$this -> m_tableSchemeColumn = $_schemeColumn;
 		return $this;
 	}
 
@@ -144,7 +144,7 @@ class	CDatabaseQuery
 
 			case 	DB_INSERT:
 
-					$tableName = ($this -> m_tableSheme != null && !empty($this -> m_tableSheme -> getTableName()) ? $this -> m_tableSheme -> getTableName() : current($this -> m_tableName) -> name);
+					$tableName = ($this -> m_tableScheme != null && !empty($this -> m_tableScheme -> getTableName()) ? $this -> m_tableScheme -> getTableName() : current($this -> m_tableName) -> name);
 
 					$queryString[]	= 'INSERT INTO';
 					$queryString[]	= '`'. $this -> m_pDatabase -> getDatabaseName() .'`.`'. $tableName .'`';
@@ -159,7 +159,7 @@ class	CDatabaseQuery
 
 			case 	DB_UPDATE:
 
-					$tableName = ($this -> m_tableSheme != null && !empty($this -> m_tableSheme -> getTableName()) ? $this -> m_tableSheme -> getTableName() : current($this -> m_tableName) -> name);
+					$tableName = ($this -> m_tableScheme != null && !empty($this -> m_tableScheme -> getTableName()) ? $this -> m_tableScheme -> getTableName() : current($this -> m_tableName) -> name);
 
 					$queryString[]	= 'UPDATE';
 					foreach($this -> m_tableName as $tableIndex => $table)
@@ -184,7 +184,7 @@ class	CDatabaseQuery
 
 			case 	DB_DELETE:
 
-					$tableName = ($this -> m_tableSheme != null && !empty($this -> m_tableSheme -> getTableName()) ? $this -> m_tableSheme -> getTableName() : current($this -> m_tableName) -> name);
+					$tableName = ($this -> m_tableScheme != null && !empty($this -> m_tableScheme -> getTableName()) ? $this -> m_tableScheme -> getTableName() : current($this -> m_tableName) -> name);
 
 					$queryString[]	= 'DELETE FROM';
 					$queryString[]	= '`'. $this -> m_pDatabase -> getDatabaseName() .'`.`'. $tableName .'`';
@@ -194,7 +194,7 @@ class	CDatabaseQuery
 
 			case 	DB_TRUNCATE:
 
-					$tableName = ($this -> m_tableSheme != null && !empty($this -> m_tableSheme -> getTableName()) ? $this -> m_tableSheme -> getTableName() : current($this -> m_tableName) -> name);
+					$tableName = ($this -> m_tableScheme != null && !empty($this -> m_tableScheme -> getTableName()) ? $this -> m_tableScheme -> getTableName() : current($this -> m_tableName) -> name);
 
 					$queryString[]	= 'TRUNCATE TABLE';
 					$queryString[]	= '`'. $this -> m_pDatabase -> getDatabaseName() .'`.`'. $tableName .'`';
@@ -203,7 +203,7 @@ class	CDatabaseQuery
 
 			case 	DB_DROP:
 
-					$tableName = ($this -> m_tableSheme != null && !empty($this -> m_tableSheme -> getTableName()) ? $this -> m_tableSheme -> getTableName() : current($this -> m_tableName) -> name);
+					$tableName = ($this -> m_tableScheme != null && !empty($this -> m_tableScheme -> getTableName()) ? $this -> m_tableScheme -> getTableName() : current($this -> m_tableName) -> name);
 
 					$queryString[]	= 'DROP TABLE IF EXISTS';
 					$queryString[]	= '`'. $this -> m_pDatabase -> getDatabaseName() .'`.`'. $tableName .'`';
@@ -216,7 +216,7 @@ class	CDatabaseQuery
 					if(empty($this -> m_tableColumns))
 						return false;
 
-					$tableName = ($this -> m_tableSheme != null && !empty($this -> m_tableSheme -> getTableName()) ? $this -> m_tableSheme -> getTableName() : current($this -> m_tableName) -> name);
+					$tableName = ($this -> m_tableScheme != null && !empty($this -> m_tableScheme -> getTableName()) ? $this -> m_tableScheme -> getTableName() : current($this -> m_tableName) -> name);
 
 					$queryString[]	= 'ALTER TABLE ';
 					$queryString[]	= '`'. $this -> m_pDatabase -> getDatabaseName() .'`.`'. $tableName .'`';
@@ -232,7 +232,7 @@ class	CDatabaseQuery
 
 			case 	DB_DESCRIBE:
 
-					$tableName = ($this -> m_tableSheme != null && !empty($this -> m_tableSheme -> getTableName()) ? $this -> m_tableSheme -> getTableName() : current($this -> m_tableName) -> name);
+					$tableName = ($this -> m_tableScheme != null && !empty($this -> m_tableScheme -> getTableName()) ? $this -> m_tableScheme -> getTableName() : current($this -> m_tableName) -> name);
 
 					$queryString[]	= 'DESCRIBE';
 					$queryString[]	= '`'. $this -> m_pDatabase -> getDatabaseName() .'`.`'. $tableName .'`';
@@ -240,7 +240,7 @@ class	CDatabaseQuery
 
 			case 	DB_COLUMNS:
 
-					$tableName = ($this -> m_tableSheme != null && !empty($this -> m_tableSheme -> getTableName()) ? $this -> m_tableSheme -> getTableName() : current($this -> m_tableName) -> name);
+					$tableName = ($this -> m_tableScheme != null && !empty($this -> m_tableScheme -> getTableName()) ? $this -> m_tableScheme -> getTableName() : current($this -> m_tableName) -> name);
 
 					$queryString[]	= 'SELECT DISTINCT * FROM';
 					$queryString[]	= 'INFORMATION_SCHEMA.COLUMNS';
@@ -322,10 +322,10 @@ class	CDatabaseQuery
 		$primaryKey		= '';
 
 		$sqlString 		= [];
-		$sqlString[] 	= "CREATE TABLE `". $this -> m_tableSheme -> m_tableName ."` (";
+		$sqlString[] 	= "CREATE TABLE `". $this -> m_tableScheme -> m_tableName ."` (";
 
 		$isFirstColumn = true;
-		foreach($this -> m_tableSheme -> m_columnsList as $columnName => $columnData)
+		foreach($this -> m_tableScheme -> m_columnsList as $columnName => $columnData)
 		{
 			if($columnData -> m_isVirtual)
 				continue;
@@ -381,7 +381,7 @@ class	CDatabaseQuery
 
 		$primaryKeySet = false;
 
-		foreach($this -> m_tableSheme -> m_columnsList as $columnName => $columnData)
+		foreach($this -> m_tableScheme -> m_columnsList as $columnName => $columnData)
 		{
 
 			if($columnData -> m_keyType !== NULL)
@@ -393,7 +393,7 @@ class	CDatabaseQuery
 				elseif($columnData -> m_keyType === 'PRIMARY' && $primaryKeySet)
 				{
 
-					$_errorMsg = 'Setting multiple primary keys on table '. $this -> m_tableSheme -> m_columnName .' is not allowed.';
+					$_errorMsg = 'Setting multiple primary keys on table '. $this -> m_tableScheme -> m_columnName .' is not allowed.';
 					return false;
 
 				}
@@ -405,7 +405,7 @@ class	CDatabaseQuery
 			}	
 		}
 
-		$sqlString[] 	= ") ENGINE=". $this -> m_tableSheme -> m_tableEngine ." DEFAULT CHARSET=". $this -> m_tableSheme -> m_charset ." COLLATE=". $this -> m_tableSheme -> m_collate;
+		$sqlString[] 	= ") ENGINE=". $this -> m_tableScheme -> m_tableEngine ." DEFAULT CHARSET=". $this -> m_tableScheme -> m_charset ." COLLATE=". $this -> m_tableScheme -> m_collate;
 
 		try
 		{
@@ -424,9 +424,9 @@ class	CDatabaseQuery
 		##	Index
 
 		$sqlString 		= [];
-		$sqlString[] 	= "ALTER TABLE `". $this -> m_tableSheme -> m_tableName ."`";
+		$sqlString[] 	= "ALTER TABLE `". $this -> m_tableScheme -> m_tableName ."`";
 		$isFirstColumn 	= true;
-		foreach($this -> m_tableSheme -> m_columnsList as $columnName => $columnData)
+		foreach($this -> m_tableScheme -> m_columnsList as $columnName => $columnData)
 		{		
 			if($columnData -> m_indexType === NULL)
 				continue;
@@ -474,7 +474,7 @@ class	CDatabaseQuery
 		$sqlString 		= [];
 		$sqlString[] 	= "ALTER TABLE `". reset($this -> m_tableName) -> name ."`";
 
-		$columnData = $this -> m_tableShemeColumn;
+		$columnData = $this -> m_tableSchemeColumn;
 		$columnName = $columnData -> m_columnName;
 
 		if($columnData -> m_isVirtual)
@@ -544,9 +544,9 @@ class	CDatabaseQuery
 	{
 		$dbConnection = &$this -> m_pDatabase -> getConnection();
 
-		foreach($this -> m_tableSheme -> m_constraintsList as $constraint)
+		foreach($this -> m_tableScheme -> m_constraintsList as $constraint)
 		{	
-			$sqlString = 	"	ALTER TABLE 	 `". $this -> m_tableSheme -> m_tableName ."` 
+			$sqlString = 	"	ALTER TABLE 	 `". $this -> m_tableScheme -> m_tableName ."` 
 								ADD	CONSTRAINT 	 `". $constraint -> m_name ."` 
 									FOREIGN KEY (`". $constraint -> m_key ."`) 
 									REFERENCES   `". $constraint -> m_refTable ."`(`". $constraint -> m_refColumn ."`) 

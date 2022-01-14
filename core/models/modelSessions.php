@@ -4,7 +4,7 @@
 define('MODEL_SESSIONS_APPEND_ACCESS_DATA',0x101);
 define('MODEL_SESSIONS_APPEND_AGENT_NAME',0x101);
 
-include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SHEME.'shemeSessions.php';
+include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SCHEME.'schemeSessions.php';
 include_once 'modelUserAgent.php';
 
 include_once 'modelSessionsAccess.php';	
@@ -14,7 +14,7 @@ class 	modelSessions extends CModel
 	public function
 	__construct()
 	{		
-		parent::__construct('shemeSessions', 'session');
+		parent::__construct('schemeSessions', 'session');
 	}	
 
 	public function

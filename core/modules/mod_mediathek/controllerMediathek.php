@@ -276,7 +276,7 @@ class	controllerMediathek extends CController
 
 			$itemInfo = new stdClass;
 
-			$itemInfo -> sheme		   = 1;
+			$itemInfo -> scheme		   = 1;
 			$itemInfo -> filename	   = $item -> filename;
 			$itemInfo -> sizes		   = [];
 			$itemInfo -> license	   = $itemExifInfo -> Copyright ?? '';
