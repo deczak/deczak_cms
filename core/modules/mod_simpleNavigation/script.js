@@ -95,13 +95,9 @@ class cmsMECP_SimpleNavigation
 
 	setViewMode(viewMode, mecpDtaClass, mecpContainer)
 	{
-		console.log('cmsMECP_SimpleNavigation::setViewMode');
-		console.log(viewMode);
-		console.log(mecpDtaClass);
-
 		mecpContainer.querySelector('input[name="simple-navigation-template"]').value = viewMode;
+		this.triggerContentUpdate(mecpContainer);
 	}
-
 
 	onEventAddPage(mecpDtaClass)
 	{
