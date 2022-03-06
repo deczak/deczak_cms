@@ -25,7 +25,11 @@ createMenu(&$sitemap, $_pos = 1, $_level = 2 )
 				&&	($sitemap[$i] -> hidden_state == 5 && $sitemap[$i] -> publish_until > $timestamp && $sitemap[$i] -> publish_until != 0)
 				)
 			||  CMS_BACKEND
-		  ); else continue;
+		  ); else
+		  {
+			$i = $i +  $sitemap[$i] -> offspring;
+			continue;
+		  }
 
 		if(CMS_BACKEND)
 			echo '<li><a href="'. CMS_SERVER_URL_BACKEND .'pages/view/'. $sitemap[$i] -> page_language .'/'. $sitemap[$i] -> node_id .'" title="'. $sitemap[$i] -> page_title .'">'. $sitemap[$i] -> page_name  .'</a>';
@@ -43,7 +47,6 @@ createMenu(&$sitemap, $_pos = 1, $_level = 2 )
 
 	return (!$locrr ? $i - 1 : $i + $locrr);
 }
-
 ?>
 
 <header>
