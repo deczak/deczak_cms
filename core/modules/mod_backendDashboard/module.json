@@ -1,5 +1,5 @@
 {
-	"scheme"				: 2,
+	"scheme"			: 2,
 	"version"			: 1,
 	"module"			: {
 		"controller"	: "",
@@ -15,6 +15,15 @@
 		"menu_group"	: "0"
 	},
 	"objectList" 		: [],
-	"rights"			: [],
-	"sections"			: []
+	"rights"			: [
+							{"name":"index",	"desc":"OVERVIEW"}],
+	"sections"			: [
+							{
+								"url_name"	:"",
+								"ctl_target":"index",
+								"menu_name"	:"OVERVIEW",
+								"menu_order":"0",
+								"use_right" :"index"
+							}
+						  ]
 }
