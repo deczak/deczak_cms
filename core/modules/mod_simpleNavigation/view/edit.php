@@ -93,6 +93,8 @@ $timestamp = time();
 
 	</div>
 
+
+
 <script>
 
 	document.addEventListener('DOMContentLoaded', function () {
@@ -108,7 +110,8 @@ $timestamp = time();
 				node['node-id'],
 				node['page_name'],
 				node['listing-hidden'],
-				node['listing-type']
+				node['listing-type'],
+				true
 			);
 		}
 
@@ -116,10 +119,14 @@ $timestamp = time();
 
 </script>
 
-<?php
-if($currentTemplate !== NULL)
-{
-	$activeTemplate = current($currentTemplate);
-	include $activeTemplate -> templateFilepath;
-}
-?>
+<div id="module-xhr-html-response-container-<?php echo $object -> object_id; ?>">
+
+	<?php
+	if($currentTemplate !== NULL)
+	{
+		$activeTemplate = current($currentTemplate);
+		include $activeTemplate -> templateFilepath;
+	}
+	?>
+
+</div>

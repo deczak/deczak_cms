@@ -160,11 +160,9 @@ class cmsMECP_SimpleNavigation
 
 	onEventRemoveItem(itemRowNode, mecpDtaClass)
 	{
-
 		let snilNode = document.querySelector('.simple-navigation-items-list.'+ mecpDtaClass);
 		let mecpNode = document.querySelector('.simple-navigation-manage-list.'+ mecpDtaClass);
 
-console.log(itemRowNode);
 		let nodeId = itemRowNode.querySelector('input.simple-navigation-manage-item-node-id').value;
 		let listingType = itemRowNode.querySelector('input.simple-navigation-manage-item-listing-type').value;
 
@@ -193,7 +191,7 @@ console.log(itemRowNode);
 		this.updateNavigationView(snilNode, mecpNode);
 	}
 
-	addNavigationItem(snilNode, mecpNode, nodeId, pageName, listingHidden, listingType)
+	addNavigationItem(snilNode, mecpNode, nodeId, pageName, listingHidden, listingType, initialCall = false)
 	{
 		if(typeof snilNode.nodeList === 'undefined')
 		{
@@ -212,7 +210,7 @@ console.log(itemRowNode);
 			listingType:listingType
 		});
 
-		this.updateNavigationView(snilNode, mecpNode);
+		this.updateNavigationView(snilNode, mecpNode, initialCall);
 	}
 
 	existNavigationItem(snilNode, nodeId, listingType)
@@ -229,7 +227,7 @@ console.log(itemRowNode);
 		return false;
 	}
 
-	updateNavigationView(snilNode, mecpNode)
+	updateNavigationView(snilNode, mecpNode, initialCall = false)
 	{
 		let tableBodyNode = mecpNode.querySelector('table > tbody');
 			tableBodyNode.innerHTML = '';
@@ -277,9 +275,13 @@ console.log(itemRowNode);
 			tableBodyNode.append(rowNode);
 		}	
 
+		if(!initialCall)
+			this.triggerContentUpdate(mecpNode);
+	}
 
-		// update regular view, view per xhr holen und ausgeben
-
+	triggerContentUpdate(mecpNode)
+	{
+		mecpNode.closest('.cms-content-object').querySelector('.cms-trigger-object-tool[data-cmd="edit"]').dispatchEvent(new Event('click'));
 	}
 }
 

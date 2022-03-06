@@ -154,7 +154,7 @@
 								if(jsonObject.state == 0)
 								{
 									if(onSuccess != null)
-										onSuccess(buttonElement,that);
+										onSuccess(buttonElement, that, jsonObject);
 								}		
 								else
 								{
@@ -193,9 +193,17 @@
 			this.xhrCommand(formData, null, null, 'cms-order-by-modules');
 		}
 
-
-		commandEdit(buttonElement)
+		commandEdit(buttonNode, srcInstance, response)
 		{
+			if(typeof response.data.html === 'undefined' ||  typeof response.data.objectId === 'undefined')
+				return;
+
+			let htmlResponseOutput = document.getElementById('module-xhr-html-response-container-'+response.data.objectId);
+
+			if(htmlResponseOutput === null)
+				return;
+
+			htmlResponseOutput.innerHTML = response.data.html;
 		}
 
 		commandDelete(buttonElement, instance)

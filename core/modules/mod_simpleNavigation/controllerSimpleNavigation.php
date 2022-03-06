@@ -60,6 +60,7 @@ class	controllerSimpleNavigation extends CController
 			case 'xhr_create' : $logicDone = $this -> logicXHRCreate($_pDatabase, $_xhrInfo, $enableEdit, $enableDelete); break;	
 			case 'xhr_edit'   : $logicDone = $this -> logicXHREdit($_pDatabase, $_xhrInfo, $enableEdit, $enableDelete); break;	
 			case 'xhr_delete' : $logicDone = $this -> logicXHRDelete($_pDatabase, $_xhrInfo, $enableEdit, $enableDelete); break;	
+			case 'xhr_view'   : $logicDone = $this -> logicXHRView($_pDatabase, $_xhrInfo, $enableEdit, $enableDelete); break;	
 		}
 
 		if(!$logicDone)
@@ -82,29 +83,13 @@ class	controllerSimpleNavigation extends CController
 
 		$parentNode = (empty($this -> m_modelSimple -> getResult()[0] -> params -> parent_node_id) ? $this -> objectInfo -> node_id : $this -> m_modelSimple -> getResult()[0] -> params -> parent_node_id);
 
-/*
-		$modelCondition  = new CModelCondition();
-		$modelCondition -> where('node_id', $parentNode);		
-
-		$modelSitemap    = new modelSitemap();
-		$modelSitemap 	-> load($_pDatabase, $modelCondition, NULL, SITEMAP_OWN_CHILDS_ONLY);	
-*/
 		$moduleTemplate	 = new CModulesTemplates();
 		$moduleTemplate	-> load('simpleNavigation', $this -> m_modelSimple -> getResult()[0] -> params -> template);
-
-
-
 
 		if(empty($this -> m_modelSimple -> getResult()[0] -> params -> nodeList))
 			$this -> m_modelSimple -> getResult()[0] -> params -> nodeList = [];
 
 		$this -> m_modelSimple -> getResult()[0] -> params -> nodeList = (array)$this -> m_modelSimple -> getResult()[0] -> params -> nodeList;
-
-
-
-
-
-
 
 		$this -> setView(	
 						'view',	
@@ -117,6 +102,26 @@ class	controllerSimpleNavigation extends CController
 						]
 						);
 
+		return true;
+	}
+
+	private function logicXHRView(CDatabaseConnection &$_pDatabase, object $_xhrInfo, bool $_enableEdit = false, bool $_enableDelete = false) : bool
+	{
+		$validationErr   = false;
+		$validationMsg   = 'OK';
+		$responseData    = [];
+
+		$this->logicView($_pDatabase, $_enableEdit, $_enableDelete);
+
+		ob_start();
+		$this->view();
+		$responseData['html'] = ob_get_contents();
+		ob_end_clean();
+
+		$responseData['objectId'] = $_xhrInfo -> objectId;
+
+		tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
+	
 		return true;
 	}
 
@@ -151,11 +156,6 @@ class	controllerSimpleNavigation extends CController
 			$this -> m_modelSimple -> getResult()[0] -> params -> nodeList = [];
 
 		$this -> m_modelSimple -> getResult()[0] -> params -> nodeList = (array)$this -> m_modelSimple -> getResult()[0] -> params -> nodeList;
-
-
-
-
-
 
 
 
@@ -287,6 +287,8 @@ class	controllerSimpleNavigation extends CController
 				$_objectUpdate['update_reason']		=	'';
 
 				$this -> m_modelPageObject -> update($_pDatabase, $_objectUpdate, $modelCondition);
+
+				$this->logicXHRView($_pDatabase, $_xhrInfo, $_enableEdit, $_enableDelete);
 			}
 			else
 			{
