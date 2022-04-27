@@ -251,8 +251,7 @@ class cmsMECP_SimpleNavigation
 					newItem = newItem.replace(/\[LISTING_TYPE_TEXT\]/g, 'Subpages by');
 					break
 			}
-			console.log(snilNode.nodeList[i]);
-
+			
 			switch(snilNode.nodeList[i].listingHidden)
 			{
 				case '0':

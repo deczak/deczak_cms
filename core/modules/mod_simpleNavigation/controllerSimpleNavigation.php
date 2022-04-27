@@ -105,7 +105,8 @@ class	controllerSimpleNavigation extends CController
 		return true;
 	}
 
-	private function logicXHRView(CDatabaseConnection &$_pDatabase, object $_xhrInfo, bool $_enableEdit = false, bool $_enableDelete = false) : bool
+	private function
+	logicXHRView(CDatabaseConnection &$_pDatabase, object $_xhrInfo, bool $_enableEdit = false, bool $_enableDelete = false) : bool
 	{
 		$validationErr   = false;
 		$validationMsg   = 'OK';
@@ -253,8 +254,8 @@ class	controllerSimpleNavigation extends CController
 		$requestList	 =	[];
 		$requestList[] 	 = 	[	"input" => "simple-navigation-template",  		"validate" => "strip_tags|!empty" ]; 
 		$requestList[] 	 = 	[	"input" => "simple-navigation-item",  			"validate" => "!empty",	"use_default" => true, "default_value" => [] ]; 
-	//	$requestList[] 	 = 	[	"input" => "navigation-display-hidden", 	"validate" => "strip_tags|!empty" ]; 
-	//	$requestList[] 	 = 	[	"input" => "navigation-parent-node-id", 	"validate" => "strip_tags|!empty" ]; 
+		//	$requestList[] 	 = 	[	"input" => "navigation-display-hidden", 	"validate" => "strip_tags|!empty" ]; 
+		//	$requestList[] 	 = 	[	"input" => "navigation-parent-node-id", 	"validate" => "strip_tags|!empty" ]; 
 
 		$pURLVariables-> retrieve($requestList, false, true); // POST 
 		$urlVarList		 = $pURLVariables -> getArray();
@@ -269,8 +270,8 @@ class	controllerSimpleNavigation extends CController
 			$urlVarList['params']	= 	[
 											"template"			=> $urlVarList['simple-navigation-template'],
 											"nodeList"			=> $urlVarList['simple-navigation-item'],
-	//										"display_hidden"	=> $urlVarList['navigation-display-hidden'],
-	//										"parent_node_id"	=> $urlVarList['navigation-parent-node-id']
+		//										"display_hidden"	=> $urlVarList['navigation-display-hidden'],
+		//										"parent_node_id"	=> $urlVarList['navigation-parent-node-id']
 										];
 			$urlVarList['params']	 = 	json_encode($urlVarList['params'], JSON_FORCE_OBJECT);
 

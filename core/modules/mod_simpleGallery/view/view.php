@@ -1,11 +1,9 @@
 <?php
-	$destList = [];
-	MEDIATHEK::getItemsList($object -> body.'/', $destList, true);
-
 
 	$ts = ($object -> params -> display_divider ?? '8');
 
 ?>
+
 
 <div class="simple-gallery-images-list" data-tile-size="<?= ($object -> params -> display_divider ?? '8'); ?>" data-tile-format="<?= ($object -> params -> format ?? '8'); ?>" id="simple-gallery-list-<?php echo $object -> object_id; ?>">
 	<?php
@@ -15,7 +13,7 @@
 		$bp = [];
 		$bl = [];
 
-		foreach($destList as $item)
+		foreach($itemList as $item)
 		{
 			switch($item -> mime )
 			{
@@ -83,9 +81,9 @@
 			<?php
 		}
 
-		$destList = array_merge($bp, $bl);
+		$itemList = array_merge($bp, $bl);
 
-		if(empty($destList))
+		if(empty($itemList))
 			break;
 
 	} while (true);

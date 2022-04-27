@@ -396,6 +396,74 @@ class 	MEDIATHEK
  
  
 	public static function 
+	getItem(string $path, array &$destList)
+	{
+
+
+			if(file_exists(CMS_SERVER_ROOT.DIR_MEDIATHEK.$path.'/info.json'))
+			{
+				$itemInfo = file_get_contents(CMS_SERVER_ROOT.DIR_MEDIATHEK.$path.'/info.json');
+
+				if($itemInfo === false)
+				{
+					// TODO ERR
+					return;
+				}
+
+				$itemInfo = json_decode($itemInfo);
+
+				if($itemInfo === null)
+				{
+					// TODO ERR
+					return;
+				}
+
+				if(!empty($itemInfo -> redirect))
+				{
+					return;
+				}
+
+				$pathSegments = explode('/', $path);
+					
+				$mediathekFilelocation 	= CMS_SERVER_ROOT.DIR_MEDIATHEK.$path.'/'.$itemInfo -> filename;
+				$mediathekFileInfo 		= new SplFileInfo($mediathekFilelocation);
+
+				$mediathekItem  = new stdClass;
+				$mediathekItem -> path  	= $path;
+				$mediathekItem -> filename  	= end($pathSegments);
+				$mediathekItem -> name 	    	= $mediathekFileInfo -> getFilename();
+				$mediathekItem -> size 			= $mediathekFileInfo -> getSize();
+				$mediathekItem -> extension 	= $mediathekFileInfo -> getExtension();
+				$mediathekItem -> title 		= $itemInfo -> title ?? '';
+				$mediathekItem -> caption 		= $itemInfo -> caption ?? '';
+				$mediathekItem -> author 		= $itemInfo -> author ?? '';
+				$mediathekItem -> notice 		= $itemInfo -> notice ?? '';
+				$mediathekItem -> gear 			= $itemInfo -> gear ?? [];
+				$mediathekItem -> gear_settings = $itemInfo -> gear_settings ?? [];
+				$mediathekItem -> license 		= $itemInfo -> license ?? '';
+				$mediathekItem -> license_url 	= $itemInfo -> license_url ?? '';
+				$mediathekItem -> mime 			= mime_content_type($mediathekFilelocation);
+
+
+				switch($mediathekItem -> mime )
+				{
+					case 'image/jpeg':
+					case 'image/png':
+					case 'image/webp':
+
+						$mediathekItem -> props  = getimagesize(CMS_SERVER_ROOT.DIR_MEDIATHEK.$path.'/'.$itemInfo -> filename);
+						$mediathekItem -> orient = (($mediathekItem -> props[0] / $mediathekItem -> props[1]) > 1 ? 0 : 1);
+				}
+
+
+				$destList[] = $mediathekItem;
+			}
+
+
+
+	}
+
+	public static function 
 	getItemsList(string $path, array &$destList, bool $ignoreSubDirectory = false)
 	{
 		$path = ($path[ strlen($path) - 1 ] !== '/' ? $path.'/' : $path);
@@ -459,7 +527,7 @@ class 	MEDIATHEK
 				{
 					case 'image/jpeg':
 					case 'image/png':
-					case 'image/png':
+					case 'image/webp':
 
 						$mediathekItem -> props  = getimagesize(CMS_SERVER_ROOT.DIR_MEDIATHEK.$path.$directory -> getFilename().'/'.$itemInfo -> filename);
 						$mediathekItem -> orient = (($mediathekItem -> props[0] / $mediathekItem -> props[1]) > 1 ? 0 : 1);
@@ -646,7 +714,7 @@ class 	MEDIATHEK
 					imagepng($resizedResource, $fileLocation. $destFilename, 5); 
 					break;
 
-				case 'image/png':
+				case 'image/webp':
 
 					imagewebp($resizedResource, $fileLocation. $destFilename, 95); 
 					break;

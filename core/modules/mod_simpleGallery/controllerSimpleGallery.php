@@ -2,6 +2,8 @@
 
 include_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelSimple.php';	
 
+include_once CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CModulesTemplates.php';	
+
 class	controllerSimpleGallery extends CController
 {
 	private	$m_modelSimple;
@@ -60,7 +62,8 @@ class	controllerSimpleGallery extends CController
 			case 'edit'		  : $logicDone = $this -> logicEdit($_pDatabase, $enableEdit, $enableDelete); break;
 			case 'xhr_create' : $logicDone = $this -> logicXHRCreate($_pDatabase, $_xhrInfo, $enableEdit, $enableDelete); break;	
 			case 'xhr_edit'   : $logicDone = $this -> logicXHREdit($_pDatabase, $_xhrInfo, $enableEdit, $enableDelete); break;
-			case 'xhr_delete' : $logicDone = $this -> logicXHRDelete($_pDatabase, $_xhrInfo, $enableEdit, $enableDelete); break;	
+			case 'xhr_delete' : $logicDone = $this -> logicXHRDelete($_pDatabase, $_xhrInfo, $enableEdit, $enableDelete); break;
+			case 'xhr_view'   : $logicDone = $this -> logicXHRView($_pDatabase, $_xhrInfo, $enableEdit, $enableDelete); break;	
 		}
 
 		if(!$logicDone) // Default
@@ -79,14 +82,45 @@ class	controllerSimpleGallery extends CController
 
 		$this -> m_modelSimple -> getResult()[0] -> params = json_decode($this -> m_modelSimple -> getResult()[0] -> params);
 
+
+		if(empty($this -> m_modelSimple -> getResult()[0] -> params -> itemList))
+			$this -> m_modelSimple -> getResult()[0] -> params -> itemList = [];
+
+		$this -> m_modelSimple -> getResult()[0] -> params -> itemList = (array)$this -> m_modelSimple -> getResult()[0] -> params -> itemList;
+
+
+
+
 		$this -> setView(	
 						'view',	
 						'',
 						[
-							'object' 	 => $this -> m_modelSimple -> getResult()[0]
+							'object' 	 => $this -> m_modelSimple -> getResult()[0],
+							'itemList'		  => $this -> processGalleryItems($_pDatabase, $this -> m_modelSimple -> getResult()[0] -> params -> itemList),
 						]
 						);
 
+		return true;
+	}
+
+	private function
+	logicXHRView(CDatabaseConnection &$_pDatabase, object $_xhrInfo, bool $_enableEdit = false, bool $_enableDelete = false) : bool
+	{
+		$validationErr   = false;
+		$validationMsg   = 'OK';
+		$responseData    = [];
+
+		$this->logicView($_pDatabase, $_enableEdit, $_enableDelete);
+
+		ob_start();
+		$this->view();
+		$responseData['html'] = ob_get_contents();
+		ob_end_clean();
+
+		$responseData['objectId'] = $_xhrInfo -> objectId;
+
+		tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
+	
 		return true;
 	}
 
@@ -100,11 +134,31 @@ class	controllerSimpleGallery extends CController
 		
 		$this -> m_modelSimple -> getResult()[0] -> params = json_decode($this -> m_modelSimple -> getResult()[0] -> params);
 
+
+		/*
+				$moduleTemplate = new CModulesTemplates();
+				$moduleTemplate ->	load('simpleGallery', $this -> m_modelSimple -> getResult()[0] -> params -> template ?? '');
+
+				$moduleTemplates = new CModulesTemplates();
+				$moduleTemplates ->	load('simpleGallery');
+		*/
+
+
+		if(empty($this -> m_modelSimple -> getResult()[0] -> params -> itemList))
+			$this -> m_modelSimple -> getResult()[0] -> params -> itemList = [];
+
+		$this -> m_modelSimple -> getResult()[0] -> params -> itemList = (array)$this -> m_modelSimple -> getResult()[0] -> params -> itemList;
+
+
+
 		$this -> setView(	
 						'edit',	
 						'',
 						[
-							'object' 	=> $this -> m_modelSimple -> getResult()[0]
+							'object' 	=> $this -> m_modelSimple -> getResult()[0],
+			#						'currentTemplate'	=> $moduleTemplate -> templatesList,
+			#						'avaiableTemplates'	=> $moduleTemplates -> templatesList,
+							'itemList'		  => $this -> processGalleryItems($_pDatabase, $this -> m_modelSimple -> getResult()[0] -> params -> itemList),
 						]
 						);
 
@@ -121,7 +175,7 @@ class	controllerSimpleGallery extends CController
 
 		$pURLVariables =	new CURLVariables();
 		$requestList		 =	[];
-		$requestList[] 	 = 	[	"input" => "simple-gallery-path", "validate" => "!empty" ]; 
+		$requestList[] 	 = 	[	"input" => "simple-gallery-item", "validate" => "!empty" ]; 
 		$requestList[] 	 = 	[	"input" => "simple-gallery-display-divider", "validate" => "!empty" ];
 		$requestList[] 	 = 	[	"input" => "simple-gallery-format", "validate" => "!empty" ];
 		$pURLVariables-> retrieve($requestList, false, true); // POST 
@@ -139,14 +193,14 @@ class	controllerSimpleGallery extends CController
 			$valuesList = [];
 
 			$valuesList['params']	= 	[
-											"display_divider"		=> $urlVarList['simple-gallery-display-divider'],
-											"format"		=> $urlVarList['simple-gallery-format'],
+											"display_divider"	=> $urlVarList['simple-gallery-display-divider'],
+											"format"			=> $urlVarList['simple-gallery-format'],
+											"itemList"			=> $urlVarList['simple-gallery-item'],
 										];
-			
 
 			$valuesList['params']	 = 	json_encode($valuesList['params'], JSON_FORCE_OBJECT);
 
-			$valuesList['body']		 = 	$urlVarList['simple-gallery-path'];
+			$valuesList['body']		 = 	'';
 			
 			$objectId = $_xhrInfo -> objectId;
 
@@ -161,6 +215,9 @@ class	controllerSimpleGallery extends CController
 				$_objectUpdate['update_reason']		=	'';
 
 				$this -> m_modelPageObject -> update($_pDatabase, $_objectUpdate, $modelCondition);
+
+
+				$this->logicXHRView($_pDatabase, $_xhrInfo, $_enableEdit, $_enableDelete);
 			
 			}
 			else
@@ -206,7 +263,8 @@ class	controllerSimpleGallery extends CController
 							'edit',	
 							'',
 							[
-								'object' 	=> $this -> m_modelSimple -> getResult()[0]
+								'object' 	=> $this -> m_modelSimple -> getResult()[0],
+								'itemList'			=> [],
 							]
 							);
 
@@ -259,5 +317,41 @@ class	controllerSimpleGallery extends CController
 		tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
 	
 		return false;
+	}
+
+	private function
+	processGalleryItems(CDatabaseConnection &$_pDatabase, &$itemsList) : array
+	{
+		
+		$collectedImageList = [];
+
+		foreach($itemsList as $item)
+		{
+
+			
+			switch($item -> {'listing-type'})
+			{
+				case 'image':
+
+
+
+					MEDIATHEK::getItem($item -> {'item-path'}.'/', $collectedImageList);
+
+
+					break;
+
+				case 'folder':
+
+
+
+
+					MEDIATHEK::getItemsList($item -> {'item-path'}.'/', $collectedImageList, true);
+
+
+					break;
+			}
+
+		}
+		return $collectedImageList;
 	}
 }
