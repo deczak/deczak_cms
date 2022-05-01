@@ -109,6 +109,13 @@
 
 	temporary solution with that media queries
 
+
+	max-width - 4% [2 + 2] padding / num tiles * 100 / (max-width - 4% padding) = height %
+
+	1400 - 4% / 6 * 100 / (1344) = 16.6%
+
+
+
 */
 
 
