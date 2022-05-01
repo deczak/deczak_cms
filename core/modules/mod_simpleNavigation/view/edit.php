@@ -39,7 +39,7 @@ $timestamp = time();
 
 		<?php foreach($avaiableTemplates as $template) { ?>
 
-			<button class="ui button icon trigger-view-mode" data-template-id="<?= $template -> templateId; ?>" type="button" title="<?= $template -> templateName; ?>">
+			<button class="ui button icon trigger-view-mode" data-template-id="<?= $template -> templateId; ?>" type="button" title="<?= $template -> templateName; ?>" style="height:29px;">
 				<i class="<?= $template -> templateIcon; ?>"></i>
 			</button>
 		
