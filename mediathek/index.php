@@ -18,14 +18,11 @@
 
 	- Bei Bildern die Möglichkeit andere Auflösungen anzuzeigen für direkten Download
 
-	- Counter Datei
-
-	- Referrer Datei ??
+	- Counter Datei oder zugriffszähler über session system schreiben lassen
 
 	- Zugriff in Session eintragen
 
 	- Erfassen von direkt Zugriffen ??
-
 	
 	->	if 404 try to get regular 404 page withouth redirect
 
@@ -33,7 +30,6 @@
 	//header($_SERVER["SERVER_PROTOCOL"] ?? 'HTTP/1.1' . ' 403 Forbidden'); 
 	
 */
-
 require_once '../core/classes/cfg.php';
 require_once '../config/directories.php';
 require_once '../config/standard.php';
@@ -71,7 +67,6 @@ $jsonInfo = json_decode($jsonInfo);
 if($jsonInfo === null)
 	exit404();
 
-
 if(!empty($jsonInfo -> redirect))
 {
 	$params = [];
@@ -82,6 +77,50 @@ if(!empty($jsonInfo -> redirect))
 	header('Location: '. CMS_SERVER_URL .'mediathek/'.$jsonInfo -> redirect .'?'. implode('&', $params), true, 301);
 	exit;
 }
+
+## Save Referer for statistic
+
+$refererFileSize = filesize($dstFilelocation.'statistic.referer.json');
+
+if($refererFileSize < 1000000) // max 1 MB Filesize, TODO option to clear this file
+{
+	$refererFile = fopen($dstFilelocation.'statistic.referer.json', "a+");
+
+	if(flock($refererFile, LOCK_EX)) // acquire an exclusive lock
+	{ 
+		if($refererFileSize > 0) 
+		{
+			fseek($refererFile, 0); 
+
+			$refererInfo = fread($refererFile, $refererFileSize);
+			$refererInfo = json_decode($refererInfo);
+
+			if($refererInfo !== null)
+			{
+				$_SERVER['HTTP_REFERER'] = trim(strip_tags($_SERVER['HTTP_REFERER'] ?? ''));
+
+				if(!empty($_SERVER['HTTP_REFERER']) && !in_array($_SERVER['HTTP_REFERER'], $refererInfo -> refererList, true) && strpos($_SERVER['HTTP_REFERER'], '://'.$_SERVER['HTTP_HOST']) === false)
+				{
+					$refererInfo -> refererList[] = $_SERVER['HTTP_REFERER'];
+
+					ftruncate($refererFile, 0);  
+					fwrite($refererFile, json_encode($refererInfo));
+				}
+			}
+		}
+		else
+		{
+			fwrite($refererFile, '{"refererList" :[]}');
+		}
+
+		fflush($refererFile);            // flush output before releasing the lock
+		flock($refererFile, LOCK_UN);    // release the lock
+	}
+
+	fclose($refererFile);
+}
+
+##
 
 $rawOutput = (isset($_GET['binary']) ? true : false);
 
