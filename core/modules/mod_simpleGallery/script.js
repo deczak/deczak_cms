@@ -5,6 +5,7 @@ class cmsMECP_SimpleGallery
 		let srcInstance = this;
 
 		window.addEventListener('click', function(event) { srcInstance.onEventClick(event, srcInstance); });
+		window.addEventListener('change', function(event) { srcInstance.onEventChange(event, srcInstance); });
 
 		window.addEventListener('event-edit-module-gallery-add-folder', function(event) { srcInstance.onEventAddFolder(event, srcInstance); });
 
@@ -47,15 +48,6 @@ class cmsMECP_SimpleGallery
 		switch(eventTagName)
 		{
 			case 'BUTTON':
-
-				if(event.target.classList.contains('trigger-view-mode'))
-				{
-					let templateId = event.target.getAttribute('data-template-id');
-					if(templateId !== null)
-						srcInstance.setViewMode(templateId, mecpDtaClass, mecpContainer);
-
-					return true;
-				}
 				
 				if(event.target.classList.contains('trigger-manage-gallery'))
 				{
@@ -97,11 +89,49 @@ class cmsMECP_SimpleGallery
 		}	
 	}
 
+	onEventChange(event, srcInstance)
+	{
+		if(typeof event.target === 'undefined')
+			return true;
+
+		let mecpContainer = event.target.closest('.simple-gallery-control');
+		if(mecpContainer === null)
+			return true;
+
+		let mecpDtaClass = mecpContainer.getAttribute('data-target-list');
+		let eventTagName = event.target.tagName;
+
+
+		switch(eventTagName)
+		{
+			case 'SELECT':
+
+				if(event.target.classList.contains('trigger-view-mode'))
+				{
+				//	let templateId = event.target.getAttribute('data-template-id');
+				//	if(templateId !== null)
+						this.triggerContentUpdate(mecpContainer);
+
+					//	srcInstance.setViewMode(templateId, mecpDtaClass, mecpContainer);
+
+					return true;
+				}
+				
+				if(event.target.classList.contains('trigger-view-divider'))
+				{
+					this.triggerContentUpdate(mecpContainer);
+					return true;
+				}
+				break;
+		}	
+	}
+	/*
 	setViewMode(viewMode, mecpDtaClass, mecpContainer)
 	{
 		mecpContainer.querySelector('input[name="simple-gallery-template"]').value = viewMode;
 		this.triggerContentUpdate(mecpContainer);
 	}
+	*/
 
 	onEventAddImage(mecpDtaClass)
 	{

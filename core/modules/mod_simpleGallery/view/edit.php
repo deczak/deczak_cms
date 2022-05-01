@@ -23,13 +23,21 @@
 
 		<label></label>
 
-		<?php foreach($avaiableTemplates as $template) { ?>
+		<?php 
+		
+		/* not in use atm
+
+		foreach($avaiableTemplates as $template) { ?>
 
 			<button class="ui button icon trigger-view-mode" data-template-id="<?= $template -> templateId; ?>" type="button" title="<?= $template -> templateName; ?>">
 				<i class="<?= $template -> templateIcon; ?>"></i>
 			</button>
 		
-		<?php } ?>
+		<?php } 
+
+		*/
+		
+		?>
 
 		<input type="hidden" name="simple-gallery-template" value="<?= $object -> params -> template; ?>">
 
@@ -37,7 +45,7 @@
 			<label>Format</label>	
 			<div class="input">
 				<div class="select-wrapper">
-					<select name="simple-gallery-format" style="width:120px; border-radius:0; padding: 5px;">
+					<select name="simple-gallery-format" class="trigger-view-mode" style="width:120px; border-radius:0; padding: 5px;">
 						<option <?= (($object -> params -> format ?? 'ratio') === 'ratio' ? 'selected' : ''); ?> value="ratio">Ratio based</option>
 						<option <?= (($object -> params -> format ?? 'ratio') === 'squares' ? 'selected' : ''); ?> value="squares">Squares</option>
 					</select>
@@ -49,7 +57,7 @@
 			<label>Display divider</label>	
 			<div class="input">
 				<div class="select-wrapper">
-					<select name="simple-gallery-display-divider" style="width:70px; border-radius:0;padding: 5px;">
+					<select name="simple-gallery-display-divider"  class="trigger-view-divider" style="width:70px; border-radius:0;padding: 5px;">
 						<option <?= (($object -> params -> display_divider ?? '8') === '2' ? 'selected' : ''); ?> value="2">2</option>
 						<option <?= (($object -> params -> display_divider ?? '8') === '3' ? 'selected' : ''); ?> value="3">3</option>
 						<option <?= (($object -> params -> display_divider ?? '8') === '4' ? 'selected' : ''); ?> value="4">4</option>
