@@ -1,6 +1,6 @@
 <?php
 
-class 	CModelConditionStage
+class CModelConditionStage
 {
 	public	$type;
 	public	$column;
@@ -19,7 +19,7 @@ class 	CModelConditionStage
 	}
 }
 
-class 	CModelConditionOrder
+class CModelConditionOrder
 {
 	public	$column;
 	public	$direction;
@@ -32,7 +32,7 @@ class 	CModelConditionOrder
 	}
 }
 
-class 	CModelConditionGroup
+class CModelConditionGroup
 {
 	public	$column;
 
@@ -43,7 +43,7 @@ class 	CModelConditionGroup
 	}
 }
 
-class 	CModelCondition
+class CModelCondition
 {
 	public $conditionList;
 	public $conditionLevel;
@@ -206,7 +206,7 @@ class 	CModelCondition
 	}
 }
 
-class	CModelRelations
+class CModelRelations
 {
 	public	$joinType;
 	public	$tableName;
@@ -247,7 +247,7 @@ define('MODEL_RESULT_RESET',0x31);
 define('MODEL_RESULT_APPEND_DTAOBJECT',0x32);
 define('MODEL_LOCK_UPDATE',0x51);
 
-class	CModel
+class CModel
 {
 	protected 	$m_pScheme;
 	protected 	$m_dataObjectName;

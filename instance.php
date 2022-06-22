@@ -63,6 +63,7 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CNodesSearch.php';
 
 	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'cmsUpdate.php';
+	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'cmsSystemModules.php';
 
 ##	M E S S A G E   S Y S T E M
 
