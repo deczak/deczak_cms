@@ -7,7 +7,8 @@
 		"desc"			: "",
 		"group"			: "Other",
 		"icon"			: "&#xf781",
-		"frontend"		: 1
+		"frontend"		: 1,
+		"system_module" : 1
 	},
 	"rights"			: [
 							{"name":"view",		"desc":"VIEW"},

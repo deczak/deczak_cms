@@ -10,6 +10,7 @@
 
 	MOD_SITES_OV_TABLE_NODEID			= Node-ID
 	MOD_SITES_OV_TABLE_PAGETITLE		= Title
+	MOD_SITES_OV_TABLE_PAGENAME			= Page name
 	MOD_SITES_OV_TABLE_PAGEURL			= URL
 
 	MOD_SITES_OV_TABLE_PAGECREATE		= Create sub page
@@ -19,13 +20,22 @@
 
 	MOD_SITES_ERR_NOTCREATED			= Could not create a new site
 	MOD_SITES_PAGECREATED				= Created new site
+	MOD_SITES_PAGECREATE				= Create new sub page
+	MOD_SITES_PAGEMOVE					= Move page to new parent page
 	
 	MOD_SITES_NEWPAGE_NAME				= Unnamed page
 	
+	MOD_SITES_PAGEDESC					= Page Description (Meta description)
+
 ##	Delete
 
 	MOD_SITES_ERR_NOTDELETED			= Could not delete page
 	MOD_SITES_PAGEDELETED				= Deleted page
+	MOD_SITES_PAGEDELETE				= Delete page
 	MOD_SITES_PAGEDELETEDTREE			= Deleted page and all sub pages
+	MOD_SITES_PAGEDELETECONFIRM			= Do you really want to delete the page?
+
+	MOD_SITES_DELETEONLYTHIS			= Delete this page only, subpages will be moved up one level.
+	MOD_SITES_DELETEALL					= Delete this page and all subpages.
 	
 	

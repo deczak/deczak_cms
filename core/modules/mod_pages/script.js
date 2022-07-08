@@ -7,77 +7,102 @@ class	cmsIndexList
 	{
 	}
 	
-	init(languagesList)
+	init(languagesList, activeLanguage)
 	{
-		this.requestData(null);
+		this.requestData(activeLanguage);
 
 		this.languagesList = languagesList;
 	}
 
 	onXHRSuccess(response, callInstance)
 	{
+
+		console.log(response);
+
 		if(response.state != 0)
 		{
 			return;
 		}
 		
-		let	tableBody 	= document.getElementById('table-body-overview');
+		let	tableBody 	= document.getElementById('page-list-overview');
 			tableBody.innerHTML = '';
 
-		let numObjects 	= Object.keys(response.data).length;
+		let listNode = document.createElement('ul');
 
-		for(let i = 0; i < numObjects; i++)
+		tableBody.append(listNode);
+
+		callInstance.constructNestedList(response.data, listNode);
+	}
+
+	constructNestedList(pageList, destNode)
+	{
+		for(let i in pageList)
 		{
-			let	template = callInstance.replaceProcess(response.data[i]);
-
-			let tableRow = document.createElement('tr');
-				tableRow.classList.add('trigger-batch-item');
-				tableRow.innerHTML = template;
+			if(typeof pageList[i] === 'function')
+				continue;
 				
-			if(callInstance.languagesList[response.data[i].page_language].lang_locked)
+			let	template = document.getElementById('template-page-item').innerHTML;
+
+			let levelFolderNode = document.createElement('span');
+				levelFolderNode.classList.add('level-folder');
+
+			for(let e = 1; e < pageList[i].level; e++)
 			{
-				tableRow.querySelectorAll('.bach-item-menu .dropdown-content a[data-right="edit"]').forEach(function(element){
-					element.remove();
-				});
+				levelFolderNode.innerHTML += ' <b>&mdash;</b> ';
+			}
+			
+			if(pageList[i].create_time == '0') pageList[i].create_time = ''; else pageList[i].create_time = cmstk.formatDate(pageList[i].create_time, 'Y-m-d @ H:i:s');
+			if(pageList[i].update_time == '0') pageList[i].update_time = ''; else pageList[i].update_time = cmstk.formatDate(pageList[i].update_time, 'Y-m-d @ H:i:s');
+
+			template = template.replaceAll('%NUM_CHILDNODES%', (typeof pageList[i].childnodes !== 'undefined' ? Object.keys(pageList[i].childnodes).length : 0));
+			template = template.replaceAll('%PAGE_NAME%', levelFolderNode.outerHTML + pageList[i].page_name);
+			template = template.replaceAll('%PAGE_PATH%', CMS.SERVER_URL +''+ ((CMS.LANGUAGE_DEFAULT_IN_URL || pageList[i].page_language !== CMS.LANGUAGE_DEFAULT) ? pageList[i].page_language +'/' : '') + pageList[i].page_path.substr(1));
+			template = template.replaceAll('%NODE_ID%', pageList[i].node_id);
+			template = template.replaceAll('%PAGE_LANGUAGE%', pageList[i].page_language);
+			//template = template.replaceAll('%CREATE_TIME%', pageList[i].create_time);
+			template = template.replaceAll('%UPDATE_TIME%', (pageList[i].update_time !== '' ? pageList[i].update_time : pageList[i].create_time));
+
+			if(pageList[i].page_path !== '/')
+			{
+				template = template.replaceAll('%BUTTON_DELETE%', '<button class="button icon trigger-delete-page"><i class="fas fa-trash-alt"></i></button>');
+				template = template.replaceAll('%BUTTON_MOVE%', '<button class="button icon trigger-move-subpage"><i class="fas fa-share" style="font-size:1.2em;"></i></button>');
 			}
 			else
 			{
-				tableRow.querySelector('.bach-item-menu .dropdown-content a[data-right="view"]').remove();
+				template = template.replaceAll('%BUTTON_DELETE%', '&nbsp;');
+				template = template.replaceAll('%BUTTON_MOVE%', '&nbsp;');
 			}
 
-			tableBody.append(tableRow);
+			let listItemNode = document.createElement('li');
+				listItemNode.innerHTML = template;
+
+			if(pageList[i].level === 1)
+				listItemNode.classList.add('open');
+
+
+			if(typeof this.openedNodeIdList[pageList[i].node_id] !== 'undefined' && this.openedNodeIdList[pageList[i].node_id])
+				listItemNode.classList.add('open');
+
+			if(typeof pageList[i].childnodes !== 'undefined' && Object.keys(pageList[i].childnodes).length > 0)
+			{
+				let listNode = document.createElement('ul');
+
+				this.constructNestedList(pageList[i].childnodes, listNode)
+
+				listItemNode.appendChild(listNode);
+			}
+
+			destNode.appendChild(listItemNode);
 		}
-		
-		document.pIndexSelector.bindEvents();
 	}
 
-	replaceProcess(object)
-	{
-		if(object.is_frontend == 1)
-			object.is_frontend = 'Frontend';
-		else
-			object.is_frontend = 'Backend';
-
-		let	spacer = (object.page_path !== '/' ? object.level * 20 : 0);
-				
-		if(object.create_time == '0') object.create_time = ''; else object.create_time = cmstk.formatDate(object.create_time, 'Y-m-d @ H:i:s');
-		if(object.update_time == '0') object.update_time = ''; else object.update_time = cmstk.formatDate(object.update_time, 'Y-m-d @ H:i:s');
-			
-		let	template = document.getElementById('template-table-row-page').innerHTML;
-			template = template.replace(/%NODE_ID%/g, object.node_id);
-			template = template.replace(/%PAGE_NAME%/g, object.page_name);
-			template = template.replace(/%PAGE_LANGUAGE%/g, object.page_language);
-			template = template.replace(/%PAGE_PATH%/g, object.page_path);
-			template = template.replace(/%SPACER%/g, spacer);
-			template = template.replace(/%CREATE_TIME%/g, object.create_time);
-			template = template.replace(/%UPDATE_TIME%/g, object.update_time);
-
-		return template;
-	}
-
-	requestData(language)
+	requestData(language, openedNodeIdList = [])
 	{
 		var	that = this;
+
+		this.openedNodeIdList = openedNodeIdList;
+
+		
 
 		var	formData = new FormData;
 			formData.append('cms-xhrequest','raw-data');
@@ -89,6 +114,5 @@ class	cmsIndexList
 
 		cmstk.callXHR(requestTarget, formData, that.onXHRSuccess, cmstk.onXHRError, that, 'index');
 	}
-
 
 }

@@ -449,4 +449,16 @@ class	controllerBlog extends CController
 
 		return (count($modelPageObject -> getResult()) != 0 ? $modelPageObject -> getResult()[0] : NULL);
 	}
+
+	public function
+	registerSystemFunction(cmsSystemModules $cmsSystemModules)
+	{
+		$cmsSystemModules -> register(cmsSystemModules::SECTION_TOOLBAR, [$this, 'systemFunctionToolbar']);
+	}
+
+	public function
+	systemFunctionToolbar(array $params = [])
+	{
+
+	}
 }

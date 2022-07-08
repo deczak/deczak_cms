@@ -46,6 +46,8 @@ class CModules extends CSingleton
 
 		cmsLog::add('CModules::initialize -- Initialized CModules Instance');
 
+		$instance -> registerSystemFunction();
+
 		return $instance;
 	}
 
@@ -95,7 +97,7 @@ class CModules extends CSingleton
 
 		switch($moduleInstance -> module_type) 
 		{
-			case 'core'   :	include CMS_SERVER_ROOT.DIR_CORE.DIR_MODULES. $moduleInstance -> module_location .'/'. $moduleInstance -> module_controller .'.php';
+			case 'core'   :	include_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODULES. $moduleInstance -> module_location .'/'. $moduleInstance -> module_controller .'.php';
 
 							$moduleConfig 	= file_get_contents( CMS_SERVER_ROOT.DIR_CORE.DIR_MODULES. $moduleInstance -> module_location .'/module.json');
 							$moduleConfig 	= ($moduleConfig !== false ? json_decode($moduleConfig) : [] );	
@@ -120,7 +122,7 @@ class CModules extends CSingleton
 							$this -> loadedList[] = $this -> modulesList[$moduleIndex];
 							return $this -> modulesList[$moduleIndex];
 							
-			case 'mantle' : include CMS_SERVER_ROOT.DIR_MANTLE.DIR_MODULES. $moduleInstance -> module_location .'/'. $moduleInstance -> module_controller .'.php';
+			case 'mantle' : include_once CMS_SERVER_ROOT.DIR_MANTLE.DIR_MODULES. $moduleInstance -> module_location .'/'. $moduleInstance -> module_controller .'.php';
 
 							$moduleConfig 	= file_get_contents( CMS_SERVER_ROOT.DIR_MANTLE.DIR_MODULES. $moduleInstance -> module_location .'/module.json');
 							$moduleConfig 	= ($moduleConfig !== false ? json_decode($moduleConfig) : [] );	
@@ -479,6 +481,71 @@ class CModules extends CSingleton
 		$instance  = static::instance();
 		$modulesResources = new CModulesResources;
 		$modulesResources -> generateResources($instance->getModules(true));
+	}
+
+	/**
+	 * 	Register the Modules with system function to cmsSystemModules
+	 */
+	private function registerSystemFunction() : void
+	{
+		foreach($this -> modulesList as $module)
+		{
+			if(!$module -> is_systemFunction)
+				continue;
+
+			switch($module -> module_type) 
+			{
+				case 'core'   :	include_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODULES. $module -> module_location .'/'. $module -> module_controller .'.php';
+
+								$moduleConfig 	= file_get_contents( CMS_SERVER_ROOT.DIR_CORE.DIR_MODULES. $module -> module_location .'/module.json');
+								$moduleConfig 	= ($moduleConfig !== false ? json_decode($moduleConfig) : [] );	
+
+								$pModulesInstall = new CModulesInstall;
+								$moduleData = $pModulesInstall -> getModuleData($moduleConfig, $module -> module_location, $module -> module_type);
+
+								if($moduleData === false)
+								{
+									cmsLog::add('CModules::registerSystemFunction -- Unable to retrieve modul info for module-ID '. $module -> module_id, true);
+									continue 2;
+								}
+
+								$moduleData = json_decode(json_encode($moduleData));
+
+								$moduleInfo = (object)$moduleData;
+								$moduleInfo -> user_rights = $this -> m_pUserRights -> getModuleRights($module -> module_id);
+								
+				case 'mantle' : include_once CMS_SERVER_ROOT.DIR_MANTLE.DIR_MODULES. $module -> module_location .'/'. $module -> module_controller .'.php';
+
+								$moduleConfig 	= file_get_contents( CMS_SERVER_ROOT.DIR_MANTLE.DIR_MODULES. $module -> module_location .'/module.json');
+								$moduleConfig 	= ($moduleConfig !== false ? json_decode($moduleConfig) : [] );	
+
+								$pModulesInstall = new CModulesInstall;
+								$moduleData = $pModulesInstall -> getModuleData($moduleConfig, $module -> module_location, $module -> module_type);
+
+								if($moduleData === false)
+								{
+									cmsLog::add('CModules::registerSystemFunction -- Unable to retrieve modul info for module-ID '. $module -> module_id, true);
+									continue 2;
+								}
+
+								$moduleData = json_decode(json_encode($moduleData));
+
+								$moduleInfo = (object)$moduleData;
+								$moduleInfo -> user_rights = $this -> m_pUserRights -> getModuleRights($module -> module_id);
+			}
+
+			if(!empty($moduleInfo))
+			{
+				$empty = new stdClass;
+
+				$moduleInstance = new $module -> module_controller($module, $empty);
+
+				if(!method_exists($moduleInstance, 'registerSystemFunction'))
+					continue;
+
+				$moduleInstance -> registerSystemFunction(cmsSystemModules::instance());
+			}
+		}
 	}
 }
 
@@ -1023,6 +1090,7 @@ class CModulesInstallS1 // Module Scheme 1
 		$moduleData['module']['module_desc']		= $_moduleConfig -> module_desc;
 		$moduleData['module']['module_icon']		= $_moduleConfig -> module_icon;
 		$moduleData['module']['module_group']		= $_moduleConfig -> module_group;
+		$moduleData['module']['is_system_module']	= $_moduleConfig -> system_module ?? '0';
 		$moduleData['module']['is_frontend']		= strval($_moduleConfig -> module_frontend);
 		$moduleData['module']['is_active']			= '1';
 		$moduleData['module']['create_time']		= $timestamp;
@@ -1158,6 +1226,7 @@ class CModulesInstallS2 // Module Scheme 2
 			$moduleData['module']['module_desc']		= $_moduleConfig -> module -> desc;
 			$moduleData['module']['module_icon']		= $_moduleConfig -> module -> icon;
 			$moduleData['module']['module_group']		= $_moduleConfig -> module -> group;
+			$moduleData['module']['is_system_module']		= $_moduleConfig -> module -> system_module ?? '0';
 			$moduleData['module']['is_frontend']		= strval($_moduleConfig -> module -> frontend);
 			$moduleData['module']['is_active']			= '1';
 			$moduleData['module']['create_time']		= $timestamp;

@@ -2,12 +2,14 @@
 class	cmsModal
 {
 	static BTN_LOCATION = { TOP_RIGHT : 1, BOTTOM_LEFT : 2, BOTTOM_RIGHT : 3 };
+	static TITLE_STATE = { DEFAULT : 1, RED : 2 };
 	
 	constructor(params = null)
 	{
 		this.buttonsList = [];
 		this.nodeModal	 = null;
 		this.modalTitle  = '';
+		this.modalTitleState  = cmsModal.TITLE_STATE.DEFAULT;
 	}
 
 	/**
@@ -22,9 +24,10 @@ class	cmsModal
 	/**
 	 * 	Set a title for the Modal
 	 */
-	setTitle(title)
+	setTitle(title, titleState = cmsModal.TITLE_STATE.DEFAULT)
 	{
 		this.modalTitle = title;
+		this.modalTitleState = titleState;
 		return this;
 	}
 
@@ -53,6 +56,7 @@ class	cmsModal
 		{
 			let nodeTitle = document.createElement('h4');
 			nodeTitle.innerHTML = this.modalTitle.trim();
+			nodeTitle.setAttribute('data-state', this.modalTitleState);
 			nodeModalChild.append(nodeTitle);
 
 		}
@@ -70,7 +74,7 @@ class	cmsModal
 		let bottomButtonBoxLeft = document.createElement('div');
 
 		for(let i = 0; i < this.buttonsList.length; i++)
-		{ console.log(srcInstance.buttonsList[i]);
+		{
 			let nodeButton = document.createElement('button');
 			nodeButton.type = 'button'
 			nodeButton.classList.add('ui', 'button');

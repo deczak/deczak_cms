@@ -21,6 +21,7 @@ class schemeModules extends CScheme
 
 		$this -> addColumn('is_frontend', DB_COLUMN_TYPE_BOOL) -> setAttribute(DB_COLUMN_ATTR_UNSIGNED);
 		$this -> addColumn('is_active', DB_COLUMN_TYPE_BOOL) -> setAttribute(DB_COLUMN_ATTR_UNSIGNED);
+		$this -> addColumn('is_systemFunction', DB_COLUMN_TYPE_BOOL) -> setAttribute(DB_COLUMN_ATTR_UNSIGNED) -> setDefault('0');
 
 		$this -> addColumnGroup(DB_COLUMN_GROUP_CREATE);
 		$this -> addColumnGroup(DB_COLUMN_GROUP_UPDATE);

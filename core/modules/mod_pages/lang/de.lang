@@ -9,7 +9,8 @@
 ##	Overview
 
 	MOD_SITES_OV_TABLE_NODEID			= Node-ID
-	MOD_SITES_OV_TABLE_PAGETITLE		= Title
+	MOD_SITES_OV_TABLE_PAGETITLE		= Titel
+	MOD_SITES_OV_TABLE_PAGENAME			= Seitenname
 	MOD_SITES_OV_TABLE_PAGEURL			= URL
 
 	MOD_SITES_OV_TABLE_PAGECREATE		= Unterseite erstellen
@@ -19,14 +20,22 @@
 
 	MOD_SITES_ERR_NOTCREATED			= Neue Seite konnte nicht erstellt werden
 	MOD_SITES_PAGECREATED				= Neue Seite erstellen
+	MOD_SITES_PAGECREATE				= Neue Unterseite erstellen
+	MOD_SITES_PAGEMOVE					= Seite verschieben zu neuer Elternseite
 	
 	MOD_SITES_NEWPAGE_NAME				= Unbenannte Seite
+
+	MOD_SITES_PAGEDESC					= Seitenbeschreibung (Meta description)
 	
 ##	Delete
 
 	MOD_SITES_ERR_NOTDELETED			= Seite konnte nicht gelöscht werden
 	MOD_SITES_PAGEDELETED				= Seite gelöscht
+	MOD_SITES_PAGEDELETE				= Seite löschen
 	MOD_SITES_PAGEDELETEDTREE			= Seite und Unterseiten gelöscht
+	MOD_SITES_PAGEDELETECONFIRM			= Möchten sie wirklich die Seite löschen?
+	MOD_SITES_DELETEONLYTHIS			= Nur diese Seite löschen, Unterseiten werden eine Ebene höher verschoben.
+	MOD_SITES_DELETEALL					= Diese Seite und alle Unterseiten löschen.
 	
 
 	

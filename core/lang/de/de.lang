@@ -20,6 +20,7 @@
 	BUTTON_EDIT			=	Bearbeiten
 	BUTTON_CREATE		=	Erstellen
 	BUTTON_REFRESH		=	Aktualisieren
+	BUTTON_CANCEL		=	Abbrechen
 	
 	YES					=	Ja
 	NO					=	Nein

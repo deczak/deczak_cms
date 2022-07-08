@@ -64,7 +64,6 @@ class cmsSystemModules extends CSingleton implements IteratorAggregate
 		}
 
 		$this -> systemFunctionList[] = new cmsSystemModulesFunction($section, $systemFunction);
-
 	}
 
     public function

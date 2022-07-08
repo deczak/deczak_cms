@@ -52,6 +52,15 @@
 						</tbody>
 					</table>
 				</div>
+
+
+
+<?php
+	
+#cmsSystemModules::instance() -> call(cmsSystemModules::SECTION_TOOLBAR);
+
+?>
+
 			</fieldset>		
 					
 			<!-- page name & description -->

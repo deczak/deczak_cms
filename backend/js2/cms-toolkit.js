@@ -137,6 +137,7 @@ class cmsNode
 	{
 		let formData 		= new FormData();
 			formData.append('language', language ?? 'en');
+			formData.append('listtype', 'simple');
 
 		let	requestTarget	= CMS.SERVER_URL_BACKEND +'pages';
 	

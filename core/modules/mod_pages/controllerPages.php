@@ -23,13 +23,15 @@ class	controllerPages extends CController
 		##	Set default target if not exists
 
 
-
 		$controllerAction = $this -> getControllerAction_v2($_rcaTarget, $_xhrInfo, 'view');
 
 
 			// temp .. needs a rewrite ...
-		$rca = (isset($_rcaTarget[$this -> objectInfo -> object_id]) ? $_rcaTarget[$this -> objectInfo -> object_id] : 'view');
 
+		#if($controllerAction !== 'delete')
+			$rca = (isset($_rcaTarget[$this -> objectInfo -> object_id]) ? $_rcaTarget[$this -> objectInfo -> object_id] : 'view');
+		#else 
+		#	$rca = $controllerAction;
 
 
 
@@ -55,7 +57,7 @@ class	controllerPages extends CController
 
 
 
-		if($_xhrInfo !== null && $_xhrInfo -> isXHR && $_xhrInfo -> action !== 'update-site' && !empty($_GET['cms-edit-page-node']))
+		if($_xhrInfo !== null && $_xhrInfo -> isXHR && $_xhrInfo -> action !== 'update-site' && $_xhrInfo -> action !== 'delete' && $_xhrInfo -> action !== 'movesub' && $_xhrInfo -> action !== 'deletetree' && $_xhrInfo -> action !== 'create' && !empty($_GET['cms-edit-page-node']))
 			$_xhrInfo -> action = 'view';
 		
 
@@ -66,6 +68,9 @@ class	controllerPages extends CController
 
 		if($_xhrInfo !== null && $_xhrInfo -> isXHR && $_xhrInfo -> action === 'update-site')
 			$_xhrInfo -> action = 'edit';
+
+
+
 		
 
 		if($_xhrInfo !== null && $_xhrInfo -> isXHR && $_xhrInfo -> objectId === $this -> objectInfo -> object_id)
@@ -76,18 +81,18 @@ class	controllerPages extends CController
 		$enableEdit 	= $this -> existsUserRight('edit');
 		$enableDelete	= $enableEdit;
 
-
 		$logicDone = false;
 		switch($controllerAction)
 		{
 			case 'xhr_view':
 			case 'view': $logicDone = $this -> logicView($_pDatabase, $_logicResult, $enableEdit, $enableDelete); break;
 				
-			case 'create': $logicDone = $this -> logicXHRCreate($_pDatabase); break;
+			case 'xhr_create': $logicDone = $this -> logicXHRCreate($_pDatabase); break;
+			case 'xhr_movesub': $logicDone = $this -> logicXHRMovesub($_pDatabase); break;
 
 
-			case 'delete': $logicDone = $this -> logicXHRDelete($_pDatabase, $_xhrInfo); break;	
-			case 'deletetree': $logicDone = $this -> logicXHRDeleteTree($_pDatabase, $_xhrInfo); break;	
+			case 'xhr_delete': $logicDone = $this -> logicXHRDelete($_pDatabase, $_xhrInfo); break;	
+			case 'xhr_deletetree': $logicDone = $this -> logicXHRDeleteTree($_pDatabase, $_xhrInfo); break;	
 
 			case 'xhr_edit'     : $logicDone = $this -> logicXHREdit($_pDatabase, $_xhrInfo); break;
 			case 'xhr_index'    : 	  $logicDone = $this -> logicXHRIndex($_pDatabase, $enableEdit, $enableDelete);	break;
@@ -135,6 +140,7 @@ class	controllerPages extends CController
 		$pURLVariables	 =	new CURLVariables();
 		$requestList		 =	[];
 		$requestList[] 	 = 	[	"input" => "language", "validate" => "strip_tags|!empty", 	"use_default" => true, "default_value" => 'en'  ];
+		$requestList[] 	 = 	[	"input" => "listtype", "validate" => "strip_tags|!empty", 	"use_default" => true, "default_value" => 'structured'  ];
 		$pURLVariables -> retrieve($requestList, false, true); 
 		$urlVarList		 = $pURLVariables ->getArray();
 
@@ -149,7 +155,12 @@ class	controllerPages extends CController
 			$validationErr = true;
 		}											
 
-		$responseData = $modelSitemap -> getResult();
+		$responseData = [];
+
+		if($urlVarList['listtype'] === 'structured')
+			$this->getStructuredArray($modelSitemap -> getResult(), 0, 1, 0, $responseData);
+		else
+			$responseData = $modelSitemap -> getResult();
 
 		tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
 	
@@ -444,15 +455,24 @@ class	controllerPages extends CController
 	private function
 	logicXHRCreate(CDatabaseConnection &$_pDatabase) : bool
 	{
+		$validationErr =	false;
+		$validationMsg =	'';
+		$responseData = 	[];
+
 		$pURLVariables	 =	new CURLVariables();
 		$requestList		 =	[];
 		$requestList[] 	 = 	[	"input" => "cms-edit-page-lang", "validate" => "strip_tags|!empty", 	"use_default" => true, "default_value" => 'en'  ];
 		$requestList[] 	 = 	[	"input" => "cms-edit-page-node",   "validate" => "strip_tags|!empty", 	"use_default" => true, "default_value" => false  ];
 		$pURLVariables -> retrieve($requestList, true, false); 
+
+		$requestList[] 	 = 	[	"input" => "page_name",   "validate" => "trim|strip_tags|!empty", 	"use_default" => true, "default_value" => false  ];
+		$requestList[] 	 = 	[	"input" => "page_description",   "validate" => "trim|strip_tags|!empty", 	"use_default" => true, "default_value" => false  ];
+		$pURLVariables -> retrieve($requestList, false, true); 
 		$urlVarList		 = $pURLVariables ->getArray();
 
-		$urlVarList['page_name'] = CLanguage::string('MOD_SITES_NEWPAGE_NAME');
+		$urlVarList['page_name'] = (empty($urlVarList['page_name']) ? CLanguage::string('MOD_SITES_NEWPAGE_NAME') : $urlVarList['page_name']);
 		$urlVarList['page_template'] = 'default';
+		$urlVarList['page_description'] = (!empty($urlVarList['page_description']) ? $urlVarList['page_description'] : '');
 
 		$urlVarList['hidden_state']	=	4;
 
@@ -471,17 +491,123 @@ class	controllerPages extends CController
 			$sitemap 	-> generate($_pDatabase);	
 
 			CMessages::add(CLanguage::string('MOD_SITES_PAGECREATED') , MSG_OK);
+			$validationMsg = CLanguage::string('MOD_SITES_PAGECREATED');
 		}
 		else
 		{
 			CMessages::add(CLanguage::string('MOD_SITES_ERR_NOTCREATED') , MSG_WARNING);
+			$validationMsg = CLanguage::string('MOD_SITES_ERR_NOTCREATED');
 		}
+		tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
 		return false;
 	}
 
+
+	
 	private function
-	logicXHRDelete(CDatabaseConnection &$_pDatabase) : bool
+	logicXHRMovesub(CDatabaseConnection &$_pDatabase) : bool
 	{
+		$validationErr =	false;
+		$validationMsg =	'';
+		$responseData = 	[];
+
+		$pURLVariables	 =	new CURLVariables();
+		$requestList		 =	[];
+		$requestList[] 	 = 	[	"input" => "cms-edit-page-node",   "validate" => "strip_tags|!empty", 	"use_default" => true, "default_value" => false  ];
+		$pURLVariables -> retrieve($requestList, true, false); 
+
+		$requestList[] 	 = 	[	"input" => "new-parent-node-id",   "validate" => "strip_tags|!empty", 	"use_default" => true, "default_value" => false  ];
+		$pURLVariables -> retrieve($requestList, false, true); 
+		$urlVarList		 = $pURLVariables ->getArray();
+
+		$modelCondition = new CModelCondition();
+		$modelCondition -> where('node_id', $urlVarList['cms-edit-page-node']);		
+		
+
+
+		$this -> m_modelPage  = new modelPage();
+
+		$this -> m_modelPage -> move($_pDatabase, $urlVarList['cms-edit-page-node'], $urlVarList['new-parent-node-id']);
+
+
+
+
+
+		/*
+		
+				Bewege 		$urlVarList['cms-edit-page-node']			zu 			$urlVarList['new-parent-node-id']
+		
+		
+
+				->	von der Zielparent Seite das letzte child finden
+
+				->	right vom letzten child +1 ist das neue left der zu verschiebenen seite
+
+				->	die menge der childs der zu verschiebenden seite +1 ergibt das neue right der zu verschiebenen seite
+
+				-> 	alle seiten ab right Zielparent müssen um die menge verschoben werden die bei der zuverschiebenden seite vorhanden sind 
+
+				->	dem ehemaligem parent muss dann die lücke wieder geschlossen werden durch die 
+
+
+				-----
+
+				->	Daten der zu verschiebenen Seite abrufen mit left und right
+
+				-> 	Daten der neuen parent Seite abrufen mit left und right
+
+				->	Menge der Punkte ermitteln für die Korrekturen
+
+
+
+
+		
+		
+		*/
+
+
+
+
+
+
+
+
+
+
+		
+		/*
+		$this -> m_modelPage  = new modelPage();
+		if($this -> m_modelPage -> delete($_pDatabase, $modelCondition))
+		{
+			$_pHTAccess  = new CHTAccess();
+			$_pHTAccess -> generatePart4Frontend($_pDatabase);
+			$_pHTAccess -> writeHTAccess($_pDatabase);
+
+			$sitemap  	 = new CXMLSitemap();
+			$sitemap 	-> generate($_pDatabase);	
+
+			#CMessages::add(CLanguage::string('MOD_SITES_PAGEDELETED') , MSG_OK);
+			$validationMsg = CLanguage::string('MOD_SITES_PAGEDELETED');
+		}
+		else
+		{
+			#CMessages::add(CLanguage::string('MOD_SITES_ERR_NOTDELETED') , MSG_WARNING);
+			$validationMsg = CLanguage::string('MOD_SITES_ERR_NOTDELETED');
+		}
+
+		*/
+
+		tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
+		return false;
+	}	
+
+	private function
+	logicXHRDelete(CDatabaseConnection &$_pDatabase, object $_xhrInfo) : bool
+	{
+		$validationErr =	false;
+		$validationMsg =	'';
+		$responseData = 	[];
+
 		$pURLVariables	 =	new CURLVariables();
 		$requestList		 =	[];
 		$requestList[] 	 = 	[	"input" => "cms-edit-page-node",   "validate" => "strip_tags|!empty", 	"use_default" => true, "default_value" => false  ];
@@ -501,18 +627,26 @@ class	controllerPages extends CController
 			$sitemap  	 = new CXMLSitemap();
 			$sitemap 	-> generate($_pDatabase);	
 
-			CMessages::add(CLanguage::string('MOD_SITES_PAGEDELETED') , MSG_OK);
+			#CMessages::add(CLanguage::string('MOD_SITES_PAGEDELETED') , MSG_OK);
+			$validationMsg = CLanguage::string('MOD_SITES_PAGEDELETED');
 		}
 		else
 		{
-			CMessages::add(CLanguage::string('MOD_SITES_ERR_NOTDELETED') , MSG_WARNING);
+			#CMessages::add(CLanguage::string('MOD_SITES_ERR_NOTDELETED') , MSG_WARNING);
+			$validationMsg = CLanguage::string('MOD_SITES_ERR_NOTDELETED');
 		}
+
+		tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
 		return false;
 	}	
 
 	private function
-	logicXHRDeleteTree(CDatabaseConnection &$_pDatabase) : bool
+	logicXHRDeleteTree(CDatabaseConnection &$_pDatabase, object $_xhrInfo) : bool
 	{
+		$validationErr =	false;
+		$validationMsg =	'';
+		$responseData = 	[];
+
 		$pURLVariables	 =	new CURLVariables();
 		$requestList		 =	[];
 		$requestList[] 	 = 	[	"input" => "cms-edit-page-node",   "validate" => "strip_tags|!empty", 	"use_default" => true, "default_value" => false  ];
@@ -532,15 +666,47 @@ class	controllerPages extends CController
 			$sitemap  	 = new CXMLSitemap();
 			$sitemap 	-> generate($_pDatabase);	
 			
-			CMessages::add(CLanguage::string('MOD_SITES_PAGEDELETED') , MSG_OK);
+			#CMessages::add(CLanguage::string('MOD_SITES_PAGEDELETED') , MSG_OK);
+			$validationMsg = CLanguage::string('MOD_SITES_PAGEDELETED');
 		}
 		else
 		{
-			CMessages::add(CLanguage::string('MOD_SITES_ERR_NOTDELETED') , MSG_WARNING);
+			#CMessages::add(CLanguage::string('MOD_SITES_ERR_NOTDELETED') , MSG_WARNING);
+			$validationMsg = CLanguage::string('MOD_SITES_ERR_NOTDELETED');
 		}
+
+		tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
 		return false;
 	}	
 
+
+	private function getStructuredArray(array $sitemapList, int $index, int $level, int $parentIndex, array &$resultArray)
+	{
+
+		$parentIndex = $index;
+		for($i = $index; $i < count($sitemapList); $i++)
+		{
+			if($sitemapList[$i] -> level === $level)
+			{
+				$resultArray[$i] = $sitemapList[$i];
+				$parentIndex = $i;
+			}
+			elseif($sitemapList[$i] -> level > $level)
+			{
+				if(!property_exists($resultArray[$parentIndex], 'childnodes'))
+					$resultArray[$parentIndex] -> childnodes = [];
+
+				$i = $this -> getStructuredArray($sitemapList, $i, $sitemapList[$i] -> level, $i, $resultArray[$parentIndex] -> childnodes);
+				$i--;
+			}
+			elseif($sitemapList[$i] -> level < $level)
+			{
+				break;
+			}
+		}
+
+		return $i;
+	}
 
 
 }

@@ -12,39 +12,68 @@
 		?>
 	</div>
 
-	<table class="table-overview">
-		<thead>
-			<tr>
-				<td class="batch-selection-item"></td>
-				<td class="center node-id"><?php echo CLanguage::string('MOD_SITES_OV_TABLE_NODEID'); ?></td>
-				<td class=""><?php echo CLanguage::string('MOD_SITES_OV_TABLE_PAGETITLE'); ?></td>
-				<td class=""><?php echo CLanguage::string('MOD_SITES_OV_TABLE_PAGEURL'); ?></td>
-				<td class="time-create"><?php echo CLanguage::string('TIME_CREATE_AT'); ?></td>
-				<td class="time-update"><?php echo CLanguage::string('TIME_UPDATE_AT'); ?></td>
-				<td class="bach-item-menu"></td>
-			</tr>
-		</thead>
-		<tbody id="table-body-overview"><!-- javascript injection --></tbody>
-		<tfoot>
-			<tr>
-				<td class="batch-selection-item"><input type="checkbox" class="trigger-batch-item-all-checkbox" id="item-all"><label for="item-all"></label></td>
-				<td colspan="2"><?php echo CLanguage::string('SELECT_ALL'); ?></td>
-				<td></td>
-				<td></td>
-				<td></td>
-				<td></td>
-			</tr>			
-		</tfoot>
-	</table>
+
+	<div id="page-header-overview">
+
+		<div class="collapse">&nbsp;</div>
+
+		<div class="page-name"><?= CLanguage::string('MOD_SITES_OV_TABLE_PAGETITLE'); ?></div>
+
+		<div class="page-option-a"></div>
+		<div class="page-option-a"></div>
+		<div class="page-option-a"></div>
+		<div class="page-option-a"></div>
+
+		<div class="page-update"><?= CLanguage::string('TIME_UPDATE_AT'); ?></div>
+
+	</div>
+
+	<div id="page-list-overview">
+
+	</div>
 
 </div>
 
 <style>
 
-	div.be-module-container table.table-overview td.node-id { width:85px; }
-	div.be-module-container table.table-overview td.time-create { width:205px; }
-	div.be-module-container table.table-overview td.time-update { width:205px; }
-	div.be-module-container table.table-overview td.center { text-align:center; }
+	#page-header-overview,
+	#page-list-overview	li > div.item { display:flex; width:100%;  }
+
+	#page-list-overview	ul,
+	#page-list-overview	li { list-style:none; margin:0px; padding:0px; }
+	#page-list-overview	li { display:none;}
+	#page-list-overview > ul > li,
+	#page-list-overview	li.open > ul > li { display:block; }
+
+	#page-list-overview	div.item .collapse { position:relative; margin-top:2px; height: 17px;  margin-right:6px; margin-left:3px; width:17px; cursor:pointer; }
+	#page-list-overview	div.item .collapse:before { content: '+'; border:1px solid gray; padding:3px; background-color:white; width: 9px; height:9px; line-height: 9px;  position: absolute; text-align:center; }
+	#page-list-overview	li.open > div.item .collapse:before { content: '-'; line-height: 8px; }
+	#page-list-overview div.item .collapse[data-num-childs="0"],
+	#page-list-overview > ul > li > div.item .collapse { opacity:0; pointer-events:none; }
+	/*#page-list-overview ul > li { background-color:rgba(64, 128, 191, 10%); }*/
+
+	#page-list-overview	div.item { padding: 4px 0px; font-size:0.86em; }
+
+	#page-header-overview div.collapse { width:26px; }
+	#page-header-overview div { font-size: 0.65em; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; padding: 4px 0px; }
+	#page-header-overview { border-bottom: 1px solid rgb(80,80,80); }
+
+	#page-list-overview	div.page-name,
+	#page-header-overview div.page-name {  width: 25%; }
+
+	#page-list-overview	div.page-update,
+	#page-header-overview div.page-update {  width: 150px; margin-left:10px; }
+
+	#page-list-overview	div.page-option-a,
+	#page-header-overview div.page-option-a { width:28px; text-align:center; }
+	#page-list-overview	 a,
+	#page-list-overview	 button { padding:2px 4px; border:0px; background:none; color: rgba(0, 0, 0, 15%); text-shadow:none; }
+	#page-list-overview	 a:hover,
+	#page-list-overview	 button:hover { color: rgba(0, 0, 0, 100%); }
+	#page-list-overview	 a i,
+	#page-list-overview	 button i { pointer-events:none; }
+
+	#page-list-overview	div.item:hover { background-color:rgba(214,187,35,25%); }
 
 	.language-select-container { display:flex; padding:10px 20px; margin-bottom:25px; }
 	.language-select-container .trigger-language-select { border:1px solid grey; padding:3px 6px; padding-left:34px; position:relative; margin-right:10px; font-size:0.8em; }
@@ -52,45 +81,251 @@
 
 </style>
 
-<template id="template-table-row-page">
+<template id="template-page-item">
 	
-	<td class="batch-selection-item"><input type="checkbox" class="trigger-batch-item-checkbox" name="group-id[]" value="%NODE_ID%" id="item-%NODE_ID%"><label for="item-%NODE_ID%"></label></td>
-	<td class="center node-id">%NODE_ID%</td>
-	<td class=""><span style="display:inline-block; width:%SPACER%px;"></span>%PAGE_NAME%</td>
-	<td class="">%PAGE_PATH%</td>
-	<td class="time-create">%CREATE_TIME%</td>
-	<td class="time-update">%UPDATE_TIME%</td>
-	<td class="bach-item-menu"><span>&equiv;</span><div class="dropdown-content"><div></div>
-		<a data-right="view" href="<?php echo CMS_SERVER_URL_BACKEND . $pageRequest -> urlPath; ?>view/%PAGE_LANGUAGE%/%NODE_ID%?language=<?= CLanguage::getActive(); ?>"><?php echo CLanguage::string('VIEW'); ?></a>
-		<a data-right="edit" href="<?php echo CMS_SERVER_URL_BACKEND . $pageRequest -> urlPath; ?>view/%PAGE_LANGUAGE%/%NODE_ID%?language=<?= CLanguage::getActive(); ?>"><?php echo CLanguage::string('EDIT'); ?></a>
-		<a data-right="edit" class="trigger-page-option" data-xhr-overwrite-target="create/%PAGE_LANGUAGE%/%NODE_ID%"><?php echo CLanguage::string('MOD_SITES_OV_TABLE_PAGECREATE'); ?></a>
-		<a data-right="edit" class="trigger-page-option" data-xhr-overwrite-target="delete/%NODE_ID%"><?php echo CLanguage::string('DELETE'); ?></a>
-		<a data-right="edit" class="trigger-page-option" data-xhr-overwrite-target="deletetree/%NODE_ID%"><?php echo CLanguage::string('MOD_SITES_OV_TABLE_PAGEDELETETREE'); ?></a>
-		</div></td>
+
+	<div class="item" data-node-id="%NODE_ID%">
+		<div class="collapse trigger-collapse" data-num-childs="%NUM_CHILDNODES%"></div>
+		<div class="page-name">%PAGE_NAME% <a href="%PAGE_PATH%"><i class="fas fa-external-link-alt" style="font-size:0.9em"></i></a></div>
+		<div class="page-option-a"><a href="<?php echo CMS_SERVER_URL_BACKEND . $pageRequest -> urlPath; ?>view/%PAGE_LANGUAGE%/%NODE_ID%?language=<?= CLanguage::getActive(); ?>" target="_blank" class="button icon"><i class="fas fa-pen"></i></a></div>
+		<div class="page-option-a"><button class="button icon trigger-add-subpage"><i class="fas fa-plus-square"></i></button></div>
+		<div class="page-option-a">%BUTTON_MOVE%</div>
+		<div class="page-option-a">%BUTTON_DELETE%</div>
+		<div class="page-update">%UPDATE_TIME%</div>
+	</div>
+
 	
 </template>
 
 <script>
 
-	var indexList 		= null;
-	var	activeLanguage 	= '';
-	var	languagesList   = <?= json_encode(CLanguage::getLanguages()); ?>;
+	let indexList 		 = null;
+	let	activeLanguage 	 = '';
+	let	languagesList    = <?= json_encode(CLanguage::getLanguages()); ?>;
+	let openedNodeIdList = [];
 
-	document.addEventListener("DOMContentLoaded", function(){
+	document.addEventListener("DOMContentLoaded", function() {
+
+		for(let lang in languagesList)
+		{
+			activeLanguage = lang;
+			break;
+		}
 
 		indexList = new cmsIndexList();
-		indexList.init(languagesList);
-
+		indexList.init(languagesList, activeLanguage);
 	});	
 
 	document.addEventListener('click', function(event) {
-		var element = event.target; 
 
-		if(	element !== null && element.classList.contains('trigger-language-select'))	onLanguageSelect(element, event);
+		let element = event.target; 
 
-		if(	element !== null && element.classList.contains('trigger-page-option'))	onPageOption(element, event);
-		
+		if(	element !== null && element.classList.contains('trigger-language-select')) onLanguageSelect(element, event);
+
+		if(	element !== null && element.classList.contains('trigger-collapse'))	onToggleCollapse(element, event);
+
+		if(	element !== null && element.classList.contains('trigger-delete-page')) onPageDelete(element, event);
+
+		if(	element !== null && element.classList.contains('trigger-add-subpage')) onPageAdd(element, event);
+
+		if(	element !== null && element.classList.contains('trigger-move-subpage')) onPageSubMove(element, event);
+			
 	}, false);
+
+
+	function
+	onPageSubMoveOKSuccess(xhrResponse, srcInfo)
+	{
+
+		console.log('onPageSubMoveOKSuccess');
+		console.log(xhrResponse);
+
+		if(xhrResponse.state !== 0)
+			return;
+
+		openedNodeIdList[ srcInfo.select.node_id ] = true;
+		indexList.requestData(activeLanguage, openedNodeIdList);
+	}
+
+	function
+	onPageSubMoveOK(event)
+	{
+		$xhrAction = 'movesub';
+
+		let requestURL = CMS.SERVER_URL_BACKEND + CMS.PAGE_PATH + CMS.MODULE_TARGET + $xhrAction + '/' + event.detail.sourceNode.nodeId;
+
+		let	formData  = new FormData;
+			formData.append('new-parent-node-id', event.detail.select.node_id);
+
+		let	xhRequest = new cmsXhr;
+			xhRequest.request(requestURL, formData, onPageSubMoveOKSuccess, event.detail, $xhrAction);
+	}
+
+	window.addEventListener('event-modal-select-new-parent-page', function(event) { onPageSubMoveOK(event); });
+
+	function
+	onPageSubMove(buttonNode, buttonEvent)
+	{
+		let nodeId = buttonNode.closest('div.item').getAttribute('data-node-id');
+		
+		let	modalNode = new cmsModalNode;
+			modalNode.setEventNameOnSelected('event-modal-select-new-parent-page');
+			modalNode.open(
+				'<?= CLanguage::string('MOD_SITES_PAGEMOVE'); ?>', 
+				{nodeId:nodeId, buttonNode:buttonNode}, 
+				'fas fa-file',
+				CMS.LANGUAGES
+			);
+	}
+
+	function
+	onPageAddOKSuccess(xhrResponse, srcInfo)
+	{
+		if(xhrResponse.state !== 0)
+			return;
+
+		openedNodeIdList[ srcInfo.nodeId ] = true;
+		indexList.requestData(activeLanguage, openedNodeIdList);
+	}
+
+	function
+	onPageAddOK(buttonEvent, modalInstance, srcInfo)
+	{
+		let fieldList = modalInstance.getFieldList();
+
+		$xhrAction = 'create';
+
+		let requestURL = CMS.SERVER_URL_BACKEND + CMS.PAGE_PATH + CMS.MODULE_TARGET + $xhrAction + '/' + activeLanguage + '/' + fieldList['modal-page-node-id'];
+
+		let	formData  = new FormData;
+			formData.append('page_name', fieldList['modal-page-name']);
+			formData.append('page_description', fieldList['modal-page-description']);
+
+		let	xhRequest = new cmsXhr;
+			xhRequest.request(requestURL, formData, onPageAddOKSuccess, srcInfo, $xhrAction);
+
+		modalInstance.close(buttonEvent);
+	}
+
+	function
+	onPageAdd(buttonNode, buttonEvent)
+	{
+		let nodeId = buttonNode.closest('div.item').getAttribute('data-node-id');
+
+		let contentHTML = '';
+		
+			contentHTML += '<fieldset class="ui fieldset simply" style="background: unset; padding: 0px; margin-bottom: unset;">';
+			contentHTML += '<input type="hidden" name="modal-page-node-id" value="'+ nodeId +'">';
+			contentHTML += '<div>';
+			contentHTML += '<div class="fields" style="width: 100%; display: flex; flex-wrap: wrap;">';
+			contentHTML += '<div class="input width-100"><label><?= CLanguage::string('MOD_SITES_OV_TABLE_PAGENAME'); ?></label><input type="text" name="modal-page-name" value="" maxlength="100"></div>';
+			contentHTML += '<div class="input width-100"><label><?= CLanguage::string('MOD_SITES_PAGEDESC'); ?></label><textarea name="modal-page-description" maxlength="160"></textarea></div>';
+			contentHTML += '</div>';
+			contentHTML += '</div>';
+			contentHTML += '</fieldset>';
+
+		let content = document.createElement('div');
+			content.innerHTML = contentHTML;
+
+		let modalA = new cmsModal;
+			modalA	.addButton(new cmsModalCtrlButton(cmsModal.BTN_LOCATION.BOTTOM_LEFT, 'OK', onPageAddOK, 'fas fa-check', {srcButtonNode:buttonNode, nodeId:nodeId}))
+					.addButton(new cmsModalCtrlButton(cmsModal.BTN_LOCATION.BOTTOM_LEFT, '<?= CLanguage::string('BUTTON_CANCEL'); ?>', null, 'fas fa-times'))
+					.setTitle('<?= CLanguage::string('MOD_SITES_PAGECREATE'); ?>')
+					.create(content)
+					.open();
+	}
+
+	function
+	onPageDeleteOKSuccess(xhrResponse, srcInfo)
+	{
+		if(xhrResponse.state !== 0)
+			return;
+
+		let listItemNode = srcInfo.srcButtonNode.closest('li');
+
+		switch(srcInfo.xhrAction)
+		{
+			case 'delete':
+
+				indexList.requestData(activeLanguage, openedNodeIdList);
+				break
+
+			case 'deletetree':
+
+				listItemNode.remove();
+				break
+		}
+	}
+
+	function
+	onPageDeleteOK(buttonEvent, modalInstance, srcInfo)
+	{
+		let fieldList = modalInstance.getFieldList();
+
+		$xhrAction = '';
+
+		switch(fieldList['modal-page-delete-type'])
+		{
+			case 'pagetree':
+
+				$xhrAction = 'deletetree';
+				break;
+
+			case 'page':
+			default:
+			
+				$xhrAction = 'delete';
+				break;
+		}
+
+		srcInfo.xhrAction = $xhrAction;
+
+		let requestURL = CMS.SERVER_URL_BACKEND + CMS.PAGE_PATH + CMS.MODULE_TARGET + $xhrAction + '/' + fieldList['modal-page-node-id'];
+
+		let	formData  = new FormData;
+
+		let	xhRequest = new cmsXhr;
+			xhRequest.request(requestURL, formData, onPageDeleteOKSuccess, srcInfo, $xhrAction);
+
+		modalInstance.close(buttonEvent);
+	}
+
+	function
+	onPageDelete(buttonNode, buttonEvent)
+	{
+		let nodeId = buttonNode.closest('div.item').getAttribute('data-node-id');
+
+		let contentHTML = '';
+			contentHTML += '<?= CLanguage::string('MOD_SITES_PAGEDELETECONFIRM'); ?>';
+			contentHTML += '<fieldset style="margin-left:10px;margin-top:10px;">';
+			contentHTML += '<input type="hidden" name="modal-page-node-id" value="'+ nodeId +'">';
+			contentHTML += '<div style="margin-bottom: 4px;"><input type="radio" name="modal-page-delete-type" value="page" checked id="modal-page-delete-page"><label for="modal-page-delete-page"><?= CLanguage::string('MOD_SITES_DELETEONLYTHIS'); ?></label></div>';
+			contentHTML += '<div style="margin-bottom: 4px;"><input type="radio" name="modal-page-delete-type" value="pagetree" id="modal-page-delete-pagetree"><label for="modal-page-delete-pagetree"><?= CLanguage::string('MOD_SITES_DELETEALL'); ?></label></div>';
+			contentHTML += '</fieldset>';
+
+		let content = document.createElement('div');
+			content.innerHTML = contentHTML;
+
+		let modalA = new cmsModal;
+			modalA	.addButton(new cmsModalCtrlButton(cmsModal.BTN_LOCATION.BOTTOM_LEFT, '<?= CLanguage::string('BUTTON_DELETE'); ?>', onPageDeleteOK, 'fas fa-trash-alt', {srcButtonNode:buttonNode}))
+					.addButton(new cmsModalCtrlButton(cmsModal.BTN_LOCATION.BOTTOM_LEFT, '<?= CLanguage::string('BUTTON_CANCEL'); ?>', null, 'fas fa-times'))
+					.setTitle('<?= CLanguage::string('MOD_SITES_PAGEDELETE'); ?>', cmsModal.TITLE_STATE.RED)
+					.create(content)
+					.open();
+	}
+
+	function
+	onToggleCollapse(element)
+	{
+
+		let liNode = element.closest('li');
+		liNode.classList.toggle('open');
+
+		let nodeId = liNode.querySelector('div.item').getAttribute('data-node-id');
+
+		openedNodeIdList[ nodeId ] = liNode.classList.contains('open');
+
+	}
 
 	function
 	onLanguageSelect(element,event)
@@ -99,29 +334,9 @@
 		event.preventDefault();
 
 		activeLanguage = element.getAttribute('data-language');
-		indexList.requestData(activeLanguage);
+		indexList.requestData(activeLanguage, openedNodeIdList);
 
 		return false;
-	}
-
-	function
-	onPageOption(element,event)
-	{
-		event.stopPropagation();
-		event.preventDefault();
-
-		var formData 		= new FormData();
-		var	requestTarget	= CMS.SERVER_URL_BACKEND + CMS.PAGE_PATH + CMS.MODULE_TARGET + element.getAttribute('data-xhr-overwrite-target');
-
-		cmstk.callXHR(requestTarget, formData, onSuccessPageOption, cmstk.onXHRError, this);
-
-		return false;
-	}
-
-	function
-	onSuccessPageOption(response, instance)
-	{
-		indexList.requestData(activeLanguage);
 	}
 	
 </script>
