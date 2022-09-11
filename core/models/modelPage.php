@@ -485,22 +485,17 @@ class 	modelPage extends CModel
 	public function
 	move(CDatabaseConnection &$_pDatabase, int $nodeId2Move, int $nodeIdNewParent)
 	{
-
-
 		$_tablePagePath	=	$this -> m_schemePagePath 	-> getTableName();
 
 		$srcNodeList = [];
 		$this -> getNodeTree($_pDatabase, $nodeId2Move, $srcNodeList );
-
-
 
 		$srcNodeEdges = count($srcNodeList) * 2;
 
 		$newParentNodeInfo = [];
 		$this -> getNodeData($_pDatabase, $nodeIdNewParent, $newParentNodeInfo);
 
-	
-
+		// Make space on destination
 
 		$pagePathCond	 = new CModelCondition();
 		$pagePathCond	-> whereGreaterEven('node_rgt', $newParentNodeInfo -> node_rgt);
@@ -509,7 +504,6 @@ class 	modelPage extends CModel
 		$dtaObject 		-> prepareMode 		= false;
 		$_pDatabase		-> query(DB_UPDATE) -> table($_tablePagePath) -> dtaObject($dtaObject) -> condition($pagePathCond) -> exec();
 
-
 		$pagePathCond	 = new CModelCondition();
 		$pagePathCond	-> whereGreater('node_lft', $newParentNodeInfo -> node_rgt);
 		$dtaObject 		 = new stdClass();
@@ -517,20 +511,12 @@ class 	modelPage extends CModel
 		$dtaObject 		-> prepareMode 		= false;
 		$_pDatabase		-> query(DB_UPDATE) -> table($_tablePagePath) -> dtaObject($dtaObject) -> condition($pagePathCond) -> exec();
 
-
-
-
-
-
-
+		// Move nodes to destination
 
 		$movingNodeInfo = [];
 		$this -> getNodeData($_pDatabase, $nodeId2Move, $movingNodeInfo);
 
-
 		$edgeCorrection = $newParentNodeInfo -> node_rgt - $movingNodeInfo -> node_lft;
-
-
 
 		$pagePathCond	 = new CModelCondition();
 		$pagePathCond	-> whereBetween('node_lft', $movingNodeInfo -> node_lft, $movingNodeInfo -> node_rgt);
@@ -538,17 +524,11 @@ class 	modelPage extends CModel
 		$dtaObject 		-> node_lft 		= 'node_lft+('. $edgeCorrection .')';
 		$dtaObject 		-> node_rgt 		= 'node_rgt+('. $edgeCorrection .')';
 		$dtaObject 		-> node_level 		= $newParentNodeInfo -> node_level + 1;
-
+		$dtaObject 		-> page_language 	= $newParentNodeInfo -> page_language;
 		$dtaObject 		-> prepareMode 		= false;
 		$_pDatabase		-> query(DB_UPDATE) -> table($_tablePagePath) -> dtaObject($dtaObject) -> condition($pagePathCond) -> exec();
 
-
-
-
-
-
-
-
+		// remove space from previous location
 
 		$pagePathCond	 = new CModelCondition();
 		$pagePathCond	-> whereGreaterEven('node_rgt', $movingNodeInfo -> node_rgt);
@@ -557,16 +537,12 @@ class 	modelPage extends CModel
 		$dtaObject 		-> prepareMode 		= false;
 		$_pDatabase		-> query(DB_UPDATE) -> table($_tablePagePath) -> dtaObject($dtaObject) -> condition($pagePathCond) -> exec();
 
-
 		$pagePathCond	 = new CModelCondition();
 		$pagePathCond	-> whereGreater('node_lft', $movingNodeInfo -> node_rgt);
 		$dtaObject 		 = new stdClass();
 		$dtaObject 		-> node_lft 		= 'node_lft-'. $srcNodeEdges;
 		$dtaObject 		-> prepareMode 		= false;
 		$_pDatabase		-> query(DB_UPDATE) -> table($_tablePagePath) -> dtaObject($dtaObject) -> condition($pagePathCond) -> exec();
-
-
-
 	}
 			
 	private function

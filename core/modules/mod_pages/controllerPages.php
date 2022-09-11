@@ -566,36 +566,14 @@ class	controllerPages extends CController
 		*/
 
 
+		$_pHTAccess  = new CHTAccess();
+		$_pHTAccess -> generatePart4Frontend($_pDatabase);
+		$_pHTAccess -> writeHTAccess($_pDatabase);
+
+		$sitemap  	 = new CXMLSitemap();
+		$sitemap 	-> generate($_pDatabase);	
 
 
-
-
-
-
-
-
-		
-		/*
-		$this -> m_modelPage  = new modelPage();
-		if($this -> m_modelPage -> delete($_pDatabase, $modelCondition))
-		{
-			$_pHTAccess  = new CHTAccess();
-			$_pHTAccess -> generatePart4Frontend($_pDatabase);
-			$_pHTAccess -> writeHTAccess($_pDatabase);
-
-			$sitemap  	 = new CXMLSitemap();
-			$sitemap 	-> generate($_pDatabase);	
-
-			#CMessages::add(CLanguage::string('MOD_SITES_PAGEDELETED') , MSG_OK);
-			$validationMsg = CLanguage::string('MOD_SITES_PAGEDELETED');
-		}
-		else
-		{
-			#CMessages::add(CLanguage::string('MOD_SITES_ERR_NOTDELETED') , MSG_WARNING);
-			$validationMsg = CLanguage::string('MOD_SITES_ERR_NOTDELETED');
-		}
-
-		*/
 
 		tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
 		return false;
