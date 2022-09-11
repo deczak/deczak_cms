@@ -524,7 +524,7 @@ class 	modelPage extends CModel
 		$dtaObject 		-> node_lft 		= 'node_lft+('. $edgeCorrection .')';
 		$dtaObject 		-> node_rgt 		= 'node_rgt+('. $edgeCorrection .')';
 		$dtaObject 		-> node_level 		= $newParentNodeInfo -> node_level + 1;
-		$dtaObject 		-> page_language 	= $newParentNodeInfo -> page_language;
+		$dtaObject 		-> page_language 	= "'". $newParentNodeInfo -> page_language ."'";
 		$dtaObject 		-> prepareMode 		= false;
 		$_pDatabase		-> query(DB_UPDATE) -> table($_tablePagePath) -> dtaObject($dtaObject) -> condition($pagePathCond) -> exec();
 
