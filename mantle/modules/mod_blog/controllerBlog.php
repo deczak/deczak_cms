@@ -460,5 +460,7 @@ class	controllerBlog extends CController
 	systemFunctionToolbar(array $params = [])
 	{
 
+		require 'view/toolbar.php';
+	
 	}
 }
