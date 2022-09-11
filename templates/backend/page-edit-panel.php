@@ -55,12 +55,6 @@
 
 
 
-<?php
-	
-#cmsSystemModules::instance() -> call(cmsSystemModules::SECTION_TOOLBAR);
-
-?>
-
 			</fieldset>		
 					
 			<!-- page name & description -->
@@ -485,6 +479,14 @@
 
 				</div>
 			</fieldset>	
+
+			<?php
+
+			// Injected modules settings
+				
+			cmsSystemModules::instance() -> call(cmsSystemModules::SECTION_TOOLBAR);
+
+			?>
 
 			<!-- extended settings -->
 
