@@ -81,6 +81,24 @@ class	controllerPages extends CController
 		$enableEdit 	= $this -> existsUserRight('edit');
 		$enableDelete	= $enableEdit;
 
+
+
+
+
+
+
+		$pURLVariables	 =	new CURLVariables();
+		$requestList		 =	[];
+		$requestList[] 	 = 	[	"input" => "cms-object-id", "validate" => "strip_tags|!empty"  ];
+		$pURLVariables -> retrieve($requestList, false, true); 
+		$urlVarList		 = $pURLVariables ->getArray();
+
+
+		if(!empty($urlVarList['cms-object-id']))
+			$controllerAction = 'view';
+
+
+
 		$logicDone = false;
 		switch($controllerAction)
 		{
@@ -443,6 +461,10 @@ class	controllerPages extends CController
 											$validationMsg .= CLanguage::string('ERR_VALIDATIONFAIL');
 											$validationErr = true;
 										}
+
+
+			
+			cmsSystemModules::instance() -> call(cmsSystemModules::SECTION_TOOLBAR_EDIT);
 
 		
 			

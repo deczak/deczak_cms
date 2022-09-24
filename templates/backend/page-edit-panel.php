@@ -388,7 +388,7 @@
 					<input type="checkbox" name="apply_childs_auth" value="1" id="apply_childs_auth">
 					<label for="apply_childs_auth"><?= CLanguage::string('BEPE_PANEL_AUTHAPPLYCHILDS'); ?></label>	
 
-
+					</div>
 
 			</fieldset>				
 		
@@ -484,7 +484,11 @@
 
 			// Injected modules settings
 				
-			cmsSystemModules::instance() -> call(cmsSystemModules::SECTION_TOOLBAR);
+			cmsSystemModules::instance() -> call(
+				cmsSystemModules::SECTION_TOOLBAR,
+				[
+					'node_id' => $pageRequest -> node_id,
+				]);
 
 			?>
 

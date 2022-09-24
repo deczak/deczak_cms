@@ -6,13 +6,20 @@ include_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelTagsAllocation.php';
 include_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelSitemap.php';	
 include_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelPage.php';
 
+include_once CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CModulesTemplates.php';	
+include_once 'modelBlog.php';
+
 class	controllerBlog extends CController
 {
 	public function
 	__construct($_module, &$_object)
 	{
+
 		parent::__construct($_module, $_object);
 		$this -> moduleInfo -> user_rights[] = 'view';	// add view right as default for everyone
+
+
+		$this -> m_modelSimple = new modelSimple();
 	}
 	
 	public function
@@ -23,7 +30,7 @@ class	controllerBlog extends CController
 		$controllerAction = $this -> getControllerAction_v2($_rcaTarget, $_xhrInfo, 'view');
 
 		##	Check user rights for this target
-		
+	
 		if(!$this -> detectRights($controllerAction))
 		{
 			if($_xhrInfo !== null)
@@ -39,7 +46,7 @@ class	controllerBlog extends CController
 			CMessages::add(CLanguage::string('ERR_PERMISSON') , MSG_WARNING);
 			return false;
 		}
-
+		
 		if($_bEditMode && $_xhrInfo === null) 
 			$controllerAction = 'edit';
 			
@@ -72,13 +79,27 @@ class	controllerBlog extends CController
 	private function
 	logicView(CDatabaseConnection &$_pDatabase) : bool
 	{
+
+		$modelCondition = new CModelCondition();
+		$modelCondition -> where('object_id', $this -> objectInfo -> object_id);
+
+		$this -> m_modelSimple -> load($_pDatabase, $modelCondition);
+		$this -> m_modelSimple -> getResult()[0] -> params = json_decode($this -> m_modelSimple -> getResult()[0] -> params);
+
+
+		$moduleTemplate = new CModulesTemplates();
+		$moduleTemplate ->	load('blog', $this -> m_modelSimple -> getResult()[0] -> params -> template ?? 'list');
+	
+
 		$nodeList = $this -> getNodesList($_pDatabase, $this -> objectInfo -> node_id);
+
 
 		$this -> setView(	
 						'view',	
 						'',
 						[
 							'object' 	=> $this -> objectInfo,
+							'currentTemplate'	=> $moduleTemplate -> templatesList,
 							'nodeList'	=> $nodeList
 						]
 						);
@@ -89,22 +110,29 @@ class	controllerBlog extends CController
 	private function
 	logicEdit(CDatabaseConnection &$_pDatabase) : bool
 	{
-		$sitemapCondition = new CModelCondition();
-		$sitemapCondition -> where('node_id', $this -> objectInfo -> node_id);
+		$modelCondition = new CModelCondition();
+		$modelCondition -> where('object_id', $this -> objectInfo -> object_id);
 
-		$modelSitemap = new modelSitemap();
-		$modelSitemap -> load($_pDatabase, $sitemapCondition);
+		$this -> m_modelSimple -> load($_pDatabase, $modelCondition);
 
-		$sitemap = &$modelSitemap -> getResult();
+		$this -> m_modelSimple -> getResult()[0] -> params = json_decode($this -> m_modelSimple -> getResult()[0] -> params);
 
-		$this -> appendAdditionNodeData($_pDatabase, $sitemap);
+		$moduleTemplate = new CModulesTemplates();
+		$moduleTemplate ->	load('blog', $this -> m_modelSimple -> getResult()[0] -> params -> template ?? 'list');
+
+		$moduleTemplates = new CModulesTemplates();
+		$moduleTemplates ->	load('blog');
+
+		$nodeList = $this -> getNodesList($_pDatabase, $this -> objectInfo -> node_id);
 
 		$this -> setView(	
 						'edit',	
 						'',
 						[
 							'object' 	=> $this -> objectInfo,
-							'sitemap'	=> $modelSitemap -> getResult()
+							'currentTemplate'	=> $moduleTemplate -> templatesList,
+							'avaiableTemplates'	=> $moduleTemplates -> templatesList,
+							'nodeList'	=> $nodeList
 						]
 						);
 
@@ -123,8 +151,30 @@ class	controllerBlog extends CController
 								$_pFormVariables =	new CURLVariables();
 								$_request		 =	[];
 								$_request[] 	 = 	[	"input" => "simple-text",  "output" => "body", 			"validate" => "!empty" ]; 
+
+
+
+		$_request[] 	 = 	[	"input" => "blog-template",  		"validate" => "strip_tags|!empty" ]; 
+
+
 								$_pFormVariables-> retrieve($_request, false, true); // POST 
-								$_aFormData		 = $_pFormVariables ->getArray();
+								$urlVarList		 = $_pFormVariables ->getArray();
+
+
+
+			$modelCondition = new CModelCondition();
+			$modelCondition -> where('object_id', $_xhrInfo -> objectId);
+
+			$urlVarList['params']	= 	[
+											"template"			=> $urlVarList['blog-template']
+										];
+			$urlVarList['params']	 = 	json_encode($urlVarList['params'], JSON_FORCE_OBJECT);
+
+
+
+
+
+
 
 								if(empty($_xhrInfo -> objectId))
 								{
@@ -137,8 +187,7 @@ class	controllerBlog extends CController
 									$modelCondition -> where('object_id', $_xhrInfo -> objectId);
 
 
-									if(true)
-									#if($this -> m_modelSimple -> update($_pDatabase, $_aFormData, $modelCondition))
+									if($this -> m_modelSimple -> update($_pDatabase, $urlVarList, $modelCondition))
 									{
 										$validationMsg = 'Object updated';
 
@@ -149,6 +198,10 @@ class	controllerBlog extends CController
 										$_objectUpdate['update_reason']		=	'';
 
 										$this -> m_modelPageObject -> update($_pDatabase, $_objectUpdate, $modelCondition);
+
+
+
+				$this->logicXHRView($_pDatabase, $_xhrInfo);
 									
 									}
 									else
@@ -156,6 +209,9 @@ class	controllerBlog extends CController
 										$validationMsg .= 'Unknown error on sql query';
 										$validationErr = true;
 									}	
+
+
+
 
 
 								}
@@ -173,6 +229,27 @@ class	controllerBlog extends CController
 	}
 
 	private function
+	logicXHRView(CDatabaseConnection &$_pDatabase, object $_xhrInfo, bool $_enableEdit = false, bool $_enableDelete = false) : bool
+	{
+		$validationErr   = false;
+		$validationMsg   = 'OK';
+		$responseData    = [];
+
+		$this->logicView($_pDatabase, $_enableEdit, $_enableDelete);
+
+		ob_start();
+		$this->view();
+		$responseData['html'] = ob_get_contents();
+		ob_end_clean();
+
+		$responseData['objectId'] = $_xhrInfo -> objectId;
+
+		tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
+	
+		return true;
+	}
+
+	private function
 	logicXHRCreate(CDatabaseConnection &$_pDatabase, object $_xhrInfo) : bool
 	{
 
@@ -183,7 +260,15 @@ class	controllerBlog extends CController
 
 			$_dataset['object_id'] 	= $this -> objectInfo -> object_id;
 			$_dataset['body'] 		= '';
-			$_dataset['params'] 	= '';
+
+			$_dataset['params']		= 	[
+											"template"			=> '',
+											"display_hidden"	=> '',
+											"parent_node_id"	=> ''
+										];
+			$_dataset['params']	 	= 	json_encode($_dataset['params'], JSON_FORCE_OBJECT);
+
+		if(!$this -> m_modelSimple -> insert($_pDatabase, $_dataset, MODEL_RESULT_APPEND_DTAOBJECT))
 		
 			if(false)
 			{
@@ -350,6 +435,15 @@ class	controllerBlog extends CController
 	{
 		foreach($nodeList as $nodeIndex => $node)
 		{
+			## append page image url small & large
+			
+			if(!empty($node -> page_image))
+			{
+				$nodeList[$nodeIndex] -> page_image_url = MEDIATHEK::getItemUrl($node -> page_image ?? 0);
+				$nodeList[$nodeIndex] -> page_image_url_s = ($nodeList[$nodeIndex] -> page_image_url !== null ? $nodeList[$nodeIndex] -> page_image_url .'?binary&size=small' : $nodeList[$nodeIndex] -> page_image_url);
+				$nodeList[$nodeIndex] -> page_image_url_m = ($nodeList[$nodeIndex] -> page_image_url !== null ? $nodeList[$nodeIndex] -> page_image_url .'?binary&size=medium' : $nodeList[$nodeIndex] -> page_image_url);
+			}
+	
 			## append text
 
 			$nodeList[$nodeIndex] -> text = $this -> getNodeText($_pDatabase, $node -> node_id);
@@ -365,6 +459,10 @@ class	controllerBlog extends CController
 			## append tags
 
 			$nodeList[$nodeIndex] -> tags = $this -> getNodeTags($_pDatabase, $node -> node_id);
+
+			## append post settings
+
+			$nodeList[$nodeIndex] -> postSetting = $this -> getNodePostSettings($_pDatabase, $node -> node_id);
 		}
 	}
 
@@ -402,6 +500,23 @@ class	controllerBlog extends CController
 		return $modelTagsAllocation -> getResult();
 	}
 	
+	protected function
+	getNodePostSettings(CDatabaseConnection &$_pDatabase, int $_nodeId)
+	{
+		$modelCondition  = new CModelCondition();
+		$modelCondition -> where('node_id', $_nodeId);		
+
+
+		$modelBlog  = new modelBlog();
+		$modelBlog -> load($_pDatabase, $modelCondition);
+
+		$postSetting = $modelBlog -> getResult();
+
+		if(!empty($postSetting))
+			$postSetting = reset($postSetting);
+
+		return $postSetting;
+	}
 	protected function
 	getNodeHeatline(CDatabaseConnection &$_pDatabase, int $_nodeId)
 	{
@@ -454,13 +569,72 @@ class	controllerBlog extends CController
 	registerSystemFunction(cmsSystemModules $cmsSystemModules)
 	{
 		$cmsSystemModules -> register(cmsSystemModules::SECTION_TOOLBAR, [$this, 'systemFunctionToolbar']);
+		$cmsSystemModules -> register(cmsSystemModules::SECTION_TOOLBAR_EDIT, [$this, 'systemFunctionToolbarEdit']);
 	}
 
 	public function
 	systemFunctionToolbar(array $params = [])
-	{
+	{	
+		switch($this -> moduleInfo -> module_type) 
+		{
+			case 'core':	
+
+				$_modLocation	= CMS_SERVER_ROOT . DIR_CORE . DIR_MODULES . $this -> moduleInfo -> module_location .'/';	
+				CLanguage::loadLanguageFile($_modLocation.'lang/', CPageRequest::instance() -> getPageLanguage());
+				break;
+
+			case 'mantle':
+
+				$_modLocation	= CMS_SERVER_ROOT . DIR_MANTLE . DIR_MODULES . $this -> moduleInfo -> module_location .'/';
+				CLanguage::loadLanguageFile($_modLocation.'lang/', CPageRequest::instance() -> getPageLanguage());
+				break;
+		}
+
+		$pDBInstance  = CDatabase::instance();
+		$dbConnection = $pDBInstance -> getConnection(CFG::GET() -> MYSQL -> PRIMARY_DATABASE);
+
+		$modelCondition = new CModelCondition();
+		$modelCondition -> where('node_id', $params['node_id']);
+
+		$modelBlog = new modelBlog();
+		$modelBlog -> load($dbConnection, $modelCondition);
+
+		$postSetting = $modelBlog -> getResult();
+
+		if(!empty($postSetting))
+			$postSettings = reset($postSetting);
+		else 
+			$postSettings  = null;
 
 		require 'view/toolbar.php';
-	
+	}
+
+	public function
+	systemFunctionToolbarEdit(array $params = [])
+	{
+		$_pFormVariables =	new CURLVariables();
+		$requestList		 =	[];
+
+		$requestList[] 	 = 	[	"input" => "cms-edit-page-node",			"output" => 'node_id', "validate" => "strip_tags|trim|is_digit|!empty" , 	"use_default" => true, "default_value" => 0 ]; 	
+		$requestList[] 	 = 	[	"input" => "modBlog_page_color",			"output" => 'post_page_color', "validate" => "strip_tags|trim|!empty" , 	"use_default" => true, "default_value" => 0 ]; 	
+		$requestList[] 	 = 	[	"input" => "modBlog_text_color",			"output" => 'post_text_color', "validate" => "strip_tags|trim|!empty" , 	"use_default" => true, "default_value" => 0 ]; 	
+		$requestList[] 	 = 	[	"input" => "modBlog_background_mode",		"output" => 'post_background_mode', "validate" => "strip_tags|trim|is_digit|!empty" , 	"use_default" => true, "default_value" => 0 ]; 	
+		$requestList[] 	 = 	[	"input" => "modBlog_teasertext_mode",		"output" => 'post_teasertext_mode', "validate" => "strip_tags|trim|!empty" , 	"use_default" => true, "default_value" => 1 ]; 	
+		$requestList[] 	 = 	[	"input" => "modBlog_post_size_length_min",	"output" => 'post_size_length_min', "validate" => "strip_tags|trim|is_digit|!empty" , 	"use_default" => true, "default_value" => 0 ]; 	
+		$requestList[] 	 = 	[	"input" => "modBlog_post_size_height",		"output" => 'post_size_height', "validate" => "strip_tags|trim|is_digit|!empty" , 	"use_default" => true, "default_value" => 0 ]; 	
+		$requestList[] 	 = 	[	"input" => "modBlog_post_display_categorie","output" => 'post_display_category', "validate" => "strip_tags|trim|is_digit|!empty" , 	"use_default" => true, "default_value" => 0 ]; 	
+
+		$_pFormVariables-> retrieve($requestList, true, true); // POST 
+		$urlVarList		 = $_pFormVariables ->getArray();
+
+		$pDBInstance  = CDatabase::instance();
+		$dbConnection = $pDBInstance -> getConnection(CFG::GET() -> MYSQL -> PRIMARY_DATABASE);
+
+		$modelCondition = new CModelCondition();
+		$modelCondition -> where('node_id', $urlVarList['node_id']);
+
+		$modelBlog = new modelBlog();
+
+		$modelBlog -> update($dbConnection, $urlVarList, $modelCondition);
 	}
 }

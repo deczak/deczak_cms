@@ -18,6 +18,7 @@ class schemeModules extends CScheme
 		$this -> addColumn('module_desc', DB_COLUMN_TYPE_STRING) -> setLength(200);
 		$this -> addColumn('module_extends', DB_COLUMN_TYPE_STRING) -> setLength(50) -> setDefault('NULL');
 		$this -> addColumn('module_extends_by', DB_COLUMN_TYPE_STRING) -> setLength(50) -> setDefault('NULL');
+		$this -> addColumn('module_version', DB_COLUMN_TYPE_STRING) -> setLength(10) -> setDefault('1');
 
 		$this -> addColumn('is_frontend', DB_COLUMN_TYPE_BOOL) -> setAttribute(DB_COLUMN_ATTR_UNSIGNED);
 		$this -> addColumn('is_active', DB_COLUMN_TYPE_BOOL) -> setAttribute(DB_COLUMN_ATTR_UNSIGNED);

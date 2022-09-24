@@ -1,6 +1,6 @@
 {
-	"scheme"				: 2,
-	"version"			: 1,
+	"scheme"			: 2,
+	"version"			: 4,
 	"module"			: {
 		"controller"	: "controllerBlog",
 		"name"			: "Blog",
@@ -8,7 +8,10 @@
 		"group"			: "Other",
 		"icon"			: "&#xf781",
 		"frontend"		: 1,
-		"system_module" : 1
+		"system_module" : 1,
+		"schemes"		: [
+							{ "filename":"schemeBlog" }
+				 		  ]
 	},
 	"rights"			: [
 							{"name":"view",		"desc":"VIEW"},
@@ -44,5 +47,14 @@
 								"menu_order":"0",
 								"use_right" :"edit"
 							}
-	]
+	],
+	"includes"			:[
+							{	
+								"type":"script",	
+								"file":"script.js",
+								"collect":true,
+								"backend":true,
+								"frontend":false
+							}
+						]
 }

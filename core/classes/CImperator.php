@@ -131,7 +131,7 @@ class	CImperator
 
 
 
-			$_modules = CModules::instance();
+				$_modules = CModules::instance();
 				$module = $_modules -> loadModule((int)$_pURLVariables -> getValue("cms-insert-module"), $_pPageRequest -> page_language);
 
 				if( $module === null)

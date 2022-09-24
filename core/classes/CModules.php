@@ -77,10 +77,10 @@ class CModules extends CSingleton
 			return null;
 		}
 
-		if(class_exists($moduleInstance -> module_controller))
-		{
-			return $moduleInstance;
-		}
+		//if(class_exists($moduleInstance -> module_controller))
+		//{ echo 'class_exists';
+		//	return $moduleInstance;
+		//}
 
 		##	Check if this moduel extends another module, if yes, call loadModule for required includes
 
@@ -94,6 +94,7 @@ class CModules extends CSingleton
 		}
 
 		##
+
 
 		switch($moduleInstance -> module_type) 
 		{
@@ -129,6 +130,7 @@ class CModules extends CSingleton
 
 							$pModulesInstall = new CModulesInstall;
 							$moduleData = $pModulesInstall -> getModuleData($moduleConfig, $moduleInstance -> module_location, $moduleInstance -> module_type);
+
 
 							if($moduleData === false)
 							{
@@ -532,6 +534,16 @@ class CModules extends CSingleton
 
 								$moduleInfo = (object)$moduleData;
 								$moduleInfo -> user_rights = $this -> m_pUserRights -> getModuleRights($module -> module_id);
+
+
+
+
+
+
+
+
+
+
 			}
 
 			if(!empty($moduleInfo))
@@ -1095,6 +1107,7 @@ class CModulesInstallS1 // Module Scheme 1
 		$moduleData['module']['is_active']			= '1';
 		$moduleData['module']['create_time']		= $timestamp;
 		$moduleData['module']['create_by']			= $userId;
+		$moduleData['module']['module_version']		= $_moduleConfig -> module_version ?? 1;
 
 		if(property_exists($_moduleConfig, 'module_extends') && !empty($_moduleConfig -> module_extends))
 			$moduleData['module']['extends'] = $_moduleConfig -> module_extends;
@@ -1231,6 +1244,7 @@ class CModulesInstallS2 // Module Scheme 2
 			$moduleData['module']['is_active']			= '1';
 			$moduleData['module']['create_time']		= $timestamp;
 			$moduleData['module']['create_by']			= $userId;
+			$moduleData['module']['module_version']		= $_moduleConfig -> version ?? 1;
 
 			if(property_exists($_moduleConfig -> module, 'extends') && !empty($_moduleConfig -> module -> extends))
 				$moduleData['module']['extends'] = $_moduleConfig -> module -> extends;

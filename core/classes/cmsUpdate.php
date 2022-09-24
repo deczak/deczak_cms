@@ -32,7 +32,7 @@ class cmsUpdate
 	 * 	@return bool true if a FS update is detected, otherwise false
 	*/
 	public function
-	detectUpdate() : bool
+	detectCoreUpdate() : bool
 	{
 		cmsLog::add('cmsUpdate::detectUpdate -- Call');
 
@@ -75,6 +75,49 @@ class cmsUpdate
 	}
 
 	/**
+	 * 	This function detects a CMS update on mantle version strings
+	 * 
+	 * 	@return bool true if a FS update is detected, otherwise false
+	*/
+	public function
+	detectMantleUpdate() : bool
+	{
+		$pDBInstance  = CDatabase::instance();
+		$dbConnection = $pDBInstance -> getConnection(CFG::GET() -> MYSQL -> PRIMARY_DATABASE);
+		
+		$moduleCondition  = new CModelCondition();
+		$moduleCondition -> where('module_type', 'mantle');
+
+		$modelModules	  =	new modelModules();
+		$modelModules	 ->	load($dbConnection, $moduleCondition);
+		$mantelModuleList =	$modelModules -> getResult();
+
+		foreach($mantelModuleList as $mantelModule)
+		{
+			$moduleFilepath	= CMS_SERVER_ROOT . $mantelModule -> module_type .'/'. DIR_MODULES . $mantelModule -> module_location .'/module.json';
+			$moduleConfig	= file_get_contents($moduleFilepath);
+
+			if($moduleConfig === false)
+			{
+				continue;
+			}
+
+			$moduleConfig = json_decode($moduleConfig);
+
+			$pModulesInstall = new CModulesInstall;
+
+			$moduleData = $pModulesInstall -> getModuleData($moduleConfig, $mantelModule -> module_location, $mantelModule -> module_type);
+
+			## check version and continue loop on no changes
+
+			if((string)$moduleData['module']['module_version'] !== (string)$mantelModule -> module_version)
+				return true;
+		}
+
+		return false;
+	}
+
+	/**
 	 * 	This function updates the database tables to their has to be state.
 	 * 	
 	 * 	@return bool true if the updates ends successful, otherwise false
@@ -108,7 +151,7 @@ class cmsUpdate
 		##	Transaction fails when changing the table schema due to PHP behavior
 		##	$dbConnection -> beginTransaction();
 	
-		##	Update scheme files
+		##	Update core scheme files
 
 		foreach($schemeList as $scheme)
 		{
@@ -122,6 +165,66 @@ class cmsUpdate
 
 				return false;
 			}	
+		}
+
+		##  Find and update mantle scheme files
+
+		$moduleCondition  = new CModelCondition();
+		$moduleCondition -> where('module_type', 'mantle');
+
+		$modelModules	  =	new modelModules();
+		$modelModules	 ->	load($dbConnection, $moduleCondition);
+		$mantelModuleList =	$modelModules -> getResult();
+
+		foreach($mantelModuleList as $mantelModule)
+		{
+			$moduleFilepath	= CMS_SERVER_ROOT . $mantelModule -> module_type .'/'. DIR_MODULES . $mantelModule -> module_location .'/module.json';
+			$moduleConfig	= file_get_contents($moduleFilepath);
+
+			if($moduleConfig === false)
+			{
+				continue;
+			}
+
+			$moduleConfig = json_decode($moduleConfig);
+
+			$pModulesInstall = new CModulesInstall;
+
+			$moduleData = $pModulesInstall -> getModuleData($moduleConfig, $mantelModule -> module_location, $mantelModule -> module_type);
+
+			## check version and continue loop on no changes
+
+			if((string)$moduleData['module']['module_version'] === (string)$mantelModule -> module_version)
+				continue;
+
+			if(!empty($moduleData['module']['schemes']) && is_array($moduleData['module']['schemes']))
+			foreach($moduleData['module']['schemes'] as $schemeInfo)
+			{
+				$scheme = $schemeInfo -> filename;
+
+				$schemeFilepath = CMS_SERVER_ROOT.$mantelModule -> module_type .'/'. DIR_MODULES .$mantelModule -> module_location.'/'. $scheme .'.php';
+
+				if(!file_exists($schemeFilepath))
+				{
+					continue;					
+				}
+
+				include_once	CMS_SERVER_ROOT.$mantelModule -> module_type .'/'. DIR_MODULES .$mantelModule -> module_location.'/'. $scheme .'.php';
+
+				$schemeInstance = new $scheme;
+				if($schemeInstance -> updateTable($dbConnection))
+				{
+					$parentCondition  = new CModelCondition();
+
+					$parentCondition -> where('module_controller', $moduleData['module']['module_controller']);
+
+					$updateModule = [
+									'module_version' => $moduleData['module']['module_version']
+									];
+
+					$modelModules -> update($dbConnection, $updateModule, $parentCondition);
+				}
+			}
 		}
 	
 		##	Transaction fails when changing the table schema due to PHP behavior
@@ -138,17 +241,19 @@ class cmsUpdate
 		return true;
 	}
 
+	/**
+	 * 	This function does checking for updates and run the update function
+	 */
 	public function 
 	execUpdate()
 	{
-		$this -> updateDatabase();
-		$this -> updateConfiguration();
-		$this -> updateBEMenu();
+		if($this->detectCoreUpdate() || $this->detectMantleUpdate())
+		{
+			$this -> updateDatabase();
+			$this -> updateConfiguration();
+			$this -> updateBEMenu();
+		}
 	}
-
-
-
-
 
 	/**
 	 * 	This function updates the /data/configuration.json file with new added settings

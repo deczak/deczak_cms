@@ -93,8 +93,7 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 if(CMS_BACKEND)
 {
 	$cmsUpdate  = new cmsUpdate;
-	if($cmsUpdate -> detectUpdate())
-		$cmsUpdate -> execUpdate();
+	$cmsUpdate -> execUpdate();
 }
 
 ##	L A N G U A G E   S Y S T E M   /   I N I T I A L   F I L E S

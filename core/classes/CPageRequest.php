@@ -37,7 +37,10 @@ class CPageRequest extends CSingleton
 	}
 
 
-
+	public function getPageLanguage() : string
+	{
+		return $this->page_language;		
+	}
 
 
 

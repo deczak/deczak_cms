@@ -1,60 +1,55 @@
 <input type="hidden" name="cms-object-id" value="<?php echo $object -> object_id; ?>">
 
-<div class="blog-container">
+<div class="page-edit-module-controls-panel blog-control" data-target-list="blog-list-<?php echo $object -> object_id; ?>">
 
-<?php
-$rootLevel = false;
-foreach($sitemap as $node)
-{
-	if($rootLevel === false)
-	{
-		$rootLevel = $node -> level + 1;
-		continue;
-	}
-	
-	if($rootLevel != $node -> level)
-	{
-		continue;
-	}
+	<div class="left">
 
-	if(
-			($node -> hidden_state == 0)
-		&&	(empty($node -> page_auth) || (!empty($node -> page_auth) && CSession::instance() -> isAuthed($node -> page_auth) === true))
-		||	(	($node -> hidden_state == 5 && $node -> publish_from  < $timestamp)
-			&&	($node -> hidden_state == 5 && $node -> publish_until > $timestamp && $node -> publish_until != 0)
-			)
-		||  CMS_BACKEND
-		); else continue;
-		
-	if(empty($node -> text))
-		continue;
+		<div class="module-header" style="white-space:nowrap; padding:0 8px; font-weight:700; font-size:1.1em;">
+			<i class="fas fa-blog"></i>&nbsp;&nbsp;&nbsp;Blog
+		</div> 
 
-	$categories = [];
-	foreach($node -> categories as $nodeCategory)
-	{
-		$categories[] = $nodeCategory -> category_name;
-	}
 
-	$headline = (empty($node -> headline -> body) ? '' : $node -> headline -> body);
-	$headline = trim(strip_tags($headline));
-	$headline = (empty($headline) ? $node -> page_title : $headline);
 
-	?>
-
-	<div class="blog-item">
-
-		<span class="categories"><?= implode(' / ', $categories); ?></span>
-		<h2><a href="<?= CMS_SERVER_URL_BACKEND .'pages/view/'. $node -> page_language .'/'. $node -> node_id; ?>"><?= $headline; ?></a></h2>
-		<span class="info"><?= CLanguage::string('TIME_CREATE_AT'); ?> <?= date("d.m.Y", $node -> create_time); ?></span>
-
-		<p><?= $node -> text -> body; ?></p>
-
-		&nbsp;&nbsp;&bull;&nbsp; <a class="darkblue"  href="<?= CMS_SERVER_URL_BACKEND .'pages/view/'. $node -> page_language .'/'. $node -> node_id; ?>"> <?= CLanguage::string('READMORE'); ?></a>
-			
 	</div>
 
+	<div class="right">
+
+		<!-- TEMPLATE --------------------------->
+
+		<label><?= CLanguage::string('M_BLOG_BEPE_BLOG_VIEWMODE'); ?></label>
+
+		<?php foreach($avaiableTemplates as $template) { ?>
+
+			<button class="ui button icon trigger-view-mode" data-template-id="<?= $template -> templateId; ?>" type="button" title="<?= $template -> templateName; ?>" style="height:29px;">
+				<i class="<?= $template -> templateIcon; ?>"></i>
+			</button>
+		
+		<?php } ?>
+
+		<input type="hidden" name="blog-template" value="<?= $object -> params -> template; ?>">
+		
+	</div>
+
+
+
+</div>
+
+
+
+
+
+
+
+
+
+<div id="module-xhr-html-response-container-<?php echo $object -> object_id; ?>">
+
 	<?php
-}
-?>
+	if($currentTemplate !== NULL)
+	{
+		$activeTemplate = current($currentTemplate);
+		include $activeTemplate -> templateFilepath;
+	}
+	?>
 
 </div>

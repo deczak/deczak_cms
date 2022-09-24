@@ -46,6 +46,7 @@ class cmsSystemModulesFunction
 class cmsSystemModules extends CSingleton implements IteratorAggregate 
 {
 	public const SECTION_TOOLBAR 	 = 1;
+	public const SECTION_TOOLBAR_EDIT= 4;
 	public const SECTION_PAGEHEAD 	 = 2;
 	public const SECTION_SYSTEM_INIT = 3;
 

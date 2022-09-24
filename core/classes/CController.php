@@ -117,7 +117,8 @@ class	CController
 	detectRights(string $_controllerAction)
 	{
 		##	get requested inner module path by controller action
-		
+
+
 		$modulePath = $this -> _getModulePath($_controllerAction);
 
 		if($modulePath === false)
@@ -149,6 +150,9 @@ class	CController
 	private function
 	_getModulePath(string $_controllerAction)
 	{
+
+
+		if(property_exists($this -> moduleInfo, 'sections'))
 		foreach($this -> moduleInfo -> sections as $path)
 		{
 			if($path -> ctl_target === $_controllerAction)
