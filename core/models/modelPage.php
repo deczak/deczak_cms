@@ -192,12 +192,35 @@ class 	modelPage extends CModel
 					$condObject  = new CModelCondition();
 					$condObject -> where('tb_page_object.object_id', 'tb_page_object_simple.object_id');	
 
+					/*
 					$modelSimple  = new modelSimple();
 					$modelSimple -> addSelectColumns('tb_page_object_simple.*', 'tb_page_object.*');
 					$modelSimple -> addRelation('join', 'tb_page_object', $condObject);
 					$modelSimple -> load($_pDatabase, $condSimple);
 
-					foreach($modelSimple -> getResult() as $node)
+
+						modelSimple::
+							  select()		<- todo
+							->relation()	<- todo
+							->get()
+
+					*/
+
+					$schemeSimple = modelSimple::$schemeName;
+					$schemeSimpleInstance = new $schemeSimple;
+
+					// workaroud until new model system can handle relations
+					$dbQuery = $_pDatabase
+						-> query(DB_SELECT) 
+						-> table($schemeSimpleInstance -> getTableName()) 
+						-> selectColumns(['tb_page_object_simple.*', 'tb_page_object.*'])
+						#-> dtaObjectName($className)
+						-> condition($condSimple)
+						-> relations([new CModelRelations('join', 'tb_page_object', $condObject)]);
+					$dbResult = $dbQuery -> exec();
+
+
+					foreach($dbResult as $node)
 						$nodeIdList[] = $node -> node_id;
 
 					$nodeIdList = array_unique($nodeIdList);

@@ -291,3 +291,30 @@ div.cms-modal-mediathek-edit fieldset > div > div.fields > div { padding:0 10px 
 div.cms-modal-mediathek-edit fieldset textarea { resize:none; }
 div.cms-modal-mediathek-edit fieldset label { margin-bottom:4px; margin-left:4px; }
 
+/*
+**	Mediathek Modal upload
+*/
+
+div.cms-modal > div.modal-mediathek-upload-inner { background-color:white; max-height:calc(100% - 10%); width:90%; max-width:1455px; outline: solid 2px rgba(0,0,0,0.4);  }
+div.cms-modal > div.modal-mediathek-upload-inner .dropzone { background-color:lightslategray; height:200px; border-radius:4px; width: calc(100% - 20px); margin:10px; display:flex; align-items:center; justify-content:center; box-shadow: 0 0 12px 1px rgb(0 0 0 / 30%); border: 1px solid rgba(0,0,0,.1);}
+div.cms-modal > div.modal-mediathek-upload-inner .dropzone.lower { height:75px; }
+div.cms-modal > div.modal-mediathek-upload-inner .dropzone:hover { background-color:gold; }
+div.cms-modal > div.modal-mediathek-upload-inner .dropzone:active { background-color:gold; }
+div.cms-modal > div.modal-mediathek-upload-inner .dropzone:after { content: 'MEDIATHEK UPLOAD DROPZONE'; color:rgba(0,0,0,.1); font-size: 1.2em; font-weight: 600; letter-spacing: 2px; }
+div.cms-modal > div.modal-mediathek-upload-inner .dropped-items { display:flex; margin:10px; overflow-x:auto; }
+div.cms-modal > div.modal-mediathek-upload-inner .dropped-items > .dropped-item  { width:275px; flex-shrink:0; margin-right: 10px; }
+div.cms-modal > div.modal-mediathek-upload-inner .dropped-items > .dropped-item:last-child  { margin-right: 0px; }
+div.cms-modal > div.modal-mediathek-upload-inner .dropped-items > .dropped-item .preview { height:250px; width:100%; position:relative; border: 1px solid rgba(0,0,0,.2);}
+div.cms-modal > div.modal-mediathek-upload-inner .dropped-items > .dropped-item .preview .klaus { position:absolute; top:10px; right:10px; height:35px; background:red; opacity:.6;color:white; border:0px; border-radius:50%; width:35px;  }
+div.cms-modal > div.modal-mediathek-upload-inner .dropped-items > .dropped-item .preview .klaus > i { pointer-events:none;  }
+div.cms-modal > div.modal-mediathek-upload-inner .dropped-items > .dropped-item .preview .klaus:hover { opacity:1; }
+div.cms-modal > div.modal-mediathek-upload-inner .dropped-items > .dropped-item:hover .preview .klaus { display:block; }
+div.cms-modal > div.modal-mediathek-upload-inner .dropped-items > .dropped-item .preview img { object-fit: cover; width: 100%; height: 100%; }
+div.cms-modal > div.modal-mediathek-upload-inner .dropped-items > .dropped-item fieldset { display:block; }
+div.cms-modal > div.modal-mediathek-upload-inner .dropped-items > .dropped-item .progress { height:5px; margin-bottom:5px; }
+
+div.cms-modal > div.modal-mediathek-upload-inner .ui.fieldset {  padding: 2px 0 0 0; margin-bottom: 0px; border-radius:0px; background: white; }
+div.cms-modal > div.modal-mediathek-upload-inner .ui.fieldset .input { margin-bottom: 2px; padding: 0px 0px; }
+div.cms-modal > div.modal-mediathek-upload-inner .ui.fieldset input, 
+div.cms-modal > div.modal-mediathek-upload-inner .ui.fieldset textarea { font-size:0.7em; border-radius: 0px; display:block;}
+

@@ -3,8 +3,7 @@
 	<link href="<?php echo CMS_SERVER_URL_BACKEND; ?>third-party/fontawesome/css/brands.min.css" rel="stylesheet">
 	<link href="<?php echo CMS_SERVER_URL_BACKEND; ?>third-party/fontawesome/css/solid.min.css" rel="stylesheet">
 	<link href="<?php echo CMS_SERVER_URL_BACKEND; ?>third-party/fontawesome/css/regular.min.css" rel="stylesheet">
-
-
+	
 	<script src="<?php echo CMS_SERVER_URL_BACKEND; ?>third-party/flatpickr/flatpickr.js"></script>
 	<link href="<?php echo CMS_SERVER_URL_BACKEND; ?>third-party/flatpickr/flatpickr.min.css" rel="stylesheet">
 

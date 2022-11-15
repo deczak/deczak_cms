@@ -20,6 +20,32 @@
 
 	<input type="checkbox" id="trigger-page-panel-slider" style="display:none !important; opacity:0 !important;" value="">
 	<label for="trigger-page-panel-slider" id="be-page-panel-slider">&nbsp;</label>
+
+	<script>
+	(function() {
+
+		let bepePagePanelSlider = window.localStorage.getItem('bepe-page-panel-slider');
+
+		if(bepePagePanelSlider === null) {
+			bepePagePanelSlider = '0';
+			window.localStorage.setItem('bepe-page-panel-slider', bepePagePanelSlider);
+		}
+
+		if(bepePagePanelSlider === '1')
+			document.getElementById('trigger-page-panel-slider').checked = true;
+
+		document.getElementById('trigger-page-panel-slider').onclick = function(event) {
+
+			if(this.checked)
+				window.localStorage.setItem('bepe-page-panel-slider', '1');
+			else
+				window.localStorage.setItem('bepe-page-panel-slider', '0');
+
+		}
+
+	})();
+
+	</script>
 		
 	<div id="be-page-panel-content" data-xhr-target="update-site" data-xhr-overwrite-target="edit/<?php echo $pageRequest -> page_language; ?>/<?php echo $pageRequest -> node_id; ?>">
 		
@@ -617,13 +643,28 @@
 
 							<div class="input-inner">
 
-								<input type="hidden" name="page_redirect" id="page_redirect_node_id" value="<?= $pageRequest -> page_redirect; ?>">
+								<input type="hidden" name="page_redirect" id="page_redirect_node_id" value="<?= (ctype_digit($pageRequest -> page_redirect) ? $pageRequest -> page_redirect : ''); ?>">
 								
-								<input type="text" id="page_redirect_node_name" readonly value="<?= (!empty($pageRequest -> page_redirect) ? '['. $pageRequest -> page_redirect .']' : '') ?>">
+								<input type="text" id="page_redirect_node_name" readonly value="<?= (!empty($pageRequest -> page_redirect) && ctype_digit($pageRequest -> page_redirect) ? '['. $pageRequest -> page_redirect .']' : '') ?>">
 
 								<div class="button-panel">
 									<button class="ui button icon button-select button-select-redirect-node"><span><i class="fas fa-ellipsis-h"></i></span></button> 
 									<button class="ui button icon button-remove button-remove-redirect-node"><i class="far fa-trash-alt"></i></button> 
+								</div>
+
+							</div>
+
+						</div>
+
+						<div class="input width-100 append-button-panel">
+							<label><?= CLanguage::string('BEPE_PANEL_REDIRECTEXTERNAL'); ?></label>
+
+							<div class="input-inner">
+
+								<input type="text" id="page_redirect_external" name="page_redirect_external" value="<?= (!ctype_digit($pageRequest -> page_redirect) ? $pageRequest -> page_redirect : ''); ?>">
+								
+								<div class="button-panel">
+									<button class="ui button icon button-remove button-remove-redirect-external"><i class="far fa-trash-alt"></i></button> 
 								</div>
 
 							</div>
@@ -735,6 +776,11 @@
 					return true;
 				}
 
+				if(event.target.classList.contains('button-remove-redirect-external'))
+				{
+					document.getElementById('page_redirect_external').value = '';	
+					return true;
+				}
 				break;
 		}
 	});

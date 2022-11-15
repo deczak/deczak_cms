@@ -5,16 +5,11 @@ include_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelSitemap.php';
 include_once CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CModulesTemplates.php';	
 
 class	controllerSimpleNavigation extends CController
-{
-	private	$m_modelSimple;
-		
+{		
 	public function
 	__construct(object $_module, object &$_object)
 	{
 		parent::__construct($_module, $_object);
-
-		$this -> m_modelSimple = new modelSimple();
-		
 		$this -> moduleInfo -> user_rights[] = 'view';	// add view right as default for everyone
 	}
 	
@@ -72,33 +67,32 @@ class	controllerSimpleNavigation extends CController
 	private function
 	logicView(CDatabaseConnection &$_pDatabase, bool $_enableEdit = false, bool $_enableDelete = false) : bool
 	{
-		$modelCondition = new CModelCondition();
-		$modelCondition -> where('object_id', $this -> objectInfo -> object_id);
 
-		$this -> m_modelSimple -> load($_pDatabase, $modelCondition);
+		$simpleObject = modelSimple::where('object_id', '=', $this -> objectInfo -> object_id)->one();
 
-		$this -> m_modelSimple -> getResult()[0] -> params = json_decode($this -> m_modelSimple -> getResult()[0] -> params);
+
+
 
 		##	gathering child nodes
 
-		$parentNode = (empty($this -> m_modelSimple -> getResult()[0] -> params -> parent_node_id) ? $this -> objectInfo -> node_id : $this -> m_modelSimple -> getResult()[0] -> params -> parent_node_id);
+		$parentNode = (empty($simpleObject -> params -> parent_node_id) ? $this -> objectInfo -> node_id : $simpleObject -> params -> parent_node_id);
 
 		$moduleTemplate	 = new CModulesTemplates();
-		$moduleTemplate	-> load('simpleNavigation', $this -> m_modelSimple -> getResult()[0] -> params -> template);
+		$moduleTemplate	-> load('simpleNavigation', $simpleObject -> params -> template);
 
-		if(empty($this -> m_modelSimple -> getResult()[0] -> params -> nodeList))
-			$this -> m_modelSimple -> getResult()[0] -> params -> nodeList = [];
+		if(empty($simpleObject -> params -> nodeList))
+			$simpleObject -> params -> nodeList = [];
 
-		$this -> m_modelSimple -> getResult()[0] -> params -> nodeList = (array)$this -> m_modelSimple -> getResult()[0] -> params -> nodeList;
+		$simpleObject -> params -> nodeList = (array)$simpleObject -> params -> nodeList;
 
 		$this -> setView(	
 						'view',	
 						'',
 						[
-							'object' 		  => $this -> m_modelSimple -> getResult()[0],
+							'object' 		  => $simpleObject,
 							'sitemap'		  => null,
 							'currentTemplate' => $moduleTemplate -> templatesList,
-							'nodeList'		  => $this -> processNavigationItems($_pDatabase, $this -> m_modelSimple -> getResult()[0] -> params -> nodeList),
+							'nodeList'		  => $this -> processNavigationItems($_pDatabase, $simpleObject -> params -> nodeList),
 						]
 						);
 
@@ -131,19 +125,18 @@ class	controllerSimpleNavigation extends CController
 	{
 
 
-		$modelCondition = new CModelCondition();
-		$modelCondition -> where('object_id', $this -> objectInfo -> object_id);
+		$simpleObject = modelSimple::where('object_id', '=', $this -> objectInfo -> object_id)->one();
 
-		$this -> m_modelSimple -> load($_pDatabase, $modelCondition);
 
-		$this -> m_modelSimple -> getResult()[0] -> params = json_decode($this -> m_modelSimple -> getResult()[0] -> params);
+
+
 
 		##	gathering child nodes
 
-		$parentNode = (empty($this -> m_modelSimple -> getResult()[0] -> params -> parent_node_id) ? $this -> objectInfo -> node_id : $this -> m_modelSimple -> getResult()[0] -> params -> parent_node_id);
+		$parentNode = (empty($simpleObject -> params -> parent_node_id) ? $this -> objectInfo -> node_id : $simpleObject -> params -> parent_node_id);
 
 		$moduleTemplate = new CModulesTemplates();
-		$moduleTemplate ->	load('simpleNavigation', $this -> m_modelSimple -> getResult()[0] -> params -> template);
+		$moduleTemplate ->	load('simpleNavigation', $simpleObject -> params -> template);
 
 		$moduleTemplates = new CModulesTemplates();
 		$moduleTemplates ->	load('simpleNavigation');
@@ -153,10 +146,10 @@ class	controllerSimpleNavigation extends CController
 
 
 
-		if(empty($this -> m_modelSimple -> getResult()[0] -> params -> nodeList))
-			$this -> m_modelSimple -> getResult()[0] -> params -> nodeList = [];
+		if(empty($simpleObject -> params -> nodeList))
+			$simpleObject -> params -> nodeList = [];
 
-		$this -> m_modelSimple -> getResult()[0] -> params -> nodeList = (array)$this -> m_modelSimple -> getResult()[0] -> params -> nodeList;
+		$simpleObject -> params -> nodeList = (array)$simpleObject -> params -> nodeList;
 
 
 
@@ -166,11 +159,11 @@ class	controllerSimpleNavigation extends CController
 						'edit',	
 						'',
 						[
-							'object' 			=> $this -> m_modelSimple -> getResult()[0],
+							'object' 			=> $simpleObject,
 							'sitemap'			=> null,
 							'currentTemplate'	=> $moduleTemplate -> templatesList,
 							'avaiableTemplates'	=> $moduleTemplates -> templatesList,
-							'nodeList'			=> $this -> processNavigationItems($_pDatabase, $this -> m_modelSimple -> getResult()[0] -> params -> nodeList),
+							'nodeList'			=> $this -> processNavigationItems($_pDatabase, $simpleObject -> params -> nodeList),
 						]
 						);
 
@@ -264,8 +257,6 @@ class	controllerSimpleNavigation extends CController
 
 		if(!$validationErr)
 		{
-			$modelCondition = new CModelCondition();
-			$modelCondition -> where('object_id', $_xhrInfo -> objectId);
 
 			$urlVarList['params']	= 	[
 											"template"			=> $urlVarList['simple-navigation-template'],
@@ -275,11 +266,18 @@ class	controllerSimpleNavigation extends CController
 										];
 			$urlVarList['params']	 = 	json_encode($urlVarList['params'], JSON_FORCE_OBJECT);
 
-			$objectId = $_xhrInfo -> objectId;
+			$simpleObject = modelSimple::where('object_id', '=', $_xhrInfo -> objectId)->one();
+			$simpleObject->params->template = $urlVarList['simple-navigation-template'];
+			$simpleObject->params->nodeList = $urlVarList['simple-navigation-item'];
 
-			if($this -> m_modelSimple -> update($_pDatabase, $urlVarList, $modelCondition))
+		
+			if($simpleObject->save())
 			{
 				$validationMsg = 'Object updated';
+
+
+				$modelCondition = new CModelCondition();
+				$modelCondition -> where('object_id', $_xhrInfo -> objectId);
 
 				$this -> m_modelPageObject = new modelPageObject();
 
@@ -315,25 +313,29 @@ class	controllerSimpleNavigation extends CController
 		$validationMsg =	'';
 		$responseData = 	[];
 
-		$_dataset['object_id'] 	= 	$this -> objectInfo -> object_id;
+			$sOParams = new stdClass;
+			$sOParams->template 		= '';
+			$sOParams->display_hidden 	= ''; 
+			$sOParams->parent_node_id 	= '';
 
-		$_dataset['body'] 		= 	'';
 
-		$_dataset['params']		= 	[
-										"template"			=> '',
-										"display_hidden"	=> '',
-										"parent_node_id"	=> ''
-									];
-		$_dataset['params']	 	= 	json_encode($_dataset['params'], JSON_FORCE_OBJECT);
 
-		if(!$this -> m_modelSimple -> insert($_pDatabase, $_dataset, MODEL_RESULT_APPEND_DTAOBJECT))
+			$simpleObject = modelSimple::new([
+				'object_id' => (int)$this -> objectInfo -> object_id,
+				'body' 		=> '',
+				'params' 	=> $sOParams,
+			]);
+			
+
+
+
+		if(!$simpleObject->save())
 		{
 			$validationErr =	true;
 			$validationMsg =	'sql insert failed';
 		}
 		else
 		{
-			$this -> m_modelSimple -> getResult()[0] -> params = json_decode($this -> m_modelSimple -> getResult()[0] -> params);
 
 			##	gathering child nodes
 
@@ -347,7 +349,7 @@ class	controllerSimpleNavigation extends CController
 
 
 			$moduleTemplate = new CModulesTemplates();
-			$moduleTemplate ->	load('simpleNavigation', $this -> m_modelSimple -> getResult()[0] -> params -> template);
+			$moduleTemplate ->	load('simpleNavigation', $simpleObject -> params -> template);
 
 			$moduleTemplates = new CModulesTemplates();
 			$moduleTemplates ->	load('simpleNavigation');
@@ -356,7 +358,7 @@ class	controllerSimpleNavigation extends CController
 							'edit',	
 							'',
 							[
-								'object' 	=> $this -> m_modelSimple -> getResult()[0],
+								'object' 	=> $simpleObject,
 								'sitemap'	=> null,
 						'currentTemplate'	=> $moduleTemplate -> templatesList,
 						'avaiableTemplates'	=> $moduleTemplates -> templatesList,
@@ -391,11 +393,16 @@ class	controllerSimpleNavigation extends CController
 
 		if(!$validationErr)
 		{
+
+
+			$simpleObject = modelSimple::where('object_id', '=', $_xhrInfo -> objectId)->one();
+
+			if($simpleObject->delete())
+			{
+				
 			$modelCondition = new CModelCondition();
 			$modelCondition -> where('object_id', $_xhrInfo -> objectId);
 
-			if($this -> m_modelSimple -> delete($_pDatabase, $modelCondition))
-			{
 				$modelPageObject  = new modelPageObject();
 				$modelPageObject -> delete($_pDatabase, $modelCondition);
 

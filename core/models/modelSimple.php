@@ -3,20 +3,12 @@
 include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SCHEME.'schemeSimple.php';	
 include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SCHEME.'schemeBackendSimple.php';	
 
-class 	modelSimple extends CModel
+class	modelSimple extends cmsModel
 {
-	public function
-	__construct()
-	{		
-		parent::__construct('schemeSimple', 'simple');
-	}
+	public static string $schemeName = 'schemeSimple';
 }
 
-class 	modelBackendSimple extends CModel
+class	modelBackendSimple extends cmsModel
 {
-	public function
-	__construct()
-	{		
-		parent::__construct('schemeBackendSimple', 'backendSimple');
-	}
+	public static string $schemeName = 'schemeBackendSimple';
 }

@@ -82,7 +82,7 @@ class	CSchemeColumn
 	public function
 	setDefault($_default)
 	{
-		if($_default === 'NULL')
+		if($_default === 'NULL' || $_default === null)
 			$this -> m_isNull 		= true;
 		else
 			$this -> m_defaultValue = $_default;
@@ -187,6 +187,17 @@ class	CScheme
 		foreach($this -> m_columnsList as $column)
 		{
 			if($column -> m_isSystemId)
+				return $column -> m_columnName;
+		}
+		return NULL;
+	}
+
+	public function
+	getPrimaryKeyColumnName()
+	{
+		foreach($this -> m_columnsList as $column)
+		{
+			if($column -> m_isAutoIncrement)
 				return $column -> m_columnName;
 		}
 		return NULL;

@@ -393,8 +393,7 @@ class 	MEDIATHEK
 
 		return null;
 	}
- 
- 
+  
 	public static function 
 	getItem(string $path, array &$destList)
 	{
@@ -679,28 +678,28 @@ class 	MEDIATHEK
 
 		$srcSize = new pos(0, 0, imagesx($imageResource), imagesy($imageResource));
 
-		foreach($supportedSizes as $sizeKey => $sizeValues)
+		foreach($supportedSizes as $sizeInfo)
 		{
-			if($sizeValues -> w > $srcSize -> w || $sizeValues -> h > $srcSize -> h)
+			if($sizeInfo -> w > $srcSize -> w || $sizeInfo -> h > $srcSize -> h)
 				continue;
 
 			$ratio = $srcSize -> w / $srcSize -> h;
-			$pch   = $sizeValues -> w / $ratio;  // 832
+			$pch   = $sizeInfo -> w / $ratio;  // 832
 
-			if($pch > $sizeValues -> h)
+			if($pch > $sizeInfo -> h)
 			{
-				$pcw      = $sizeValues -> h * $ratio;
-				$destSize = new pos(0, 0, $pcw, $sizeValues -> h);
+				$pcw      = $sizeInfo -> h * $ratio;
+				$destSize = new pos(0, 0, $pcw, $sizeInfo -> h);
 			}
 			else
 			{
-				$destSize = new pos(0, 0, $sizeValues -> w, $pch);
+				$destSize = new pos(0, 0, $sizeInfo -> w, $pch);
 			}
 
 			$resizedResource = imagecreatetruecolor($destSize -> w, $destSize -> h);
 			imagecopyresampled($resizedResource, $imageResource, 0, 0, 0, 0, $destSize -> w, $destSize -> h, $srcSize -> w, $srcSize -> h);
 
-			$destFilename = $sizeKey .'_'. $fileName;
+			$destFilename = $sizeInfo->name .'_'. $fileName;
 
 			switch($mime)
 			{
@@ -724,7 +723,7 @@ class 	MEDIATHEK
 					continue 2;
 			}
 
-			$resizedImageList[$sizeKey] = $destFilename;
+			$resizedImageList[$sizeInfo->name] = $destFilename;
 		}
 
 		return $resizedImageList;

@@ -1,3 +1,10 @@
+<?php
+
+	$pAvaiableTemplates	=	new CTemplates(CMS_SERVER_ROOT . DIR_TEMPLATES);
+	$avaiableTemplates 	= 	$pAvaiableTemplates -> searchTemplates(true);
+
+?>
+
 <div class="be-module-container">
 
 	<div class="language-select-container">
@@ -19,6 +26,7 @@
 
 		<div class="page-name"><?= CLanguage::string('MOD_SITES_OV_TABLE_PAGETITLE'); ?></div>
 
+		<div class="page-template"><?= CLanguage::string('MOD_SITES_OV_TABLE_TEMPLATE'); ?></div>
 		<div class="page-option-a"></div>
 		<div class="page-option-a"></div>
 		<div class="page-option-a"></div>
@@ -61,6 +69,9 @@
 	#page-list-overview	div.page-name,
 	#page-header-overview div.page-name {  width: 25%; }
 
+	#page-list-overview	div.page-template,
+	#page-header-overview div.page-template {  width: 130px; }
+
 	#page-list-overview	div.page-update,
 	#page-header-overview div.page-update {  width: 150px; margin-left:10px; }
 
@@ -87,6 +98,7 @@
 	<div class="item" data-node-id="%NODE_ID%">
 		<div class="collapse trigger-collapse" data-num-childs="%NUM_CHILDNODES%"></div>
 		<div class="page-name">%PAGE_NAME% <a href="%PAGE_PATH%"><i class="fas fa-external-link-alt" style="font-size:0.9em"></i></a></div>
+		<div class="page-template">%PAGE_TEMPLATE%</div>
 		<div class="page-option-a"><a href="<?php echo CMS_SERVER_URL_BACKEND . $pageRequest -> urlPath; ?>view/%PAGE_LANGUAGE%/%NODE_ID%?language=<?= CLanguage::getActive(); ?>" target="_blank" class="button icon"><i class="fas fa-pen"></i></a></div>
 		<div class="page-option-a"><button class="button icon trigger-add-subpage"><i class="fas fa-plus-square"></i></button></div>
 		<div class="page-option-a">%BUTTON_MOVE%</div>
@@ -200,6 +212,7 @@
 		let	formData  = new FormData;
 			formData.append('page_name', fieldList['modal-page-name']);
 			formData.append('page_description', fieldList['modal-page-description']);
+			formData.append('page_template', fieldList['modal-page-template']);
 
 		let	xhRequest = new cmsXhr;
 			xhRequest.request(requestURL, formData, onPageAddOKSuccess, srcInfo, $xhrAction);
@@ -220,6 +233,23 @@
 			contentHTML += '<div class="fields" style="width: 100%; display: flex; flex-wrap: wrap;">';
 			contentHTML += '<div class="input width-100"><label><?= CLanguage::string('MOD_SITES_OV_TABLE_PAGENAME'); ?></label><input type="text" name="modal-page-name" value="" maxlength="100"></div>';
 			contentHTML += '<div class="input width-100"><label><?= CLanguage::string('MOD_SITES_PAGEDESC'); ?></label><textarea name="modal-page-description" maxlength="160"></textarea></div>';
+			contentHTML += `
+			
+					<div class="input width-100">
+					<label><?= CLanguage::string('BEPE_PANEL_GROUP_TEMPLATE'); ?></label>
+						<div class="select-wrapper">
+						<select name="modal-page-template">
+							<?php 
+							foreach($pAvaiableTemplates -> getTemplates() as $_tmplIndex => $_tmplData)
+							{
+								echo '<option value="'. $_tmplIndex .'" '. ($_tmplIndex === $pageRequest -> page_template ? 'selected' : '') .'>'. $_tmplData -> template_name .'</option>';
+							}
+							?>
+						</select>
+						</div>
+						<div class="result-box" data-field="page_template" data-error=""></div>
+					</div>		
+			`;
 			contentHTML += '</div>';
 			contentHTML += '</div>';
 			contentHTML += '</fieldset>';

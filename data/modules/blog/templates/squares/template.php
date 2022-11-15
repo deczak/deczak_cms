@@ -156,10 +156,16 @@ for($i = 0; $i < count($nodeList); $i++)
 				<?php
 				if(!$placeholder) 
 				{
+
+					if(!empty($item -> page_redirect))
+						$pageUrl = $item -> page_redirect;
+					else
+						$pageUrl = CMS_SERVER_URL . URL_LANG_PRREFIX . substr($item -> page_path, 1);
+
 					if(CMS_BACKEND)
 						echo '<a href="'. CMS_SERVER_URL_BACKEND .'pages/view/'. $item -> page_language .'/'. $item -> node_id .'" title="'. $item -> page_title .'">';
 					else
-						echo '<a href="'. CMS_SERVER_URL . URL_LANG_PRREFIX . substr($item -> page_path, 1) .'" title="'. $item -> page_title .'" '. ($item -> menu_follow == 0 ? 'rel="nofollow"' : '') .'>';
+						echo '<a href="'. $pageUrl .'" title="'. $item -> page_title .'" '. (!empty($item -> page_redirect) ? 'target="about:blank"' : '') .' '. ($item -> menu_follow == 0 ? 'rel="nofollow"' : '') .'>';
 				}
 				?>
 

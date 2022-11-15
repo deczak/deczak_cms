@@ -6,15 +6,10 @@ include_once CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CModulesTemplates.php';
 
 class	controllerSimpleGallery extends CController
 {
-	private	$m_modelSimple;
-		
 	public function
 	__construct(object $_module, object &$_object)
 	{
 		parent::__construct($_module, $_object);
-
-		$this -> m_modelSimple = new modelSimple();
-
 		$this -> moduleInfo -> user_rights[] = 'view';	// add view right as default for everyone
 	}
 	
@@ -75,28 +70,19 @@ class	controllerSimpleGallery extends CController
 	private function
 	logicView(CDatabaseConnection &$_pDatabase, bool $_enableEdit = false, bool $_enableDelete = false) : bool
 	{
-		$modelCondition = new CModelCondition();
-		$modelCondition -> where('object_id', $this -> objectInfo -> object_id);
+		$simpleObject = modelSimple::where('object_id', '=', $this -> objectInfo -> object_id)->one();
 
-		$this -> m_modelSimple -> load($_pDatabase, $modelCondition);
+		if(empty($simpleObject -> params -> itemList))
+			$simpleObject -> params -> itemList = [];
 
-		$this -> m_modelSimple -> getResult()[0] -> params = json_decode($this -> m_modelSimple -> getResult()[0] -> params);
-
-
-		if(empty($this -> m_modelSimple -> getResult()[0] -> params -> itemList))
-			$this -> m_modelSimple -> getResult()[0] -> params -> itemList = [];
-
-		$this -> m_modelSimple -> getResult()[0] -> params -> itemList = (array)$this -> m_modelSimple -> getResult()[0] -> params -> itemList;
-
-
-
+		$simpleObject -> params -> itemList = (array)$simpleObject -> params -> itemList;
 
 		$this -> setView(	
 						'view',	
 						'',
 						[
-							'object' 	 => $this -> m_modelSimple -> getResult()[0],
-							'itemList'		  => $this -> processGalleryItems($_pDatabase, $this -> m_modelSimple -> getResult()[0] -> params -> itemList),
+							'object'	=> $simpleObject,
+							'itemList'	=> $this -> processGalleryItems($_pDatabase, $simpleObject -> params -> itemList),
 						]
 						);
 
@@ -127,38 +113,19 @@ class	controllerSimpleGallery extends CController
 	private function
 	logicEdit(CDatabaseConnection &$_pDatabase, bool $enableEdit, bool $enableDelete) : bool
 	{
-		$modelCondition = new CModelCondition();
-		$modelCondition -> where('object_id', $this -> objectInfo -> object_id);
+		$simpleObject = modelSimple::where('object_id', '=', $this -> objectInfo -> object_id)->one();
 
-		$this -> m_modelSimple -> load($_pDatabase, $modelCondition);
-		
-		$this -> m_modelSimple -> getResult()[0] -> params = json_decode($this -> m_modelSimple -> getResult()[0] -> params);
+		if(empty($simpleObject -> params -> itemList))
+			$simpleObject -> params -> itemList = [];
 
-
-		/*
-				$moduleTemplate = new CModulesTemplates();
-				$moduleTemplate ->	load('simpleGallery', $this -> m_modelSimple -> getResult()[0] -> params -> template ?? '');
-
-				$moduleTemplates = new CModulesTemplates();
-				$moduleTemplates ->	load('simpleGallery');
-		*/
-
-
-		if(empty($this -> m_modelSimple -> getResult()[0] -> params -> itemList))
-			$this -> m_modelSimple -> getResult()[0] -> params -> itemList = [];
-
-		$this -> m_modelSimple -> getResult()[0] -> params -> itemList = (array)$this -> m_modelSimple -> getResult()[0] -> params -> itemList;
-
-
+		$simpleObject -> params -> itemList = (array)$simpleObject -> params -> itemList;
 
 		$this -> setView(	
 						'edit',	
 						'',
 						[
-							'object' 	=> $this -> m_modelSimple -> getResult()[0],
-			#						'currentTemplate'	=> $moduleTemplate -> templatesList,
-			#						'avaiableTemplates'	=> $moduleTemplates -> templatesList,
-							'itemList'		  => $this -> processGalleryItems($_pDatabase, $this -> m_modelSimple -> getResult()[0] -> params -> itemList),
+							'object'	=> $simpleObject,
+							'itemList'	=> $this -> processGalleryItems($_pDatabase, $simpleObject -> params -> itemList),
 						]
 						);
 
@@ -186,27 +153,19 @@ class	controllerSimpleGallery extends CController
 
 		if(!$validationErr)
 		{
-			$modelCondition = new CModelCondition();
-			$modelCondition -> where('object_id', $_xhrInfo -> objectId);
+			$simpleObject = modelSimple::where('object_id', '=', $_xhrInfo -> objectId)->one();
 
+			$simpleObject->params->display_divider 	= $urlVarList['simple-gallery-display-divider'];
+			$simpleObject->params->format 			= $urlVarList['simple-gallery-format'];
+			$simpleObject->params->itemList 		= $urlVarList['simple-gallery-item'];
+			$simpleObject->body = '';
 
-			$valuesList = [];
-
-			$valuesList['params']	= 	[
-											"display_divider"	=> $urlVarList['simple-gallery-display-divider'],
-											"format"			=> $urlVarList['simple-gallery-format'],
-											"itemList"			=> $urlVarList['simple-gallery-item'],
-										];
-
-			$valuesList['params']	 = 	json_encode($valuesList['params'], JSON_FORCE_OBJECT);
-
-			$valuesList['body']		 = 	'';
-			
-			$objectId = $_xhrInfo -> objectId;
-
-			if($this -> m_modelSimple -> update($_pDatabase, $valuesList, $modelCondition))
+			if($simpleObject->save())
 			{
 				$validationMsg = 'Object updated';
+
+				$modelCondition = new CModelCondition();
+				$modelCondition -> where('object_id', $_xhrInfo -> objectId);
 
 				$this -> m_modelPageObject = new modelPageObject();
 
@@ -246,25 +205,27 @@ class	controllerSimpleGallery extends CController
 		$validationMsg =	'';
 		$responseData = 	[];
 
-		$_dataset['object_id'] 	= $this -> objectInfo -> object_id;
-		$_dataset['body'] 		= '';
-		$_dataset['params'] 	= '';
+		$sOParams = new stdClass;
+
+		$simpleObject = modelSimple::new([
+			'object_id' => (int)$this -> objectInfo -> object_id,
+			'body' 		=> '',
+			'params' 	=> $sOParams,
+		]);
 		
-		if(!$this -> m_modelSimple -> insert($_pDatabase, $_dataset, MODEL_RESULT_APPEND_DTAOBJECT))
+		if(!$simpleObject->save())
 		{
 			$validationErr =	true;
 			$validationMsg =	'sql insert failed';
 		}
 		else
 		{
-
-		
 			$this -> setView(	
 							'edit',	
 							'',
 							[
-								'object' 	=> $this -> m_modelSimple -> getResult()[0],
-								'itemList'			=> [],
+								'object'	=> $simpleObject,
+								'itemList'	=> [],
 							]
 							);
 
@@ -291,11 +252,13 @@ class	controllerSimpleGallery extends CController
 
 		if(!$validationErr)
 		{
-			$modelCondition = new CModelCondition();
-			$modelCondition -> where('object_id', $_xhrInfo -> objectId);
+			$simpleObject = modelSimple::where('object_id', '=', $_xhrInfo -> objectId)->one();
 
-			if($this -> m_modelSimple -> delete($_pDatabase, $modelCondition))
+			if($simpleObject->delete())
 			{
+				$modelCondition = new CModelCondition();
+				$modelCondition -> where('object_id', $_xhrInfo -> objectId);
+
 				$_objectModel  	 = new modelPageObject();
 				$_objectModel	-> delete($_pDatabase, $modelCondition);
 
@@ -322,32 +285,20 @@ class	controllerSimpleGallery extends CController
 	private function
 	processGalleryItems(CDatabaseConnection &$_pDatabase, &$itemsList) : array
 	{
-		
 		$collectedImageList = [];
 
 		foreach($itemsList as $item)
-		{
-
-			
+		{		
 			switch($item -> {'listing-type'})
 			{
 				case 'image':
 
-
-
 					MEDIATHEK::getItem($item -> {'item-path'}.'/', $collectedImageList);
-
-
 					break;
 
 				case 'folder':
 
-
-
-
 					MEDIATHEK::getItemsList($item -> {'item-path'}.'/', $collectedImageList, true);
-
-
 					break;
 			}
 

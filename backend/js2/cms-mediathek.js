@@ -55,6 +55,7 @@ class	cmsMediathek
 		}
 
 		let itemsNode = document.createElement('div');
+			itemsNode.style.width = '100%';
 
 		switch(document.cmsMediathek.viewMode)
 		{
@@ -83,11 +84,14 @@ class	cmsMediathek
 		{
 			case cmsMediathek.WORKMODE_EDIT:
 
+
+
+
 				let buttonImportNode = document.createElement('button');
 					buttonImportNode.classList.add('ui', 'button', 'icon', 'labeled', 'button-import');
 					buttonImportNode.type = 'button';
-					buttonImportNode.onclick = function(event) { srcInstance._onClickButtonImport(event, srcInstance) };
-					buttonImportNode.innerHTML = '<span><i class="fas fa-file-import"></i></span> Mediathek Import';
+					buttonImportNode.onclick = function(event) { srcInstance._onClickButtonUpload(event, srcInstance) };
+					buttonImportNode.innerHTML = '<span><i class="fas fa-file-upload"></i></span> Upload';
 
 				controlPanelRightNode.append(buttonImportNode);
 
@@ -299,7 +303,6 @@ class	cmsMediathek
 		contentNode.append(tableNode);
 	}
 
-
 	_onClick(event, srcInstance)
 	{
 		let targetNode = event.target;
@@ -372,13 +375,12 @@ class	cmsMediathek
 			}
 		}
 	}
-
-	_onClickButtonImport(event, srcInstance)
+	
+	_onClickButtonUpload(event, srcInstance)
 	{
-		let	formData  = new FormData;
 
-		let	xhRequest = new cmsXhr;
-			xhRequest.request(CMS.SERVER_URL_BACKEND + 'mediathek/', formData, srcInstance.onXHRSuccessImport, srcInstance, 'import');
+		let modalUpload = new cmsModalMediathekUpload();
+			modalUpload.open(event, srcInstance);
 	}
 
 	_onClickButtonViewSquare(event, srcInstance)
@@ -712,4 +714,437 @@ class	cmsMediathek
 		let	xhRequest = new cmsXhr;
 			xhRequest.request(CMS.SERVER_URL_BACKEND + 'mediathek/', formData, onSuccessCallback, srcInstance, 'directory_items');
 	}
+}
+
+class cmsModalMediathekUpload extends cmsModal
+{
+
+	constructor()
+	{
+		super();
+	}
+	
+	open(event, srcInstance)
+	{
+
+
+
+		let instance = this;
+
+
+
+		instance.srcInstance = srcInstance;
+
+
+
+		instance.modalUploadDropzoneNode = document.createElement('div');
+		instance.modalUploadDropzoneNode.classList.add('dropzone');
+
+		instance.modalUploadDropzoneNode.ondrop = function(event) { instance._onDropZoneDrop(event, instance) };
+		instance.modalUploadDropzoneNode.ondragover = function(event) { instance._onDropZoneDragOver(event, instance) };
+		instance.modalUploadDropzoneNode.ondragenter = function(event) { instance._onDropZoneDragEnter(event, instance) };
+		instance.modalUploadDropzoneNode.ondragleave = function(event) { instance._onDropZoneDragLeave(event, instance) };
+
+		instance.modalUploadDropItemsNode = document.createElement('div');
+		instance.modalUploadDropItemsNode.classList.add('dropped-items')
+
+
+
+
+		let content = document.createElement('div');
+			content.append(
+ 
+				instance.modalUploadDropzoneNode, 
+				instance.modalUploadDropItemsNode
+				);
+	
+		super.addButton(new cmsModalCtrlButton(cmsModal.BTN_LOCATION.BOTTOM_LEFT, 'Upload', instance._onEventClick_Upload, 'fas fa-file-upload'));
+		super.addButton(new cmsModalCtrlButton(cmsModal.BTN_LOCATION.BOTTOM_LEFT, 'Close', super.close, 'fas fa-times'));
+		super.setTitle('Mediathek upload')
+		super.create(content, {}, ['modal-mediathek-upload-inner']);
+		super.open();
+
+
+
+		content.addEventListener('click', function(event) { instance._onEventClickHandler(event, srcInstance); });
+	
+
+
+	
+		
+
+
+
+
+
+	}
+
+	_onEventClickHandler(event, srcInstance)
+	{
+
+		//console.log(event.target);
+		//console.log(event.target.tagName);
+		//console.log(event.target.id);
+
+		let actionClick = event.target.getAttribute('action-click');
+
+		
+
+
+		//console.log(actionClick);
+
+
+		if(actionClick === null)
+			return;
+
+		event.stopPropagation();
+
+		switch(actionClick)
+		{
+			case 'dropped-item-remove':
+
+					this._onEventClick_DroppedItemRemove(event);
+					break;
+
+		}
+
+	}
+
+	_onEventClick_DroppedItemRemove(event)
+	{
+		event.target.closest('div.dropped-item').remove();
+	}
+
+	_onEventClick_Upload(event, srcInstance)
+	{
+		let itemsList = srcInstance.nodeModal.querySelectorAll('.dropped-item');
+
+		for(let i = 0; i < itemsList.length; i++)
+		{
+			if(typeof itemsList[i].fileInfo === 'undefined' || (typeof itemsList[i].fileInfo !== 'undefined' && typeof itemsList[i].fileInfo === null))
+				continue;
+
+			let removeButtonNode = itemsList[i].querySelector('[action-click="dropped-item-remove"]');
+			if(removeButtonNode !== null)
+				removeButtonNode.remove();
+
+			let fieldList = cmsForms.collectFields(itemsList[i].querySelector('fieldset'));
+
+			let progressNode = itemsList[i].querySelector('.progress');
+
+			itemsList[i].progress = new cmsProgress(progressNode, {
+				progressColor : 'green',
+				backgroundColor : 'red'
+			});
+
+            let formData = new FormData();
+                formData.append('file', itemsList[i].fileInfo, fieldList.filename);
+                formData.append('media-item-author', fieldList['modal-media-item-author']);
+                formData.append('media-item-camera', fieldList['modal-media-item-camera']);
+                formData.append('media-item-caption', fieldList['modal-media-item-caption']);
+                formData.append('media-item-lens', fieldList['modal-media-item-lens']);
+                formData.append('media-item-license', fieldList['modal-media-item-license']);
+                formData.append('media-item-licenseurl', fieldList['modal-media-item-licenseurl']);
+                formData.append('media-item-path', fieldList['modal-media-item-path']);
+                formData.append('media-item-title', fieldList['modal-media-item-title']);
+
+			srcInstance._onEventClick_UploadProcess(formData, itemsList[i].progress, itemsList[i]);
+		}
+	}
+
+	_onEventClick_UploadProcess(formData, progress, droppedItem)
+	{
+
+		console.log('cmsModalMediathekUpload::_onEventClick_UploadProcess');
+
+
+		console.log(progress);
+
+		let requestURL = CMS.SERVER_URL_BACKEND + 'mediathek/';
+
+		let xhRequest = new XMLHttpRequest();
+		xhRequest.open('POST', requestURL);
+		xhRequest.responseType = 'json';
+		xhRequest.setRequestHeader("X-Requested-With","XMLHttpRequest");
+		xhRequest.setRequestHeader("X-Requested-XHR-Action", 'upload');
+		xhRequest.onerror   = function ()
+		{
+			// Event does not fire on 404 or 500
+		};
+		xhRequest.onloadend = function(event)
+		{
+
+
+			console.log('onloadend', xhRequest.response, this, event);
+
+			if(this.status === 200)
+			{
+				//callbackSuccess(xhRequest.response, xhrCallInstance);
+
+				droppedItem.fileInfo = null;
+
+
+
+			}
+			else
+			{
+				//callbackError(this, xhrCallInstance);
+			}
+
+
+		};
+        xhRequest.upload.addEventListener("progress", (event) => {
+
+            let percentComplete = (event.loaded / event.total) * 100;
+
+			console.log(percentComplete);
+
+			progress.setPercent(percentComplete);
+
+
+			if(percentComplete == 100)
+			{
+
+
+				// todo  grüner haken in das bild
+
+			}
+
+
+		});
+
+		xhRequest.send(formData);
+
+	}
+
+	_transformFileEntry(entry, successCallback, srcInstance) {
+	
+		console.log('_transformFileEntry');
+
+		entry.file((file) => {
+
+			successCallback(file, entry, srcInstance);
+
+		});
+	}
+
+	_onDropZoneDropItems(item) {
+		
+		let srcInstance = this;
+
+		if (item.isFile)
+		{
+			srcInstance._transformFileEntry(item, srcInstance._onDropZoneDropItemBox, srcInstance)
+			srcInstance.modalUploadDropzoneNode.classList.add('lower');
+		}
+		else if (item.isDirectory)
+		{
+			let directoryReader = item.createReader();
+
+			directoryReader.readEntries((entries) => {
+
+				entries.forEach((entry) => {
+
+					srcInstance._onDropZoneDropItems(entry);
+					
+				});
+
+			});
+		}
+	}
+
+	_onDropZoneDropItemBox(fileInfo, fileEntry, srcInstance)
+	{
+		switch(fileInfo.type)
+		{
+			case 'image/jpeg':
+			case 'image/png':
+			case 'image/webp':
+
+					break;
+
+			default:
+
+					return;
+		}
+  
+		let dropItem = document.createElement('div');
+			dropItem.classList.add('dropped-item');
+			dropItem.fileInfo = fileInfo;
+			dropItem.innerHTML  = `
+				<div class="preview">
+					<img class="" src="">
+					<button class="klaus" type="button" action-click="dropped-item-remove"><i class="far fa-trash-alt"></i></button>
+				</div>
+				<fieldset class="ui fieldset">
+
+					<div class="fields">
+						<div class="input width-100">
+							<input type="text" name="modal-media-item-filename" value="`+ fileInfo.name +`" placeholder="Filename" maxlength="150" title="Filename">
+						</div>
+					</div>
+
+					<div class="fields">
+						<div class="input width-100">
+							<input type="text" name="modal-media-item-title" value="" placeholder="Title" maxlength="150" title="Title">
+						</div>
+					</div>
+
+					<div class="fields">
+						<div class="input width-100">
+							<textarea name="modal-media-item-caption" maxlength="150" placeholder="Caption" title="Caption"></textarea>
+						</div>
+					</div>
+
+					<div class="fields">
+						<div class="input width-100">
+							<input type="text" name="modal-media-item-author" value="" placeholder="Author" maxlength="150" title="Author">
+						</div>
+					</div>
+
+					<div class="fields">
+						<div class="input width-100">
+							<input type="text" name="modal-media-item-license" value="" placeholder="License" maxlength="150" title="License">
+						</div>
+					</div>
+
+					<div class="fields">
+						<div class="input width-100">
+							<input type="text" name="modal-media-item-licenseurl" value="" placeholder="License URL" maxlength="150" title="License URL">
+						</div>
+					</div>
+
+					<div class="fields">
+						<div class="input width-100">
+							<input type="text" name="modal-media-item-camera" value="" placeholder="Camera" maxlength="150" title="Camera">
+						</div>
+					</div>
+
+					<div class="fields">
+						<div class="input width-100">
+							<input type="text" name="modal-media-item-lens" value="" placeholder="Lens" maxlength="150" title="Lens">
+						</div>
+					</div>
+
+					<div class="fields">
+						<div class="input width-100">
+							<input type="text" name="modal-media-item-path" value="" placeholder="Path" maxlength="150" title="Path">
+						</div>
+					</div>
+
+
+					<div class="progress"></div>
+				
+				</fieldset>
+			`;
+
+		let itemNode = srcInstance.modalUploadDropItemsNode.appendChild(dropItem);
+
+
+
+		console.log('xxxxxxxxxxxxxxxx');
+		let activeMediathekPath = srcInstance.srcInstance.activePath;
+
+			activeMediathekPath = activeMediathekPath.replace(/^\/+|\/+$/g, '');
+
+
+		console.log('activeMediathekPath', activeMediathekPath);
+
+		let filePath = fileEntry.fullPath.split('/').filter(n => n);
+		filePath.pop();
+		filePath = filePath.join('/');
+
+
+		if(activeMediathekPath != '')
+			filePath = activeMediathekPath + (filePath != '' ? '/' : '') + filePath;
+			
+		console.log('filePath', filePath);
+
+		if(filePath.length > 0)
+			itemNode.querySelector('input[placeholder="Path"]').value = '/'+ filePath +'/';
+		else
+			itemNode.querySelector('input[placeholder="Path"]').value = '/';
+		
+		switch(fileInfo.type)
+		{
+			case 'image/jpeg':
+			case 'image/png':
+			case 'image/webp':
+
+					let reader  = new FileReader();
+					reader.readAsDataURL(fileInfo)
+					reader.onload = function(e) {
+						itemNode.querySelector('.preview img').src = reader.result;
+					};
+
+					break;
+					
+			default:
+
+		}
+
+		switch(fileInfo.type)
+		{
+			case 'image/jpeg':
+
+					EXIF.getData(fileInfo, function() {
+
+						let model 		= EXIF.getTag(this, "Model");
+						let artist 		= EXIF.getTag(this, "Artist");
+						let copyright 	= EXIF.getTag(this, "Copyright");
+						let lens		= EXIF.getTag(this, "LensModel");
+
+						if(model !== null && model !== ''&& typeof model !== 'undefined')
+							itemNode.querySelector('input[placeholder="Camera"]').value = model;
+
+						if(copyright !== null && copyright !== ''&& typeof copyright !== 'undefined')
+							itemNode.querySelector('input[placeholder="License"]').value = copyright;
+
+						if(artist !== null && artist !== '' && typeof artist !== 'undefined')
+							itemNode.querySelector('input[placeholder="Author"]').value = String(artist).replaceAll("\r", '').replaceAll("\n", ' ');
+
+						if(lens !== null && lens !== ''&& typeof lens !== 'undefined')
+							itemNode.querySelector('input[placeholder="Lens"]').value = lens.replace(/[\u0000-\u001F\u007F-\u009F]/g, "");
+					});
+					
+		}
+  
+	}
+
+	// Dropzone Events
+
+	_onDropZoneDrop(event, srcInstance)
+	{
+		event.preventDefault();
+
+		var items = event.dataTransfer.items;
+
+		for(let i=0; i<items.length; i++)
+		{
+			let item = items[i].webkitGetAsEntry();
+
+			if(item)
+			{
+				srcInstance._onDropZoneDropItems(item);
+			}
+		}
+
+		event.target.style.backgroundColor = '';
+	}
+
+	_onDropZoneDragOver(event)
+	{
+		event.preventDefault();
+	}
+
+	_onDropZoneDragEnter(event)
+	{
+		event.target.style.backgroundColor = 'gold';
+	}
+
+	_onDropZoneDragLeave(event)
+	{
+		event.target.style.backgroundColor = '';
+	}
+
 }

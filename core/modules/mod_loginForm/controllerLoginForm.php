@@ -11,9 +11,9 @@ class	controllerLoginForm extends CController
 		parent::__construct($_module, $_object, $_backendCall);
 
 		if($this -> isBackendCall())
-			$this -> m_modelSimple = new modelBackendSimple();
+			$this -> m_modelSimpleName = 'modelBackendSimple';
 		else
-			$this -> m_modelSimple = new modelSimple();
+			$this -> m_modelSimpleName = 'modelSimple';
 
 
 		$this -> moduleInfo -> user_rights[] = 'view';			// add view right as default for everyone
@@ -143,18 +143,20 @@ if(isset($_GET['logout']))
 
 		if(empty($this -> objectInfo -> params))
 		{
-			$modelCondition = new CModelCondition();
-			$modelCondition -> where('object_id', $this -> objectInfo -> object_id);
+			
 
-			$this -> m_modelSimple -> load($_pDatabase, $modelCondition);
+		$simpleObject = $this -> m_modelSimpleName::where('object_id', '=', $this -> objectInfo -> object_id)->one();
 
 
-			$this -> m_modelSimple -> getResult()[0] -> params = json_decode($this -> m_modelSimple -> getResult()[0] -> params);
 
-			$this -> objectInfo -> params = $this -> m_modelSimple -> getResult()[0] -> params;
-			$this -> objectInfo -> body = $this -> m_modelSimple -> getResult()[0] -> body;
 
-			if(CSession::instance() -> isAuthed($this -> m_modelSimple -> getResult()[0] -> params -> object_id) !== false)
+
+
+
+			$this -> objectInfo -> params = $simpleObject  -> params;
+			$this -> objectInfo -> body = $simpleObject  -> body;
+
+			if(CSession::instance() -> isAuthed($simpleObject  -> params -> object_id) !== false)
 			{
 				$this -> logicSuccess($_pDatabase);
 			}
@@ -162,7 +164,7 @@ if(isset($_GET['logout']))
 
 
 			$modelCondition = new CModelCondition();
-			$modelCondition -> where('object_id', $this -> m_modelSimple -> getResult()[0] -> params -> object_id);
+			$modelCondition -> where('object_id', $simpleObject  -> params -> object_id);
 			
 			$_pModelLoginObjects	 =	new modelLoginObjects();
 			$_pModelLoginObjects	->	load($_pDatabase, $modelCondition);	
@@ -171,7 +173,7 @@ if(isset($_GET['logout']))
 							'view',	
 							'',
 							[
-								'object' 	=> $this -> m_modelSimple -> getResult()[0],
+								'object' 	=> $simpleObject ,
 								'login_object' => $_pModelLoginObjects -> getResult()[0]
 							]
 							);
@@ -182,7 +184,7 @@ if(isset($_GET['logout']))
 			// set data as property
 
 			$object = new stdClass;
-			$object -> params		= json_decode($this -> objectInfo -> params);
+			$object -> params		= $this -> objectInfo -> params;
 			$object -> object_id	= $this -> objectInfo -> object_id;
 
 			// authed check
@@ -221,6 +223,8 @@ if(isset($_GET['logout']))
 			$validationMsg =	'';
 			$responseData = 	[];
 
+
+			/*
 			$_dataset['object_id'] 	= $this -> objectInfo -> object_id;
 			$_dataset['body'] 		= '';
 
@@ -228,8 +232,21 @@ if(isset($_GET['logout']))
 			$_dataset['params']['labels'] 		= [];
 
 			$_dataset['params'] = json_encode($_dataset['params'], JSON_HEX_QUOT | JSON_HEX_APOS | JSON_UNESCAPED_UNICODE);
+			*/
 
-			if(!$this -> m_modelSimple -> insert($_pDatabase, $_dataset, MODEL_RESULT_APPEND_DTAOBJECT))
+
+			$sOParams = new stdClass;
+			$sOParams->object_id 		= '';
+			$sOParams->labels 			= []; 
+
+			$simpleObject = $this -> m_modelSimpleName::new([
+				'object_id' => (int)$this -> objectInfo -> object_id,
+				'body' 		=> '',
+				'params' 	=> $sOParams,
+			]);
+			
+
+			if(!$simpleObject->save())
 			{
 				$validationErr =	true;
 				$validationMsg =	'sql insert failed';
@@ -247,7 +264,7 @@ if(isset($_GET['logout']))
 								'edit',	
 								'',
 								[
-									'object' 	=> $this -> m_modelSimple -> getResult()[0],
+									'object' 	=> $simpleObject,
 									'login_objects' => $_pModelLoginObjects -> getResult()
 								]
 								);
@@ -266,10 +283,12 @@ if(isset($_GET['logout']))
 	logicEdit(CDatabaseConnection &$_pDatabase) : bool
 	{
 
-		$modelCondition = new CModelCondition();
-		$modelCondition -> where('object_id', $this -> objectInfo -> object_id);
 
-		$this -> m_modelSimple -> load($_pDatabase, $modelCondition);
+
+		$simpleObject = $this -> m_modelSimpleName::where('object_id', '=', $this -> objectInfo -> object_id)->one();
+
+
+
 
 		$_pModelLoginObjects	 =	new modelLoginObjects();
 		$_pModelLoginObjects	->	load($_pDatabase);	
@@ -278,7 +297,7 @@ if(isset($_GET['logout']))
 						'edit',	
 						'',
 						[
-							'object' 		=> $this -> m_modelSimple -> getResult()[0],
+							'object' 		=> $simpleObject,
 							'login_objects' => $_pModelLoginObjects -> getResult()
 						]
 						);
@@ -316,7 +335,7 @@ if(isset($_GET['logout']))
 								
 								if(!$validationErr)
 								{
-
+									/*
 									$_aFormData['params']['object_id'] 	= $_aFormData['login-object-id'];
 									$_aFormData['params']['labels'] 	= $_aFormData['field_label'];
 
@@ -325,13 +344,20 @@ if(isset($_GET['logout']))
 									unset($_aFormData['login-object-id']);
 									unset($_aFormData['field_label']);
 
+									*/
 
 
-									$modelCondition = new CModelCondition();
-									$modelCondition -> where('object_id', $_xhrInfo -> objectId);
 									#$modelCondition -> where('object_id', $_aFormData['object_id']);
 
-									if($this -> m_modelSimple -> update($_pDatabase, $_aFormData, $modelCondition))
+
+
+
+									$simpleObject = $this -> m_modelSimpleName::where('object_id', '=', $_xhrInfo -> objectId)->one();
+									$simpleObject->params->object_id = $_aFormData['login-object-id'];
+									$simpleObject->params->labels = $_aFormData['field_label'];
+									$simpleObject->body = $_aFormData['body'];
+
+									if($simpleObject->save())
 									{
 
 
@@ -339,6 +365,9 @@ if(isset($_GET['logout']))
 											return true;
 					
 										$validationMsg = 'Object updated';
+
+									$modelCondition = new CModelCondition();
+									$modelCondition -> where('object_id', $_xhrInfo -> objectId);
 
 										$this -> m_modelPageObject = new modelPageObject();
 
@@ -387,11 +416,14 @@ if(isset($_GET['logout']))
 
 									if(!$validationErr)
 									{
+
+						$simpleObject = $this -> m_modelSimpleName::where('object_id', '=', $_xhrInfo -> objectId)->one();
+
+						if($simpleObject->delete())
+
+										{
 										$modelCondition = new CModelCondition();
 										$modelCondition -> where('object_id', $_xhrInfo -> objectId);
-
-										if($this -> m_modelSimple -> delete($_pDatabase, $modelCondition))
-										{
 											$_objectModel  	 = new modelPageObject();
 											$_objectModel	-> delete($_pDatabase, $modelCondition);
 

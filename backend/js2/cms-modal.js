@@ -34,7 +34,7 @@ class	cmsModal
 	/**
 	 * 	Creates the required nodes for the modal
 	 */
-	create(nodeContent, extInnerStyles = null)
+	create(nodeContent, extInnerStyles = null, extInnerClasses = null)
 	{		
 		let srcInstance = this;
 
@@ -43,6 +43,8 @@ class	cmsModal
 
 		let	nodeModalChild = document.createElement('div');
 		nodeModalChild.classList.add('cms-modal-inner');
+		if(extInnerClasses !== null)
+			nodeModalChild.classList.add(...extInnerClasses);
 
 		if(extInnerStyles !== null)
 		{

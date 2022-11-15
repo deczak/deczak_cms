@@ -77,6 +77,7 @@ class 	modelSitemap extends CModel
 																$this -> tbPage .'.publish_from',
 																$this -> tbPage .'.publish_until',
 																$this -> tbPage .'.publish_expired',
+																$this -> tbPage .'.page_template',
 																$this -> tbPage .'.hidden_state',
 																$this -> tbPage .'.menu_follow',
 																$this -> tbPage .'.page_image',

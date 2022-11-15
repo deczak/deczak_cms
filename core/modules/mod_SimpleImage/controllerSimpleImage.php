@@ -3,16 +3,11 @@
 include_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelSimple.php';	
 
 class	controllerSimpleImage extends CController
-{
-	private	$m_modelSimple;
-		
+{		
 	public function
 	__construct(object $_module, object &$_object)
 	{
 		parent::__construct($_module, $_object);
-
-		$this -> m_modelSimple = new modelSimple();
-
 		$this -> moduleInfo -> user_rights[] = 'view';	// add view right as default for everyone
 	}
 	
@@ -72,18 +67,13 @@ class	controllerSimpleImage extends CController
 	private function
 	logicView(CDatabaseConnection &$_pDatabase, bool $_enableEdit = false, bool $_enableDelete = false) : bool
 	{
-		$modelCondition = new CModelCondition();
-		$modelCondition -> where('object_id', $this -> objectInfo -> object_id);
-
-		$this -> m_modelSimple -> load($_pDatabase, $modelCondition);
-
-		$this -> m_modelSimple -> getResult()[0] -> params = json_decode($this -> m_modelSimple -> getResult()[0] -> params);
+		$simpleObject = modelSimple::where('object_id', '=', $this -> objectInfo -> object_id)->one();
 
 		$this -> setView(	
 						'view',	
 						'',
 						[
-							'object' 	=> $this -> m_modelSimple -> getResult()[0]
+							'object' 	=> $simpleObject
 						]
 						);
 
@@ -93,18 +83,13 @@ class	controllerSimpleImage extends CController
 	private function
 	logicEdit(CDatabaseConnection &$_pDatabase, bool $enableEdit, bool $enableDelete) : bool
 	{
-		$modelCondition = new CModelCondition();
-		$modelCondition -> where('object_id', $this -> objectInfo -> object_id);
-
-		$this -> m_modelSimple -> load($_pDatabase, $modelCondition);
-
-		$this -> m_modelSimple -> getResult()[0] -> params = json_decode($this -> m_modelSimple -> getResult()[0] -> params);
+		$simpleObject = modelSimple::where('object_id', '=', $this -> objectInfo -> object_id)->one();
 
 		$this -> setView(	
 						'edit',	
 						'',
 						[
-							'object' 	=> $this -> m_modelSimple -> getResult()[0]
+							'object' 	=> $simpleObject
 						]
 						);
 
@@ -131,33 +116,31 @@ class	controllerSimpleImage extends CController
 		$pURLVariables-> retrieve($requestList, false, true); // POST 
 		$urlVarList		 = $pURLVariables ->getArray();
 
-
 		if(empty($_xhrInfo -> objectId)) 		{ 	$validationErr = true; 	$responseData[] = 'cms-object-id'; 			}
 
 		if(!$validationErr)
 		{
-			$modelCondition = new CModelCondition();
-			$modelCondition -> where('object_id', $_xhrInfo -> objectId);
-					
-			$valuesList = [];
-			
-			$valuesList['params']	= 	[
-											"id"				=> $urlVarList['simple-image-id'],
-											"position_x"		=> $urlVarList['simple-image-position-x'],
-											"position_x_unit"	=> $urlVarList['simple-image-position-x-unit'],
-											"position_y"		=> $urlVarList['simple-image-position-y'],
-											"position_y_unit"	=> $urlVarList['simple-image-position-y-unit'],
-											"height"			=> $urlVarList['simple-image-height'],
-											"height_unit"		=> $urlVarList['simple-image-height-unit'],
-											"fit"				=> $urlVarList['simple-image-fit'],
-										];
+	
+			$simpleObject = modelSimple::where('object_id', '=', $_xhrInfo -> objectId)->one();
 
-			$valuesList['params']	 = 	json_encode($valuesList['params'], JSON_FORCE_OBJECT);
-			
-			$objectId = $_xhrInfo -> objectId;
+			$sOParams = new stdClass;
+			$sOParams->id 				= $urlVarList['simple-image-id'];
+			$sOParams->position_x 		= $urlVarList['simple-image-position-x'];
+			$sOParams->position_x_unit 	= $urlVarList['simple-image-position-x-unit'];
+			$sOParams->position_y 		= $urlVarList['simple-image-position-y'];
+			$sOParams->position_y_unit 	= $urlVarList['simple-image-position-y-unit'];
+			$sOParams->height 			= $urlVarList['simple-image-height'];
+			$sOParams->height_unit 		= $urlVarList['simple-image-height-unit'];
+			$sOParams->fit 				= $urlVarList['simple-image-fit'];
 
-			if($this -> m_modelSimple -> update($_pDatabase, $valuesList, $modelCondition))
+			$simpleObject->params	= $sOParams;
+			$simpleObject->body 	= '';
+
+			if($simpleObject->save())
 			{
+				$modelCondition = new CModelCondition();
+				$modelCondition -> where('object_id', $_xhrInfo -> objectId);
+
 				$validationMsg = 'Object updated';
 
 				$this -> m_modelPageObject = new modelPageObject();
@@ -183,8 +166,6 @@ class	controllerSimpleImage extends CController
 
 		tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
 
-
-
 		return false;
 	}
 
@@ -195,11 +176,15 @@ class	controllerSimpleImage extends CController
 		$validationMsg =	'';
 		$responseData = 	[];
 
-		$_dataset['object_id'] 	= $this -> objectInfo -> object_id;
-		$_dataset['body'] 		= '';
-		$_dataset['params'] 	= '';
+		$sOParams = new stdClass;
+
+		$simpleObject = modelSimple::new([
+			'object_id' => (int)$this -> objectInfo -> object_id,
+			'body' 		=> '',
+			'params' 	=> $sOParams,
+		]);
 		
-		if(!$this -> m_modelSimple -> insert($_pDatabase, $_dataset, MODEL_RESULT_APPEND_DTAOBJECT))
+		if(!$simpleObject->save())
 		{
 			$validationErr =	true;
 			$validationMsg =	'sql insert failed';
@@ -210,7 +195,7 @@ class	controllerSimpleImage extends CController
 							'edit',	
 							'',
 							[
-								'object' 	=> $this -> m_modelSimple -> getResult()[0]
+								'object' 	=> $simpleObject
 							]
 							);
 
@@ -237,11 +222,13 @@ class	controllerSimpleImage extends CController
 
 		if(!$validationErr)
 		{
-			$modelCondition = new CModelCondition();
-			$modelCondition -> where('object_id', $_xhrInfo -> objectId);
+			$simpleObject = modelSimple::where('object_id', '=', $_xhrInfo -> objectId)->one();
 
-			if($this -> m_modelSimple -> delete($_pDatabase, $modelCondition))
+			if($simpleObject->delete())
 			{
+				$modelCondition = new CModelCondition();
+				$modelCondition -> where('object_id', $_xhrInfo -> objectId);
+
 				$_objectModel  	 = new modelPageObject();
 				$_objectModel	-> delete($_pDatabase, $modelCondition);
 

@@ -30,6 +30,7 @@ class	CFG extends CSingleton
 	protected	$SYSTEM_MAILER;
 	protected	$TEMPLATE;
 	protected	$FRONTEND;
+	protected	$MEDIATHEK;
 
 	public static function
 	initialize()
@@ -53,6 +54,7 @@ class	CFG extends CSingleton
 		$instance -> SYSTEM_MAILER	= $configuration -> SYSTEM_MAILER;
 		$instance -> TEMPLATE		= $configuration -> TEMPLATE;
 		$instance -> FRONTEND		= $configuration -> FRONTEND;
+		$instance -> MEDIATHEK		= $configuration -> MEDIATHEK;
 	}
 
 	public function

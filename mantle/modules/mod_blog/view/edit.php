@@ -8,8 +8,6 @@
 			<i class="fas fa-blog"></i>&nbsp;&nbsp;&nbsp;Blog
 		</div> 
 
-
-
 	</div>
 
 	<div class="right">
@@ -30,17 +28,7 @@
 		
 	</div>
 
-
-
 </div>
-
-
-
-
-
-
-
-
 
 <div id="module-xhr-html-response-container-<?php echo $object -> object_id; ?>">
 

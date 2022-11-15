@@ -4,15 +4,10 @@ include_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelSimple.php';
 
 class	controllerSimpleSource extends CController
 {
-	private	$m_modelSimple;
-		
 	public function
 	__construct(object $_module, object &$_object)
 	{
 		parent::__construct($_module, $_object);
-
-		$this -> m_modelSimple = new modelSimple();
-
 		$this -> moduleInfo -> user_rights[] = 'view';	// add view right as default for everyone
 	}
 	
@@ -72,16 +67,13 @@ class	controllerSimpleSource extends CController
 	private function
 	logicView(CDatabaseConnection &$_pDatabase, bool $_enableEdit = false, bool $_enableDelete = false) : bool
 	{
-		$modelCondition = new CModelCondition();
-		$modelCondition -> where('object_id', $this -> objectInfo -> object_id);
-
-		$this -> m_modelSimple -> load($_pDatabase, $modelCondition);
-
+		$simpleObject = modelSimple::where('object_id', '=', $this -> objectInfo -> object_id)->one();
+		
 		$this -> setView(	
 						'view',	
 						'',
 						[
-							'object' 	=> $this -> m_modelSimple -> getResult()[0]
+							'object' 	=> $simpleObject
 						]
 						);
 
@@ -91,17 +83,13 @@ class	controllerSimpleSource extends CController
 	private function
 	logicEdit(CDatabaseConnection &$_pDatabase, bool $enableEdit, bool $enableDelete) : bool
 	{
-		$modelCondition = new CModelCondition();
-		$modelCondition -> where('object_id', $this -> objectInfo -> object_id);
-
-		$this -> m_modelSimple -> load($_pDatabase, $modelCondition);
-
-
+		$simpleObject = modelSimple::where('object_id', '=', $this -> objectInfo -> object_id)->one();
+		
 		$this -> setView(	
 						'edit',	
 						'',
 						[
-							'object' 	=> $this -> m_modelSimple -> getResult()[0]
+							'object' 	=> $simpleObject 
 						]
 						);
 
@@ -115,26 +103,30 @@ class	controllerSimpleSource extends CController
 		$validationMsg   = 'OK';
 		$responseData    = [];
 	
-
 		$pURLVariables =	new CURLVariables();
 		$requestList		 =	[];
 		$requestList[] 	 = 	[	"input" => "simple-text",  "output" => "body", 			"validate" => "!empty" ]; 
 		$pURLVariables-> retrieve($requestList, false, true); // POST 
 		$urlVarList		 = $pURLVariables ->getArray();
 
-
-		if(empty($_xhrInfo -> objectId)) 		{ 	$validationErr = true; 	$responseData[] = 'cms-object-id'; 			}
+		if(empty($_xhrInfo -> objectId)) 		
+		{ 	
+			$validationErr = true; 	
+			$responseData[] = 'cms-object-id'; 			
+		}
 
 		if(!$validationErr)
 		{
-			$modelCondition = new CModelCondition();
-			$modelCondition -> where('object_id', $_xhrInfo -> objectId);
-			
-			$objectId = $_xhrInfo -> objectId;
+			$simpleObject = modelSimple::where('object_id', '=', $_xhrInfo -> objectId)->one();
+			#$simpleObject->params->... = ;
+			$simpleObject->body = $urlVarList['simple-text'];
 
-			if($this -> m_modelSimple -> update($_pDatabase, $urlVarList, $modelCondition))
+			if($simpleObject->save())
 			{
 				$validationMsg = 'Object updated';
+
+				$modelCondition = new CModelCondition();
+				$modelCondition -> where('object_id', $_xhrInfo -> objectId);
 
 				$this -> m_modelPageObject = new modelPageObject();
 
@@ -143,7 +135,6 @@ class	controllerSimpleSource extends CController
 				$_objectUpdate['update_reason']		=	'';
 
 				$this -> m_modelPageObject -> update($_pDatabase, $_objectUpdate, $modelCondition);
-			
 			}
 			else
 			{
@@ -159,46 +150,43 @@ class	controllerSimpleSource extends CController
 
 		tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
 
-
-
 		return false;
 	}
 
 	private function
 	logicXHRCreate(CDatabaseConnection &$_pDatabase, object $_xhrInfo, bool $_enableEdit = false, bool $_enableDelete = false) : bool
 	{
+		$validationErr =	false;
+		$validationMsg =	'';
+		$responseData = 	[];
 
-			$validationErr =	false;
-			$validationMsg =	'';
-			$responseData = 	[];
+		$sOParams = new stdClass;
 
-			$_dataset['object_id'] 	= $this -> objectInfo -> object_id;
-			$_dataset['body'] 		= '';
-			$_dataset['params'] 	= '';
+		$simpleObject = modelSimple::new([
+			'object_id' => (int)$this -> objectInfo -> object_id,
+			'body' 		=> '',
+			'params' 	=> $sOParams,
+		]);
+		
+		if(!$simpleObject->save())
+		{
+			$validationErr =	true;
+			$validationMsg =	'sql insert failed';
+		}
+		else
+		{
+			$this -> setView(	
+							'edit',	
+							'',
+							[
+								'object' 	=> $simpleObject
+							]
+							);
 
+			$responseData['html'] = $this -> m_pView -> getHTML();
+		}
 
-
-
-			
-			if(!$this -> m_modelSimple -> insert($_pDatabase, $_dataset, MODEL_RESULT_APPEND_DTAOBJECT))
-			{
-				$validationErr =	true;
-				$validationMsg =	'sql insert failed';
-			}
-			else
-			{
-				$this -> setView(	
-								'edit',	
-								'',
-								[
-									'object' 	=> $this -> m_modelSimple -> getResult()[0]
-								]
-								);
-
-				$responseData['html'] = $this -> m_pView -> getHTML();
-			}
-
-			tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
+		tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
 		
 		return false;
 	}
@@ -218,11 +206,14 @@ class	controllerSimpleSource extends CController
 
 		if(!$validationErr)
 		{
-			$modelCondition = new CModelCondition();
-			$modelCondition -> where('object_id', $_xhrInfo -> objectId);
 
-			if($this -> m_modelSimple -> delete($_pDatabase, $modelCondition))
+			$simpleObject = modelSimple::where('object_id', '=', $_xhrInfo -> objectId)->one();
+
+			if($simpleObject->delete())
 			{
+				$modelCondition = new CModelCondition();
+				$modelCondition -> where('object_id', $_xhrInfo -> objectId);
+
 				$_objectModel  	 = new modelPageObject();
 				$_objectModel	-> delete($_pDatabase, $modelCondition);
 

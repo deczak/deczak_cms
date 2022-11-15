@@ -152,7 +152,11 @@ class	CDatabaseQuery
 	
 					$insertColumns 	= [];
 					foreach($this -> m_dtaObject as $columnName => $columnValue)
+					{
+						if($this -> m_tableScheme != null && !$this -> m_tableScheme -> existsColumn($columnName))
+							continue;
 						$insertColumns[] = "`". $columnName ."` = :". $columnName ."";
+					}
 					$queryString[] 	= implode(', ', $insertColumns);
 					$execParameters = $this -> _getDtaObjectValues();
 					break;
@@ -168,15 +172,26 @@ class	CDatabaseQuery
 	
 					$insertColumns 	= [];
 					if(property_exists($this -> m_dtaObject, 'prepareMode') && $this -> m_dtaObject -> prepareMode === false)
+					{
 						foreach($this -> m_dtaObject as $columnName => $columnValue)
 						{
+							if($this -> m_tableScheme != null && !$this -> m_tableScheme -> existsColumn($columnName))
+								continue;
 							if($columnName === 'prepareMode')
 								continue;
 							$insertColumns[] = "`". $columnName ."` = ". $columnValue ."";
 						}
+					}
 					else
+					{
 						foreach($this -> m_dtaObject as $columnName => $columnValue)
+						{
+							if($this -> m_tableScheme != null && !$this -> m_tableScheme -> existsColumn($columnName))
+								continue;
 							$insertColumns[] = "`". $columnName ."` = :". $columnName ."";
+						}
+					}
+
 					$queryString[] 	= implode(', ', $insertColumns);
 					$queryString[]	= $this -> _getConditions();
 					$execParameters = array_merge($this -> _getConditionsValues(), $this -> _getDtaObjectValues());
@@ -731,6 +746,9 @@ class	CDatabaseQuery
 
 		foreach($this -> m_dtaObject as $propName => $propValue)
 		{
+			if($this -> m_tableScheme != null && !$this -> m_tableScheme -> existsColumn($propName))
+				continue;
+
 			if(is_object($propValue) || is_array($propValue))
 			{
 				$return[$propName] = json_encode($propValue, JSON_UNESCAPED_UNICODE);

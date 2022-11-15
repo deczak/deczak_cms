@@ -306,6 +306,7 @@ class	controllerPages extends CController
 										$requestList[] 	 = 	[	"input" => "page_categories", 	"validate" => "strip_tags|trim|!empty" , 	"use_default" => true, "default_value" => [] ]; 	
 										$requestList[] 	 = 	[	"input" => "page_tags", 		"validate" => "strip_tags|trim|!empty" , 	"use_default" => true, "default_value" => [] ]; 	
 										$requestList[] 	 = 	[	"input" => "page_redirect", 	"validate" => "strip_tags|trim|!empty" , 	"use_default" => true, "default_value" => '' ]; 	
+										$requestList[] 	 = 	[	"input" => "page_redirect_external", 	"validate" => "strip_tags|trim|!empty" , 	"use_default" => true, "default_value" => '' ]; 	
 										$_pFormVariables-> retrieve($requestList, false, true); // POST 
 										$urlVarList		 = $_pFormVariables ->getArray();
 
@@ -431,11 +432,13 @@ class	controllerPages extends CController
 												$modelRedirect	 = new modelRedirect();
 												$modelRedirect	-> delete($_pDatabase, $redirectCondition);
 
-												if(!empty($urlVarList['page_redirect']))
+												$redirectTarget = (!empty($urlVarList['page_redirect']) ? $urlVarList['page_redirect'] : (!empty($urlVarList['page_redirect_external']) ? $urlVarList['page_redirect_external'] : null));
+
+												if(!empty($redirectTarget))
 												{
 													$redirect_id = 0;
 													$newRedirect["node_id"] 		= $nodeId;
-													$newRedirect["redirect_target"]	= $urlVarList['page_redirect'];
+													$newRedirect["redirect_target"]	= $redirectTarget;
 													$newRedirect["create_time"] 	= time();
 													$newRedirect["create_by"]	 	= CSession::instance() -> getValue('user_id');
 													$modelRedirect				   -> insert($_pDatabase, $newRedirect, $redirect_id);
@@ -489,11 +492,12 @@ class	controllerPages extends CController
 
 		$requestList[] 	 = 	[	"input" => "page_name",   "validate" => "trim|strip_tags|!empty", 	"use_default" => true, "default_value" => false  ];
 		$requestList[] 	 = 	[	"input" => "page_description",   "validate" => "trim|strip_tags|!empty", 	"use_default" => true, "default_value" => false  ];
+		$requestList[] 	 = 	[	"input" => "page_template",   "validate" => "trim|strip_tags|!empty", 	"use_default" => true, "default_value" => 'default'  ];
 		$pURLVariables -> retrieve($requestList, false, true); 
 		$urlVarList		 = $pURLVariables ->getArray();
 
 		$urlVarList['page_name'] = (empty($urlVarList['page_name']) ? CLanguage::string('MOD_SITES_NEWPAGE_NAME') : $urlVarList['page_name']);
-		$urlVarList['page_template'] = 'default';
+		$urlVarList['page_template'] = (!empty($urlVarList['page_template']) ? $urlVarList['page_template'] : 'default');
 		$urlVarList['page_description'] = (!empty($urlVarList['page_description']) ? $urlVarList['page_description'] : '');
 
 		$urlVarList['hidden_state']	=	4;

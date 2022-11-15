@@ -70,3 +70,4 @@
 	BEPE_PANEL_AUTHAPPLYCHILDS		=	Apply auth on sub-pages
 
 	BEPE_PANEL_REDIRECTNODEID		=	Internal redirection
+	BEPE_PANEL_REDIRECTEXTERNAL		=	External redirection

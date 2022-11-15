@@ -68,5 +68,6 @@
 	BEPE_PANEL_AUTHAPPLYCHILDS		= 	Auth auf Unterseiten anwenden
 
 	BEPE_PANEL_REDIRECTNODEID		=	Interne Weiterleitung
+	BEPE_PANEL_REDIRECTEXTERNAL		=	Externe Weiterleitung
 
 

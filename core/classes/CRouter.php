@@ -272,6 +272,9 @@ class CRouter extends CSingleton
 					else
 						$object -> params = false;
 					
+					if(is_array($object -> params)) // must be an object, not array
+						continue;
+						
 					$item  = new stdClass;
 					$item -> objectId = $object -> object_id;
 

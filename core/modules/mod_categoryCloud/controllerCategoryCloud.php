@@ -8,15 +8,11 @@ include_once CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CModulesTemplates.php';
 
 class	controllerCategoryCloud extends CController
 {
-
 	public function
 	__construct($_module, &$_object)
 	{		
 		$this -> m_modelCategories	= new modelCategories();
-		$this -> m_modelSimple	= new modelSimple();
-
 		parent::__construct($_module, $_object);
-
 		$this -> moduleInfo -> user_rights[] = 'view';	// add view right as default for everyone
 	}
 	
@@ -77,14 +73,11 @@ class	controllerCategoryCloud extends CController
 	logicView(CDatabaseConnection &$_pDatabase) : bool
 	{
 		##	get object
-		$objectCondition = new CModelCondition();
-		$objectCondition -> where('object_id', $this -> objectInfo -> object_id);
-		$this -> m_modelSimple -> load($_pDatabase, $objectCondition);
-		$this -> m_modelSimple -> getResult()[0] -> params = json_decode($this -> m_modelSimple -> getResult()[0] -> params);
+		$simpleObject = modelSimple::where('object_id', '=', $this -> objectInfo -> object_id)->one();
 		
 		##	get node list
-		$parentNode = $this -> m_modelSimple -> getResult()[0] -> params -> parent_node_id;
-		$parentNode = (empty($parentNode) ? $this -> objectInfo -> node_id : $this -> m_modelSimple -> getResult()[0] ->  params -> parent_node_id);
+		$parentNode = $simpleObject -> params -> parent_node_id;
+		$parentNode = (empty($parentNode) ? $this -> objectInfo -> node_id : $simpleObject ->  params -> parent_node_id);
 
 		$modelCondition = new CModelCondition();
 		$modelCondition -> where('node_id', $parentNode);		
@@ -119,7 +112,7 @@ class	controllerCategoryCloud extends CController
 
 		##	get module templates
 		$moduleTemplate		 = new CModulesTemplates();
-		$moduleTemplate		->	load('simpleCategorieCloud', $this -> m_modelSimple -> getResult()[0] -> params -> template);
+		$moduleTemplate		->	load('simpleCategorieCloud', $simpleObject -> params -> template);
 
 		##	get parent node
 		$parentNode= tk::getNodeFromSitemap($modelSitemap -> getResult(), $parentNode);
@@ -128,7 +121,7 @@ class	controllerCategoryCloud extends CController
 						'view',	
 						'',
 						[
-							'object' 	=> $this -> m_modelSimple -> getResult()[0],
+							'object' 	=> $simpleObject,
 							'termList' 	=> $categoriesList ?? [],
 							'parentNode' 	=> $parentNode,
 							'currentTemplate'	=> $moduleTemplate -> templatesList
@@ -143,14 +136,11 @@ class	controllerCategoryCloud extends CController
 	{
 
 		##	get object
-		$objectCondition = new CModelCondition();
-		$objectCondition -> where('object_id', $this -> objectInfo -> object_id);
-		$this -> m_modelSimple -> load($_pDatabase, $objectCondition);
-		$this -> m_modelSimple -> getResult()[0] -> params = json_decode($this -> m_modelSimple -> getResult()[0] -> params);
+		$simpleObject = modelSimple::where('object_id', '=', $this -> objectInfo -> object_id)->one();
 		
 		##	get node list
-		$parentNode = $this -> m_modelSimple -> getResult()[0] -> params -> parent_node_id;
-		$parentNode = (empty($parentNode) ? $this -> objectInfo -> node_id : $this -> m_modelSimple -> getResult()[0] ->  params -> parent_node_id);
+		$parentNode = $$simpleObject -> params -> parent_node_id;
+		$parentNode = (empty($parentNode) ? $this -> objectInfo -> node_id : $simpleObject ->  params -> parent_node_id);
 
 		$modelCondition = new CModelCondition();
 		$modelCondition -> where('node_id', $parentNode);		
@@ -186,7 +176,7 @@ class	controllerCategoryCloud extends CController
 
 		##	get module templates
 		$moduleTemplate		 = new CModulesTemplates();
-		$moduleTemplate		-> load('simpleCategorieCloud', $this -> m_modelSimple -> getResult()[0] -> params -> template);
+		$moduleTemplate		-> load('simpleCategorieCloud', $simpleObject -> params -> template);
 
 		$moduleTemplates	 = new CModulesTemplates();
 		$moduleTemplates	-> load('simpleCategorieCloud');
@@ -199,7 +189,7 @@ class	controllerCategoryCloud extends CController
 						'edit',	
 						'',
 						[
-							'object' 	=> $this -> m_modelSimple -> getResult()[0],
+							'object' 	=> $simpleObject,
 							'termList' 	=> $categoriesList ?? [],
 							'parentNode' 	=> $parentNode,
 							'currentTemplate'	=> $moduleTemplate -> templatesList,
@@ -213,66 +203,62 @@ class	controllerCategoryCloud extends CController
 	private function
 	logicXHREdit(CDatabaseConnection &$_pDatabase, object $_xhrInfo) : bool
 	{
+		$validationErr =	false;
+		$validationMsg =	'';
+		$responseData = 	[];
 
-			$validationErr =	false;
-			$validationMsg =	'';
-			$responseData = 	[];
+		$_pFormVariables =	new CURLVariables();
+		$_request		 =	[];
+		$_request[] 	 = 	[	"input" => "categorycloud-template",  		"validate" => "strip_tags|!empty" ]; 
+		$_request[] 	 = 	[	"input" => "categorycloud-parent-node-id", 	"validate" => "strip_tags|!empty" ]; 
+		$_pFormVariables-> retrieve($_request, false, true); // POST 
+		$_aFormData		 = $_pFormVariables ->getArray();
 
+		if(empty($_xhrInfo -> objectId))
+		{ 	
+			$validationErr = true; 	
+			$responseData[] = 'cms-object-id';
+		}
 
-								$_pFormVariables =	new CURLVariables();
-								$_request		 =	[];
-								$_request[] 	 = 	[	"input" => "categorycloud-template",  		"validate" => "strip_tags|!empty" ]; 
-								$_request[] 	 = 	[	"input" => "categorycloud-parent-node-id", 	"validate" => "strip_tags|!empty" ]; 
-								$_pFormVariables-> retrieve($_request, false, true); // POST 
-								$_aFormData		 = $_pFormVariables ->getArray();
+		if(!$validationErr)
+		{
+			$simpleObject = modelSimple::where('object_id', '=', $_xhrInfo -> objectId)->one();
 
-								if(empty($_xhrInfo -> objectId))
-								{ 	
-									$validationErr = true; 	
-									$responseData[] = 'cms-object-id';
-								}
+			$sOParams = new stdClass;
+			$sOParams->template 		= $_aFormData['categorycloud-template'];
+			$sOParams->parent_node_id 	= $_aFormData['categorycloud-parent-node-id'];
 
-								if(!$validationErr)
-								{
-									$modelCondition = new CModelCondition();
-									$modelCondition -> where('object_id', $_xhrInfo -> objectId);
+			$simpleObject->params	= $sOParams;
+			$simpleObject->body 	= '';
 
-									$_aFormData['params']	= 	[
-																	"template"			=> $_aFormData['categorycloud-template'],
-																	"parent_node_id"	=> $_aFormData['categorycloud-parent-node-id']
-																];
-									$_aFormData['params']	 = 	json_encode($_aFormData['params'], JSON_FORCE_OBJECT);
+			if($simpleObject->save())
+			{
+				$modelCondition = new CModelCondition();
+				$modelCondition -> where('object_id', $_xhrInfo -> objectId);
 
+				$validationMsg = 'Object updated';
 
+				$this -> m_modelPageObject = new modelPageObject();
 
-									$objectId = $_xhrInfo -> objectId;
+				$_objectUpdate['update_time']		=	time();
+				$_objectUpdate['update_by']			=	0;
+				$_objectUpdate['update_reason']		=	'';
 
-									if($this -> m_modelSimple -> update($_pDatabase, $_aFormData, $modelCondition))
-									{
-										$validationMsg = 'Object updated';
+				$this -> m_modelPageObject -> update($_pDatabase, $_objectUpdate, $modelCondition);
+			}
+			else
+			{
+				$validationMsg .= 'Unknown error on sql query';
+				$validationErr = true;
+			}											
+		}
+		else	// Validation Failed
+		{
+			$validationMsg .= 'Data validation failed - object was not updated';
+			$validationErr = true;
+		}
 
-										$this -> m_modelPageObject = new modelPageObject();
-
-										$_objectUpdate['update_time']		=	time();
-										$_objectUpdate['update_by']			=	0;
-										$_objectUpdate['update_reason']		=	'';
-
-										$this -> m_modelPageObject -> update($_pDatabase, $_objectUpdate, $modelCondition);
-									
-									}
-									else
-									{
-										$validationMsg .= 'Unknown error on sql query';
-										$validationErr = true;
-									}											
-								}
-								else	// Validation Failed
-								{
-									$validationMsg .= 'Data validation failed - object was not updated';
-									$validationErr = true;
-								}
-
-			tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
+		tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
 
 		return false;
 	}
@@ -280,65 +266,62 @@ class	controllerCategoryCloud extends CController
 	private function
 	logicXHRCreate(CDatabaseConnection &$_pDatabase, object $_xhrInfo) : bool
 	{
-
-			$validationErr =	false;
-			$validationMsg =	'';
-			$responseData = 	[];
-
-			$_dataset['object_id'] 	= $this -> objectInfo -> object_id;
-			$_dataset['body'] 		= '';
-			$_dataset['params']		= 	[
-											"template"			=> '',
-											"display_hidden"	=> '',
-											"parent_node_id"	=> ''
-										];
-			$_dataset['params']	 	= 	json_encode($_dataset['params'], JSON_FORCE_OBJECT);
-
+		$validationErr =	false;
+		$validationMsg =	'';
+		$responseData = 	[];
 			
+		$sOParams = new stdClass;
+		$sOParams->template = '';
+		$sOParams->display_hidden = '';
+		$sOParams->parent_node_id = '';
 
-			if(!$this -> m_modelSimple -> insert($_pDatabase, $_dataset, MODEL_RESULT_APPEND_DTAOBJECT))
-			{
-				$validationErr =	true;
-				$validationMsg =	'sql insert failed';
-			}
-			else
-			{
-				$this -> m_modelSimple -> getResult()[0] -> params = json_decode($this -> m_modelSimple -> getResult()[0] -> params);
-				
-				##	get node list
-				$parentNode = $this -> m_modelSimple -> getResult()[0] -> params -> parent_node_id;
-				$parentNode = (empty($parentNode) ? $this -> objectInfo -> node_id : $this -> m_modelSimple -> getResult()[0] ->  params -> parent_node_id);
-
-				$modelCondition = new CModelCondition();
-				$modelCondition -> where('node_id', $parentNode);		
-				$modelSitemap  = new modelSitemap();
-				$modelSitemap -> load($_pDatabase, $modelCondition);	
-
-				$collectedNodeIds = [];
-				foreach($modelSitemap -> getResult() as $node)
-					$collectedNodeIds[] = $node -> node_id;
-
-				##	get categorie allocations
-				$condCategoriesAllocation = new CModelCondition();
-				$condCategoriesAllocation -> whereIn('node_id', implode(',', $collectedNodeIds));	
-				$condCategoriesAllocation -> groupBy('category_id');
-
-				$modelCategoriesAllocation = new modelCategoriesAllocation();
-				$modelCategoriesAllocation -> load($_pDatabase, $condCategoriesAllocation);
-
-				$collectedCategoryIds = [];
-				foreach($modelCategoriesAllocation -> getResult() as $categorieAlloc)
-					$collectedCategoryIds[] = $categorieAlloc -> category_id;
-
-		if(!empty($collectedCategoryIds))
+		$simpleObject = modelSimple::new([
+			'object_id' => (int)$this -> objectInfo -> object_id,
+			'body' 		=> '',
+			'params' 	=> $sOParams,
+		]);
+		
+		if(!$simpleObject->save())
 		{
-				##	get categorie list
-				$condCategories = new CModelCondition();
-				$condCategories -> whereIn('category_id', implode(',', $collectedCategoryIds));	
-				$condCategories -> groupBy('category_id');
-				$this -> m_modelCategories -> load($_pDatabase, $condCategories);
-			$categoriesList = $this -> m_modelTags -> getResult();
+			$validationErr =	true;
+			$validationMsg =	'sql insert failed';
 		}
+		else
+		{			
+			##	get node list
+			$parentNode = $simpleObject -> params -> parent_node_id;
+			$parentNode = (empty($parentNode) ? $this -> objectInfo -> node_id : $simpleObject ->  params -> parent_node_id);
+
+			$modelCondition = new CModelCondition();
+			$modelCondition -> where('node_id', $parentNode);		
+			$modelSitemap  = new modelSitemap();
+			$modelSitemap -> load($_pDatabase, $modelCondition);	
+
+			$collectedNodeIds = [];
+			foreach($modelSitemap -> getResult() as $node)
+				$collectedNodeIds[] = $node -> node_id;
+
+			##	get categorie allocations
+			$condCategoriesAllocation = new CModelCondition();
+			$condCategoriesAllocation -> whereIn('node_id', implode(',', $collectedNodeIds));	
+			$condCategoriesAllocation -> groupBy('category_id');
+
+			$modelCategoriesAllocation = new modelCategoriesAllocation();
+			$modelCategoriesAllocation -> load($_pDatabase, $condCategoriesAllocation);
+
+			$collectedCategoryIds = [];
+			foreach($modelCategoriesAllocation -> getResult() as $categorieAlloc)
+				$collectedCategoryIds[] = $categorieAlloc -> category_id;
+
+			if(!empty($collectedCategoryIds))
+			{
+					##	get categorie list
+					$condCategories = new CModelCondition();
+					$condCategories -> whereIn('category_id', implode(',', $collectedCategoryIds));	
+					$condCategories -> groupBy('category_id');
+					$this -> m_modelCategories -> load($_pDatabase, $condCategories);
+				$categoriesList = $this -> m_modelTags -> getResult();
+			}
 
 				##	create fake pageRequest
 				$parentNode = tk::getNodeFromSitemap($modelSitemap -> getResult(), $parentNode);
@@ -350,7 +333,7 @@ class	controllerCategoryCloud extends CController
 
 				##	get module templates
 				$moduleTemplate		 = new CModulesTemplates();
-				$moduleTemplate		-> load('simpleCategorieCloud', $this -> m_modelSimple -> getResult()[0] -> params -> template);
+				$moduleTemplate		-> load('simpleCategorieCloud', $simpleObject -> params -> template);
 
 				$moduleTemplates	 = new CModulesTemplates();
 				$moduleTemplates	-> load('simpleCategorieCloud');
@@ -359,7 +342,7 @@ class	controllerCategoryCloud extends CController
 								'edit',	
 								'',
 								[
-								'object' 			=> $this -> m_modelSimple -> getResult()[0],
+								'object' 			=> $simpleObject,
 								'parentNode' 		=> $parentNode,
 								'termList' 			=> $categoriesList ?? [],
 								'currentTemplate'	=> $moduleTemplate -> templatesList,
@@ -374,58 +357,54 @@ class	controllerCategoryCloud extends CController
 				$pRouter -> createRoutes($_pDatabase);
 			}
 
-			tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
+		tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
 
 		return false;
-	
 	}
 	
 	private function
 	logicXHRDelete(CDatabaseConnection &$_pDatabase, object $_xhrInfo, bool $_enableEdit = false, bool $_enableDelete = false) : bool
 	{
-
-			$validationErr =	false;
-			$validationMsg =	'';
-			$responseData = 	[];
-		
-
-
-
+		$validationErr =	false;
+		$validationMsg =	'';
+		$responseData = 	[];
+	
 		if(empty($_xhrInfo -> objectId))
 		{ 	
 			$validationErr	= true; 	
 			$responseData[] = 'cms-object-id'; 			
 		}
-									if(!$validationErr)
-									{
-										$modelCondition = new CModelCondition();
-										$modelCondition -> where('object_id', $_xhrInfo -> objectId);
 
-										if($this -> m_modelSimple -> delete($_pDatabase, $modelCondition))
-										{
-											$_objectModel  	 = new modelPageObject();
-											$_objectModel	-> delete($_pDatabase, $modelCondition);
+		if(!$validationErr)
+		{
+			$simpleObject = modelSimple::where('object_id', '=', $_xhrInfo -> objectId)->one();
 
-											$validationMsg = 'Object deleted';
-										}
-										else
-										{
-											$validationMsg .= 'Unknown error on sql query';
-											$validationErr = true;
-										}									
-									}
-									else	// Validation Failed
-									{
-										$validationMsg .= 'Data validation failed - object was not updated';
-										$validationErr = true;
-									}
+			if($simpleObject->delete())
+			{
+				$modelCondition = new CModelCondition();
+				$modelCondition -> where('object_id', $_xhrInfo -> objectId);
 
+				$_objectModel  	 = new modelPageObject();
+				$_objectModel	-> delete($_pDatabase, $modelCondition);
 
-									$pRouter  = CRouter::instance();
-									$pRouter -> createRoutes($_pDatabase);
+				$validationMsg = 'Object deleted';
+			}
+			else
+			{
+				$validationMsg .= 'Unknown error on sql query';
+				$validationErr = true;
+			}									
+		}
+		else	// Validation Failed
+		{
+			$validationMsg .= 'Data validation failed - object was not updated';
+			$validationErr = true;
+		}
 
+		$pRouter  = CRouter::instance();
+		$pRouter -> createRoutes($_pDatabase);
 			
-			tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
+		tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
 
 		return false;
 	}

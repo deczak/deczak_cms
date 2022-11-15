@@ -11,7 +11,8 @@ class	controllerMediathek extends CController
 		parent::__construct($_module, $_object);
 
 		CPageRequest::instance() -> subs = $this -> getSubSection();
-
+		
+		/*
 		$this -> imageSizesList = [
 			'xlarge' => new pos(0, 0,1980, 1200),
 			'large'  => new pos(0, 0,1600, 1024),
@@ -19,6 +20,7 @@ class	controllerMediathek extends CController
 			'small'  => new pos(0, 0, 800,  800),
 			'thumb'  => new pos(0, 0, 500,  500),
 		];
+		*/
 	}
 	
 	public function
@@ -63,13 +65,14 @@ class	controllerMediathek extends CController
 		switch($controllerAction)
 		{
 			case 'xhr_index': 			$logicDone = $this -> logicXHRIndex($_pDatabase, $_xhrInfo, $enableEdit, $enableDelete, $enableUpload);
-			case 'xhr_import': 			$logicDone = $this -> logicXHRImport($_pDatabase, $_xhrInfo, $enableEdit, $enableDelete, $enableUpload);
+			#case 'xhr_import': 			$logicDone = $this -> logicXHRImport($_pDatabase, $_xhrInfo, $enableEdit, $enableDelete, $enableUpload);
 			case 'xhr_directory_list': 	$logicDone = $this -> logicXHRDirectoryList();
 			case 'xhr_directory_items': $logicDone = $this -> logicXHRDirectoryItems();
 			case 'xhr_move_item':		$logicDone = $this -> logicXHRMoveItem();
 			case 'xhr_remove_item':		$logicDone = $this -> logicXHRRemoveItem($_pDatabase);
 			case 'xhr_edit_item':		$logicDone = $this -> logicXHREditItem($_pDatabase, $_xhrInfo, $enableEdit, $enableDelete, $enableUpload);
 			case 'xhr_get_item':		$logicDone = $this -> logicXHRGetItem($_pDatabase, $_xhrInfo);
+			case 'xhr_upload':		$logicDone = $this -> logicXHRUpload($_pDatabase, $_xhrInfo);
 		}
 
 		if(!$logicDone) // Default
@@ -145,14 +148,7 @@ class	controllerMediathek extends CController
 					if($mediaId === null)
 						continue;
 
-					$modelCondition = new CModelCondition();
-					$modelCondition -> where('media_id', $mediaId);
-					
-					$modelMediathek = new modelMediathek;
-					$modelMediathek	-> load($_pDatabase, $modelCondition);	
-
-					$itemDBInfo = $modelMediathek -> getResult();
-					$itemDBInfo = (!empty($itemDBInfo) ? reset($itemDBInfo) : null);
+					$itemDBInfo = modelMediathek::find($mediaId);
 
 					if($itemDBInfo === null)
 						continue;
@@ -237,7 +233,6 @@ class	controllerMediathek extends CController
 
 	/**
 	 * 	XHR Call to import all new (unprocessed) files in mediathek directory
-	 */
 	private function
 	logicXHRImport(CDatabaseConnection &$_pDatabase, ?object $_xhrInfo, bool $_enableEdit = false, bool $_enableDelete = false, bool $_enableUpload = false) : bool
 	{
@@ -337,6 +332,7 @@ class	controllerMediathek extends CController
 		return false;
 	}
 
+	 */
 	/**
 	 * 	XHR Call to retrieve a multidimensional array of mediathek directory
 	 */
@@ -555,11 +551,18 @@ class	controllerMediathek extends CController
 
 		if(!empty($mediaIdList))
 		{
+
+			modelMediathek::whereIn('media_id', $mediaIdList)->delete();
+
+			/*
+
 			$modelCondition = new CModelCondition();
 			$modelCondition -> whereIn('media_id', implode(',', $mediaIdList));
 			
 			$modelMediathek = new modelMediathek;
 			$modelMediathek	-> delete($_pDatabase, $modelCondition);	
+			
+			*/
 		}
 
 		tk::rrmdir($itemLocation);
@@ -623,15 +626,20 @@ class	controllerMediathek extends CController
 
 
 
+		$modelMediathek = modelMediathek::find($urlVarList['media_id']);
+		$modelMediathek->pull($urlVarList);
 
-
+		/*
 		$modelCondition = new CModelCondition();
 		$modelCondition -> where('media_id', $urlVarList['media_id']);
 
 		
 		$modelMediathek  = new modelMediathek;
 		if($modelMediathek -> update($_pDatabase, $urlVarList, $modelCondition) === false)
+		*/
+		if(!$modelMediathek->save())
 		{
+
 
 			$validationErr =	true;
 			$validationMsg =	'Mediathek, update media item failed';
@@ -729,7 +737,9 @@ class	controllerMediathek extends CController
 
 			tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
 		}
-		
+
+
+		/*
 		$modelCondition = new CModelCondition();
 		$modelCondition -> where('media_id', $urlVarList['media_id']);
 		
@@ -738,6 +748,10 @@ class	controllerMediathek extends CController
 
 		$itemDBInfo = $modelMediathek -> getResult();
 		$itemDBInfo = (!empty($itemDBInfo) ? reset($itemDBInfo) : null);
+		*/
+
+
+		$itemDBInfo = modelMediathek::find($urlVarList['media_id']);
 
 		$responseData = (array)$itemDBInfo;
 
@@ -757,4 +771,57 @@ class	controllerMediathek extends CController
 		return false;
 	}
 
+	/**
+	 *
+	 */
+	private function
+	logicXHRUpload(CDatabaseConnection &$_pDatabase, ?object $_xhrInfo) : bool
+	{
+		$validationErr   = false;
+		$validationMsg   = 'OK';
+		$responseData    = [];
+
+
+
+
+		$queryValidationString = cmsRequestQueryValidation::set(
+			QueryValidation::STRIP_TAGS | QueryValidation::TRIM | QueryValidation::IS_NOTEMPTY
+		);
+
+		
+
+		$requestQuery = new cmsRequestQuery(true);
+		$requestQuery->post('media-item-author')->validate($queryValidationString)->out('')->exec();
+		$requestQuery->post('media-item-camera')->validate($queryValidationString)->out('')->exec();
+		$requestQuery->post('media-item-caption')->validate($queryValidationString)->out('')->exec();
+		$requestQuery->post('media-item-lens')->validate($queryValidationString)->out('')->exec();
+		$requestQuery->post('media-item-license')->validate($queryValidationString)->out('')->exec();
+		$requestQuery->post('media-item-licenseurl')->validate($queryValidationString)->out('')->exec();
+		$requestQuery->post('media-item-path')->validate($queryValidationString)->out('')->exec();
+		$requestQuery->post('media-item-title')->validate($queryValidationString)->out('')->exec();
+		$sOParams = $requestQuery->toObject();
+
+
+
+print_r($sOParams);
+
+
+	$cmsUpload = new cmsUpload;
+
+	$uploadResponse = $cmsUpload -> processUpload(cmsUpload::DEST_MEDIATHEK, '');
+
+	print_r($uploadResponse);
+
+
+// cmsUpload
+
+// 
+
+
+		tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
+
+
+
+		return false;
+	}
 }

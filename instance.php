@@ -38,12 +38,14 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 
 	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CView.php';
 	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CModel.php';
+	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'cmsModel.php';
 	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CModelCondition.php';
 	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CModelComplementary.php';
 	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CController.php';
 	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CScheme.php';
 
 	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CURLVariables.php';
+	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'cmsRequestQuery.php';
 	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CRouter.php';
 	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CMessages.php';
 	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CSysMailer.php';
@@ -64,7 +66,7 @@ defined('CMS_BACKEND') or define('CMS_BACKEND', false);
 
 	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'cmsUpdate.php';
 	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'cmsSystemModules.php';
-
+	require_once	CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'cmsUpload.php';
 ##	M E S S A G E   S Y S T E M
 
 	CMessages::initialize();

@@ -141,9 +141,10 @@ class CPageRequest extends CSingleton
 				$_nodeId = $redirectTarget;
 				$this -> canonical = true;
 			}
-			else
+			elseif(strpos($redirectTarget, 'http') !== false)
 			{
-				// TODO :: Redirect to this string 
+				header('Location: ' . $redirectTarget, true, 307);
+				exit;
 			}
 		}
 		elseif(!empty($redirectList) && CMS_BACKEND)
@@ -361,18 +362,28 @@ class CPageRequest extends CSingleton
 			{
 				$pageObject = new $_className($_objectData, $schemeBackendPageObject -> getColumns());
 
-				$modelCondition = new CModelCondition();
-				$modelCondition -> where('object_id', $pageObject -> object_id);
+				#$modelCondition = new CModelCondition();
+				#$modelCondition -> where('object_id', $pageObject -> object_id);
 
+
+				$simpleBEObject = modelBackendSimple::where('object_id', '=', $pageObject -> object_id)->one();
+
+				if($simpleBEObject)
+				{
+
+					$pageObject -> body 	= $simpleBEObject -> body;
+					$pageObject -> params 	= $simpleBEObject -> params;
+
+				}
+
+				/*
 				$modelBackendSimple  = new modelBackendSimple;
 				if($modelBackendSimple -> load($_pDatabase, $modelCondition))
 				{
 					$simpleObject = reset($modelBackendSimple -> getResult());
 
-					$pageObject -> body = $simpleObject -> body;
-					$pageObject -> params = $simpleObject -> params;
 				}
-
+				*/
 				$this -> objectsList[] = $pageObject;		
 			}
 

@@ -56,6 +56,7 @@ class	cmsIndexList
 
 			template = template.replaceAll('%NUM_CHILDNODES%', (typeof pageList[i].childnodes !== 'undefined' ? Object.keys(pageList[i].childnodes).length : 0));
 			template = template.replaceAll('%PAGE_NAME%', levelFolderNode.outerHTML + pageList[i].page_name);
+			template = template.replaceAll('%PAGE_TEMPLATE%', pageList[i].page_template);
 			template = template.replaceAll('%PAGE_PATH%', CMS.SERVER_URL +''+ ((CMS.LANGUAGE_DEFAULT_IN_URL || pageList[i].page_language !== CMS.LANGUAGE_DEFAULT) ? pageList[i].page_language +'/' : '') + pageList[i].page_path.substr(1));
 			template = template.replaceAll('%NODE_ID%', pageList[i].node_id);
 			template = template.replaceAll('%PAGE_LANGUAGE%', pageList[i].page_language);
