@@ -12,7 +12,7 @@ class cmsUpload
 	}
 
 	public function
-	processUpload(int $destSection, string $destPath, bool $isRegularUpload = true) : ?object
+	processUpload(int $destSection, string $destPath, bool $isRegularUpload = true, ?object $additionalParams = null) : ?object
 	{
 		$sectionProcessor = null;
 
@@ -28,6 +28,6 @@ class cmsUpload
 				return null;
 		}
 
-		return $sectionProcessor->process($destPath, $isRegularUpload);
+		return $sectionProcessor->process($destPath, $isRegularUpload, $additionalParams);
 	}
 }

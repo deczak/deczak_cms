@@ -791,34 +791,37 @@ class	controllerMediathek extends CController
 		
 
 		$requestQuery = new cmsRequestQuery(true);
-		$requestQuery->post('media-item-author')->validate($queryValidationString)->out('')->exec();
-		$requestQuery->post('media-item-camera')->validate($queryValidationString)->out('')->exec();
-		$requestQuery->post('media-item-caption')->validate($queryValidationString)->out('')->exec();
-		$requestQuery->post('media-item-lens')->validate($queryValidationString)->out('')->exec();
-		$requestQuery->post('media-item-license')->validate($queryValidationString)->out('')->exec();
-		$requestQuery->post('media-item-licenseurl')->validate($queryValidationString)->out('')->exec();
-		$requestQuery->post('media-item-path')->validate($queryValidationString)->out('')->exec();
-		$requestQuery->post('media-item-title')->validate($queryValidationString)->out('')->exec();
-		$sOParams = $requestQuery->toObject();
+		$requestQuery->post('media-item-author')->validate($queryValidationString)->out('media_item_author')->exec();
+		$requestQuery->post('media-item-camera')->validate($queryValidationString)->out('media_item_camera')->exec();
+		$requestQuery->post('media-item-caption')->validate($queryValidationString)->out('media_item_caption')->exec();
+		$requestQuery->post('media-item-lens')->validate($queryValidationString)->out('media_item_lens')->exec();
+		$requestQuery->post('media-item-license')->validate($queryValidationString)->out('media_item_license')->exec();
+		$requestQuery->post('media-item-licenseurl')->validate($queryValidationString)->out('media_item_licenseurl')->exec();
+		$requestQuery->post('media-item-path')->validate($queryValidationString)->out('media_item_path')->exec();
+		$requestQuery->post('media-item-title')->validate($queryValidationString)->out('media_item_title')->exec();
+		$mediaParams = $requestQuery->toObject();
 
 
 
-print_r($sOParams);
+		print_r($mediaParams);echo PHP_EOL;
 
 
-	$cmsUpload = new cmsUpload;
+		$cmsUpload = new cmsUpload;
 
-	$uploadResponse = $cmsUpload -> processUpload(cmsUpload::DEST_MEDIATHEK, '');
-
-	print_r($uploadResponse);
-
-
-// cmsUpload
-
-// 
+		$uploadResponse = $cmsUpload -> processUpload(
+			cmsUpload::DEST_MEDIATHEK, 
+			$mediaParams->media_item_path,
+			true,
+			$mediaParams
+			);
 
 
-		tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
+
+		print_r($uploadResponse); echo PHP_EOL;
+
+
+
+		tk::xhrResult(intval($validationErr), $validationMsg, (array)$uploadResponse);	// contains exit call
 
 
 

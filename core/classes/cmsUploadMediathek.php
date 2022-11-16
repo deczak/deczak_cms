@@ -7,14 +7,13 @@ class cmsUploadMediathek
 	public function
 	__construct()
 	{
-			
 		//CMS_SERVER_ROOT
 		//CMS_SERVER_URL
-		
 		//DIR_MEDIATHEK
 	}
+
 	public function
-	process(string $destPath, bool $isRegularUpload = true)
+	process(string $destPath, bool $isRegularUpload = true, ?object $additionalParams = null) : ?object
 	{	
 		$imageSizesList = CFG::GET()->MEDIATHEK->IMAGES_SIZES;
 
@@ -84,17 +83,17 @@ class cmsUploadMediathek
 		$itemInfo -> scheme		   = 1;
 		$itemInfo -> filename	   = $dstFilename;
 		$itemInfo -> sizes		   = [];
-		$itemInfo -> license	   = $itemExifInfo -> Copyright ?? '';
-		$itemInfo -> license_url   = '';
+		$itemInfo -> license	   = $additionalParams->media_item_license ?? ($itemExifInfo -> Copyright ?? '');
+		$itemInfo -> license_url   = $additionalParams->media_item_licenseurl ?? '';
 		$itemInfo -> gear		   = [
 			"by_meta"	=> false,
-			"camera"	=> $itemExifInfo -> Model ?? '',
-			"lens"		=> $itemExifInfo -> LensModel ?? $itemExifInfo -> {'UndefinedTag:0xA434'} ?? ''
+			"camera"	=> $additionalParams->media_item_camera ?? ($itemExifInfo -> Model ?? ''),
+			"lens"		=> $additionalParams->media_item_lens ?? ($itemExifInfo -> LensModel ?? ($itemExifInfo -> {'UndefinedTag:0xA434'} ?? ''))
 		];
 		$itemInfo -> gear_settings = [];	// This values are not getting retrieved at the moment
-		$itemInfo -> title		   = '';
-		$itemInfo -> caption	   = '';
-		$itemInfo -> author 	   = $itemExifInfo -> Artist ?? '';
+		$itemInfo -> title		   = $additionalParams->media_item_title ?? '';
+		$itemInfo -> caption	   = $additionalParams->media_item_caption ?? '';
+		$itemInfo -> author 	   = $additionalParams->media_item_author ?? ($itemExifInfo -> Artist ?? '');
 		$itemInfo -> notice		   = '';
 		$itemInfo -> timeAdd	   = time();
 
@@ -116,14 +115,14 @@ class cmsUploadMediathek
 		$mediaItem = modelMediathek::new();
 
 		$mediaItem->media_filename 	  	= $itemInfo -> filename;
-		$mediaItem->media_title 		  	= $itemInfo -> title;
+		$mediaItem->media_title 		= $itemInfo -> title;
 		$mediaItem->media_caption	  	= $itemInfo -> caption;
-		$mediaItem->media_author		  	= $itemInfo -> author;
-		$mediaItem->media_notice	  		= $itemInfo -> notice;
+		$mediaItem->media_author		= $itemInfo -> author;
+		$mediaItem->media_notice	  	= $itemInfo -> notice;
 		$mediaItem->media_license	  	= $itemInfo -> license;
-		$mediaItem->media_license_url   	= $itemInfo -> license_url;
+		$mediaItem->media_license_url   = $itemInfo -> license_url;
 		$mediaItem->media_gear	  		= (object)$itemInfo -> gear;
-		$mediaItem->media_gear_settings 	= (object)$itemInfo -> gear_settings ?? [];
+		$mediaItem->media_gear_settings = (object)$itemInfo -> gear_settings ?? [];
 		$mediaItem->media_size	  		= $processedItem->filesize;
 		$mediaItem->media_extension	  	= $fileextension;
 		$mediaItem->media_mime	  		= $_FILES["file"]["type"];
@@ -138,4 +137,3 @@ class cmsUploadMediathek
 	}
 
 }
-
