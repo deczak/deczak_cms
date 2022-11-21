@@ -52,6 +52,9 @@ class cmstk extends cmstkOld
 	}
 
 
+	/**
+	 *	Strips all unwandet characters out 
+	 */
 	static validateFilename(str)
 	{
 		let toValidate = String(str);
@@ -60,6 +63,9 @@ class cmstk extends cmstkOld
 		return toValidate;
 	}
 
+	/**
+	 *	Strips all unwandet characters out 
+	 */
 	static validateFilepath(str)
 	{
 		let toValidate = String(str);

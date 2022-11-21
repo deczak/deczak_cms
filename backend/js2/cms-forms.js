@@ -52,18 +52,10 @@ class cmsForms
 	*/
 	static validateInput(event)
 	{
-
 		let node = event.target;
-
-		console.log('validateInput', event, node);
-
-		console.log(node.tagName);
-		console.log(node.value);
 
 		if(node.tagName === 'INPUT')
 		{
-
-
 			if(node.hasAttribute('validate-filename'))
 			{
 				let position = node.selectionStart; 
@@ -77,12 +69,7 @@ class cmsForms
 				node.value = cmstk.validateFilepath(node.value);
   				node.selectionEnd = position;   
 			}
-
-
-
 		}
-
-
 	}
 }
 

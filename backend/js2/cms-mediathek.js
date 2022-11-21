@@ -821,13 +821,8 @@ class cmsModalMediathekUpload extends cmsModal
 
 		for(let i = 0; i < itemsList.length; i++)
 		{
-
-
-
-			
 			if(typeof itemsList[i].fileInfo === 'undefined' || (typeof itemsList[i].fileInfo !== 'undefined' && itemsList[i].fileInfo === null))
 				continue;
-
 
 			let removeButtonNode = itemsList[i].querySelector('[action-click="dropped-item-remove"]');
 			if(removeButtonNode !== null)
@@ -854,65 +849,29 @@ class cmsModalMediathekUpload extends cmsModal
                 formData.append('media-item-title', fieldList['modal-media-item-title']);
                 formData.append('media-item-filename', fieldList['modal-media-item-filename']);
 
-			srcInstance._onEventClick_UploadProcess(formData, itemsList[i].progress, itemsList[i]);
+			let requestURL = CMS.SERVER_URL_BACKEND + 'mediathek/';
+
+			cmsXhr.uploadRequest(requestURL, formData, srcInstance._onEventClick_UploadProcessResponse, itemsList[i].progress, itemsList[i]);
 		}
 	}
 
-	_onEventClick_UploadProcess(formData, progress, droppedItem)
+	_onEventClick_UploadProcessResponse(responseCode, responseData, uploadItemNode)
 	{
-
-
-/*
-
-	tracker der dateien die zur verarbeitung anstehen damit bei der letzten datei die mediathek aktualisiert wird
-
-
-*/
-
-
-
-		console.log('cmsModalMediathekUpload::_onEventClick_UploadProcess');
-
-
-		console.log(progress);
-
-		let requestURL = CMS.SERVER_URL_BACKEND + 'mediathek/';
-
-		let xhRequest = new XMLHttpRequest();
-		xhRequest.open('POST', requestURL);
-		xhRequest.setRequestHeader("X-Requested-With","XMLHttpRequest");
-		xhRequest.setRequestHeader("X-Requested-XHR-Action", 'upload');
-		xhRequest.onerror   = function ()
+		if(responseCode === 200)
 		{
-			// Event does not fire on 404 or 500
-		};
-		xhRequest.onloadend = function(event)
+			uploadItemNode.fileInfo = null;
+
+			let uploadCheckNode = document.createElement('div');
+				uploadCheckNode.classList.add('upload-done');
+				uploadCheckNode.innerHTML = '<div class="circle"><i class="fas fa-check"></i></div>';
+
+			let previewNode = uploadItemNode.querySelector('.preview');
+				previewNode.append(uploadCheckNode);
+		}
+		else
 		{
-			console.log('onloadend', xhRequest.response, this, event);
-
-			if(this.status === 200)
-			{
-				droppedItem.fileInfo = null;
-
-				let uploadCheckNode = document.createElement('div');
-					uploadCheckNode.classList.add('upload-done');
-					uploadCheckNode.innerHTML = '<div class="circle"><i class="fas fa-check"></i></div>';
-
-				let previewNode = droppedItem.querySelector('.preview');
-					previewNode.append(uploadCheckNode);
-			}
-			else
-			{
-				//callbackError(this, xhrCallInstance);
-			}
-		};
-        xhRequest.upload.addEventListener("progress", (event) => {
-
-            let percentComplete = (event.loaded / event.total) * 100;
-			progress.setPercent(percentComplete);
-		});
-
-		xhRequest.send(formData);
+			//callbackError(this, xhrCallInstance);
+		}
 	}
 
 	_transformFileEntry(entry, successCallback, srcInstance) {
