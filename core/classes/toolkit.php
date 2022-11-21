@@ -30,6 +30,27 @@ class	TK
 	}
 
 	public static function
+	xhrResponse(int $responseCode, array|object $data, int $error = 0, string $msg = 'OK')
+	{
+		header("Permissions-Policy: interest-cohort=()");	
+		header('Content-type:application/json; charset=utf-8');
+						
+		$jsonResponse = json_encode([
+			'error' => $error,
+			'msg'   => $msg,
+			'data' 	=> $data,
+		], JSON_HEX_APOS | JSON_UNESCAPED_SLASHES | JSON_FORCE_OBJECT | JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK);
+
+		if($jsonResponse === false)
+			http_response_code(500);
+
+		echo $jsonResponse;
+
+		http_response_code($responseCode);
+		exit;
+	}
+
+	public static function
 	normalizeFilename(string $_filename, bool $_replaceSlashes = false)
 	{
 		$search 	= array(" ", "Ä", "Ö", "Ü", "ä", "ö", "ü", "ß");

@@ -777,18 +777,7 @@ class	controllerMediathek extends CController
 	private function
 	logicXHRUpload(CDatabaseConnection &$_pDatabase, ?object $_xhrInfo) : bool
 	{
-		$validationErr   = false;
-		$validationMsg   = 'OK';
-		$responseData    = [];
-
-
-
-
-		$queryValidationString = cmsRequestQueryValidation::set(
-			QueryValidation::STRIP_TAGS | QueryValidation::TRIM | QueryValidation::IS_NOTEMPTY
-		);
-
-		
+		$queryValidationString = QueryValidation::STRIP_TAGS | QueryValidation::TRIM | QueryValidation::IS_NOTEMPTY;
 
 		$requestQuery = new cmsRequestQuery(true);
 		$requestQuery->post('media-item-author')->validate($queryValidationString)->out('media_item_author')->exec();
@@ -801,11 +790,6 @@ class	controllerMediathek extends CController
 		$requestQuery->post('media-item-title')->validate($queryValidationString)->out('media_item_title')->exec();
 		$mediaParams = $requestQuery->toObject();
 
-
-
-		print_r($mediaParams);echo PHP_EOL;
-
-
 		$cmsUpload = new cmsUpload;
 
 		$uploadResponse = $cmsUpload -> processUpload(
@@ -814,17 +798,12 @@ class	controllerMediathek extends CController
 			true,
 			$mediaParams
 			);
+			
+		tk::xhrResponse(
+			200, 
+			$uploadResponse
+			);
 
-
-
-		print_r($uploadResponse); echo PHP_EOL;
-
-
-
-		tk::xhrResult(intval($validationErr), $validationMsg, (array)$uploadResponse);	// contains exit call
-
-
-
-		return false;
+		return true;
 	}
 }

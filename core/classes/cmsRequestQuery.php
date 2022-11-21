@@ -14,22 +14,6 @@ class QueryValidation
     const UPPERCASE		= 0x200;
 }
 
-class cmsRequestQueryValidation
-{
-	public $validateFlags;
-
-	public function
-	__construct($validateFlags)
-	{
-		$this->validateFlags = $validateFlags;
-	}
-
-	public static function
-	set($validateFlags)
-	{
-		return new cmsRequestQueryValidation($validateFlags);
-	}
-}
 
 class cmsRequestQueryProcessor
 {
@@ -95,6 +79,8 @@ class cmsRequestQueryProcessor
 	public function 
 	validate($validateFlags)
 	{
+		if(is_object($validateFlags))
+		$this->qryValidate = $validateFlags;
 		$this->qryValidate = $validateFlags;
 		return $this;
 	}
@@ -155,59 +141,59 @@ class cmsRequestQueryProcessor
 			// Formating Validation
 
 			if ($this->qryValidate & QueryValidation::STRIP_TAGS)
-			{	tk::dbug('QueryValidation::STRIP_TAGS');
+			{
 				$toValidate = strip_tags($toValidate);
 			}
 
 			if ($this->qryValidate & QueryValidation::TRIM)
-			{	tk::dbug('QueryValidation::TRIM');
+			{
 				$toValidate = trim($toValidate);
 			}
 
 			if ($this->qryValidate & QueryValidation::LOWERCASE)
-			{	tk::dbug('QueryValidation::LOWERCASE');
+			{
 				$toValidate = strtolower($toValidate);
 			}
 
 			if ($this->qryValidate & QueryValidation::UPPERCASE)
-			{	tk::dbug('QueryValidation::UPPERCASE');
+			{
 				$toValidate = strtoupper($toValidate);
 			}
 
 			// CAST Validation
 
 			if ($this->qryValidate & QueryValidation::CAST_INTEGER)
-			{	tk::dbug('QueryValidation::CAST_INTEGER');
+			{
 				$toValidate = (int)$toValidate;
 			}
 
 			if ($this->qryValidate & QueryValidation::CAST_BOOL)
-			{	tk::dbug('QueryValidation::CAST_BOOL');
+			{
 				$toValidate = filter_var($toValidate, FILTER_VALIDATE_BOOLEAN);
 			}
 
 			// IS Validation
 
 			if ($this->qryValidate & QueryValidation::IS_EMAIL)
-			{	tk::dbug('QueryValidation::IS_EMAIL');
+			{
 				if(filter_var($toValidate, FILTER_VALIDATE_EMAIL) === false) 
 					return $this->qryDefault;
 			}
 
 			if ($this->qryValidate & QueryValidation::IS_DIGIT)
-			{	tk::dbug('QueryValidation::IS_DIGIT');
+			{
 				if(!ctype_digit($toValidate)) 
 					return $this->qryDefault;
 			}
 
 			if ($this->qryValidate & QueryValidation::IS_EMPTY)
-			{	tk::dbug('QueryValidation::IS_EMPTY');
+			{
 				if(!empty($toValidate)) 
 					return $this->qryDefault;
 			}
 
 			if ($this->qryValidate & QueryValidation::IS_NOTEMPTY)
-			{	tk::dbug('QueryValidation::IS_NOTEMPTY');
+			{
 				if(empty($toValidate)) 
 					return $this->qryDefault;
 			}

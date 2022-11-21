@@ -855,6 +855,16 @@ class cmsModalMediathekUpload extends cmsModal
 	_onEventClick_UploadProcess(formData, progress, droppedItem)
 	{
 
+
+/*
+
+	tracker der dateien die zur verarbeitung anstehen damit bei der letzten datei die mediathek aktualisiert wird
+
+
+*/
+
+
+
 		console.log('cmsModalMediathekUpload::_onEventClick_UploadProcess');
 
 
@@ -864,7 +874,6 @@ class cmsModalMediathekUpload extends cmsModal
 
 		let xhRequest = new XMLHttpRequest();
 		xhRequest.open('POST', requestURL);
-		xhRequest.responseType = 'json';
 		xhRequest.setRequestHeader("X-Requested-With","XMLHttpRequest");
 		xhRequest.setRequestHeader("X-Requested-XHR-Action", 'upload');
 		xhRequest.onerror   = function ()
