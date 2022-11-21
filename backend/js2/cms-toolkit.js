@@ -51,8 +51,25 @@ class cmstk extends cmstkOld
 		return result;
 	}
 
-}
 
+	static validateFilename(str)
+	{
+		let toValidate = String(str);
+		toValidate = toValidate.replace(/[\s]/g, '-');
+		toValidate = toValidate.replace(/[^a-zA-Z.\-_\[\]\d]/g, '');
+		return toValidate;
+	}
+
+	static validateFilepath(str)
+	{
+		let toValidate = String(str);
+		toValidate = toValidate.replace(/[\s]/g, '-');
+		toValidate = toValidate.replace(/\/\//g, '/');
+		toValidate = toValidate.replace(/[^a-zA-Z.\-_\[\]/\d]/g, '');
+		return toValidate;
+	}
+
+}
 
 class cmsTabInstance
 {
@@ -127,8 +144,6 @@ class cmsTabInstance
 cmsTabInstance.register();
 addEventListener("beforeunload", function(){ cmsTabInstance.unregister() }, false);
 
-
-
 class cmsNode
 {
 
@@ -191,6 +206,3 @@ class cmsNode
 	}
 
 }
-
-
-

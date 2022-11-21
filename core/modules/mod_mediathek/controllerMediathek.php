@@ -788,6 +788,7 @@ class	controllerMediathek extends CController
 		$requestQuery->post('media-item-licenseurl')->validate($queryValidationString)->out('media_item_licenseurl')->exec();
 		$requestQuery->post('media-item-path')->validate($queryValidationString)->out('media_item_path')->exec();
 		$requestQuery->post('media-item-title')->validate($queryValidationString)->out('media_item_title')->exec();
+		$requestQuery->post('media-item-filename')->validate($queryValidationString)->out('media_item_filename')->exec();
 		$mediaParams = $requestQuery->toObject();
 
 		$cmsUpload = new cmsUpload;

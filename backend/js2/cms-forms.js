@@ -46,4 +46,45 @@ class cmsForms
 		}
 		return formData;
 	}
+
+	/*
+		This function validates the input if this not covered bei vanilla HTML
+	*/
+	static validateInput(event)
+	{
+
+		let node = event.target;
+
+		console.log('validateInput', event, node);
+
+		console.log(node.tagName);
+		console.log(node.value);
+
+		if(node.tagName === 'INPUT')
+		{
+
+
+			if(node.hasAttribute('validate-filename'))
+			{
+				let position = node.selectionStart; 
+				node.value = cmstk.validateFilename(node.value);
+  				node.selectionEnd = position;   
+			}
+
+			if(node.hasAttribute('validate-filepath'))
+			{
+				let position = node.selectionStart; 
+				node.value = cmstk.validateFilepath(node.value);
+  				node.selectionEnd = position;   
+			}
+
+
+
+		}
+
+
+	}
 }
+
+
+addEventListener("input", cmsForms.validateInput, false);

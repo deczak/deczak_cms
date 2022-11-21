@@ -33,6 +33,20 @@ class cmsUploadMediathek
 		$fileextension 	= array_pop($fnpart);
 		$basename 		= implode('.', $fnpart);
 
+		if(strpos($additionalParams->media_item_filename, '.') !== false)
+		{
+			$cfnpart 		= explode('.', $additionalParams->media_item_filename);
+			$cfileextension = array_pop($cfnpart);
+			$cbasename 		= implode('.', $cfnpart);
+		}
+		else
+		{
+			$cbasename = $additionalParams->media_item_filename;
+		}
+
+		if(!empty($cbasename))
+			$dstFilename = $cbasename .'.'.$fileextension;
+
 		if(!file_exists($dstFilelocation.$basename))
 		if(!mkdir($dstFilelocation.$basename, 0777, true))
 		{

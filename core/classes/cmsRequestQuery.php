@@ -14,7 +14,6 @@ class QueryValidation
     const UPPERCASE		= 0x200;
 }
 
-
 class cmsRequestQueryProcessor
 {
 	private $qryKey;
@@ -348,8 +347,6 @@ tk::dbug(
 
 
 	todo
-
-		cmsRequestQueryValidation in validation verarbeiten								<-- das da machen
 
 		validation auf array prüfen und dann die childs recursiv mit prüfen
 

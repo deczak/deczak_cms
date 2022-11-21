@@ -42,6 +42,13 @@ class cmsProgress
 
 
 
+		let zffP = 255 / 100 * percent;
+
+		let zffPN = 255 - zffP;
+
+		console.log('setPercent', zffP, zffPN);
+
+
 
 		/*
 		
@@ -60,13 +67,3 @@ class cmsProgress
 }
 
 
-
-
-
-/*
-
-	andere default farben wählen
-
-	farbverlauf im progress von rot zu grün 
-
-*/

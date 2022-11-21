@@ -310,6 +310,8 @@ div.cms-modal > div.modal-mediathek-upload-inner .dropped-items > .dropped-item 
 div.cms-modal > div.modal-mediathek-upload-inner .dropped-items > .dropped-item .preview .klaus:hover { opacity:1; }
 div.cms-modal > div.modal-mediathek-upload-inner .dropped-items > .dropped-item:hover .preview .klaus { display:block; }
 div.cms-modal > div.modal-mediathek-upload-inner .dropped-items > .dropped-item .preview img { object-fit: cover; width: 100%; height: 100%; }
+div.cms-modal > div.modal-mediathek-upload-inner .dropped-items > .dropped-item .preview .upload-done { position:absolute; top:0px; left:0px; height:100%; width:100%; display:flex; justify-content:center; align-items:center; backdrop-filter:blur(2px) grayscale(0.7); }
+div.cms-modal > div.modal-mediathek-upload-inner .dropped-items > .dropped-item .preview .upload-done .circle { border-radius:50%; background:white; width:50px; height:50px; color:green; display:flex; justify-content:center; align-items:center; box-shadow:0 0 10px 5px rgb(0 0 0 / 20%) }
 div.cms-modal > div.modal-mediathek-upload-inner .dropped-items > .dropped-item fieldset { display:block; }
 div.cms-modal > div.modal-mediathek-upload-inner .dropped-items > .dropped-item .progress { height:5px; margin-bottom:5px; }
 

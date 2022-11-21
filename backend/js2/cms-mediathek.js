@@ -821,8 +821,13 @@ class cmsModalMediathekUpload extends cmsModal
 
 		for(let i = 0; i < itemsList.length; i++)
 		{
-			if(typeof itemsList[i].fileInfo === 'undefined' || (typeof itemsList[i].fileInfo !== 'undefined' && typeof itemsList[i].fileInfo === null))
+
+
+
+			
+			if(typeof itemsList[i].fileInfo === 'undefined' || (typeof itemsList[i].fileInfo !== 'undefined' && itemsList[i].fileInfo === null))
 				continue;
+
 
 			let removeButtonNode = itemsList[i].querySelector('[action-click="dropped-item-remove"]');
 			if(removeButtonNode !== null)
@@ -847,6 +852,7 @@ class cmsModalMediathekUpload extends cmsModal
                 formData.append('media-item-licenseurl', fieldList['modal-media-item-licenseurl']);
                 formData.append('media-item-path', fieldList['modal-media-item-path']);
                 formData.append('media-item-title', fieldList['modal-media-item-title']);
+                formData.append('media-item-filename', fieldList['modal-media-item-filename']);
 
 			srcInstance._onEventClick_UploadProcess(formData, itemsList[i].progress, itemsList[i]);
 		}
@@ -882,48 +888,31 @@ class cmsModalMediathekUpload extends cmsModal
 		};
 		xhRequest.onloadend = function(event)
 		{
-
-
 			console.log('onloadend', xhRequest.response, this, event);
 
 			if(this.status === 200)
 			{
-				//callbackSuccess(xhRequest.response, xhrCallInstance);
-
 				droppedItem.fileInfo = null;
 
+				let uploadCheckNode = document.createElement('div');
+					uploadCheckNode.classList.add('upload-done');
+					uploadCheckNode.innerHTML = '<div class="circle"><i class="fas fa-check"></i></div>';
 
-
+				let previewNode = droppedItem.querySelector('.preview');
+					previewNode.append(uploadCheckNode);
 			}
 			else
 			{
 				//callbackError(this, xhrCallInstance);
 			}
-
-
 		};
         xhRequest.upload.addEventListener("progress", (event) => {
 
             let percentComplete = (event.loaded / event.total) * 100;
-
-			console.log(percentComplete);
-
 			progress.setPercent(percentComplete);
-
-
-			if(percentComplete == 100)
-			{
-
-
-				// todo  grüner haken in das bild
-
-			}
-
-
 		});
 
 		xhRequest.send(formData);
-
 	}
 
 	_transformFileEntry(entry, successCallback, srcInstance) {
@@ -989,7 +978,7 @@ class cmsModalMediathekUpload extends cmsModal
 
 					<div class="fields">
 						<div class="input width-100">
-							<input type="text" name="modal-media-item-filename" value="`+ fileInfo.name +`" placeholder="Filename" maxlength="150" title="Filename">
+							<input type="text" name="modal-media-item-filename" validate-filename value="`+ fileInfo.name +`" placeholder="Filename" maxlength="150" title="Filename">
 						</div>
 					</div>
 
@@ -1037,7 +1026,7 @@ class cmsModalMediathekUpload extends cmsModal
 
 					<div class="fields">
 						<div class="input width-100">
-							<input type="text" name="modal-media-item-path" value="" placeholder="Path" maxlength="150" title="Path">
+							<input type="text" name="modal-media-item-path" value="" validate-filepath placeholder="Path" maxlength="150" title="Path">
 						</div>
 					</div>
 
