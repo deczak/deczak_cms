@@ -30,4 +30,41 @@ class cmsUpload
 
 		return $sectionProcessor->process($destPath, $isRegularUpload, $additionalParams);
 	}
+
+	public static function 
+	validateFilename(string $fileLocation, string $fileName) : string
+	{
+		$fileName = tk::normalizeFilename($fileName);
+
+		if(!file_exists($fileLocation.$fileName))
+			return $fileName;
+
+		if(strpos($fileName, '.') !== false)
+		{
+			$fnpart 		= explode('.', $fileName);
+			$fileExtension 	= array_pop($fnpart);
+			$basename 		= implode('.', $fnpart);
+		}
+		else
+		{
+			$basename 		= $fileName;
+			$fileExtension 	= '';
+		}
+
+		if(strpos($fileName, '-') !== false)
+		{
+			$basename		= explode('-', $basename);
+			$fileCounter	= array_pop($basename);
+			$basename		= implode('-', $basename);
+
+			if(ctype_digit($fileCounter))
+				$fileCounter++;
+			else
+				$fileCounter = 2;
+
+			return cmsUpload::validateFilename($fileLocation, $basename .'-'. $fileCounter.'.'.$fileExtension);
+		}
+
+		return cmsUpload::validateFilename($fileLocation, $basename .'-2.'.$fileExtension);
+	}
 }

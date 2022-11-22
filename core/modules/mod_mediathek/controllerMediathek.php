@@ -551,7 +551,6 @@ class	controllerMediathek extends CController
 
 		if(!empty($mediaIdList))
 		{
-
 			modelMediathek::whereIn('media_id', $mediaIdList)->delete();
 
 			/*

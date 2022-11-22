@@ -57,7 +57,7 @@ class	TK
 		$replace 	= array("-", "Ae", "Oe", "Ue", "ae", "oe", "ue", "ss");
 
  		$_filename 	= str_replace($search, $replace, strtolower($_filename));
-		$_filename = preg_replace( '/[^a-z0-9_\-]+/', '', $_filename);
+		$_filename = preg_replace( '/[^a-z0-9_.-]+/', '', $_filename);
 	
 		return $_filename;
 	}

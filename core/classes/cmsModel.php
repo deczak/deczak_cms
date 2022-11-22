@@ -176,7 +176,7 @@ class cmsModelQuery
 	whereIn(string $column, array $values) : cmsModelQuery
 	{
 		if(!isset($this->where))
-			$this->where = [[]];
+			$this->whereIn = [[]];
 		$this->whereIn[ count($this->whereIn) - 1 ][] = [
 			'column' => $column,
 			'values' => $values,

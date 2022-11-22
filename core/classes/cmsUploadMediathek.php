@@ -47,6 +47,14 @@ class cmsUploadMediathek
 		if(!empty($cbasename))
 			$dstFilename = $cbasename .'.'.$fileextension;
 
+
+		$dstFilename = cmsUpload::validateFilename($dstFilelocation.$basename.'/', $dstFilename);
+
+
+		$fnpart 		= explode('.', $dstFilename);
+		$fileextension 	= array_pop($fnpart);
+		$basename 		= implode('.', $fnpart);
+
 		if(!file_exists($dstFilelocation.$basename))
 		if(!mkdir($dstFilelocation.$basename, 0777, true))
 		{
@@ -68,7 +76,7 @@ class cmsUploadMediathek
 		$processedItem = new stdClass;
 		$processedItem->filename 		= $dstFilename;
 		$processedItem->filelocation 	= $dstFilelocation.$basename.'/';
-		$processedItem->mimetype	 	= $_FILES["file"]["name"];
+		$processedItem->mimetype	 	= $_FILES["file"]["type"];
 		$processedItem->filesize 		= $mediathekFileInfo -> getSize();
 
 		switch($_FILES["file"]["type"])
