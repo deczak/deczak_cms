@@ -779,8 +779,6 @@ class	controllerMediathek extends CController
 		$queryValidationString = QueryValidation::STRIP_TAGS | QueryValidation::TRIM | QueryValidation::IS_NOTEMPTY;
 
 
-		print_r($_POST); echo  PHP_EOL;
-
 
 		$requestQuery = new cmsRequestQuery(true);
 		$requestQuery->post('media-item-author')->validate($queryValidationString)->out('media_item_author')->exec();
@@ -795,8 +793,6 @@ class	controllerMediathek extends CController
 		$mediaParams = $requestQuery->toObject();
 
 		$cmsUpload = new cmsUpload;
-
-		print_r($mediaParams); echo  PHP_EOL;
 
 		$uploadResponse = $cmsUpload -> processUpload(
 			cmsUpload::DEST_MEDIATHEK, 
