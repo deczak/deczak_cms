@@ -85,6 +85,12 @@ class	cmsMediathek
 			case cmsMediathek.WORKMODE_EDIT:
 
 
+				let buttonCreateDirNode = document.createElement('button');
+					buttonCreateDirNode.classList.add('ui', 'button', 'icon', 'labeled', 'button-create-folder');
+					buttonCreateDirNode.type = 'button';
+					buttonCreateDirNode.onclick = function(event) { srcInstance._onClickButtonCreateFolder(event, srcInstance) };
+					buttonCreateDirNode.innerHTML = '<span><i class="fas fa-folder"></i></span> Create Folder';
+
 
 
 				let buttonImportNode = document.createElement('button');
@@ -93,7 +99,7 @@ class	cmsMediathek
 					buttonImportNode.onclick = function(event) { srcInstance._onClickButtonUpload(event, srcInstance) };
 					buttonImportNode.innerHTML = '<span><i class="fas fa-file-upload"></i></span> Upload';
 
-				controlPanelRightNode.append(buttonImportNode);
+				controlPanelRightNode.append(buttonCreateDirNode, buttonImportNode);
 
 
 				break;
@@ -188,7 +194,7 @@ class	cmsMediathek
 				continue;
 				
 			let squareNode = document.createElement('div');
-				squareNode.classList.add('item-'+ (itemsList[i].extension == 'dir' ? 'dir' : 'file'));
+				squareNode.classList.add('mediathek-item', 'item-'+ (itemsList[i].extension == 'dir' ? 'dir' : 'file'));
 				squareNode.setAttribute('data-event-click', 'item-'+ (itemsList[i].extension == 'dir' ? 'dir' : 'file'));
 				squareNode.setAttribute('data-item-path', itemsList[i].path);
 				squareNode.itemInfo = JSON.parse(JSON.stringify(itemsList[i]));
@@ -203,7 +209,11 @@ class	cmsMediathek
 
 					squareNode.classList.add('item-image');
 					squareNode.style.backgroundImage = "url('"+ CMS.SERVER_URL +"mediathek/"+ itemsList[i].path +"?binary&size=thumb')";
-					squareNode.innerHTML = '<div class="name">'+ itemsList[i].name  +'</div>';
+					squareNode.innerHTML = `
+						<div class="name">`+ itemsList[i].name  +`</div>
+						<div class="filemodify filemodify-edit" data-modify="fileedit" title="Edit item"><i class="fas fa-pen"></i></div>
+						<div class="filemodify filemodify-remove" data-modify="fileremove" title="Delete item"><i class="fas fa-trash-alt"></i></div>
+					`;
 
 					break;
 
@@ -229,7 +239,7 @@ class	cmsMediathek
 				continue;
 
 			let itemRowNode = document.createElement('tr');
-				itemRowNode.classList.add('item-'+ (itemsList[i].type == 'DIR' ? 'dir' : 'file'));
+				itemRowNode.classList.add('mediathek-item', 'item-'+ (itemsList[i].type == 'DIR' ? 'dir' : 'file'));
 				itemRowNode.setAttribute('data-event-click', 'item-'+ (itemsList[i].type == 'DIR' ? 'dir' : 'file'));
 				itemRowNode.setAttribute('data-item-path', itemsList[i].path);
 				itemRowNode.itemInfo = JSON.parse(JSON.stringify(itemsList[i]));
@@ -311,7 +321,14 @@ class	cmsMediathek
 		{
 			// In list mode, check for click on TD to change the targetNode, the info is in the TR
 
-			targetNode = event.target.parentNode;
+			targetNode = event.target.closest('.mediathek-item');
+		}
+
+		if(document.cmsMediathek.viewMode == cmsMediathek.VIEWMODE_SQUARES && (event.target.tagName == 'DIV'))
+		{
+			// In square mode, check for click on DIV to change the targetNode, the info is in the item DIV
+
+			targetNode = event.target.closest('.mediathek-item');
 		}
 
 		if(event.target.classList.contains('filemodify') && srcInstance.workMode === cmsMediathek.WORKMODE_EDIT)
@@ -381,6 +398,11 @@ class	cmsMediathek
 
 		let modalUpload = new cmsModalMediathekUpload();
 			modalUpload.open(event, srcInstance);
+	}
+
+	_onClickButtonCreateFolder(event, srcInstance)
+	{
+		alert('todo');
 	}
 
 	_onClickButtonViewSquare(event, srcInstance)
@@ -819,6 +841,18 @@ class cmsModalMediathekUpload extends cmsModal
 	{
 		let itemsList = srcInstance.nodeModal.querySelectorAll('.dropped-item');
 
+		srcInstance.itemsOnProcessList = [];
+
+		for(let i = 0; i < itemsList.length; i++)
+		{
+			if(typeof itemsList[i].fileInfo === 'undefined' || (typeof itemsList[i].fileInfo !== 'undefined' && itemsList[i].fileInfo === null))
+				continue;
+
+			srcInstance.itemsOnProcessList.push(itemsList[i].fileInfo);
+
+			//itemsList[i].fileInfo.size
+		}
+
 		for(let i = 0; i < itemsList.length; i++)
 		{
 			if(typeof itemsList[i].fileInfo === 'undefined' || (typeof itemsList[i].fileInfo !== 'undefined' && itemsList[i].fileInfo === null))
@@ -851,12 +885,32 @@ class cmsModalMediathekUpload extends cmsModal
 
 			let requestURL = CMS.SERVER_URL_BACKEND + 'mediathek/';
 
-			cmsXhr.uploadRequest(requestURL, formData, srcInstance._onEventClick_UploadProcessResponse, itemsList[i].progress, itemsList[i]);
+			cmsXhr.uploadRequest(requestURL, formData, srcInstance, srcInstance._onEventClick_UploadProcessResponse, itemsList[i].progress, itemsList[i]);
 		}
 	}
 
-	_onEventClick_UploadProcessResponse(responseCode, responseData, uploadItemNode)
+	_onEventClick_UploadProcessResponse(responseCode, responseData, srcInstance, uploadItemNode)
 	{
+
+		console.log('_onEventClick_UploadProcessResponse', srcInstance.itemsOnProcessList, uploadItemNode);
+
+		for(let i = 0; i < srcInstance.itemsOnProcessList.length; i++)
+		{
+			if(srcInstance.itemsOnProcessList[i].name === uploadItemNode.fileInfo.name)
+			{
+				srcInstance.itemsOnProcessList.splice(i, 1);
+			}
+		}
+
+		if(srcInstance.itemsOnProcessList.length === 0)
+		{
+
+			// All items finished
+
+			console.log('all finished', srcInstance.srcInstance);
+			srcInstance.srcInstance.requestItems();
+		}
+
 		if(responseCode === 200)
 		{
 			uploadItemNode.fileInfo = null;
@@ -872,6 +926,8 @@ class cmsModalMediathekUpload extends cmsModal
 		{
 			//callbackError(this, xhrCallInstance);
 		}
+
+
 	}
 
 	_transformFileEntry(entry, successCallback, srcInstance) {

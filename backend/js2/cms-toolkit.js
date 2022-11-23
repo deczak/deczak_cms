@@ -59,6 +59,13 @@ class cmstk extends cmstkOld
 	{
 		let toValidate = String(str);
 		toValidate = toValidate.replace(/[\s]/g, '-');
+		toValidate = toValidate.replaceAll('ä', 'ae');
+		toValidate = toValidate.replaceAll('ö', 'oe');
+		toValidate = toValidate.replaceAll('ü', 'ue');
+		toValidate = toValidate.replaceAll('Ä', 'Ae');
+		toValidate = toValidate.replaceAll('Ö', 'Oe');
+		toValidate = toValidate.replaceAll('Ü', 'Ue');
+		toValidate = toValidate.replaceAll('ß', 'ss');
 		toValidate = toValidate.replace(/[^a-zA-Z.\-_\[\]\d]/g, '');
 		return toValidate;
 	}
@@ -71,6 +78,13 @@ class cmstk extends cmstkOld
 		let toValidate = String(str);
 		toValidate = toValidate.replace(/[\s]/g, '-');
 		toValidate = toValidate.replace(/\/\//g, '/');
+		toValidate = toValidate.replaceAll('ä', 'ae');
+		toValidate = toValidate.replaceAll('ö', 'oe');
+		toValidate = toValidate.replaceAll('ü', 'ue');
+		toValidate = toValidate.replaceAll('Ä', 'Ae');
+		toValidate = toValidate.replaceAll('Ö', 'Oe');
+		toValidate = toValidate.replaceAll('Ü', 'Ue');
+		toValidate = toValidate.replaceAll('ß', 'ss');
 		toValidate = toValidate.replace(/[^a-zA-Z.\-_\[\]/\d]/g, '');
 		return toValidate;
 	}

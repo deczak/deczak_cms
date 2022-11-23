@@ -35,18 +35,19 @@ class	cmsXhr
 		xhRequest.send(formData);
 	}
 
-	static uploadRequest(requestURL, formData, callbackSuccess, progress, uploadItemNode)
+	static uploadRequest(requestURL, formData, srcInstance, callbackSuccess, progress, uploadItemNode)
 	{
 		let xhRequest = new XMLHttpRequest();
 		xhRequest.open('POST', requestURL);
 		xhRequest.setRequestHeader("X-Requested-With","XMLHttpRequest");
 		xhRequest.setRequestHeader("X-Requested-XHR-Action", 'upload');
-		xhRequest.onerror   = () =>	{
+		xhRequest.onerror = () =>	{
 			// Event does not fire on 404 or 500
+			console.log('cmsXhr.uploadRequest error', requestURL, callbackSuccess);
 		};
 		xhRequest.onloadend = (event) => {
 			if(callbackSuccess !== null)
-				callbackSuccess(this.status, xhRequest.response, uploadItemNode)
+				callbackSuccess(xhRequest.status, xhRequest.response, srcInstance, uploadItemNode)
 		};
         xhRequest.upload.addEventListener("progress", (event) => {
 			if(progress !== null)

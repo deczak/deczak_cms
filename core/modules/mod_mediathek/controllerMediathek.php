@@ -611,7 +611,7 @@ class	controllerMediathek extends CController
 
 
 
-		$urlVarList['media_gear'] = [
+		$urlVarList['media_gear'] = (object)[
 			'camera' => $urlVarList['media_gear_camera'],
 			'lens'   => $urlVarList['media_gear_lens']
 		];
@@ -778,6 +778,10 @@ class	controllerMediathek extends CController
 	{
 		$queryValidationString = QueryValidation::STRIP_TAGS | QueryValidation::TRIM | QueryValidation::IS_NOTEMPTY;
 
+
+		print_r($_POST); echo  PHP_EOL;
+
+
 		$requestQuery = new cmsRequestQuery(true);
 		$requestQuery->post('media-item-author')->validate($queryValidationString)->out('media_item_author')->exec();
 		$requestQuery->post('media-item-camera')->validate($queryValidationString)->out('media_item_camera')->exec();
@@ -791,6 +795,8 @@ class	controllerMediathek extends CController
 		$mediaParams = $requestQuery->toObject();
 
 		$cmsUpload = new cmsUpload;
+
+		print_r($mediaParams); echo  PHP_EOL;
 
 		$uploadResponse = $cmsUpload -> processUpload(
 			cmsUpload::DEST_MEDIATHEK, 
