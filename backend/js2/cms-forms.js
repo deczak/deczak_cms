@@ -54,20 +54,38 @@ class cmsForms
 	{
 		let node = event.target;
 
+		let correction = 0;	
+		if(event.data !== null) // inputType: 'insertText'
+		{
+
+			switch(String(event.data).toLowerCase())
+			{
+				case 'ä':
+				case 'ö':
+				case 'ü':
+				case 'ß':
+
+					correction = 1;
+			}
+		}
+		/*
+			insertFromPaste
+		*/
+
 		if(node.tagName === 'INPUT')
 		{
 			if(node.hasAttribute('validate-filename'))
 			{
 				let position = node.selectionStart; 
 				node.value = cmstk.validateFilename(node.value);
-  				node.selectionEnd = position;   
+  				node.selectionEnd = position + correction;   
 			}
 
 			if(node.hasAttribute('validate-filepath'))
 			{
 				let position = node.selectionStart; 
 				node.value = cmstk.validateFilepath(node.value);
-  				node.selectionEnd = position;   
+  				node.selectionEnd = position + correction;   
 			}
 		}
 	}

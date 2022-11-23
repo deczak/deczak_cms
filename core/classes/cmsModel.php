@@ -541,6 +541,13 @@ class cmsModelCollection implements IteratorAggregate, Countable, JsonSerializab
 		return $cmsModelQuery->find($primaryKeyId);
 	}
 
+	public static function
+	remove() : bool
+	{
+		$cmsModelQuery = new cmsModelQuery(static::class);
+		return $cmsModelQuery->delete();
+	}
+
 	# Interface IteratorAggregate
 
     public function

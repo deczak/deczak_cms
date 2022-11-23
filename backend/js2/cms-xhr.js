@@ -23,7 +23,7 @@ class	cmsXhr
 		};
 		xhRequest.onloadend = function()
 		{
-			if(this.status === 200)
+			if(xhRequest.status === 200)
 			{
 				callbackSuccess(xhRequest.response, xhrCallInstance);
 			}

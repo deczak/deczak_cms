@@ -71,6 +71,7 @@
 .ui.fieldset { border:1px solid black; padding:10px 15px 10px 15px; position:relative; margin-bottom:25px; position: relative; background: rgba(0,0,0,0.1); border:none; border-radius:3px; }
 .ui.fieldset:not(.simply) { padding-top:24px; border-radius:3px 3px 3px 0px;}
 .ui.fieldset.button-only { background: rgba(0,0,0,0); }
+.ui.fieldset.modal { background:unset; padding: 0px; margin-bottom: unset; }
 
 
 .ui.fieldset > legend { display:inline-block; padding:0px 6px; margin-left:10px; font-size:0.85em; position: absolute;top: 0px;left: -10px;background: white;border-bottom-right-radius: 7px;font-weight: bold;font-size: 0.75em;padding: 3px 10px;}

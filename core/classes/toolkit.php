@@ -821,6 +821,50 @@ class 	MEDIATHEK
 			unset($item -> childs);
 		}
 	}
+
+	/**
+	 */
+	public static function
+	createPath(string $path) : ?string
+	{
+		$path = CMS_SERVER_ROOT . DIR_MEDIATHEK . trim($path,' /\\');
+
+		if(!file_exists($path))
+		if(!mkdir($path, 0777, true))
+			return null;
+
+		return $path;
+	}
+
+	/**
+	 *	Deletes Mediathek content
+	 */
+	public static function
+	deleteAll()
+	{
+		$directoryList = new DirectoryIterator(CMS_SERVER_ROOT . DIR_MEDIATHEK);
+		foreach($directoryList as $directory)
+		{
+			if($directory -> isDot())
+				continue;
+			if($directory -> isDir())
+			{
+				tk::rrmdir($directory->getPathname());
+			}
+			/*
+			elseif($directory -> isFile())
+			{
+				switch($directory->getFilename())
+				{
+					case 'readme':
+					case 'index.php':
+						continue 2;
+				}
+			}
+			*/
+		}
+	}
+
 }
 
 /**

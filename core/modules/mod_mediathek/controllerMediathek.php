@@ -11,16 +11,6 @@ class	controllerMediathek extends CController
 		parent::__construct($_module, $_object);
 
 		CPageRequest::instance() -> subs = $this -> getSubSection();
-		
-		/*
-		$this -> imageSizesList = [
-			'xlarge' => new pos(0, 0,1980, 1200),
-			'large'  => new pos(0, 0,1600, 1024),
-			'medium' => new pos(0, 0,1200, 1200),
-			'small'  => new pos(0, 0, 800,  800),
-			'thumb'  => new pos(0, 0, 500,  500),
-		];
-		*/
 	}
 	
 	public function
@@ -30,6 +20,7 @@ class	controllerMediathek extends CController
 
 		$controllerAction = $this -> getControllerAction($_rcaTarget, 'index');
 		
+
 		##	Check user rights for this target
 		
 		if(!$this -> detectRights($controllerAction))
@@ -60,7 +51,6 @@ class	controllerMediathek extends CController
 		$enableDelete	= $this -> existsUserRight('delete');
 		$enableUpload	= $this -> existsUserRight('upload');
 	
-
 		$logicDone = false;
 		switch($controllerAction)
 		{
@@ -72,7 +62,13 @@ class	controllerMediathek extends CController
 			case 'xhr_remove_item':		$logicDone = $this -> logicXHRRemoveItem($_pDatabase);
 			case 'xhr_edit_item':		$logicDone = $this -> logicXHREditItem($_pDatabase, $_xhrInfo, $enableEdit, $enableDelete, $enableUpload);
 			case 'xhr_get_item':		$logicDone = $this -> logicXHRGetItem($_pDatabase, $_xhrInfo);
-			case 'xhr_upload':		$logicDone = $this -> logicXHRUpload($_pDatabase, $_xhrInfo);
+			case 'xhr_upload':			$logicDone = $this -> logicXHRUpload($_pDatabase, $_xhrInfo);
+		}
+
+		if($enableUpload)		
+		switch($controllerAction)
+		{
+			case 'xhr_create_folder':	$logicDone = $this -> logicXHRCreateFolder($_pDatabase, $_xhrInfo);
 		}
 
 		if(!$logicDone) // Default
@@ -231,108 +227,6 @@ class	controllerMediathek extends CController
 		return false;
 	}
 
-	/**
-	 * 	XHR Call to import all new (unprocessed) files in mediathek directory
-	private function
-	logicXHRImport(CDatabaseConnection &$_pDatabase, ?object $_xhrInfo, bool $_enableEdit = false, bool $_enableDelete = false, bool $_enableUpload = false) : bool
-	{
-		$validationErr   = false;
-		$validationMsg   = 'OK';
-		$responseData    = [];
-
-		$itemsList = [];
-
-		MEDIATHEK::getRawItemsList($itemsList);
-
-		foreach($itemsList as $item)
-		{
-			$itemPath = CMS_SERVER_ROOT.DIR_MEDIATHEK.$item -> filelocation . $item -> filenameBase .'/';
-
-			if(!file_exists($itemPath))
-			if(!mkdir($itemPath, 0777, true))
-			{
-				// TODO ERR
-				continue;
-			}
-
-			if(!rename(CMS_SERVER_ROOT.DIR_MEDIATHEK.$item -> filepath, $itemPath . $item -> filename))
-			{
-				// TODO ERR
-				continue;
-			}
-
-			switch($item -> mime)
-			{
-				case 'image/jpeg':
-
-					$itemExifInfo	= (object)exif_read_data($itemPath . $item -> filename, 'EXIF');
-					break;
-			}
-
-			$itemInfo = new stdClass;
-
-			$itemInfo -> scheme		   = 1;
-			$itemInfo -> filename	   = $item -> filename;
-			$itemInfo -> sizes		   = [];
-			$itemInfo -> license	   = $itemExifInfo -> Copyright ?? '';
-			$itemInfo -> license_url   = '';
-			$itemInfo -> gear		   = [
-				"by_meta"	=> false,
-				"camera"	=> $itemExifInfo -> Model ?? '',
-				"lens"		=> $itemExifInfo -> LensModel ?? $itemExifInfo -> {'UndefinedTag:0xA434'} ?? ''
-			];
-			$itemInfo -> gear_settings = [];	// This values are not getting retrieved at the moment
-			$itemInfo -> title		   = '';
-			$itemInfo -> caption	   = '';
-			$itemInfo -> author 	   = $itemExifInfo -> Artist ?? '';
-			$itemInfo -> notice		   = '';
-			$itemInfo -> timeAdd	   = time();
-
-			switch($item -> mime)
-			{
-				case 'image/png': 
-				case 'image/webp': 
-				case 'image/jpeg':
-
-					$itemInfo -> sizes = MEDIATHEK::createResizedImages($itemPath, $item -> filename, $item -> mime, $this -> imageSizesList);
-					$itemInfo -> sizes = $itemInfo -> sizes ?? [];
-		
-					break;
-
-				default: // ...................	Add file for download
-
-					// todo
-			}
-
-			file_put_contents($itemPath.'info.json', json_encode($itemInfo, JSON_UNESCAPED_UNICODE));
-
-			$modelMediathek = new modelMediathek;
-			$mediaId = $modelMediathek -> insert($_pDatabase, [
-				'media_filename' 	  => $itemInfo -> filename,
-				'media_title' 		  => $itemInfo -> title,
-				'media_caption' 	  => $itemInfo -> caption,
-				'media_author' 		  => $itemInfo -> author,
-				'media_notice' 		  => $itemInfo -> notice,
-				'media_license' 	  => $itemInfo -> license,
-				'media_license_url'   => $itemInfo -> license_url,
-				'media_gear' 		  => $itemInfo -> gear,
-				'media_gear_settings' => $itemInfo -> gear_settings ?? [],
-				'media_size' 		  => $item -> size,
-				'media_extension' 	  => $item -> extension,
-				'media_mime' 		  => $item -> mime,
-				'create_by' 		  => CSession::instance() -> getValue('user_id'),
-				'create_time' 		  => time()
-			]);
-
-			file_put_contents($itemPath. $mediaId .'.media-id', $mediaId);
-		}
-
-		tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
-
-		return false;
-	}
-
-	 */
 	/**
 	 * 	XHR Call to retrieve a multidimensional array of mediathek directory
 	 */
@@ -776,9 +670,18 @@ class	controllerMediathek extends CController
 	private function
 	logicXHRUpload(CDatabaseConnection &$_pDatabase, ?object $_xhrInfo) : bool
 	{
+		if(empty($_POST))
+		{
+			CMessages::add('Post data empty, post size limit to low?' , MSG_WARNING);
+			tk::xhrResponse(
+				400, 
+				[],
+				1,
+				'Post data empty, post size limit to low?'
+				);
+		}
+		
 		$queryValidationString = QueryValidation::STRIP_TAGS | QueryValidation::TRIM | QueryValidation::IS_NOTEMPTY;
-
-
 
 		$requestQuery = new cmsRequestQuery(true);
 		$requestQuery->post('media-item-author')->validate($queryValidationString)->out('media_item_author')->exec();
@@ -804,6 +707,54 @@ class	controllerMediathek extends CController
 		tk::xhrResponse(
 			200, 
 			$uploadResponse
+			);
+
+		return true;
+	}
+	/**
+	 *
+	 */
+	private function
+	logicXHRCreateFolder(CDatabaseConnection &$_pDatabase, ?object $_xhrInfo) : bool
+	{
+		
+		$queryValidationString = QueryValidation::STRIP_TAGS | QueryValidation::TRIM | QueryValidation::IS_NOTEMPTY;
+
+		$requestQuery = new cmsRequestQuery(true);
+		$requestQuery->post('mediathek-active-path')->validate($queryValidationString)->out('mediathek_active_path')->exec();
+		$requestQuery->post('mediathek-folder')->validate($queryValidationString)->out('mediathek_folder')->exec();
+		$mediaParams = $requestQuery->toObject();
+
+		if($mediaParams->mediathek_active_path === null)
+			tk::xhrResponse(
+				400, 
+				[],
+				1,
+				'Mediathek active path not set');
+
+		if($mediaParams->mediathek_folder === null)
+			tk::xhrResponse(
+				400, 
+				[],
+				1,
+				'Folder name is not set');
+
+		if(MEDIATHEK::createPath($mediaParams->mediathek_active_path.'/'.$mediaParams->mediathek_folder) === null)
+		{
+			CMessages::add('Mediathek folder creation failed' , MSG_WARNING);
+			tk::xhrResponse(
+				400, 
+				[],
+				1,
+				'Mediathek folder creation failed'
+				);
+		}
+
+
+
+		tk::xhrResponse(
+			200, 
+			[]
 			);
 
 		return true;

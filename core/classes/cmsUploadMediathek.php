@@ -27,8 +27,8 @@ class cmsUploadMediathek
 
 		$dstFilename = basename($_FILES["file"]["name"]);
 
-		$dstFilelocation = CMS_SERVER_ROOT . DIR_MEDIATHEK . trim($destPath,' /\\');
-
+		$dstFilelocation = CMS_SERVER_ROOT . DIR_MEDIATHEK . trim($destPath,' /\\') .'/';
+		
 		$fnpart 		= explode('.', $dstFilename);
 		$fileextension 	= array_pop($fnpart);
 		$basename 		= implode('.', $fnpart);

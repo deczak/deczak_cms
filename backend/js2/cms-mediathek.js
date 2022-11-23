@@ -402,7 +402,57 @@ class	cmsMediathek
 
 	_onClickButtonCreateFolder(event, srcInstance)
 	{
-		alert('todo');
+
+/*
+
+	aktiver pfad ausgeben
+
+*/
+
+		let modal = new cmsModal();
+
+		let content = document.createElement('div');
+			content.innerHTML = `
+				<fieldset class="ui fieldset modal">
+
+					<div class="fields">
+						<div class="input width-100">
+							<input type="text" name="modal-mediathek-folder" validate-filename value="" placeholder="" maxlength="150" title="Folder name">
+						</div>
+					</div>
+
+					<input type="hidden" name="modal-mediathek-active-path" value="`+ srcInstance.activePath +`/">
+
+				</fieldset>
+			`;
+	
+		modal.addButton(new cmsModalCtrlButton(cmsModal.BTN_LOCATION.BOTTOM_RIGHT, 'Create', srcInstance._onClickButtonCreateFolderOK, 'fas fa-check', srcInstance));
+		modal.addButton(new cmsModalCtrlButton(cmsModal.BTN_LOCATION.BOTTOM_RIGHT, 'Cancel', modal.close, 'fas fa-times'));
+		modal.setTitle('Create Folder in '+ srcInstance.activePath +'/')
+		modal.create(content, {}, ['modal-mediathek-create-folder-inner']);
+		modal.open(srcInstance);
+
+
+
+	}
+
+	_onClickButtonCreateFolderOK(event, modalInstance)
+	{
+		let fieldList = modalInstance.getFieldList();
+
+		let	formData  = new FormData;
+			formData.append('mediathek-active-path', fieldList['modal-mediathek-active-path']);
+			formData.append('mediathek-folder', fieldList['modal-mediathek-folder']);
+
+		let	xhRequest = new cmsXhr;
+			xhRequest.request(CMS.SERVER_URL_BACKEND + 'mediathek/', formData, this.dataInfo._onClickButtonCreateFolderSuccess, { srcInstance: this.dataInfo, modalInstance:modalInstance }, 'create_folder');
+	}
+
+	_onClickButtonCreateFolderSuccess(response, srcInfo)
+	{
+		srcInfo.srcInstance.requestItems();
+
+		srcInfo.modalInstance.close();
 	}
 
 	_onClickButtonViewSquare(event, srcInstance)
@@ -748,16 +798,9 @@ class cmsModalMediathekUpload extends cmsModal
 	
 	open(event, srcInstance)
 	{
-
-
-
 		let instance = this;
 
-
-
 		instance.srcInstance = srcInstance;
-
-
 
 		instance.modalUploadDropzoneNode = document.createElement('div');
 		instance.modalUploadDropzoneNode.classList.add('dropzone');
@@ -769,9 +812,6 @@ class cmsModalMediathekUpload extends cmsModal
 
 		instance.modalUploadDropItemsNode = document.createElement('div');
 		instance.modalUploadDropItemsNode.classList.add('dropped-items')
-
-
-
 
 		let content = document.createElement('div');
 			content.append(
@@ -786,35 +826,13 @@ class cmsModalMediathekUpload extends cmsModal
 		super.create(content, {}, ['modal-mediathek-upload-inner']);
 		super.open();
 
-
-
 		content.addEventListener('click', function(event) { instance._onEventClickHandler(event, srcInstance); });
-	
-
-
-	
-		
-
-
-
-
 
 	}
 
 	_onEventClickHandler(event, srcInstance)
 	{
-
-		//console.log(event.target);
-		//console.log(event.target.tagName);
-		//console.log(event.target.id);
-
 		let actionClick = event.target.getAttribute('action-click');
-
-		
-
-
-		//console.log(actionClick);
-
 
 		if(actionClick === null)
 			return;
@@ -827,9 +845,7 @@ class cmsModalMediathekUpload extends cmsModal
 
 					this._onEventClick_DroppedItemRemove(event);
 					break;
-
 		}
-
 	}
 
 	_onEventClick_DroppedItemRemove(event)
@@ -891,9 +907,6 @@ class cmsModalMediathekUpload extends cmsModal
 
 	_onEventClick_UploadProcessResponse(responseCode, responseData, srcInstance, uploadItemNode)
 	{
-
-		console.log('_onEventClick_UploadProcessResponse', srcInstance.itemsOnProcessList, uploadItemNode);
-
 		for(let i = 0; i < srcInstance.itemsOnProcessList.length; i++)
 		{
 			if(srcInstance.itemsOnProcessList[i].name === uploadItemNode.fileInfo.name)
@@ -907,7 +920,6 @@ class cmsModalMediathekUpload extends cmsModal
 
 			// All items finished
 
-			console.log('all finished', srcInstance.srcInstance);
 			srcInstance.srcInstance.requestItems();
 		}
 
@@ -925,14 +937,16 @@ class cmsModalMediathekUpload extends cmsModal
 		else
 		{
 			//callbackError(this, xhrCallInstance);
+
+			// fehler in console  ausgebne eg 400
 		}
 
 
 	}
 
-	_transformFileEntry(entry, successCallback, srcInstance) {
+	_transformFileEntry(entry, successCallback, srcInstance)
+	{
 	
-		console.log('_transformFileEntry');
 
 		entry.file((file) => {
 
@@ -941,7 +955,8 @@ class cmsModalMediathekUpload extends cmsModal
 		});
 	}
 
-	_onDropZoneDropItems(item) {
+	_onDropZoneDropItems(item)
+	{
 		
 		let srcInstance = this;
 
@@ -1055,13 +1070,11 @@ class cmsModalMediathekUpload extends cmsModal
 
 
 
-		console.log('xxxxxxxxxxxxxxxx');
 		let activeMediathekPath = srcInstance.srcInstance.activePath;
 
 			activeMediathekPath = activeMediathekPath.replace(/^\/+|\/+$/g, '');
 
 
-		console.log('activeMediathekPath', activeMediathekPath);
 
 		let filePath = fileEntry.fullPath.split('/').filter(n => n);
 		filePath.pop();
@@ -1071,7 +1084,6 @@ class cmsModalMediathekUpload extends cmsModal
 		if(activeMediathekPath != '')
 			filePath = activeMediathekPath + (filePath != '' ? '/' : '') + filePath;
 			
-		console.log('filePath', filePath);
 
 		if(filePath.length > 0)
 			itemNode.querySelector('input[placeholder="Path"]').value = '/'+ filePath +'/';

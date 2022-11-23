@@ -10,6 +10,7 @@
 				<li><a class="darkblue" href="#remote-system"><?php echo CLanguage::string('M_BEENV_REMOTEUSER'); ?></a></li>
 				<li><a class="darkblue" href="#header"><?php echo CLanguage::string('M_BEENV_HEADER'); ?></a></li>
 				<li><a class="darkblue" href="#update-sitemap"><?php echo CLanguage::string('M_BEENV_GENERATE'); ?></a></li>
+				<li><a class="darkblue" href="#mediathek">Mediathek</a></li>
 			</ul>
 	
 		</div>
@@ -342,6 +343,40 @@
 							</div>
 							<div style="font-weight:500; margin-left:20px;">
 								<?= CLanguage::string('M_BEENV_GENERATE_RES'); ?>
+							</div>
+						</div>
+
+					</div>
+
+
+
+				</div>
+
+			</div>
+
+		</fieldset>
+
+		<fieldset class="ui fieldset submit-able" id="mediathek">
+
+			<div>
+
+				<div class="group width-100">
+
+					<div class="group-head width-100">Mediathek Wipe</div>
+			
+					<div class="delete-box" style="padding: 15px 23px; border-radius:3px; display:flex; flex-direction:column;">
+
+						<div style="display:flex; align-items:center; margin-bottom:15px;">
+							<div style="width:213px; border-radius:3px; background:white;">
+							<fieldset class="ui fieldset" data-xhr-target="mediathek_wipe" data-xhr-overwrite-target="edit/1" style="margin:0px;">	
+								<div class="submit-container button-only">
+									<button class="ui button icon labeled trigger-submit-fieldset" type="button" disabled><span><i class="fas fa-sync-alt" data-icon="fa-sync-alt"></i></span><?php echo CLanguage::string('DELETE'); ?></button>
+									<div class="protector"><input type="checkbox" class="trigger-submit-protector" id="protector-mediathek_wipe"><label for="protector-mediathek_wipe"></label></div>
+								</div>
+							</fieldset>
+							</div>
+							<div style="font-weight:500; margin-left:20px;">
+								<?= CLanguage::string('M_BEENV_MEDIATHEK_WIPE'); ?>
 							</div>
 						</div>
 

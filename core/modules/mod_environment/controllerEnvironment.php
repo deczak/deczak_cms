@@ -5,6 +5,7 @@ include_once CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CXMLSitemap.php';
 
 require_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelUserGroups.php';	
 require_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelUsersRegister.php';	
+include_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelMediathek.php';	
 
 class	controllerEnvironment extends CController
 {
@@ -67,6 +68,7 @@ class	controllerEnvironment extends CController
 			case 'xhr_update_resources': $logicDone = $this -> logicXHRUpdateResources($_pDatabase); break;	
 			case 'xhr_error_clear': 	 $logicDone = $this -> logicXHRClearError($_pDatabase);	break;	
 			case 'xhr_edit_header': 	 $logicDone = $this -> logicXHREditHeader($_pDatabase);	break;	
+			case 'xhr_mediathek_wipe': 	 $logicDone = $this -> logicXHRMediathekWipe($_pDatabase);	break;	
 		
 		
 		}
@@ -331,7 +333,26 @@ class	controllerEnvironment extends CController
 		return false;
 	}
 
+	private function
+	logicXHRMediathekWipe(CDatabaseConnection &$_dbConnection) : bool
+	{	
+		$systemId = $this -> querySystemId();
 
+		if($systemId !== false)
+		{	
+			$validationErr 	= false;
+			$validationMsg 	= '';
+			$responseData 	= [];
+
+			MEDIATHEK::deleteAll();
+
+			modelMediathek::remove();
+
+			tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
+		}
+
+		return false;
+	}
 
 
 
