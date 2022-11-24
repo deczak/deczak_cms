@@ -116,7 +116,7 @@
 							<div style="width:213px; border-radius:3px; background:white;">
 							<fieldset class="ui fieldset" data-xhr-target="error_clear" data-xhr-overwrite-target="edit/1" style="margin:0px;">	
 								<div class="submit-container button-only">
-									<button class="ui button icon labeled trigger-submit-fieldset" type="button" disabled><span><i class="fas fa-sync-alt" data-icon="fa-sync-alt"></i></span><?php echo CLanguage::string('BUTTON_DELETE'); ?></button>
+									<button class="ui button icon labeled trigger-submit-fieldset" type="button" disabled><span><i class="fas fa-trash-alt" data-icon="fa-trash-alt"></i></span><?php echo CLanguage::string('BUTTON_DELETE'); ?></button>
 									<div class="protector"><input type="checkbox" class="trigger-submit-protector" id="protector-error-clear"><label for="protector-error-clear"></label></div>
 								</div>
 							</fieldset>
@@ -276,7 +276,7 @@
 		
 
 
-		<fieldset class="ui fieldset submit-able" id="update-sitemap">
+		<fieldset class="ui fieldset submit-able inner-buttons" id="update-sitemap">
 
 			<div>
 
@@ -356,7 +356,7 @@
 
 		</fieldset>
 
-		<fieldset class="ui fieldset submit-able" id="mediathek">
+		<fieldset class="ui fieldset submit-able inner-buttons" id="mediathek">
 
 			<div>
 
@@ -370,7 +370,7 @@
 							<div style="width:213px; border-radius:3px; background:white;">
 							<fieldset class="ui fieldset" data-xhr-target="mediathek_wipe" data-xhr-overwrite-target="edit/1" style="margin:0px;">	
 								<div class="submit-container button-only">
-									<button class="ui button icon labeled trigger-submit-fieldset" type="button" disabled><span><i class="fas fa-sync-alt" data-icon="fa-sync-alt"></i></span><?php echo CLanguage::string('DELETE'); ?></button>
+									<button class="ui button icon labeled trigger-submit-fieldset" type="button" disabled><span><i class="fas fa-trash-alt" data-icon="fa-trash-alt"></i></span><?php echo CLanguage::string('BUTTON_DELETE'); ?></button>
 									<div class="protector"><input type="checkbox" class="trigger-submit-protector" id="protector-mediathek_wipe"><label for="protector-mediathek_wipe"></label></div>
 								</div>
 							</fieldset>
