@@ -198,6 +198,8 @@ class	cmsMediathek
 				squareNode.setAttribute('data-event-click', 'item-'+ (itemsList[i].extension == 'dir' ? 'dir' : 'file'));
 				squareNode.setAttribute('data-item-path', itemsList[i].path);
 				squareNode.itemInfo = JSON.parse(JSON.stringify(itemsList[i]));
+
+
 				
 			switch(itemsList[i].extension)
 			{
@@ -211,9 +213,15 @@ class	cmsMediathek
 					squareNode.style.backgroundImage = "url('"+ CMS.SERVER_URL +"mediathek/"+ itemsList[i].path +"?binary&size=thumb')";
 					squareNode.innerHTML = `
 						<div class="name">`+ itemsList[i].name  +`</div>
-						<div class="filemodify filemodify-edit" data-modify="fileedit" title="Edit item"><i class="fas fa-pen"></i></div>
-						<div class="filemodify filemodify-remove" data-modify="fileremove" title="Delete item"><i class="fas fa-trash-alt"></i></div>
 					`;
+
+					if(this.workMode === cmsMediathek.WORKMODE_EDIT)
+					{
+						squareNode.innerHTML += `
+							<div class="filemodify filemodify-edit" data-modify="fileedit" title="Edit item"><i class="fas fa-pen"></i></div>
+							<div class="filemodify filemodify-remove" data-modify="fileremove" title="Delete item"><i class="fas fa-trash-alt"></i></div>
+						`;
+					}
 
 					break;
 
