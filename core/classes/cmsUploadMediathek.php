@@ -15,7 +15,7 @@ class cmsUploadMediathek
 	public function
 	process(string $destPath, bool $isRegularUpload = true, ?object $additionalParams = null) : ?object
 	{	
-		$imageSizesList = CFG::GET()->MEDIATHEK->IMAGES_SIZES;
+		$imageSizesList = (array)CFG::GET()->MEDIATHEK->IMAGES_SIZES;
 
 		if($_FILES["file"]["error"] !== UPLOAD_ERR_OK)
 			return null;
