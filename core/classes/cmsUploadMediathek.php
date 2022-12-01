@@ -28,8 +28,8 @@ class cmsUploadMediathek
 		$dstFilename = basename($_FILES["file"]["name"]);
 
 		$destPath = trim($destPath,' /\\');
-		$destPath = (!empty($destPath) ? '/' : '');
-
+		$destPath = (!empty($destPath) ? $destPath.'/' : '');
+		
 		$dstFilelocation = CMS_SERVER_ROOT . DIR_MEDIATHEK . $destPath;
 		
 		$fnpart 		= explode('.', $dstFilename);
@@ -49,7 +49,7 @@ class cmsUploadMediathek
 
 		if(!empty($cbasename))
 			$dstFilename = $cbasename .'.'.$fileextension;
-
+			
 		$dstFilename = cmsUpload::validateFilename($dstFilelocation.$basename.'/', $dstFilename);
 
 		$fnpart 		= explode('.', $dstFilename);

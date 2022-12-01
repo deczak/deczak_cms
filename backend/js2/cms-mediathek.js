@@ -18,6 +18,7 @@ class	cmsMediathek
 		this.workMode 	  = workMode;
 		this.rootPath	  = rootPath;
 		this.activePath   = rootPath;
+		this.offset   	  = 0;
 
 
 		if(typeof document.cmsMediathek === 'undefined')
@@ -41,6 +42,7 @@ class	cmsMediathek
 	{
 		let	formData  = new FormData;
 			formData.append('path', this.activePath);
+			formData.append('offset', this.offset);
 
 		let	xhRequest = new cmsXhr;
 			xhRequest.request(CMS.SERVER_URL_BACKEND + 'mediathek/', formData, this.onXHRSuccessRequestItems, this, 'index');
@@ -54,6 +56,8 @@ class	cmsMediathek
 			return;
 		}
 
+		srcInstance.offset   	  = response.data.offset;
+
 		let itemsNode = document.createElement('div');
 			itemsNode.style.width = '100%';
 
@@ -61,12 +65,12 @@ class	cmsMediathek
 		{
 			case cmsMediathek.VIEWMODE_LIST:
 
-				srcInstance._generateHTML_List(response.data, itemsNode);
+				srcInstance._generateHTML_List(response.data.list, itemsNode);
 				break;
 
 			case cmsMediathek.VIEWMODE_SQUARES:
 
-				srcInstance._generateHTML_Squares(response.data, itemsNode);
+				srcInstance._generateHTML_Squares(response.data.list, itemsNode);
 				break;
 		}
 
@@ -108,16 +112,13 @@ class	cmsMediathek
 
 				break;
 
-
 		}
 
 		// Button Folder Up
 
-
-
-				let buttonFolderUpNode = document.createElement('button');
-					buttonFolderUpNode.classList.add('ui', 'button', 'icon');
-					buttonFolderUpNode.type = 'button';
+		let buttonFolderUpNode = document.createElement('button');
+			buttonFolderUpNode.classList.add('ui', 'button', 'icon');
+			buttonFolderUpNode.type = 'button';
 
 		if(srcInstance.activePath !== '')
 		{
@@ -132,25 +133,24 @@ class	cmsMediathek
 
 		// Button View mode
 
-				var textViewModeNode = document.createElement('label');
-					textViewModeNode.append(document.createTextNode('View mode'));
+		var textViewModeNode = document.createElement('label');
+			textViewModeNode.append(document.createTextNode('View mode'));
+
+		let buttonViewSquareNode = document.createElement('button');
+			buttonViewSquareNode.classList.add('ui', 'button', 'icon', 'button-view-square');
+			buttonViewSquareNode.onclick = function(event) { srcInstance._onClickButtonViewSquare(event, srcInstance) };
+			buttonViewSquareNode.innerHTML = '<i class="fas fa-th"></i>';
+			buttonViewSquareNode.type = 'button';
 
 
-				let buttonViewSquareNode = document.createElement('button');
-					buttonViewSquareNode.classList.add('ui', 'button', 'icon', 'button-view-square');
-					buttonViewSquareNode.onclick = function(event) { srcInstance._onClickButtonViewSquare(event, srcInstance) };
-					buttonViewSquareNode.innerHTML = '<i class="fas fa-th"></i>';
-					buttonViewSquareNode.type = 'button';
+		let buttonViewListNode = document.createElement('button');
+			buttonViewListNode.classList.add('ui', 'button', 'icon', 'button-view-list');
+			buttonViewListNode.onclick = function(event) { srcInstance._onClickButtonViewList(event, srcInstance) };
+			buttonViewListNode.innerHTML = '<i class="fas fa-bars"></i>';
+			buttonViewListNode.type = 'button';
 
 
-				let buttonViewListNode = document.createElement('button');
-					buttonViewListNode.classList.add('ui', 'button', 'icon', 'button-view-list');
-					buttonViewListNode.onclick = function(event) { srcInstance._onClickButtonViewList(event, srcInstance) };
-					buttonViewListNode.innerHTML = '<i class="fas fa-bars"></i>';
-					buttonViewListNode.type = 'button';
-
-
-				controlPanelLeftNode.append(buttonFolderUpNode, textViewModeNode, buttonViewListNode, buttonViewSquareNode);
+		controlPanelLeftNode.append(buttonFolderUpNode, textViewModeNode, buttonViewListNode, buttonViewSquareNode);
 
 
 		//
@@ -375,6 +375,8 @@ class	cmsMediathek
 
 						// click on dir item always open this dir
 						
+						srcInstance.offset = 0;
+			
 						srcInstance.activePath = targetNode.getAttribute('data-item-path') + '';
 						srcInstance.requestItems();
 
@@ -392,6 +394,8 @@ class	cmsMediathek
 
 						if(srcInstance.activePath == '')
 							break;
+
+						srcInstance.offset = 0;
 			
 						srcInstance.activePath = srcInstance.activePath.substring(0, srcInstance.activePath.lastIndexOf('/')) + '';
 						srcInstance.requestItems();
@@ -410,13 +414,6 @@ class	cmsMediathek
 
 	_onClickButtonCreateFolder(event, srcInstance)
 	{
-
-/*
-
-	aktiver pfad ausgeben
-
-*/
-
 		let modal = new cmsModal();
 
 		let content = document.createElement('div');
@@ -439,9 +436,6 @@ class	cmsMediathek
 		modal.setTitle('Create Folder in '+ srcInstance.activePath +'/')
 		modal.create(content, {}, ['modal-mediathek-create-folder-inner']);
 		modal.open(srcInstance);
-
-
-
 	}
 
 	_onClickButtonCreateFolderOK(event, modalInstance)

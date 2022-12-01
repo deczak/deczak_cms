@@ -102,6 +102,7 @@ class	controllerMediathek extends CController
 		$pURLVariables	 =	new CURLVariables();
 		$requestList		 =	[];
 		$requestList[] 	 = 	[ "input" => 'path', "validate" => "strip_tags|!empty", "use_default" => true, "default_value" => '/' ]; 		
+		$requestList[] 	 = 	[ "input" => 'offset', "validate" => "strip_tags|digit|!empty", "use_default" => true, "default_value" => '0' ]; 		
 		$pURLVariables -> retrieve($requestList, false, true);	
 
 		$urlVarList		 = $pURLVariables -> getArray();
@@ -220,7 +221,9 @@ class	controllerMediathek extends CController
 			}
 		}
 
-		$responseData = array_merge($itemsListDirs, $itemsListFiles);
+		$responseData['list'] = array_merge($itemsListDirs, $itemsListFiles);
+
+		$responseData['offset'] = $urlVarList['offset'] + count($responseData['list']);
 
 		tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
 
