@@ -27,11 +27,14 @@ class cmsUploadMediathek
 
 		$dstFilename = basename($_FILES["file"]["name"]);
 
-		$dstFilelocation = CMS_SERVER_ROOT . DIR_MEDIATHEK . trim($destPath,' /\\') .'/';
+		$destPath = trim($destPath,' /\\');
+		$destPath = (!empty($destPath) ? '/' : '');
+
+		$dstFilelocation = CMS_SERVER_ROOT . DIR_MEDIATHEK . $destPath;
 		
 		$fnpart 		= explode('.', $dstFilename);
 		$fileextension 	= array_pop($fnpart);
-		$basename 		= implode('.', $fnpart);
+		$basename 		= strtolower(implode('.', $fnpart));
 
 		if(strpos($additionalParams->media_item_filename, '.') !== false)
 		{
@@ -47,9 +50,7 @@ class cmsUploadMediathek
 		if(!empty($cbasename))
 			$dstFilename = $cbasename .'.'.$fileextension;
 
-
 		$dstFilename = cmsUpload::validateFilename($dstFilelocation.$basename.'/', $dstFilename);
-
 
 		$fnpart 		= explode('.', $dstFilename);
 		$fileextension 	= array_pop($fnpart);
@@ -61,7 +62,7 @@ class cmsUploadMediathek
 			// TODO ERR
 			return null;
 		}
-
+			
 		if($isRegularUpload)
 		{
 			move_uploaded_file($srcFilepath, $dstFilelocation.$basename.'/'.$dstFilename);
