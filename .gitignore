@@ -14,10 +14,8 @@ public/*
 !public/index.php
 templates/*
 !templates/backend
-#mantle/*
-#!mantle/**/*
 mantle/modules/*
-!mantle/modules/mod_blog/*
+!mantle/modules/mod_blog
 mediathek/*
 !mediathek/index.php
 !mediathek/readme

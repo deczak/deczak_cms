@@ -1,0 +1,24 @@
+M_BLOG_BEPE_GROUP			= Blog settings
+
+M_BLOG_BEPE_BLOG_POST_TXT_MODE_CLR = Text color	
+
+M_BLOG_BEPE_BLOG_POST_BG_MODE = Background for blog post
+M_BLOG_BEPE_BLOG_POST_BG_MODE_IMG = Page image
+M_BLOG_BEPE_BLOG_POST_BG_MODE_CLR = Page color	
+
+
+M_BLOG_BEPE_BLOG_TEXT_MODE = Teaser text output
+M_BLOG_BEPE_BLOG_TEXT_MODE_META = Page description
+M_BLOG_BEPE_BLOG_TEXT_MODE_HEAD = Erster Textblock
+M_BLOG_BEPE_BLOG_TEXT_MODE_NOPE = No teaser text
+
+
+M_BLOG_BEPE_BLOG_POST_SIZE_LENGTH_MIN = Blog Post mindest Größe X
+M_BLOG_BEPE_BLOG_POST_SIZE_LENGTH_AUTO = Automatisch
+M_BLOG_BEPE_BLOG_POST_SIZE_HEIGHT = Blog Post Größe Y
+
+
+M_BLOG_BEPE_BLOG_VIEWMODE = View mode
+
+
+M_BLOG_BEPE_BLOG_POST_DISPLAY_CAT = Kategorie anzeigen
