@@ -830,9 +830,12 @@ class 	MEDIATHEK
 		$path = CMS_SERVER_ROOT . DIR_MEDIATHEK . trim($path,' /\\');
 
 		if(!file_exists($path))
-		if(!mkdir($path, 0777, true))
-			return null;
-
+		{
+			if(!mkdir($path, 0777, true))
+				return null;
+			chmod($path, 0777);
+			// todo may needs to loop dirs of $path
+		}
 		return $path;
 	}
 

@@ -62,6 +62,8 @@ class cmsUploadMediathek
 			// TODO ERR
 			return null;
 		}
+		
+		chmod($dstFilelocation.$basename, 0777);
 			
 		if($isRegularUpload)
 		{

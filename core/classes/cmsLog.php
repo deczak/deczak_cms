@@ -21,7 +21,10 @@ class cmsLog extends CSingleton
 		$logfileName 	 = 'error-'. date("Y-m-d");
 
 		if(!file_exists($logfileLocation))
+		{
 			mkdir($logfileLocation);
+			chmod($logfileLocation, 0777);
+		}
 
 		if(CFG::GET() -> ERROR_SYSTEM -> ERROR_FILE -> ENABLED)
 		{
