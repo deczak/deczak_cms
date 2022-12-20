@@ -478,11 +478,11 @@ class CModules extends CSingleton
 	 * 	Static wrapper function for resource generation 
 	 */
 	public static function
-	generateResources()
+	generateResources(bool $_onlyFrontend = false))
 	{
 		$instance  = static::instance();
 		$modulesResources = new CModulesResources;
-		$modulesResources -> generateResources($instance->getModules(true));
+		$modulesResources -> generateResources($instance->getModules($_onlyFrontend));
 	}
 
 	/**
