@@ -20,8 +20,10 @@ mediathek/*
 !mediathek/index.php
 !mediathek/readme
 install/page-templates/*
+!install/page-templates/pt-default.zip
 data/modules/simpleNavigation
 !data/modules/simpleNavigation/list
+!data/modules/simpleNavigation/squares
 backend/css/cms.css
 backend/js/cms.js
 VERSION-DB

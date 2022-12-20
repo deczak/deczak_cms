@@ -208,6 +208,8 @@ class	CPackagesInstall
 						case 'css':
 						case 'less':
 						case 'js':
+						case 'woff':
+						case 'woff2':
 
 							$copyDestination = $destLocationPublic;
 							break;

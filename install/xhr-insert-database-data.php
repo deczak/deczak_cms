@@ -257,6 +257,10 @@
 	$modelLoginObjects = new modelLoginObjects;
 	$modelLoginObjects -> insert($db, $loginObject);
 
+## 	Create resource Files
+
+	CModules::generateResources();
+
 ##	fin
 
 	tk::xhrResult(0, 'OK');
