@@ -1,106 +1,204 @@
-<?php
 
-	$ts = ($object -> params -> display_divider ?? '8');
-
-?>
+<div class="simple-gallery-images-list loading-indicator-space" id="simple-galleryimage-list-<?= $object -> object_id; ?>" data-tile-size="<?= ($object -> params -> display_divider ?? '8'); ?>" data-tile-format="<?= ($object -> params -> format ?? '8'); ?>" id="simple-gallery-list-<?php echo $object -> object_id; ?>">
 
 
-<div class="simple-gallery-images-list" data-tile-size="<?= ($object -> params -> display_divider ?? '8'); ?>" data-tile-format="<?= ($object -> params -> format ?? '8'); ?>" id="simple-gallery-list-<?php echo $object -> object_id; ?>">
-	<?php
-	do {
+	<div class="loading-indicator" style="clear:both;text-align: center; padding-top:20px; position:absolute; top:100%; left:0px; width:100%;">
+		<div class="lds-dual-ring"></div>
+	</div>
 
-		$rp = 0;
-		$bp = [];
-		$bl = [];
+</div>
+
+<script>
+
+class cmsSimpleGalleryController
+{
+	constructor()
+	{
+	}
+
+	create(nodeId, objectId, initialItemList)
+	{
+		let containerNode = document.getElementById(nodeId);
+
+		containerNode.simpleGallery = {};
+		containerNode.simpleGallery.requestLimit	= initialItemList.length;
+		containerNode.simpleGallery.requestOffset	= 0;
+		containerNode.simpleGallery.stopRequest		= false;
+		containerNode.simpleGallery.lockRequest		= false;
+		containerNode.simpleGallery.objectId		= objectId;
+
+		let srcInstance = this;
+
+		srcInstance.requestItemsSuccess(containerNode, initialItemList);
+
+		addEventListener("scroll", (event) => {
+
+			if(cms_tk.detectNodeBottomInViewport(containerNode, 200))
+				srcInstance.requestItems(containerNode);
+
+		});
+	}
+
+	requestItems(outputNode)
+	{
+		if(outputNode.simpleGallery.lockRequest)
+			return;
+
+		if(outputNode.simpleGallery.stopRequest)
+			return;
+
+		outputNode.simpleGallery.lockRequest = true;
+
+		let formData = new FormData;
+			formData.set('requestLimit', outputNode.simpleGallery.requestLimit);
+			formData.set('requestOffset', outputNode.simpleGallery.requestOffset);
+
+		cms_xhr.request(CMS.SERVER_URL + CMS.PAGE_PATH, formData, (response, srcInfo) => {
+			
+			if(response.state) 
+			{
+				console.log('xhr Request Failed: '+ response.msg);
+				return false;
+			}
+
+			srcInfo.srcInstance.requestItemsSuccess(srcInfo.outputNode, Object.values(response.data))
+
+		}, {srcInstance:this, outputNode: outputNode}, 'getItems', outputNode.simpleGallery.objectId, cms_xhr.onXHRError);
+	}
+
+	requestItemsSuccess(outputNode, itemList)
+	{
+		this.drawList(outputNode, itemList);
+
+		outputNode.simpleGallery.requestOffset = outputNode.simpleGallery.requestOffset + itemList.length;
+		outputNode.simpleGallery.lockRequest = false;
+
+		if(cms_tk.detectNodeBottomInViewport(outputNode, 200))
+			this.requestItems(outputNode);
 
 
-		switch(($object -> params -> display_divider ?? '8'))
+		if(itemList.length < outputNode.simpleGallery.requestLimit)
 		{
-			case '2': 
-				$imageSize = 'medium';
-			case '3': 
-				$imageSize = 'small';
-			default:
-				$imageSize = 'thumb';
+			outputNode.simpleGallery.stopRequest = true;
 
+			outputNode.classList.remove('loading-indicator-space');
 		}
 
-		foreach($itemList as $item)
-		{
-			switch($item -> mime )
+
+
+	}
+
+	drawList(outputNode, itemList)
+	{
+		let ts = <?= ($object -> params -> display_divider ?? '8'); ?>;
+
+		loopDo:
+		do {
+
+			let rp = 0;
+			let bp = [];
+			let bl = [];
+			let rp2= 0;
+
+			let imageSize = 'thumb';
+
+			switch((<?= $object -> params -> display_divider ?? '8'; ?>))
 			{
-				case 'image/jpeg':
-				case 'image/png':
-				case 'image/png':
+				case '2': 
+					imageSize = 'medium'; break;
+				case '3': 
+					imageSize = 'small'; break;
 
-					break;
-
-				default:
-
-					continue 2;
 			}
 
-			switch($item -> orient )
+			for(let item of itemList)
 			{
-				case 0:
-
-					$rp2 = 2;
-					break;
-
-				case 1:
-
-					$rp2 = 1;
-					break;
-			}
-
-			if(($rp + $rp2) > $ts)
-			{
-				if($rp == ($ts - 1) && count($bp) > 0)
+				switch(item.mime )
 				{
-					$itemp = array_pop($bp)
+					case 'image/jpeg':
+					case 'image/png':
+					case 'image/png':
 
-					?>
-					<a class="orient-<?= $itemp -> orient; ?>" href="<?= CMS_SERVER_URL.DIR_MEDIATHEK . $itemp -> path; ?>?size=xlarge">
-						<img src="<?= CMS_SERVER_URL.DIR_MEDIATHEK . $itemp -> path; ?>?binary&size=<?= $imageSize; ?>">
-					</a>
-					<?php
+						break;
+
+					default:
+
+						continue loopDo;
 				}
 
-				$rp = 0;
-
-				switch($item -> orient)
+				switch(item.orient)
 				{
 					case 0:
 
-						$bl[] = $item;
+						rp2 = 2;
 						break;
 
 					case 1:
 
-						$bp[] = $item;
+						rp2 = 1;
 						break;
 				}
 
-				continue;
+				if((rp + rp2) > ts)
+				{
+					if(rp == (ts - 1) && bp.length > 0)
+					{
+						let itemp = bp.pop();
+
+						let aNode = document.createElement('a');
+							aNode.classList.add('orient-'+ itemp.orient);
+							aNode.href = '<?= CMS_SERVER_URL.DIR_MEDIATHEK; ?>'+ itemp.path +'/?size=xlarge'
+							aNode.innerHTML = '<img src="<?= CMS_SERVER_URL.DIR_MEDIATHEK; ?>'+ itemp.path +'/?binary&size='+ imageSize +'">'
+
+						outputNode.appendChild(aNode);
+					}
+
+					rp = 0;
+
+					switch(item.orient)
+					{
+						case 0:
+
+							bl.push(item);
+							break;
+
+						case 1:
+
+							bp.push(item);
+							break;
+					}
+
+					continue;
+				}
+
+				rp = rp + rp2;
+
+				let aNode = document.createElement('a');
+					aNode.classList.add('orient-'+ item.orient);
+					aNode.href = '<?= CMS_SERVER_URL.DIR_MEDIATHEK; ?>'+ item.path +'/?size=xlarge'
+					aNode.innerHTML = '<img src="<?= CMS_SERVER_URL.DIR_MEDIATHEK; ?>'+ item.path +'/?binary&size='+ imageSize +'">'
+
+				outputNode.appendChild(aNode);			
 			}
 
-			$rp = $rp + $rp2;
+			itemList = bp.concat(bl);
 
-			?>
-			<a class="orient-<?= $item -> orient; ?>" href="<?= CMS_SERVER_URL.DIR_MEDIATHEK . $item -> path; ?>?size=xlarge">
-				<img src="<?= CMS_SERVER_URL.DIR_MEDIATHEK . $item -> path; ?>?binary&size=<?= $imageSize; ?>">
-			</a>
-			<?php
-		}
+			if(itemList.length == 0)
+				break;
 
-		$itemList = array_merge($bp, $bl);
+		} while (true);
+	}
+}
 
-		if(empty($itemList))
-			break;
+document.cmsSimpleGalleryController = new cmsSimpleGalleryController();
 
-	} while (true);
-	?>
-</div>
+document.addEventListener('DOMContentLoaded', () => {
+
+	document.cmsSimpleGalleryController.create('simple-galleryimage-list-<?= $object -> object_id; ?>', <?= $object -> object_id; ?>, <?= json_encode($itemList); ?>);
+
+});
+
+</script>
 
 <style>
 
@@ -120,7 +218,11 @@
 
 
 
-div.simple-gallery-images-list { display:flex; flex-wrap:wrap; }
+div.simple-gallery-images-list { display:flex; flex-wrap:wrap; position: relative; margin-bottom:40px; }
+
+div.simple-gallery-images-list.loading-indicator-space { margin-bottom:40px; }
+div.simple-gallery-images-list:not(.loading-indicator-space) .loading-indicator { display:none;  }
+
 div.simple-gallery-images-list > a { flex-shrink:0; display:block; border:1px solid white; padding-top:16.5%; position:relative; }
 
 
@@ -327,5 +429,32 @@ div.simple-gallery-images-list > a > img { width: 100%; height:100%; object-fit:
 }
 
 
+
+</style>
+
+<style>
+
+	.lds-dual-ring {
+		display: inline-block;
+		width: 60px;
+		height: 60px;
+	}
+
+	.lds-dual-ring:after {
+		content: " ";
+		display: block;
+		width: 44px;
+		height: 44px;
+		margin: 4px;
+		border-radius: 50%;
+		border: 6px solid gold;
+		border-color: gold transparent gold transparent;
+		animation: lds-dual-ring 1.2s linear infinite;
+	}
+
+	@keyframes lds-dual-ring {
+		0%   { transform: rotate(0deg); }
+		100% { transform: rotate(360deg); }
+	}
 
 </style>

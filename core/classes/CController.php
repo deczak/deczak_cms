@@ -114,10 +114,12 @@ class	CController
 	}
 
 	protected function
-	detectRights(string $_controllerAction)
+	detectRights(string $_controllerAction, array $allowedActions = [])
 	{
-		##	get requested inner module path by controller action
+		if(in_array($_controllerAction, $allowedActions, true))
+			return true;
 
+		##	get requested inner module path by controller action
 
 		$modulePath = $this -> _getModulePath($_controllerAction);
 

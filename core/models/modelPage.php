@@ -100,6 +100,7 @@ class 	modelPage extends CModel
 			$page -> page_categories = $this -> getCategories($_pDatabase, $page -> node_id);
 			$page -> page_tags 		 = $this -> getTags($_pDatabase, $page -> node_id);
 			$page -> page_url 		 = $modelSitemap -> getPagePath($_pDatabase, $page -> node_id, $page -> page_language);
+			$page -> url 		 	 = ((CFG::GET() -> LANGUAGE -> DEFAULT_IN_URL || $page -> page_language !== CLanguage::getDefault()) ? $page -> page_language .'' : '') . $page -> page_url;
 		
 			$this -> m_resultList[] = new $className($page, $this -> m_schemePage -> getColumns());
 		}

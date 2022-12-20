@@ -35,6 +35,7 @@ class schemePage extends CScheme
 		$this -> addColumn('update_by', DB_COLUMN_TYPE_STRING) -> setLength(25) -> setDefault('NULL');
 
 		$this -> addColumn('page_path', DB_COLUMN_TYPE_STRING) -> setVirtual();
+		$this -> addColumn('url', DB_COLUMN_TYPE_STRING) -> setVirtual();
 		$this -> addColumn('page_title', DB_COLUMN_TYPE_STRING) -> setVirtual();
 		$this -> addColumn('page_name', DB_COLUMN_TYPE_STRING) -> setVirtual();
 		$this -> addColumn('crumb_name', DB_COLUMN_TYPE_STRING) -> setVirtual();

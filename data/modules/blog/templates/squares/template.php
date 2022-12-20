@@ -1,250 +1,375 @@
-<?php
 
-$rowSizeLimit = 5;
-$rowIndex 	  = 0;
-$drawList 	  = [];
-$subStripList = [
-	2 => 100,
-	3 => 160,
-];
+<div class="blog-container blog-tiles" id="blog-tiles-container"></div>
 
-for($i = 0; $i < count($nodeList); $i++)
+<div id="blog-tiles-container-loading-indicator" style="clear:both;text-align: center; padding-top:20px;">
+	<div class="lds-dual-ring"></div>
+</div>
+
+<script>
+class blogSquaresController
 {
-	if(!isset($drawList[$rowIndex]))
+	constructor(objectId, nodeList)
 	{
-		$drawList[$rowIndex] = [
-			'X3ItemIndex' 		 => null,		// Item index of size 3 item
-			'XAutoItemIndexList' => [],			// Item index list of auto size items
-			'rowIndex' 			 => $rowIndex,	// Index of this row
-			'rowSizeUsed'		 => 0,			// Total item sizes
-			'itemList' 			 => [],			// Item list of assigned tiles
-		];
+		this.rowSizeLimit 		= 5;
+		this.rowIndex 	  		= 0;
+		this.subStripList 		= [];
+		this.subStripList[2]	= 100;
+		this.subStripList[3]	= 160;
+
+		this.requestLimit		= nodeList.length;
+		this.requestOffset		= 0;
+
+		this.stopRequest		= false;
+		this.lockRequest		= false;
+
+		this.objectId			= objectId;
+
+		this.requestItemsSuccess(nodeList, this);
+
+		let srcInstance = this;
+
+		addEventListener("scroll", (event) => {
+
+			if(cms_tk.detectNodeInViewport(document.getElementById('blog-tiles-container-loading-indicator'), 200))
+				srcInstance.requestItems();
+
+		});
+
 	}
 
-	if(empty($nodeList[$i] -> postSetting))
+	requestItems()
 	{
-		$nodeList[$i] -> postSetting = new stdClass;
-		$nodeList[$i] -> postSetting -> post_page_color		= 0;
-		$nodeList[$i] -> postSetting -> post_text_color		= 0;
-		$nodeList[$i] -> postSetting -> post_background_mode	= 0;
-		$nodeList[$i] -> postSetting -> post_teasertext_mode	= 0;
-		$nodeList[$i] -> postSetting -> post_size_length_min	= 0;
-		$nodeList[$i] -> postSetting -> post_size_height		= 1;
-	}
+		if(this.lockRequest)
+			return;
 
-	$itemSize = empty($nodeList[$i] -> postSetting -> post_size_length_min) ? 1 : $nodeList[$i] -> postSetting -> post_size_length_min;
+		if(this.stopRequest)
+			return;
 
-	if(($drawList[$rowIndex]['rowSizeUsed'] + $itemSize) > $rowSizeLimit)
-	{
-		$rowSizeFree = $rowSizeLimit - $drawList[$rowIndex]['rowSizeUsed'];
+		this.lockRequest = true;
 
-		// TODO: Hier schauen ob ein auto item vorhanden dessen size geändert werden kann, anschließend rowSizeFree anpassen
+		let formData = new FormData;
+			formData.set('requestLimit', this.requestLimit);
+			formData.set('requestOffset', this.requestOffset);
 
-		if($rowSizeFree > 0)
-		{
-			if($rowSizeFree == 2)
-				$numOfTiles2Create = random_int(1,2);
-			else
-				$numOfTiles2Create = 1;
-
-			$itemListNum = count($drawList[$rowIndex]['itemList']);
-
-			for($o = 0; $o < $numOfTiles2Create; $o++)
+		cms_xhr.request(CMS.SERVER_URL + CMS.PAGE_PATH, formData, (response, srcInstance) => {
+			
+			if(response.state) 
 			{
-				$placeholderItemIndex = random_int(0,$itemListNum + 1);
+				console.log('xhr Request Failed: '+ response.msg);
+				return false;
+			}
 
-				$placeholder = new stdClass;
-				$placeholder -> postSetting = new stdClass;
-				$placeholder -> postSetting -> post_page_color			= '#' . str_pad(dechex(mt_rand(0, 0xFFFFFF)), 6, '0', STR_PAD_LEFT);
-				$placeholder -> postSetting -> post_text_color			= 'transparent';
-				$placeholder -> postSetting -> post_background_mode	= 0;
-				$placeholder -> postSetting -> post_teasertext_mode	= 0;
-				$placeholder -> postSetting -> post_size_length_min	= 1;
-				$placeholder -> postSetting -> post_size_height		= 1;
+			srcInstance.requestItemsSuccess(Object.values(response.data), srcInstance)
 
-				if($numOfTiles2Create == 1)
+
+		}, this, 'getBlogItems', this.objectId, cms_xhr.onXHRError);
+
+	}
+
+	requestItemsSuccess(nodeList, srcInstance)
+	{
+		let drawList = srcInstance.prepareDrawListItems(nodeList);
+		srcInstance.drawList(drawList);
+		srcInstance.lockRequest = false;
+
+		if(cms_tk.detectNodeInViewport(document.getElementById('blog-tiles-container-loading-indicator'), 200))
+			srcInstance.requestItems();
+	}
+
+	prepareDrawListItems(nodeList)
+	{
+
+		let drawList = [];
+
+		for(let i = 0; i < nodeList.length; i++)
+		{
+			if(typeof drawList[this.rowIndex] === 'undefined')
+			{
+				drawList[this.rowIndex] = {}
+				drawList[this.rowIndex].X3ItemIndex 		= null			// Item index of size 3 item
+				drawList[this.rowIndex].XAutoItemIndexList 	= []			// Item index list of auto size items
+				drawList[this.rowIndex].rowIndex 			= this.rowIndex	// Index of this row
+				drawList[this.rowIndex].rowSizeUsed			= 0				// Total item sizes
+				drawList[this.rowIndex].itemList 			= []			// Item list of assigned tiles
+				
+			}
+
+			if(typeof nodeList[i].postSetting === 'undefined')
+			{
+				nodeList[i].postSetting = {
+				post_page_color			: 0,
+				post_text_color			: 0,
+				post_background_mode	: 0,
+				post_teasertext_mode	: 0,
+				post_size_length_min	: 1,
+				post_size_height		: 1
+				};
+			}
+
+			let itemSize = nodeList[i].postSetting.post_size_length_min == 0 ? 1 : nodeList[i].postSetting.post_size_length_min;
+
+			if((drawList[this.rowIndex].rowSizeUsed + itemSize) > this.rowSizeLimit)
+			{
+				let rowSizeFree = this.rowSizeLimit - drawList[this.rowIndex].rowSizeUsed;
+
+				// TODO: Hier schauen ob ein auto item vorhanden dessen size geändert werden kann, anschließend rowSizeFree anpassen
+
+				if(rowSizeFree > 0)
 				{
-					$placeholder -> postSetting -> post_size_length_min	= $rowSizeFree;
+					let numOfTiles2Create = 1;
+
+					if(rowSizeFree == 2)
+						numOfTiles2Create = cms_tk.getRandomInteger(1,2);
+
+					let itemListNum = drawList[this.rowIndex].itemList.length;
+
+					for(let o = 0; o < numOfTiles2Create; o++)
+					{
+						let placeholderItemIndex = cms_tk.getRandomInteger(0, itemListNum + 1);
+
+						let randomColor = cms_tk.getRandomInteger(0, 0xFFFFFF).toString(16);
+							randomColor = randomColor.padStart(6, '0');
+
+						let placeholder = {};
+						placeholder.postSetting = {};
+						placeholder.postSetting.post_page_color			= '#' + randomColor;
+						placeholder.postSetting.post_text_color			= 'transparent';
+						placeholder.postSetting.post_background_mode	= 0;
+						placeholder.postSetting.post_teasertext_mode	= 0;
+						placeholder.postSetting.post_size_length_min	= 1;
+						placeholder.postSetting.post_size_height		= 1;
+
+						if(numOfTiles2Create == 1)
+						{
+							placeholder.postSetting.post_size_length_min	= rowSizeFree;
+						}
+
+						if(placeholderItemIndex >= itemListNum)
+						{
+							drawList[this.rowIndex].itemList.push({
+								itemSize : placeholder.postSetting.post_size_length_min,
+								item 	 : placeholder,
+								pholder  : true
+							});
+						}
+						else
+						{
+							drawList[this.rowIndex].itemList.splice(placeholderItemIndex, 0, {
+								itemSize : placeholder.postSetting.post_size_length_min,
+								item 	 : placeholder,
+								item 	 : placeholder,
+								pholder  : true
+							});
+						}
+					}
 				}
 
-				if($placeholderItemIndex >= $itemListNum)
-				{
-					$drawList[$rowIndex]['itemList'][] = [
-						'itemSize' => $placeholder -> postSetting -> post_size_length_min,
-						'item' 	   => $placeholder,
-						'pholder'  => true,
-					];
-				}
-				else
-				{
-					array_splice( $drawList[$rowIndex]['itemList'], $placeholderItemIndex, 0, [[
-						'itemSize' => $placeholder -> postSetting -> post_size_length_min,
-						'item' 	   => $placeholder,
-						'pholder'  => true,
-					]]);
-				}
+				i--;
+				this.rowIndex++;
+			}
+			else
+			{
+				drawList[this.rowIndex].rowSizeUsed = drawList[this.rowIndex].rowSizeUsed + itemSize;
+
+				let itemIndex = drawList[this.rowIndex].itemList.length;
+
+				if(itemSize === 3)
+					drawList[this.rowIndex].X3ItemIndex = itemIndex;
+
+				drawList[this.rowIndex].itemList.push({
+					itemSize : itemSize,
+					item 	   : nodeList[i]
+				});
+
+				if(nodeList[i].postSetting.post_size_length_min === 0)
+					drawList[this.rowIndex].XAutoItemIndexList.push(itemIndex);
+
 			}
 		}
 
-		$i--;
-		$rowIndex++;
-	}
-	else
-	{
-		$drawList[$rowIndex]['rowSizeUsed'] = $drawList[$rowIndex]['rowSizeUsed'] + $itemSize;
+		let numItemsToDraw = 0;
 
-		$itemIndex = count($drawList[$rowIndex]['itemList']);
-
-		if($itemSize === 3)
-			$drawList[$rowIndex]['X3ItemIndex'] = $itemIndex;
-
-		$drawList[$rowIndex]['itemList'][] = [
-			'itemSize' => $itemSize,
-			'item' 	   => $nodeList[$i],
-		];
-
-		if($nodeList[$i] -> postSetting -> post_size_length_min === 0)
-			$drawList[$rowIndex]['XAutoItemIndexList'][] = $itemIndex;
-	}
-}
-?>
-
-<div class="blog-container blog-tiles">
-		
-	<?php
-	for($rowIndex = 0; $rowIndex < count($drawList); $rowIndex++)
-	{
-		for($itemIndex = 0; $itemIndex < count($drawList[$rowIndex]['itemList']); $itemIndex++)
+		if(nodeList.length === this.requestLimit)
 		{
-			$placeholder = &$drawList[$rowIndex]['itemList'][$itemIndex]['pholder'] ?? false;
-			$itemSize 	 = &$drawList[$rowIndex]['itemList'][$itemIndex]['itemSize'];
-			$item 		 = &$drawList[$rowIndex]['itemList'][$itemIndex]['item'];
-
-			$categories = [];
-			if($item -> postSetting -> post_display_category ?? 0)
+			for(let i = 0; i < drawList.length; i++)
 			{
-				foreach($item -> categories as $nodeCategory)
+				if(!drawList[i])
+					continue;
+
+				let rowSizeFillState = 0;
+
+				let rowNumItemsToDraw = 0;
+
+				for(let i2 = 0; i2 < drawList[i].itemList.length; i2++)
 				{
-					$categories[] = $nodeCategory -> category_name;
+					rowSizeFillState = rowSizeFillState + drawList[i].itemList[i2].itemSize;
+
+					if(typeof drawList[i].itemList[i2].pholder !== 'undefined' && drawList[i].itemList[i2].pholder) ;else 
+					{
+						rowNumItemsToDraw++;
+					}
 				}
+
+				if(rowSizeFillState < this.rowSizeLimit)
+				{
+					drawList[i] = null;
+					continue;
+				}
+
+				numItemsToDraw = numItemsToDraw + rowNumItemsToDraw;
 			}
-			?>
-			<div class="blog-tiles-item" tile-size="<?= $itemSize; ?>">
+		}
+		else
+		{
+			this.stopRequest = true;
+			document.getElementById('blog-tiles-container-loading-indicator').innerHTML = '';
+		}
 
-				<?php
+		this.requestOffset = this.requestOffset + numItemsToDraw;
 
-				$tileBackgroundStyleSet = [];
-				$tileTextStyleSet = [];
+		return drawList;
+	}
 
-				switch($item -> postSetting -> post_background_mode)
+	drawList(drawList)
+	{
+ 		let blogNode = document.getElementById('blog-tiles-container');
+
+		for(let rowIndex = 0; rowIndex < drawList.length; rowIndex++)
+		{
+			if(!drawList[rowIndex])
+				continue;
+
+			for(let itemIndex = 0; itemIndex < drawList[rowIndex]['itemList'].length; itemIndex++)
+			{
+				let placeholder = drawList[rowIndex]['itemList'][itemIndex]['pholder'] ?? false;
+				let itemSize 	 = drawList[rowIndex]['itemList'][itemIndex]['itemSize'];
+				let item 		 = drawList[rowIndex]['itemList'][itemIndex]['item'];
+
+				if(typeof item === 'undefined')
+					continue; 
+				let categories = [];
+
+				if(item.postSetting.post_display_category ?? 0)
+				{
+					for(let catIndex = 0; catIndex < item.categories.length; catIndex++)
+					{
+						categories.push(item.categories[catIndex].category_name);
+					}
+				}
+
+
+				let itemNode = document.createElement('div');
+					itemNode.classList.add('blog-tiles-item');
+					itemNode.setAttribute('tile-size', itemSize)
+
+
+
+				let tileBackgroundStyleSet = [];
+				let tileTextStyleSet = [];
+
+				switch(item.postSetting.post_background_mode)
 				{
 					case 0:
 
-						$tileBackgroundStyleSet[] = 'background-color:'. $item -> postSetting -> post_page_color;
+						tileBackgroundStyleSet.push('background-color:'+ item.postSetting.post_page_color);
 						break;
 						
 					case 1:
 
-						$tileBackgroundStyleSet[] = 'background-image:url(\''. $item -> page_image_url_m .'\')';
+						tileBackgroundStyleSet.push('background-image:url(\''+ item.page_image_url_m +'\')');
 						break;
 				}
 
-				$tileTextStyleSet[] = 'color:'. $item -> postSetting -> post_text_color;
+				tileTextStyleSet.push('color:'+ item.postSetting.post_text_color);
 
-				?>
-				
-				<?php
-				if(!$placeholder) 
-				{
+				let linkNode = null;
 
-					if(!empty($item -> page_redirect))
-						$pageUrl = $item -> page_redirect;
-					else
-						$pageUrl = CMS_SERVER_URL . URL_LANG_PRREFIX . substr($item -> page_path, 1);
+				if(!placeholder) 
+				{ 
+					<?php
+						if(CMS_BACKEND)
+							echo "let pageUrl = '". CMS_SERVER_URL_BACKEND ."pages/view/'+ item.page_language +'/'+ item.node_id";
+						else
+							echo 'let pageUrl = CMS.SERVER_URL + item.url;';
+					?>
 
-					if(CMS_BACKEND)
-						echo '<a href="'. CMS_SERVER_URL_BACKEND .'pages/view/'. $item -> page_language .'/'. $item -> node_id .'" title="'. $item -> page_title .'">';
-					else
-						echo '<a href="'. $pageUrl .'" title="'. $item -> page_title .'" '. (!empty($item -> page_redirect) ? 'target="about:blank"' : '') .' '. ($item -> menu_follow == 0 ? 'rel="nofollow"' : '') .'>';
+					if(typeof item.page_redirect !== 'undefined' && item.page_redirect !== null)
+						pageUrl = item.page_redirect;
+
+
+					linkNode = document.createElement('a');
+					linkNode.href = pageUrl;
+					linkNode.title = item.page_title;
+
+					if(typeof item.page_redirect !== 'undefined')
+						linkNode.target = 'about:blank';
+
+					if(!item.menu_follow)
+						linkNode.setAttribute('rel', 'nofollow');
 				}
-				?>
+			
+				let itemContent = '';
+					itemContent += '<div class="blog-tiles-item-content">';
+					itemContent += '<span class="item-content-background '+ (item.postSetting.post_background_mode ? 'background-image-mode' : '') +' '+ (placeholder ? 'background-placeholder' : '') +'" style="'+ tileBackgroundStyleSet.join(';') +'"></span>';
+					itemContent += '<div class="item-content-text" style="'+ tileTextStyleSet.join(';') +'">';
+					itemContent += '<div class="item-content-text-wrapper '+ (item.postSetting.post_background_mode ? 'text-background-color' : '') +'">';
+					itemContent += '<span class="item-content-categories">'+ categories.join(' / ') +'</span>';
 
-				<div class="blog-tiles-item-content">
+				if(typeof item.headline !== 'undefined')
+					itemContent += '<span class="item-content-title">'+ (item.headline.body.replace(/<[^>]*>?/gm, '')?? '') +'</span>';
 
-					<span class="item-content-background <?= ($item -> postSetting -> post_background_mode ? 'background-image-mode' : '') ?> <?= ($placeholder ? 'background-placeholder' : '') ?>" style="<?= implode('; ', $tileBackgroundStyleSet); ?>"></span>
+				let teaserText = '';
 
-					<div class="item-content-text" style="<?= implode('; ', $tileTextStyleSet); ?>">
-
-						<div class="item-content-text-wrapper <?= ($item -> postSetting -> post_background_mode ? 'text-background-color' : '') ?>">
-
-
-							<span class="item-content-categories"><?= implode(' / ', $categories); ?></span>
-
-							<span class="item-content-title">
-
-								<?= strip_tags($item -> headline -> body ?? ''); ?>
-
-							</span>
-
-							<?php
-
-							$teserText = '';
-
-							if($itemSize > 1)
-							{
-								switch($item -> postSetting -> post_teasertext_mode)
-								{	
-									case 1:
-
-										$teserText = $item -> page_description;
-										break;
-
-									case 2:
-
-										$teserText = $item -> text -> body; 
-										break;				
-								}
-
-								if(!empty($teserText))
-								{
-									echo '<span class="item-content-teaser">';
-
-									$teserText = substr($teserText, 0, $subStripList[$itemSize] ?? 200); 
-									$teserText = substr($teserText, 0, strrpos($teserText, ' ')); 
-
-									echo $teserText;
-
-									if(strlen($item -> text -> body) > strlen($teserText))
-										echo '&nbsp...';
-
-									echo '</span>';
-								}
-							}
-
-							?> 
-
-						</div>
-
-					</div>
-
-				</div>
-
-				<?php
-				if(!$placeholder) 
+				if(itemSize > 1)
 				{
-					echo '</a>';
-				}
-				?>
+					switch(item.postSetting.post_teasertext_mode)
+					{	
+						case 1:
 
-			</div>
-			<?php
+							teaserText = item.page_description;
+							break;
+
+						case 2:
+
+							teaserText = item.text.body; 
+							break;				
+					}
+
+					if(teaserText != '')
+					{
+						teaserText = teaserText.substr(0, this.subStripList[itemSize] ?? 200); 
+						teaserText = teaserText.substr(0, teaserText.lastIndexOf(' ') + 1)
+
+						itemContent += '<span class="item-content-teaser">'+ teaserText + (teaserText.length && item.text.body.length > teaserText.length ? '&nbsp...' : '') +'</span>';
+					}
+				}
+
+				itemContent += '</div>';
+				itemContent += '</div>';
+				itemContent += '</div>';
+					
+				if(linkNode !== null)
+				{
+					linkNode.innerHTML = itemContent;
+					itemNode.append(linkNode);
+				}
+				else
+				{
+					itemNode.innerHTML = itemContent;
+				}
+						
+				blogNode.append(itemNode);
+			}
 		}
 	}
-	?>
 
-</div>
+}
 
-<div style="clear:both;"></div>
+document.addEventListener('DOMContentLoaded', () => {
+document.blogSquaresController = new blogSquaresController(<?= $objectId; ?>, <?= json_encode($nodeList); ?>);
+});
+
+</script>
 
 <style>
 
@@ -407,6 +532,29 @@ for($i = 0; $i < count($nodeList); $i++)
 		display:block;
 		font-size:0.9em;
 		margin-top:5px;
+	}
+
+	.lds-dual-ring {
+		display: inline-block;
+		width: 60px;
+		height: 60px;
+	}
+
+	.lds-dual-ring:after {
+		content: " ";
+		display: block;
+		width: 44px;
+		height: 44px;
+		margin: 4px;
+		border-radius: 50%;
+		border: 6px solid gold;
+		border-color: gold transparent gold transparent;
+		animation: lds-dual-ring 1.2s linear infinite;
+	}
+
+	@keyframes lds-dual-ring {
+		0%   { transform: rotate(0deg); }
+		100% { transform: rotate(360deg); }
 	}
 
 </style>

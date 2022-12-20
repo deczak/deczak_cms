@@ -51,11 +51,11 @@ class	CImperator
 			}
 		}		
 
-		$this -> logic_public($_pPageRequest, $_rcaTarget);
+		$this -> logic_public($_pPageRequest, $_rcaTarget, $_isBackendMode);
 	}
 
 	private function
-	logic_public(&$_pPageRequest, array $_rcaTarget)
+	logic_public(&$_pPageRequest, array $_rcaTarget, bool $_isBackendMode)
 	{
 		if($_pPageRequest -> responseCode !== 200)
 		{	
@@ -86,10 +86,10 @@ class	CImperator
 																				);
 		}
 
-		if( $_pPageRequest -> urlPath  === false)
-			$_pPageRequest -> urlPath  = $_pPageRequest -> page_path .'/';
-		else
+		if( $_isBackendMode)
 			$_pPageRequest -> urlPath .= $_pPageRequest -> page_language .'/'. $_pPageRequest -> node_id;
+		else
+			$_pPageRequest -> urlPath .= $_pPageRequest -> url;
 
 		$this -> pageRequest = &$_pPageRequest;
 	}

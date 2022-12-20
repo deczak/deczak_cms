@@ -12,6 +12,7 @@ class schemeSitemap extends CScheme
 		$this -> addColumn('page_id'		, DB_COLUMN_TYPE_INT);
 		$this -> addColumn('page_version'	, DB_COLUMN_TYPE_STRING);
 		$this -> addColumn('page_path'		, DB_COLUMN_TYPE_STRING);
+		$this -> addColumn('url'			, DB_COLUMN_TYPE_STRING);
 		$this -> addColumn('page_title'		, DB_COLUMN_TYPE_STRING);
 		$this -> addColumn('page_name'		, DB_COLUMN_TYPE_STRING);
 		$this -> addColumn('crumb_name'		, DB_COLUMN_TYPE_STRING);

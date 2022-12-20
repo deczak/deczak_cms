@@ -25,6 +25,15 @@ class 	modelSitemap extends CModel
 	{
 		$_mainpageNodeID = 1;
 
+		if($_pCondition !== null)
+		{
+			$_pConditionCopy = clone $_pCondition;
+
+			$_pCondition->limit = 0;
+			$_pCondition->offset = 0;
+		}
+
+
 		$dbQuery 	= $_pDatabase		-> query(DB_SELECT) 
 										-> table($this -> tbPagePath) 
 										-> selectColumns(['*'])
@@ -55,6 +64,9 @@ class 	modelSitemap extends CModel
 						-> where('n.node_id', $_mainpageNodeID)
 						-> groupBy('o.node_lft')
 						-> orderBy('o.node_lft');
+
+		if(isset($_pConditionCopy->limit) && $_pConditionCopy->limit > 0)
+			$condPgPath	-> limit($_pConditionCopy->limit, $_pConditionCopy->offset);
 
 		$sqlNodeRes 	 = $_pDatabase		-> query(DB_SELECT) 
 											-> table($this -> tbPagePath, 'n') 
@@ -114,6 +126,7 @@ class 	modelSitemap extends CModel
 
 			$_sqlNode -> page_path = $this -> getPagePath($_pDatabase, $_sqlNode -> node_id, $_sqlNode -> page_language);
 			$_sqlNode -> page_path_segment = trim($_sqlNode -> page_path_segment, '/');
+			$_sqlNode -> url = ((CFG::GET() -> LANGUAGE -> DEFAULT_IN_URL || $_sqlNode -> page_language !== CLanguage::getDefault()) ? $_sqlNode -> page_language .'' : '') . $_sqlNode -> page_path;
 	
 			$_pages[]  = $_sqlNode;
 		}

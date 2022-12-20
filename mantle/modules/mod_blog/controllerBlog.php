@@ -17,6 +17,10 @@ class	controllerBlog extends CController
 	{
 		parent::__construct($_module, $_object);
 		$this -> moduleInfo -> user_rights[] = 'view';	// add view right as default for everyone
+
+		$this->publicActionList = [
+			'getBlogItems'
+		];
 	}
 	
 	public function
@@ -28,7 +32,7 @@ class	controllerBlog extends CController
 
 		##	Check user rights for this target
 	
-		if(!$this -> detectRights($controllerAction))
+		if(!$this -> detectRights($controllerAction, $this->publicActionList))
 		{
 			if($_xhrInfo !== null)
 			{
@@ -43,6 +47,7 @@ class	controllerBlog extends CController
 			CMessages::add(CLanguage::string('ERR_PERMISSON') , MSG_WARNING);
 			return false;
 		}
+
 		
 		if($_bEditMode && $_xhrInfo === null) 
 			$controllerAction = 'edit';
@@ -63,6 +68,7 @@ class	controllerBlog extends CController
 			case 'xhr_edit'   : $logicDone = $this -> logicXHREdit($_pDatabase, $_xhrInfo); break;
 			case 'xhr_create' : $logicDone = $this -> logicXHRCreate($_pDatabase, $_xhrInfo); break;	
 			case 'xhr_delete' : $logicDone = $this -> logicXHRDelete($_pDatabase, $_xhrInfo); break;	
+			case 'xhr_getBlogItems' : $logicDone = $this -> logicXHRIndex($_pDatabase, $_xhrInfo); break;	
 
 		}
 
@@ -89,7 +95,8 @@ class	controllerBlog extends CController
 						[
 							'object' 	=> $this -> objectInfo,
 							'currentTemplate'	=> $moduleTemplate -> templatesList,
-							'nodeList'	=> $nodeList
+							'nodeList'	=> $nodeList,
+							'objectId'  => $this -> objectInfo -> object_id
 						]
 						);
 
@@ -305,8 +312,35 @@ class	controllerBlog extends CController
 		return false;
 	}
 
+	private function
+	logicXHRIndex(CDatabaseConnection &$_pDatabase, object $_xhrInfo) : bool
+	{
+		$queryValidationString = QueryValidation::STRIP_TAGS | QueryValidation::TRIM | QueryValidation::IS_NOTEMPTY | QueryValidation::IS_DIGIT;
+
+		$requestQuery = new cmsRequestQuery(true);
+		$requestQuery->post('requestLimit')->validate($queryValidationString)->default(20)->exec();
+		$requestQuery->post('requestOffset')->validate($queryValidationString)->default(0)->exec();
+		$requestItems = $requestQuery->toObject();
+	
+		$nodeList = $this -> getNodesList(
+			$_pDatabase, 
+			$this -> objectInfo -> node_id, 
+			$requestItems->requestLimit + 1,
+			$requestItems->requestOffset
+			);
+
+		tk::xhrResult(
+			0,
+			'',
+			$nodeList
+		);
+	
+		return false;
+	}
+	
+
 	protected function
-	getNodesList(CDatabaseConnection &$_pDatabase, int $_rootNodeId)
+	getNodesList(CDatabaseConnection &$_pDatabase, int $_rootNodeId, int $limit = 5, int $offset = 0)
 	{
 		$nodesSearch = new CNodesSearch;
 		if($nodesSearch -> detectSearch())
@@ -320,18 +354,26 @@ class	controllerBlog extends CController
 		}
 		else
 		{
-			$sitemapCondition = new CModelCondition();
-			$sitemapCondition -> where('node_id', $_rootNodeId);
+			$sitemapCondition 	 = new CModelCondition();
+			$sitemapCondition 	-> where('node_id', $_rootNodeId)
+								-> limit($limit, $offset);
+
 
 			$modelSitemap = new modelSitemap();
 			$modelSitemap -> load($_pDatabase, $sitemapCondition);
 
 			$nodeList = &$modelSitemap -> getResult();
+
+
+
 		
 			$this -> appendAdditionNodeData($_pDatabase, $nodeList);
 		}
 		
 		##
+
+		if(isset($nodeList[0]))
+			unset($nodeList[0]);
 
 		$timestamp = time();
 		$rootLevel = false;
@@ -343,16 +385,19 @@ class	controllerBlog extends CController
 			{
 				if($rootLevel === false)
 				{
-					$rootLevel = $node -> level + 1;
-					unset($nodeList[$nodeIndex]);
+					#$rootLevel = $node -> level + 1;
+					$rootLevel = $node -> level;
+					//unset($nodeList[$nodeIndex]);
 					continue;
 				}
 				
+		
 				if($rootLevel != $node -> level)
 				{
 					unset($nodeList[$nodeIndex]);
 					continue;
 				}
+		
 			}
 
 			if(
@@ -370,12 +415,16 @@ class	controllerBlog extends CController
 				unset($nodeList[$nodeIndex]);
 		}
 
+/*
 		$createTime = [];
 
-		foreach ($nodeList as $key => $node)
+		foreach($nodeList as $key => $node)
 			$createTime[$key] = $node -> create_time;
+			*/
 
-		array_multisort($createTime, SORT_DESC, $nodeList);
+		#array_multisort($createTime, SORT_DESC, $nodeList);
+		$nodeList = array_values($nodeList);
+
 		
 		return $nodeList;
 	}

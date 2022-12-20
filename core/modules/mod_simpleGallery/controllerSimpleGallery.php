@@ -11,6 +11,10 @@ class	controllerSimpleGallery extends CController
 	{
 		parent::__construct($_module, $_object);
 		$this -> moduleInfo -> user_rights[] = 'view';	// add view right as default for everyone
+
+		$this->publicActionList = [
+			'getItems'
+		];
 	}
 	
 	public function
@@ -22,7 +26,7 @@ class	controllerSimpleGallery extends CController
 
 		##	Check user rights for this target
 	
-		if(!$this -> detectRights($controllerAction))
+		if(!$this -> detectRights($controllerAction, $this->publicActionList))
 		{
 			if($_xhrInfo !== null && $_xhrInfo -> isXHR)
 			{
@@ -59,6 +63,7 @@ class	controllerSimpleGallery extends CController
 			case 'xhr_edit'   : $logicDone = $this -> logicXHREdit($_pDatabase, $_xhrInfo, $enableEdit, $enableDelete); break;
 			case 'xhr_delete' : $logicDone = $this -> logicXHRDelete($_pDatabase, $_xhrInfo, $enableEdit, $enableDelete); break;
 			case 'xhr_view'   : $logicDone = $this -> logicXHRView($_pDatabase, $_xhrInfo, $enableEdit, $enableDelete); break;	
+			case 'xhr_getItems' : $logicDone = $this -> logicXHRIndex($_pDatabase, $_xhrInfo); break;	
 		}
 
 		if(!$logicDone) // Default
@@ -282,8 +287,39 @@ class	controllerSimpleGallery extends CController
 		return false;
 	}
 
+
 	private function
-	processGalleryItems(CDatabaseConnection &$_pDatabase, &$itemsList) : array
+	logicXHRIndex(CDatabaseConnection &$_pDatabase, object $_xhrInfo) : bool
+	{
+		$queryValidationString = QueryValidation::STRIP_TAGS | QueryValidation::TRIM | QueryValidation::IS_NOTEMPTY | QueryValidation::IS_DIGIT;
+
+		$requestQuery = new cmsRequestQuery(true);
+		$requestQuery->post('requestLimit')->validate($queryValidationString)->default(20)->exec();
+		$requestQuery->post('requestOffset')->validate($queryValidationString)->default(0)->exec();
+		$requestItems = $requestQuery->toObject();
+	
+	
+
+		$simpleObject = modelSimple::where('object_id', '=', $this -> objectInfo -> object_id)->one();
+
+		if(empty($simpleObject -> params -> itemList))
+			$simpleObject -> params -> itemList = [];
+
+		$simpleObject -> params -> itemList = (array)$simpleObject -> params -> itemList;
+
+		tk::xhrResult(
+			0,
+			'',
+			$this -> processGalleryItems($_pDatabase, $simpleObject -> params -> itemList, $requestItems->requestLimit, $requestItems->requestOffset)
+		);
+	
+		return false;
+	}
+	
+
+
+	private function
+	processGalleryItems(CDatabaseConnection &$_pDatabase, &$itemsList, int $limit = 20, int $offset = 0) : array
 	{
 		$collectedImageList = [];
 
@@ -303,6 +339,12 @@ class	controllerSimpleGallery extends CController
 			}
 
 		}
+
+
+		if($limit !== 0)
+			$collectedImageList = array_slice($collectedImageList, $offset, $limit);
+
+
 		return $collectedImageList;
 	}
 }
