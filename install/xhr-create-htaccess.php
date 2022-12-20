@@ -72,7 +72,10 @@
 	$configFile = str_replace('%SUB_PATH%',$_POST['server-subpath'], $configFile);
 
 	if(!file_exists('../data/htaccess/'))
+	{
 		mkdir('../data/htaccess/');
+		chmod('../data/htaccess/', 0777);
+	}
 
 	file_put_contents('../data/htaccess/0-base', $configFile);
 

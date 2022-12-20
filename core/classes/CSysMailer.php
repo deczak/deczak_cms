@@ -93,9 +93,11 @@ class	CSysMailer extends CSingleton
 			{
 				if(mkdir($_destDirectoryPath) === false)
 				{
-					trigger_error("CSysMailer::sendMail -- Call of mkdir fails on initialization",E_USER_WARNING);
+					trigger_error("CSysMailer::sendMail -- Call of mkdir fails on initialization", E_USER_WARNING);
 					exit;
 				}
+
+				chmod($_destDirectoryPath, 0777);
 			}
 
 			$_timeStamp		= time();

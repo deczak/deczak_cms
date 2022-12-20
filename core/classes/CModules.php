@@ -1358,11 +1358,11 @@ class CModulesResources
 	public function
 	generateResources(array $_modulesList)
 	{
-		if(!file_exists(CMS_SERVER_ROOT.DIR_PUBLIC .'css'))		mkdir(CMS_SERVER_ROOT.DIR_PUBLIC .'css');
-		if(!file_exists(CMS_SERVER_ROOT.DIR_PUBLIC .'js'))		mkdir(CMS_SERVER_ROOT.DIR_PUBLIC .'js');
+		if(!file_exists(CMS_SERVER_ROOT.DIR_PUBLIC .'css'))		{mkdir(CMS_SERVER_ROOT.DIR_PUBLIC .'css'); chmod(CMS_SERVER_ROOT.DIR_PUBLIC .'css', 0777); }
+		if(!file_exists(CMS_SERVER_ROOT.DIR_PUBLIC .'js'))		{mkdir(CMS_SERVER_ROOT.DIR_PUBLIC .'js'); chmod(CMS_SERVER_ROOT.DIR_PUBLIC .'js', 0777); }
 
-		if(!file_exists(CMS_SERVER_ROOT.DIR_BACKEND .'css'))	mkdir(CMS_SERVER_ROOT.DIR_BACKEND .'css');
-		if(!file_exists(CMS_SERVER_ROOT.DIR_BACKEND .'js'))		mkdir(CMS_SERVER_ROOT.DIR_BACKEND .'js');
+		if(!file_exists(CMS_SERVER_ROOT.DIR_BACKEND .'css'))	{mkdir(CMS_SERVER_ROOT.DIR_BACKEND .'css'); chmod(CMS_SERVER_ROOT.DIR_BACKEND .'css', 0777); }
+		if(!file_exists(CMS_SERVER_ROOT.DIR_BACKEND .'js'))		{mkdir(CMS_SERVER_ROOT.DIR_BACKEND .'js'); chmod(CMS_SERVER_ROOT.DIR_BACKEND .'js', 0777); }
 
 		$hFileCSSFrontend 	 = fopen(CMS_SERVER_ROOT.DIR_PUBLIC .'css/cms.css', "a");
 		$hFileCSSBackend 	 = fopen(CMS_SERVER_ROOT.DIR_BACKEND .'css/cms.css', "a");

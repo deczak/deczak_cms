@@ -100,8 +100,11 @@ class	CPackagesInstall
 				$destLocationPublic = CMS_SERVER_ROOT . DIR_PUBLIC . DIR_TEMPLATES;
 
 				if(!is_dir($destLocationPublic))
+				{
 					if(!mkdir($destLocationPublic, 0777, true))
 						return false;
+					chmod($destLocationPublic, 0777);
+				}
 
 				break;
 
@@ -139,6 +142,7 @@ class	CPackagesInstall
 				// error
 				return false;
 			}
+			chmod($destLocation . $packageInfo -> info -> dir, 0777);
 		}
 
 		## Copy package file
@@ -180,12 +184,12 @@ class	CPackagesInstall
 		{
 			$jobPath = pathinfo($packageInfo -> exec -> pull[$i][1], PATHINFO_DIRNAME);
 
-			if(!is_dir($jobPath) && !mkdir($jobPath, 0777, true))
+			if(!is_dir($jobPath))
 			{
-				// error
-				return false;
+				if(!mkdir($jobPath, 0777, true))
+					return false;
+				chmod($jobPath, 0777);
 			}
-
 
 			$copyDestination 	= $destLocation;
 			
@@ -222,8 +226,12 @@ class	CPackagesInstall
  			$fileLocation 	= pathinfo($packageInfo -> exec -> pull[$i][1], PATHINFO_DIRNAME);
 
 			if(!is_dir($copyDestination . $fileLocation))
+			{
 				if(!mkdir($copyDestination . $fileLocation, 0777, true))
 					return false;
+					
+				chmod($copyDestination . $fileLocation, 0777);
+			}
 
 			copy(
 				$_exractedDirPath . $packageInfo -> exec -> pull[$i][0], 
