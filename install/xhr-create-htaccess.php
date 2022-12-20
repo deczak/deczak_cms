@@ -14,6 +14,7 @@
 	include_once '../core/classes/toolkit.php';
 	include_once '../core/classes/CScheme.php';
 	include_once '../core/classes/CModel.php';
+	include_once '../core/classes/cmsModel.php';
 	include_once '../core/classes/CSession.php';
 	include_once '../core/classes/CRouter.php';
 	include_once '../core/classes/CModules.php';

@@ -18,6 +18,7 @@
 	include_once '../core/classes/CURLVariables.php';
 	include_once '../core/classes/CScheme.php';
 	include_once '../core/classes/CModel.php';
+	include_once '../core/classes/cmsModel.php';
 	include_once '../core/classes/CView.php';
 	include_once '../core/classes/CController.php';
 	include_once '../core/classes/CPageRequest.php';
