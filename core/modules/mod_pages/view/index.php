@@ -169,8 +169,7 @@
 		let	formData  = new FormData;
 			formData.append('new-parent-node-id', event.detail.select.node_id);
 
-		let	xhRequest = new cmsXhr;
-			xhRequest.request(requestURL, formData, onPageSubMoveOKSuccess, event.detail, $xhrAction);
+			cmsXhr.request(requestURL, formData, onPageSubMoveOKSuccess, event.detail, $xhrAction);
 	}
 
 	window.addEventListener('event-modal-select-new-parent-page', function(event) { onPageSubMoveOK(event); });
@@ -214,8 +213,7 @@
 			formData.append('page_description', fieldList['modal-page-description']);
 			formData.append('page_template', fieldList['modal-page-template']);
 
-		let	xhRequest = new cmsXhr;
-			xhRequest.request(requestURL, formData, onPageAddOKSuccess, srcInfo, $xhrAction);
+			cmsXhr.request(requestURL, formData, onPageAddOKSuccess, srcInfo, $xhrAction);
 
 		modalInstance.close(buttonEvent);
 	}
@@ -314,8 +312,7 @@
 
 		let	formData  = new FormData;
 
-		let	xhRequest = new cmsXhr;
-			xhRequest.request(requestURL, formData, onPageDeleteOKSuccess, srcInfo, $xhrAction);
+			cmsXhr.request(requestURL, formData, onPageDeleteOKSuccess, srcInfo, $xhrAction);
 
 		modalInstance.close(buttonEvent);
 	}

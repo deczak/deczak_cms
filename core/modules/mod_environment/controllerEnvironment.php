@@ -69,6 +69,7 @@ class	controllerEnvironment extends CController
 			case 'xhr_error_clear': 	 $logicDone = $this -> logicXHRClearError($_pDatabase);	break;	
 			case 'xhr_edit_header': 	 $logicDone = $this -> logicXHREditHeader($_pDatabase);	break;	
 			case 'xhr_mediathek_wipe': 	 $logicDone = $this -> logicXHRMediathekWipe($_pDatabase);	break;	
+			case 'xhr_temp_wipe': 	 	 $logicDone = $this -> logicXHRTempWipe($_pDatabase);	break;	
 		
 		
 		}
@@ -354,6 +355,27 @@ class	controllerEnvironment extends CController
 		return false;
 	}
 
+
+	private function
+	logicXHRTempWipe(CDatabaseConnection &$_dbConnection) : bool
+	{	
+		$systemId = $this -> querySystemId();
+
+		if($systemId !== false)
+		{	
+			$validationErr 	= false;
+			$validationMsg 	= '';
+			$responseData 	= [];
+
+
+			tk::rrmdir(CMS_SERVER_ROOT. DIR_TEMP, true);
+
+
+			tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
+		}
+
+		return false;
+	}
 
 
 }

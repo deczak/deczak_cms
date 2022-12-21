@@ -20,8 +20,6 @@
 
 	</script>
 
-	<script src="<?php echo CMS_SERVER_URL_BACKEND; ?>js/toolkit.js"></script>
-
 	<script>
 
 		var	CMS = 	{

@@ -30,7 +30,7 @@ class blogSquaresController
 
 		addEventListener("scroll", (event) => {
 
-			if(cms_tk.detectNodeInViewport(document.getElementById('blog-tiles-container-loading-indicator'), 200))
+			if(cmstk.detectNodeInViewport(document.getElementById('blog-tiles-container-loading-indicator'), 200))
 				srcInstance.requestItems();
 
 		});
@@ -51,7 +51,7 @@ class blogSquaresController
 			formData.set('requestLimit', this.requestLimit);
 			formData.set('requestOffset', this.requestOffset);
 
-		cms_xhr.request((typeof CMS.SERVER_URL_BACKEND !== 'undefined' ? CMS.SERVER_URL_BACKEND : CMS.SERVER_URL) + CMS.PAGE_PATH, formData, (response, srcInstance) => {
+		cmsXhr.request((typeof CMS.SERVER_URL_BACKEND !== 'undefined' ? CMS.SERVER_URL_BACKEND : CMS.SERVER_URL) + CMS.PAGE_PATH, formData, (response, srcInstance) => {
 			
 			if(response.state) 
 			{
@@ -62,7 +62,7 @@ class blogSquaresController
 			srcInstance.requestItemsSuccess(Object.values(response.data), srcInstance)
 
 
-		}, this, 'getBlogItems', this.objectId, cms_xhr.onXHRError);
+		}, this, 'getBlogItems', this.objectId, cmsXhr.onXHRError);
 
 	}
 
@@ -72,7 +72,7 @@ class blogSquaresController
 		srcInstance.drawList(drawList);
 		srcInstance.lockRequest = false;
 
-		if(cms_tk.detectNodeInViewport(document.getElementById('blog-tiles-container-loading-indicator'), 200))
+		if(cmstk.detectNodeInViewport(document.getElementById('blog-tiles-container-loading-indicator'), 200))
 			srcInstance.requestItems();
 	}
 
@@ -119,15 +119,15 @@ class blogSquaresController
 					let numOfTiles2Create = 1;
 
 					if(rowSizeFree == 2)
-						numOfTiles2Create = cms_tk.getRandomInteger(1,2);
+						numOfTiles2Create = cmstk.getRandomInteger(1,2);
 
 					let itemListNum = drawList[this.rowIndex].itemList.length;
 
 					for(let o = 0; o < numOfTiles2Create; o++)
 					{
-						let placeholderItemIndex = cms_tk.getRandomInteger(0, itemListNum + 1);
+						let placeholderItemIndex = cmstk.getRandomInteger(0, itemListNum + 1);
 
-						let randomColor = cms_tk.getRandomInteger(0, 0xFFFFFF).toString(16);
+						let randomColor = cmstk.getRandomInteger(0, 0xFFFFFF).toString(16);
 							randomColor = randomColor.padStart(6, '0');
 
 						let placeholder = {};

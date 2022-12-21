@@ -32,5 +32,8 @@ M_BEENV_ERROR_CLEAR			= Deletes all log and error files in log directory.
 M_BEENV_GENERATE_RES_NOTE	= The resources Files are automatically updated when modify the modules.
 M_BEENV_GENERATE_RES		= Manually update the resource files for JS and CSS
 
+M_BEENV_DELETEACLEAR		= Delete & Clear
 
-M_BEENV_MEDIATHEK_WIPE		= Delete media library content
+M_BEENV_MEDIATHEK_WIPE_BTN	= Delete Mediathek content
+
+M_BEENV_TEMP_WIPE_BTN		= Delete Temporary content

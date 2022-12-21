@@ -230,7 +230,7 @@ class	TK
 	}
 
 	public static function
-	rrmdir($dir)
+	rrmdir($dir, bool $deleteInitDir = true)
 	{ 
 		if(is_dir($dir))
 		{
@@ -239,14 +239,42 @@ class	TK
 			{
 				if($object != "." && $object != "..")
 				{ 
+
 					if(is_dir($dir. DIRECTORY_SEPARATOR .$object) && !is_link($dir."/".$object))
 						tk::rrmdir($dir. DIRECTORY_SEPARATOR .$object);
 					else
-						unlink($dir. DIRECTORY_SEPARATOR .$object); 
+						@unlink($dir. DIRECTORY_SEPARATOR .$object); 
 				}
 			}
-			rmdir($dir); 
+			if($deleteInitDir)
+				@rmdir($dir); 
 		} 
+	}
+
+	public static function
+	rmkdir(string $prefixPath, string $relativePath) : ?string
+	{
+		$prefixPath = '/'.trim($prefixPath,' /\\').'/';
+
+		$relativePath = trim($relativePath,' /\\');
+		$relativePath = str_replace('\\', '/', $relativePath);
+		$relativePathSgmts = explode('/', $relativePath);
+
+		$relativePath = '';
+
+		foreach($relativePathSgmts as $sgmt)
+		{
+			$relativePath .= $sgmt.'/';
+
+			if(!file_exists($prefixPath.$relativePath))
+			{
+				if(!mkdir($prefixPath.$relativePath, 0777, true))
+					return null;
+				chmod($prefixPath.$relativePath, 0777);
+			}
+		}
+
+		return $relativePath;
 	}
 
 	public static function
@@ -827,16 +855,7 @@ class 	MEDIATHEK
 	public static function
 	createPath(string $path) : ?string
 	{
-		$path = CMS_SERVER_ROOT . DIR_MEDIATHEK . trim($path,' /\\');
-
-		if(!file_exists($path))
-		{
-			if(!mkdir($path, 0777, true))
-				return null;
-			chmod($path, 0777);
-			// todo may needs to loop dirs of $path
-		}
-		return $path;
+		return tk::rmkdir(CMS_SERVER_ROOT . DIR_MEDIATHEK, $path);
 	}
 
 	/**

@@ -33,7 +33,7 @@ class cmsSimpleGalleryController
 
 		addEventListener("scroll", (event) => {
 
-			if(cms_tk.detectNodeBottomInViewport(containerNode, 200))
+			if(cmstk.detectNodeBottomInViewport(containerNode, 200))
 				srcInstance.requestItems(containerNode);
 
 		});
@@ -53,7 +53,7 @@ class cmsSimpleGalleryController
 			formData.set('requestLimit', outputNode.simpleGallery.requestLimit);
 			formData.set('requestOffset', outputNode.simpleGallery.requestOffset);
 
-		cms_xhr.request((typeof CMS.SERVER_URL_BACKEND !== 'undefined' ? CMS.SERVER_URL_BACKEND : CMS.SERVER_URL) + CMS.PAGE_PATH, formData, (response, srcInfo) => {
+		cmsXhr.request((typeof CMS.SERVER_URL_BACKEND !== 'undefined' ? CMS.SERVER_URL_BACKEND : CMS.SERVER_URL) + CMS.PAGE_PATH, formData, (response, srcInfo) => {
 			
 			if(response.state) 
 			{
@@ -63,7 +63,7 @@ class cmsSimpleGalleryController
 
 			srcInfo.srcInstance.requestItemsSuccess(srcInfo.outputNode, Object.values(response.data))
 
-		}, {srcInstance:this, outputNode: outputNode}, 'getItems', outputNode.simpleGallery.objectId, cms_xhr.onXHRError);
+		}, {srcInstance:this, outputNode: outputNode}, 'getItems', outputNode.simpleGallery.objectId, cmsXhr.onXHRError);
 	}
 
 	requestItemsSuccess(outputNode, itemList)
@@ -73,7 +73,7 @@ class cmsSimpleGalleryController
 		outputNode.simpleGallery.requestOffset = outputNode.simpleGallery.requestOffset + itemList.length;
 		outputNode.simpleGallery.lockRequest = false;
 
-		if(cms_tk.detectNodeBottomInViewport(outputNode, 200))
+		if(cmstk.detectNodeBottomInViewport(outputNode, 200))
 			this.requestItems(outputNode);
 
 

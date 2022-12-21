@@ -44,8 +44,7 @@ class	cmsMediathek
 			formData.append('path', this.activePath);
 			formData.append('offset', this.offset);
 
-		let	xhRequest = new cmsXhr;
-			xhRequest.request(CMS.SERVER_URL_BACKEND + 'mediathek/', formData, this.onXHRSuccessRequestItems, this, 'index');
+		cmsXhr.request(CMS.SERVER_URL_BACKEND + 'mediathek/', formData, this.onXHRSuccessRequestItems, this, 'index');
 	}
 
 	onXHRSuccessRequestItems(response, srcInstance)
@@ -446,8 +445,7 @@ class	cmsMediathek
 			formData.append('mediathek-active-path', fieldList['modal-mediathek-active-path']);
 			formData.append('mediathek-folder', fieldList['modal-mediathek-folder']);
 
-		let	xhRequest = new cmsXhr;
-			xhRequest.request(CMS.SERVER_URL_BACKEND + 'mediathek/', formData, this.dataInfo._onClickButtonCreateFolderSuccess, { srcInstance: this.dataInfo, modalInstance:modalInstance }, 'create_folder');
+		cmsXhr.request(CMS.SERVER_URL_BACKEND + 'mediathek/', formData, this.dataInfo._onClickButtonCreateFolderSuccess, { srcInstance: this.dataInfo, modalInstance:modalInstance }, 'create_folder');
 	}
 
 	_onClickButtonCreateFolderSuccess(response, srcInfo)
@@ -495,8 +493,7 @@ class	cmsMediathek
 		let	formData  = new FormData;
 			formData.append('mediathek-remove-item-src', eventInfo.itemNode.itemInfo.path);
 
-		let	xhRequest = new cmsXhr;
-			xhRequest.request(CMS.SERVER_URL_BACKEND + 'mediathek/', formData, eventInfo.srcInstance._onClickButtonRemoveItemSuccess, eventInfo.srcInstance, 'remove_item');
+			cmsXhr.request(CMS.SERVER_URL_BACKEND + 'mediathek/', formData, eventInfo.srcInstance._onClickButtonRemoveItemSuccess, eventInfo.srcInstance, 'remove_item');
 	}
 
 	_onClickButtonRemoveItem(itemNode, eventNode, srcInstance)
@@ -534,8 +531,7 @@ class	cmsMediathek
 			formData.append('media_notice', fieldList['modal-media-item-notice']);
 			formData.append('media_title', fieldList['modal-media-item-title']);
 	
-		let	xhRequest = new cmsXhr;
-			xhRequest.request(CMS.SERVER_URL_BACKEND + 'mediathek/', formData, eventInfo.srcInstance._onClickButtonEditItemSuccess, eventInfo, 'edit_item');
+			cmsXhr.request(CMS.SERVER_URL_BACKEND + 'mediathek/', formData, eventInfo.srcInstance._onClickButtonEditItemSuccess, eventInfo, 'edit_item');
 	}
 
 	_onClickButtonEditItemRequestItem(response, srcInfo)
@@ -747,8 +743,7 @@ class	cmsMediathek
 			formData.append('mediathek-move-item-src', event.detail.sourceNode.itemNode.itemInfo.path);
 			formData.append('mediathek-move-item-dst', event.detail.select.path);
 
-		let	xhRequest = new cmsXhr;
-			xhRequest.request(CMS.SERVER_URL_BACKEND + 'mediathek/', formData, event.detail.sourceNode.srcInstance._onClickButtonMoveItemSuccess, event.detail.sourceNode.srcInstance, 'move_item');
+			cmsXhr.request(CMS.SERVER_URL_BACKEND + 'mediathek/', formData, event.detail.sourceNode.srcInstance._onClickButtonMoveItemSuccess, event.detail.sourceNode.srcInstance, 'move_item');
 	}
 
 	_onClickButtonMoveItemModalPath(response, srcInstance)
@@ -776,8 +771,7 @@ class	cmsMediathek
 	{
 		let	formData  = new FormData;
 
-		let	xhRequest = new cmsXhr;
-			xhRequest.request(CMS.SERVER_URL_BACKEND + 'mediathek/', formData, onSuccessCallback, srcInstance, 'directory_list');
+			cmsXhr.request(CMS.SERVER_URL_BACKEND + 'mediathek/', formData, onSuccessCallback, srcInstance, 'directory_list');
 	}
 
 	static queryDiretoryItems(mediathekPath, onSuccessCallback, srcInstance)
@@ -785,8 +779,7 @@ class	cmsMediathek
 		let	formData  = new FormData;
 			formData.append('simple-gallery-path', mediathekPath);
 
-		let	xhRequest = new cmsXhr;
-			xhRequest.request(CMS.SERVER_URL_BACKEND + 'mediathek/', formData, onSuccessCallback, srcInstance, 'directory_items');
+			cmsXhr.request(CMS.SERVER_URL_BACKEND + 'mediathek/', formData, onSuccessCallback, srcInstance, 'directory_items');
 	}
 }
 

@@ -5,7 +5,7 @@ class	cmsXhr
 	{
 	}
 	
-	request(requestURL, formData, callbackSuccess, xhrCallInstance, xhrAction, callbackError = null)
+	static request(requestURL, formData, callbackSuccess, xhrCallInstance, xhrAction, xhrObjectId = 0, callbackError = null)
 	{		
 		let that = this;
 
@@ -17,6 +17,7 @@ class	cmsXhr
 		xhRequest.responseType = 'json';
 		xhRequest.setRequestHeader("X-Requested-With","XMLHttpRequest");
 		xhRequest.setRequestHeader("X-Requested-XHR-Action", xhrAction);
+		xhRequest.setRequestHeader("X-Requested-XHR-Object", xhrObjectId);
 		xhRequest.onerror   = function ()
 		{
 			// Event does not fire on 404 or 500
