@@ -6,7 +6,7 @@
 }
 
 
-	button { cursor:pointer; background:rgb(242, 242, 242);  font-family: 'Open Sans', sans-serif; background:linear-gradient(to bottom, rgb(242, 242, 242), rgb(204, 204, 204)); border:1px solid grey; text-shadow: 0 0 4px rgba(255,255,255,0.8); }
+	button { cursor:pointer; background:rgb(242, 242, 242);  font-family: 'Source Sans Pro', sans-serif; background:linear-gradient(to bottom, rgb(242, 242, 242), rgb(204, 204, 204)); border:1px solid grey; text-shadow: 0 0 4px rgba(255,255,255,0.8); }
 
 	input,
 	textarea,
@@ -18,7 +18,7 @@
 		line-height:			inherit;
 		border:					1px solid grey;
 		box-sizing: border-box;
-		font-family: 'Open Sans',sans-serif;
+		font-family: 'Source Sans Pro',sans-serif;
 	}
 
 	input,

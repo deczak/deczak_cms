@@ -6,7 +6,7 @@
 
 	* { box-sizing:border-box; }
 
-	body { font-size:16px; padding:0px; margin:0px; font-family:'Open Sans',sans-serif; -moz-text-size-adjust:none; -webkit-text-size-adjust:none; -ms-text-size-adjust:none; text-size-adjust:none; scroll-behavior:smooth; background:rgb(245,245,245); color:rgb(50,50,50); overflow-y:scroll; }
+	body { font-size:16px; padding:0px; margin:0px; font-family:'Source Sans Pro',sans-serif; -moz-text-size-adjust:none; -webkit-text-size-adjust:none; -ms-text-size-adjust:none; text-size-adjust:none; scroll-behavior:smooth; background:rgb(245,245,245); color:rgb(50,50,50); overflow-y:scroll; }
 	html {  padding:0px; margin:0px; }
 
 	p { margin:20px 0px; hyphens: auto; }
@@ -39,35 +39,23 @@
 /**	Fonts
 **/
 
-	@font-face {
-	  font-family: 'Open Sans';
-	  font-style: normal;
-	  font-weight: 300;
-	  src: local('Open Sans Light'), local('OpenSans-Light'),
-		   url('../fonts/open-sans-v15-latin-300.woff2') format('woff2'),
-		   url('../fonts/open-sans-v15-latin-300.woff') format('woff'); 
-		font-display: swap;
-	}
+@font-face {
+  font-family: 'Source Sans Pro';
+  font-style: normal;
+  font-weight: 300;
+  src: local(''),
+       url('../fonts/source-sans-pro-v21-latin-300.woff2') format('woff2'), 
+       url('../fonts/source-sans-pro-v21-latin-300.woff') format('woff');
+}
 
-	@font-face {
-		font-family: 'Open Sans';
-		font-style: normal;
-		font-weight: 400;
-		src: local('Open Sans Regular'), local('OpenSans-Regular'),
-			url('../fonts/open-sans-v15-latin-regular.woff2') format('woff2'),
-			url('../fonts/open-sans-v15-latin-regular.woff') format('woff');
-		font-display: swap;
-	}
-
-	@font-face {
-	  font-family: 'Open Sans';
-	  font-style: normal;
-	  font-weight: 700;
-	  src: local('Open Sans Bold'), local('OpenSans-Bold'),
-		   url('../fonts/open-sans-v15-latin-700.woff2') format('woff2'),
-		   url('../fonts/open-sans-v15-latin-700.woff') format('woff'); 
-		font-display: swap;
-	}	
+@font-face {
+  font-family: 'Source Sans Pro';
+  font-style: normal;
+  font-weight: 400;
+  src: local(''),
+       url('../fonts/source-sans-pro-v21-latin-regular.woff2') format('woff2'), 
+       url('../fonts/source-sans-pro-v21-latin-regular.woff') format('woff'); 
+}
 
 /**	Wrappers
 */

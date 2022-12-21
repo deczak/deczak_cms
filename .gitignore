@@ -21,8 +21,6 @@ mantle/modules/*
 mediathek/*
 !mediathek/index.php
 !mediathek/readme
-install/page-templates/*
-!install/page-templates/pt-default.zip
 data/modules/simpleNavigation
 !data/modules/simpleNavigation/list/
 backend/css/cms.css

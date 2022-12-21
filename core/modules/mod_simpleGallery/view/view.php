@@ -53,7 +53,7 @@ class cmsSimpleGalleryController
 			formData.set('requestLimit', outputNode.simpleGallery.requestLimit);
 			formData.set('requestOffset', outputNode.simpleGallery.requestOffset);
 
-		cms_xhr.request(CMS.SERVER_URL + CMS.PAGE_PATH, formData, (response, srcInfo) => {
+		cms_xhr.request((typeof CMS.SERVER_URL_BACKEND !== 'undefined' ? CMS.SERVER_URL_BACKEND : CMS.SERVER_URL) + CMS.PAGE_PATH, formData, (response, srcInfo) => {
 			
 			if(response.state) 
 			{

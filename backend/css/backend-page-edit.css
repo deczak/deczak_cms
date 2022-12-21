@@ -87,7 +87,7 @@
 	#be-page-panel a.darkblue:hover,
 	#be-page-panel a.darkblue:focus   { text-shadow:0 0 1px #b3b3b3; color:#204060; }		
 
-	#be-page-panel { position:fixed; top:0; left:0; padding:0px; margin:0px; font-size:16px;  font-family:'Open Sans',sans-serif; font-weight:300; z-index:99999; background:#3d3d44; height:100%; box-shadow:0 0 6px 5px rgba(0,0,0,0.9); }
+	#be-page-panel { position:fixed; top:0; left:0; padding:0px; margin:0px; font-size:16px;  font-family:'Source Sans Pro',sans-serif; font-weight:300; z-index:99999; background:#3d3d44; height:100%; box-shadow:0 0 6px 5px rgba(0,0,0,0.9); }
 
 	#be-page-panel-slider { position:fixed; top:0px; left:0px; background: linear-gradient(to left,rgb(233,223,37),rgb(214,187,35)); transition:margin-left 0.4s; border-left:1px solid black; border-right:1px solid black; width:15px; box-shadow:1px 0 3px black; height:100%; padding-left:0px; z-index: 1; }
 	#be-page-panel-slider:before { display:none; }
@@ -129,7 +129,7 @@
 	#be-page-panel a.darkblue:focus   { text-shadow:0 0 1px #b3b3b3; color:#204060; }		
 
 
-	#be-page-panel { position:fixed; top:0; left:0; padding:0px; margin:0px; font-size:16px;  font-family:'Open Sans',sans-serif; font-weight:300; z-index:99999; background:#3d3d44; height:100%; box-shadow:0 0 6px 5px rgba(0,0,0,0.9); }
+	#be-page-panel { position:fixed; top:0; left:0; padding:0px; margin:0px; font-size:16px;  font-family:'Source Sans Pro',sans-serif; font-weight:300; z-index:99999; background:#3d3d44; height:100%; box-shadow:0 0 6px 5px rgba(0,0,0,0.9); }
 	#be-page-panel b { font-weight:600; }
 
 	#be-page-panel-slider { position:fixed; top:0px; left:0px; background: linear-gradient(to left,rgb(233,223,37),rgb(214,187,35)); transition:margin-left 0.4s; border-left:1px solid black; border-right:1px solid black; width:8px; box-shadow:1px 0 3px black; height:100%; padding-left:0px; z-index: 1; }
@@ -201,7 +201,7 @@
 	.page-edit-module-controls-panel { display:flex; justify-content:space-between; align-items:center; width:calc(100% - 1px); background:rgba(194, 214, 214, 0.4); font-weight: 300; font-size: 0.84em; flex-wrap:wrap; margin-bottom:10px; }
 	.page-edit-module-controls-panel > div:not(.ignore-flex) { display:flex; align-items:center; }
 	.page-edit-module-controls-panel > div.right { text-align:right; }
-	.page-edit-module-controls-panel button { border-radius:0px; border:0px; background:transparent; font-family: 'Open Sans',sans-serif; font-size:0.9em; font-weight:600; white-space:nowrap; }
+	.page-edit-module-controls-panel button { border-radius:0px; border:0px; background:transparent; font-family: 'Source Sans Pro',sans-serif; font-size:0.9em; font-weight:600; white-space:nowrap; }
 	.page-edit-module-controls-panel button:not([disabled]):hover { background:rgba(0,0,0,0.1); }
 	.page-edit-module-controls-panel label { padding:0 12px; font-size:0.9em; white-space:nowrap; }
 	.page-edit-module-controls-panel button i,
