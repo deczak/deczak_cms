@@ -77,7 +77,7 @@ class cmsSimpleGalleryController
 			this.requestItems(outputNode);
 
 
-		if(itemList.length < outputNode.simpleGallery.requestLimit)
+		if(itemList.length < outputNode.simpleGallery.requestLimit || itemList.length == 0)
 		{
 			outputNode.simpleGallery.stopRequest = true;
 
