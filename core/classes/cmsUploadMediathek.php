@@ -124,6 +124,8 @@ class cmsUploadMediathek
 
 		switch($_FILES["file"]["type"])
 		{
+			case 'image/png': 
+			case 'image/webp': 
 			case 'image/jpeg':
 
 				$itemInfo -> sizes = $processedItem->rects ?? [];

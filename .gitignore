@@ -12,6 +12,8 @@ data/configuration.json
 data/routes.json
 public/*
 !public/index.php
+!public/js/
+public/js/cms.js
 templates/*
 !templates/backend
 mantle/modules/*
@@ -22,8 +24,7 @@ mediathek/*
 install/page-templates/*
 !install/page-templates/pt-default.zip
 data/modules/simpleNavigation
-!data/modules/simpleNavigation/list
-!data/modules/simpleNavigation/squares
+!data/modules/simpleNavigation/list/
 backend/css/cms.css
 backend/js/cms.js
 VERSION-DB
