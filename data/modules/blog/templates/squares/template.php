@@ -51,7 +51,7 @@ class blogSquaresController
 			formData.set('requestLimit', this.requestLimit);
 			formData.set('requestOffset', this.requestOffset);
 
-		cms_xhr.request(CMS.SERVER_URL + CMS.PAGE_PATH, formData, (response, srcInstance) => {
+		cms_xhr.request((typeof CMS.SERVER_URL_BACKEND !== 'undefined' ? CMS.SERVER_URL_BACKEND : CMS.SERVER_URL) + CMS.PAGE_PATH, formData, (response, srcInstance) => {
 			
 			if(response.state) 
 			{

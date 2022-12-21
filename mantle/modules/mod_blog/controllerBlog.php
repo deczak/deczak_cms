@@ -123,7 +123,8 @@ class	controllerBlog extends CController
 							'object' 	=> $simpleObject,
 							'currentTemplate'	=> $moduleTemplate -> templatesList,
 							'avaiableTemplates'	=> $moduleTemplates -> templatesList,
-							'nodeList'	=> $nodeList
+							'nodeList'	=> $nodeList,
+							'objectId'  => $this -> objectInfo -> object_id
 						]
 						);
 
