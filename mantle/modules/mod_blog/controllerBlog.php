@@ -233,7 +233,7 @@ class	controllerBlog extends CController
 		$simpleObject = modelSimple::new();
 		$simpleObject->body			= '';
 		$simpleObject->object_id	= $this -> objectInfo -> object_id;
-		$simpleObject->params->template		= '';
+		$simpleObject->params->template		= 'list';
 	
 		if(!$simpleObject->save())
 		{
@@ -248,6 +248,15 @@ class	controllerBlog extends CController
 			$modelSitemap = new modelSitemap();
 			$modelSitemap -> load($_pDatabase, $sitemapCondition);
 
+
+		$moduleTemplate = new CModulesTemplates();
+		$moduleTemplate ->	load('blog', $simpleObject -> params -> template );
+
+		$moduleTemplates = new CModulesTemplates();
+		$moduleTemplates ->	load('blog');
+
+
+
 			$sitemap = $modelSitemap -> getResult();
 		
 			$this -> appendAdditionNodeData($_pDatabase, $sitemap);
@@ -256,8 +265,11 @@ class	controllerBlog extends CController
 							'edit',	
 							'',
 							[
-								'object' 	=> $this -> objectInfo,
-								'sitemap'	=> $modelSitemap -> getResult()
+								'object' 	=> $simpleObject,
+								'sitemap'	=> $modelSitemap -> getResult(),
+
+							'currentTemplate'	=> $moduleTemplate -> templatesList,
+							'avaiableTemplates'	=> $moduleTemplates -> templatesList,
 							]
 							);
 

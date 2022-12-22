@@ -35,7 +35,7 @@ else
 			$categories[] = $nodeCategory -> category_name;
 		}
 
-		$headline = trim(strip_tags($node -> headline -> body));
+		$headline = trim(strip_tags($node -> headline -> body ?? ''));
 		$headline = (empty($headline) ? $node -> page_title : $headline);
 
 		if(property_exists($node, 'page_url'))
@@ -50,7 +50,7 @@ else
 			<span class="categories"><?= implode(' / ', $categories); ?></span>
 			<h2><a href="<?= CMS_SERVER_URL . URL_LANG_PRREFIX . $pagePath; ?>"><?= $headline; ?></a></h2>
 
-			<p><?= $node -> text -> body; ?></p>
+			<p><?= $node -> text -> body ?? ''; ?></p>
 		
 			&nbsp;&nbsp;&bull;&nbsp; <a class="darkblue" href="<?= CMS_SERVER_URL . URL_LANG_PRREFIX . $pagePath; ?>"> <?= CLanguage::string('READMORE'); ?></a>
 			

@@ -15,8 +15,9 @@ class blogSquaresController
 		this.subStripList 		= [];
 		this.subStripList[2]	= 100;
 		this.subStripList[3]	= 160;
-
-		this.requestLimit		= nodeList.length;
+		
+		//this.requestLimit		= nodeList.length;
+		this.requestLimit		= 10;
 		this.requestOffset		= 0;
 
 		this.stopRequest		= false;
@@ -68,6 +69,15 @@ class blogSquaresController
 
 	requestItemsSuccess(nodeList, srcInstance)
 	{
+
+		if(!nodeList.length)
+		{
+
+			srcInstance.stopRequest = true;
+			document.getElementById('blog-tiles-container-loading-indicator').innerHTML = '';
+			return;
+		}
+
 		let drawList = srcInstance.prepareDrawListItems(nodeList);
 		srcInstance.drawList(drawList);
 		srcInstance.lockRequest = false;
@@ -94,7 +104,7 @@ class blogSquaresController
 				
 			}
 
-			if(typeof nodeList[i].postSetting === 'undefined')
+			if(typeof nodeList[i].postSetting === 'undefined' || nodeList[i].postSetting === null)
 			{
 				nodeList[i].postSetting = {
 				post_page_color			: 0,
@@ -315,7 +325,7 @@ class blogSquaresController
 					itemContent += '<div class="item-content-text-wrapper '+ (item.postSetting.post_background_mode ? 'text-background-color' : '') +'">';
 					itemContent += '<span class="item-content-categories">'+ categories.join(' / ') +'</span>';
 
-				if(typeof item.headline !== 'undefined')
+				if(typeof item.headline !== 'undefined' && item.headline !== null)
 					itemContent += '<span class="item-content-title">'+ (item.headline.body.replace(/<[^>]*>?/gm, '')?? '') +'</span>';
 
 				let teaserText = '';

@@ -1102,7 +1102,7 @@ class CModulesInstallS1 // Module Scheme 1
 		$moduleData['module']['module_desc']		= $_moduleConfig -> module_desc;
 		$moduleData['module']['module_icon']		= $_moduleConfig -> module_icon;
 		$moduleData['module']['module_group']		= $_moduleConfig -> module_group;
-		$moduleData['module']['is_system_module']	= $_moduleConfig -> system_module ?? '0';
+		$moduleData['module']['is_systemFunction']	= $_moduleConfig -> system_module ?? '0';
 		$moduleData['module']['is_frontend']		= strval($_moduleConfig -> module_frontend);
 		$moduleData['module']['is_active']			= '1';
 		$moduleData['module']['create_time']		= $timestamp;
@@ -1239,7 +1239,7 @@ class CModulesInstallS2 // Module Scheme 2
 			$moduleData['module']['module_desc']		= $_moduleConfig -> module -> desc;
 			$moduleData['module']['module_icon']		= $_moduleConfig -> module -> icon;
 			$moduleData['module']['module_group']		= $_moduleConfig -> module -> group;
-			$moduleData['module']['is_system_module']		= $_moduleConfig -> module -> system_module ?? '0';
+			$moduleData['module']['is_systemFunction']	= $_moduleConfig -> module -> system_module ?? '0';
 			$moduleData['module']['is_frontend']		= strval($_moduleConfig -> module -> frontend);
 			$moduleData['module']['is_active']			= '1';
 			$moduleData['module']['create_time']		= $timestamp;
