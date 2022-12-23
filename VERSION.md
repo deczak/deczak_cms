@@ -11,6 +11,12 @@ The version number is the release date. A letter as suffix indicates fixes on sa
 
 ## Version history	 
 
+### 20221223
+
+**Changes**
+- Various changes and fixes
+- Added Mediathek
+
 ### 20211220
 
 **Changes**

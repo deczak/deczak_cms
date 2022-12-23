@@ -289,6 +289,9 @@ class	TK
 			}
 			else
 			{
+				if(is_array($dstObject -> $prop))
+					$dstObject -> $prop = (object)$dstObject -> $prop;
+					
 				tk::object_merge($dstObject -> $prop, $value);
 			}
 		}
