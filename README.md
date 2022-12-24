@@ -1,7 +1,7 @@
 
 ## The project
 
-I create this content management system primarily for myself and my requirements, but make it available to the general public. I have no objection to participating in the project. Notes on errors and the like are welcome.
+I create this content management system primarily for myself and my requirements, but make it available to the general public. I don't mind if you want to take part in the project. Notes on errors and the like are welcome. Some parts need to be rewritten, so there is no technical documentation about it.
 
 There are two branches:
 
@@ -36,7 +36,7 @@ The CMS is still in an early stage of development. There may be errors that can 
 
 ## Requirements
 
-+ A web server with PHP7 +, HTAccess support (Apache style) including URL rewrite and working sendmail configuration in PHP.
++ A web server with PHP8+, HTAccess support (Apache style) including URL rewrite and working sendmail configuration in PHP.
 + A MySQL compatible database server
 
 ## Install information
