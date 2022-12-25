@@ -13,79 +13,91 @@ class CModulesTemplates
 		$this -> templatesList	= [];
 	}
 
-
-
-
 	public function
-	load(string $_moduleName, string $_templateName = '')
+	load(string $_moduleRootDir, string $_moduleName, string $_templateName = '')
 	{
-		$templatesLocation = $this -> dataLocation .$_moduleName.'/templates/';
+		{	##	read module standard templates
 
-		if(!empty($_templateName))
-		{
-			##	read defined template
+			$templatesLocation = $_moduleRootDir.$_moduleName.'/template/';
 
-			$targetTemplate = $templatesLocation.$_templateName.'/';
-
-			if(file_exists($targetTemplate))
+			if(is_dir($templatesLocation)) 
 			{
-				$templateJson 		= file_get_contents($targetTemplate . 'template.json');
+				$_dirIterator = new DirectoryIterator($templatesLocation);
 
-				if($templateJson !== false)
+				foreach($_dirIterator as $_dirItem)
 				{
-					$templateJson = json_decode($templateJson);
+					if($_dirItem -> isDot() || $_dirItem -> getType() !== 'dir')
+						continue;
 
-					if($templateJson !== NULL)
+					if($_dirItem -> getFilename()[0] === '.') continue;
+
+					$templateLocation 	= $templatesLocation . $_dirItem -> getFilename() . '/';
+					$templateJson 		= file_get_contents($templateLocation . 'template.json');
+
+					if($templateJson !== false)
 					{
-						$this -> templatesList[] = new moduleTemplate(
-																		$targetTemplate . 'template.php',
-																		$templateJson -> templateId,
-																		$templateJson -> templateName,
-																		$templateJson -> templateDescription,
-																		$templateJson -> templateIcon
-																	 );
+						$templateJson = json_decode($templateJson);
+
+						if($templateJson !== NULL)
+						{
+							$this -> templatesList[$templateJson -> templateId] = new moduleTemplate(
+								$templateLocation . 'template.php',
+								$templateJson -> templateId,
+								$templateJson -> templateName,
+								$templateJson -> templateDescription,
+								$templateJson -> templateIcon
+							);
+						}
 					}
-				}
-			}
-			else
-			{
-				$this -> templatesList = NULL;
-			}
+				}	
+			}	
 		}
-		else
-		{
-			##	read all templates withouth source
 
-			$_dirIterator = new DirectoryIterator($templatesLocation);
+		{	##	read root template dir for module templates
 
-			foreach($_dirIterator as $_dirItem)
+			$templatesLocation = CMS_SERVER_ROOT.DIR_TEMPLATES_MODULE.$_moduleName.'/';
+
+			if(is_dir($templatesLocation)) 
 			{
-				if($_dirItem -> isDot() || $_dirItem -> getType() !== 'dir')
-					continue;
+				$_dirIterator = new DirectoryIterator($templatesLocation);
 
-				if($_dirItem -> getFilename()[0] === '.') continue;
-
-				$templateLocation 	= $templatesLocation . $_dirItem -> getFilename() . '/';
-				$templateJson 		= file_get_contents($templateLocation . 'template.json');
-
-				if($templateJson !== false)
+				foreach($_dirIterator as $_dirItem)
 				{
-					$templateJson = json_decode($templateJson);
+					if($_dirItem -> isDot() || $_dirItem -> getType() !== 'dir')
+						continue;
 
-					if($templateJson !== NULL)
+					if($_dirItem -> getFilename()[0] === '.') continue;
+
+					$templateLocation 	= $templatesLocation . $_dirItem -> getFilename() . '/';
+					$templateJson 		= file_get_contents($templateLocation . 'template.json');
+
+					if($templateJson !== false)
 					{
-						$this -> templatesList[] = new moduleTemplate(
-																		$templateLocation . 'template.php',
-																		$templateJson -> templateId,
-																		$templateJson -> templateName,
-																		$templateJson -> templateDescription,
-																		$templateJson -> templateIcon
-																	 );
+						$templateJson = json_decode($templateJson);
+
+						if($templateJson !== NULL)
+						{
+							$this -> templatesList[$templateJson -> templateId] = new moduleTemplate(
+								$templateLocation . 'template.php',
+								$templateJson -> templateId,
+								$templateJson -> templateName,
+								$templateJson -> templateDescription,
+								$templateJson -> templateIcon
+							);
+						}
 					}
-				}
-			}
+				}	
+			}	
+		}
+
+		{	##	Find wanted module truncate other
+
+			if(!empty($_templateName) && isset($this -> templatesList[$_templateName]))
+				$this -> templatesList = [$this -> templatesList[$_templateName]];
+
 		}
 	}
+
 }
 
 class	moduleTemplate

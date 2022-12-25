@@ -15,6 +15,17 @@ class	controllerTagCloud extends CController
 		$this -> m_modelTags	= new modelTags();
 		parent::__construct($_module, $_object);
 		$this -> moduleInfo -> user_rights[] = 'view';	// add view right as default for everyone
+
+		switch($this -> moduleInfo -> module_type) 
+		{
+			case 'core':	
+				$this -> moduleRootDir = CMS_SERVER_ROOT.DIR_CORE.DIR_MODULES;
+				break;
+							
+			case 'mantle':
+				$this -> moduleRootDir = CMS_SERVER_ROOT.DIR_MANTLE.DIR_MODULES;
+				break;
+		}
 	}
 	
 	public function
@@ -114,7 +125,7 @@ class	controllerTagCloud extends CController
 
 		##	get module templates
 		$moduleTemplate		 = new CModulesTemplates();
-		$moduleTemplate		->	load('simpleTagCloud', $simpleObject -> params -> template);
+		$moduleTemplate		->	load($this -> moduleRootDir, $this->moduleInfo->module_location, $simpleObject -> params -> template);
 
 		##	get parent node
 		$parentNode= tk::getNodeFromSitemap($modelSitemap -> getResult(), $parentNode);
@@ -177,10 +188,10 @@ class	controllerTagCloud extends CController
 
 		##	get module templates
 		$moduleTemplate		 = new CModulesTemplates();
-		$moduleTemplate		-> load('simpleTagCloud', $simpleObject -> params -> template);
+		$moduleTemplate		-> load($this -> moduleRootDir, $this->moduleInfo->module_location, $simpleObject -> params -> template);
 
 		$moduleTemplates	 = new CModulesTemplates();
-		$moduleTemplates	-> load('simpleTagCloud');
+		$moduleTemplates	-> load($this -> moduleRootDir, $this->moduleInfo->module_location);
 
 		##	get parent node
 		$parentNode = tk::getNodeFromSitemap($modelSitemap -> getResult(), $parentNode);
@@ -331,10 +342,10 @@ class	controllerTagCloud extends CController
 
 			##	get module templates
 			$moduleTemplate		 = new CModulesTemplates();
-			$moduleTemplate		-> load('simpleTagCloud', $simpleObject -> params -> template);
+			$moduleTemplate		-> load($this -> moduleRootDir, $this->moduleInfo->module_location, $simpleObject -> params -> template);
 
 			$moduleTemplates	 = new CModulesTemplates();
-			$moduleTemplates	-> load('simpleTagCloud');
+			$moduleTemplates	-> load($this -> moduleRootDir, $this->moduleInfo->module_location);
 
 			$this -> setView(	
 							'edit',	

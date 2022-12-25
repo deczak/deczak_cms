@@ -51,15 +51,21 @@ class	CHTML
 						$pageRequest -> page_template = CFG::GET() -> TEMPLATE -> ERROR_TEMPLATE;
 						break;
 		}
-		
-		$pTemplate 		=	new CTemplates(CMS_SERVER_ROOT . DIR_TEMPLATES);
+
+		if(CMS_BACKEND && $pageRequest -> page_template === CMS_BACKEND_TEMPLATE)
+			$pTemplate 		=	new CTemplates(CMS_SERVER_ROOT . DIR_TEMPLATES);
+		else
+			$pTemplate 		=	new CTemplates(CMS_SERVER_ROOT . DIR_TEMPLATES_PAGE);
 
 		if(!isset($pageRequest -> page_template) || $pageRequest -> page_template == NULL)
 			$pageRequest -> page_template = CFG::GET() -> TEMPLATE -> ERROR_TEMPLATE;
 		
 		$template 		= 	$pTemplate -> readTemplateData($pageRequest -> page_template);
 
-		$templatePath	= 	CMS_SERVER_ROOT . DIR_TEMPLATES . $pageRequest -> page_template .'/';
+		if(CMS_BACKEND && $pageRequest -> page_template === CMS_BACKEND_TEMPLATE)
+			$templatePath	= 	CMS_SERVER_ROOT . DIR_TEMPLATES . $pageRequest -> page_template .'/';
+		else
+			$templatePath	= 	CMS_SERVER_ROOT . DIR_TEMPLATES_PAGE . $pageRequest -> page_template .'/';
 
 		$messages		=	CMessages::instance();		
 		$language		= 	CLanguage::instance();	

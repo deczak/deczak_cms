@@ -96,7 +96,7 @@ class	CPackagesInstall
 		{
 			case 'page-template':
 
-				$destLocation 		= CMS_SERVER_ROOT . DIR_TEMPLATES;
+				$destLocation 		= CMS_SERVER_ROOT . DIR_TEMPLATES_PAGE;
 				$destLocationPublic = CMS_SERVER_ROOT . DIR_PUBLIC . DIR_TEMPLATES;
 
 				if(!is_dir($destLocationPublic))

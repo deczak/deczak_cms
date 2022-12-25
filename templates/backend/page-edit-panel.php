@@ -4,7 +4,7 @@
 	require_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelCategories.php';
 	require_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelTags.php';
 
-	$pAvaiableTemplates	=	new CTemplates(CMS_SERVER_ROOT . DIR_TEMPLATES);
+	$pAvaiableTemplates	=	new CTemplates(CMS_SERVER_ROOT . DIR_TEMPLATES_PAGE);
 	$avaiableTemplates 	= 	$pAvaiableTemplates -> searchTemplates(true);
 
 	$pDatabase = CDatabase::instance() -> getConnection(CFG::GET() -> MYSQL -> PRIMARY_DATABASE);

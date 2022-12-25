@@ -17,10 +17,20 @@ class	controllerBlog extends CController
 	{
 		parent::__construct($_module, $_object);
 		$this -> moduleInfo -> user_rights[] = 'view';	// add view right as default for everyone
-
 		$this->publicActionList = [
 			'getBlogItems'
 		];
+
+		switch($this -> moduleInfo -> module_type) 
+		{
+			case 'core':	
+				$this -> moduleRootDir = CMS_SERVER_ROOT.DIR_CORE.DIR_MODULES;
+				break;
+							
+			case 'mantle':
+				$this -> moduleRootDir = CMS_SERVER_ROOT.DIR_MANTLE.DIR_MODULES;
+				break;
+		}
 	}
 	
 	public function
@@ -84,8 +94,8 @@ class	controllerBlog extends CController
 	{
 		$simpleObject = modelSimple::where('object_id', '=', $this -> objectInfo -> object_id)->one();
 
-		$moduleTemplate = new CModulesTemplates();
-		$moduleTemplate ->	load('blog', $simpleObject -> params -> template ?? 'list');
+		$moduleTemplate  = new CModulesTemplates();
+		$moduleTemplate ->	load($this -> moduleRootDir, $this->moduleInfo->module_location, $simpleObject -> params -> template ?? 'list');
 	
 		$nodeList = $this -> getNodesList($_pDatabase, $this -> objectInfo -> node_id);
 
@@ -109,10 +119,10 @@ class	controllerBlog extends CController
 		$simpleObject = modelSimple::where('object_id', '=', $this -> objectInfo -> object_id)->one();
 
 		$moduleTemplate = new CModulesTemplates();
-		$moduleTemplate ->	load('blog', $simpleObject -> params -> template ?? 'list');
+		$moduleTemplate ->	load($this -> moduleRootDir, $this->moduleInfo->module_location, $simpleObject -> params -> template ?? 'list');
 
 		$moduleTemplates = new CModulesTemplates();
-		$moduleTemplates ->	load('blog');
+		$moduleTemplates ->	load($this -> moduleRootDir, $this->moduleInfo->module_location);
 
 		$nodeList = $this -> getNodesList($_pDatabase, $this -> objectInfo -> node_id);
 
@@ -250,10 +260,10 @@ class	controllerBlog extends CController
 
 
 		$moduleTemplate = new CModulesTemplates();
-		$moduleTemplate ->	load('blog', $simpleObject -> params -> template );
+		$moduleTemplate ->	load($this -> moduleRootDir, $this->moduleInfo->module_location, $simpleObject -> params -> template );
 
 		$moduleTemplates = new CModulesTemplates();
-		$moduleTemplates ->	load('blog');
+		$moduleTemplates ->	load($this -> moduleRootDir, $this->moduleInfo->module_location);
 
 
 

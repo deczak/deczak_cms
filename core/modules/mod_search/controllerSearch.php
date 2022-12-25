@@ -11,6 +11,17 @@ class	controllerSearch extends CController
 	{
 		parent::__construct($_module, $_object);
 		$this -> moduleInfo -> user_rights[] = 'view';	// add view right as default for everyone
+
+		switch($this -> moduleInfo -> module_type) 
+		{
+			case 'core':	
+				$this -> moduleRootDir = CMS_SERVER_ROOT.DIR_CORE.DIR_MODULES;
+				break;
+							
+			case 'mantle':
+				$this -> moduleRootDir = CMS_SERVER_ROOT.DIR_MANTLE.DIR_MODULES;
+				break;
+		}
 	}
 	
 	public function
@@ -83,7 +94,7 @@ class	controllerSearch extends CController
 	
 		##	get module templates
 		$moduleTemplate		 = new CModulesTemplates();
-		$moduleTemplate		->	load('simpleSearch', $simpleObject -> params -> template);
+		$moduleTemplate		->	load($this -> moduleRootDir, $this->moduleInfo->module_location, $simpleObject -> params -> template);
 
 		##	get parent node
 		$parentNode= tk::getNodeFromSitemap($modelSitemap -> getResult(), $parentNode);
@@ -121,10 +132,10 @@ class	controllerSearch extends CController
 
 		##	get module templates
 		$moduleTemplate		 = new CModulesTemplates();
-		$moduleTemplate		-> load('simpleSearch', $simpleObject -> params -> template);
+		$moduleTemplate		-> load($this -> moduleRootDir, $this->moduleInfo->module_location, $simpleObject -> params -> template);
 
 		$moduleTemplates	 = new CModulesTemplates();
-		$moduleTemplates	-> load('simpleSearch');
+		$moduleTemplates	-> load($this -> moduleRootDir, $this->moduleInfo->module_location);
 
 		$this -> setView(	
 						'edit',	
@@ -242,10 +253,10 @@ class	controllerSearch extends CController
 
 			##	get module templates
 			$moduleTemplate		 = new CModulesTemplates();
-			$moduleTemplate		-> load('simpleSearch', $simpleObject -> params -> template);
+			$moduleTemplate		-> load($this -> moduleRootDir, $this->moduleInfo->module_location, $simpleObject -> params -> template);
 
 			$moduleTemplates	 = new CModulesTemplates();
-			$moduleTemplates	-> load('simpleSearch');
+			$moduleTemplates	-> load($this -> moduleRootDir, $this->moduleInfo->module_location);
 
 			$this -> setView(	
 							'edit',	
