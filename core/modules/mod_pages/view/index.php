@@ -1,6 +1,6 @@
 <?php
 
-	$pAvaiableTemplates	=	new CTemplates(CMS_SERVER_ROOT . DIR_TEMPLATES);
+	$pAvaiableTemplates	=	new CTemplates(CMS_SERVER_ROOT . DIR_TEMPLATES_PAGE);
 	$avaiableTemplates 	= 	$pAvaiableTemplates -> searchTemplates(true);
 
 ?>

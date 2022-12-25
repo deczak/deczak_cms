@@ -195,8 +195,6 @@ class	CPackagesInstall
 			
  			$fileExtension 		= pathinfo(strtolower($packageInfo -> exec -> pull[$i][0]), PATHINFO_EXTENSION);
 
-
-
 			switch($packageInfo -> info -> type)
 			{
 				case 'page-template':
