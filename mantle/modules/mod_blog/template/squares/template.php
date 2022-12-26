@@ -478,8 +478,8 @@ document.blogSquaresController = new blogSquaresController(<?= $objectId; ?>, <?
 
 	div.blog-container.blog-tiles > div.blog-tiles-item div.blog-tiles-item-content span.item-content-background.background-image-mode { 
 
-  		filter: saturate(0.3);
-  		opacity:0.4;
+  		filter: saturate(0.2);
+  		opacity:0.2;
 	}
 
 	div.blog-container.blog-tiles > div.blog-tiles-item div.blog-tiles-item-content span.item-content-background:hover { 
