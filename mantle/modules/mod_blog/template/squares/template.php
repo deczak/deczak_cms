@@ -330,6 +330,11 @@ class blogSquaresController
 
 				let teaserText = '';
 
+
+
+				if(item.text === null)
+					item.text = {body:''}
+
 				if(itemSize > 1)
 				{
 					switch(item.postSetting.post_teasertext_mode)
@@ -448,7 +453,7 @@ document.blogSquaresController = new blogSquaresController(<?= $objectId; ?>, <?
 		display:flex;
 		flex-direction:column;
 		justify-content:center;
-		text-shadow: 0 0px 4px rgb(255 255 255);
+		/*text-shadow: 0 0px 4px rgb(255 255 255);*/
 		box-shadow: 0 0 5px 2px rgb(0 0 0 / 10%);
 		position:relative;
 		overflow:hidden;		
@@ -525,7 +530,7 @@ document.blogSquaresController = new blogSquaresController(<?= $objectId; ?>, <?
 	div.blog-container.blog-tiles > div.blog-tiles-item div.blog-tiles-item-content span.item-content-categories {
 
 		display:block;
-		font-size:0.5em;
+		font-size:0.54em;
 		font-weight:600;
 		text-transform:uppercase;
 		letter-spacing:1px;

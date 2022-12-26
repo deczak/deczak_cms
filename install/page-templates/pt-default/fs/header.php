@@ -55,7 +55,7 @@ createMenu(&$sitemap, $_pos = 1, $_level = 2 )
 
 		<div>
 
-			This is the header area
+			<!-- place here the header stuff -->
 
 		</div>
 

@@ -386,9 +386,6 @@ class	controllerBlog extends CController
 			$modelSitemap -> load($_pDatabase, $sitemapCondition);
 
 			$nodeList = &$modelSitemap -> getResult();
-
-
-
 		
 			$this -> appendAdditionNodeData($_pDatabase, $nodeList);
 		}
@@ -403,7 +400,6 @@ class	controllerBlog extends CController
 
 		foreach($nodeList as $nodeIndex => $node)
 		{
-
 			if(property_exists($node, 'level'))
 			{
 				if($rootLevel === false)
@@ -414,7 +410,6 @@ class	controllerBlog extends CController
 					continue;
 				}
 				
-		
 				if($rootLevel != $node -> level)
 				{
 					unset($nodeList[$nodeIndex]);
@@ -434,16 +429,16 @@ class	controllerBlog extends CController
 				||  CMS_BACKEND
 				); else unset($nodeList[$nodeIndex]);
 
-			if(empty($node -> text))
-				unset($nodeList[$nodeIndex]);
+			#if(empty($node -> text))
+			#	unset($nodeList[$nodeIndex]);
 		}
 
-/*
+		/*
 		$createTime = [];
 
 		foreach($nodeList as $key => $node)
 			$createTime[$key] = $node -> create_time;
-			*/
+		*/
 
 		#array_multisort($createTime, SORT_DESC, $nodeList);
 		$nodeList = array_values($nodeList);

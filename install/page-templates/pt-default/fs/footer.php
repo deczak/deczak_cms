@@ -1,11 +1,8 @@
 
 <footer>
 
-	<div class="inner-wrapper">
 
-		This is the footer area
-
-	</div>
+	<!-- place here the footer stuff -->
 
 </footer>
 
