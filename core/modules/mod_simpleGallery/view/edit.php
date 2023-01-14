@@ -47,26 +47,16 @@
 				<div class="select-wrapper">
 					<select name="simple-gallery-format" class="trigger-view-mode" style="width:120px; border-radius:0; padding: 5px;">
 						<option <?= (($object -> params -> format ?? 'ratio') === 'ratio' ? 'selected' : ''); ?> value="ratio">Ratio based</option>
-						<option <?= (($object -> params -> format ?? 'ratio') === 'squares' ? 'selected' : ''); ?> value="squares">Squares</option>
+						<option hidden <?= (($object -> params -> format ?? 'ratio') === 'squares' ? 'selected' : ''); ?> value="squares">Squares</option>
 					</select>
 				</div>	
 			</div>
 		</div>
 
 		<div style="display:flex; align-items:center;">
-			<label>Display divider</label>	
+			<label>Thumbnail Height (px)</label>	
 			<div class="input">
-				<div class="select-wrapper">
-					<select name="simple-gallery-display-divider"  class="trigger-view-divider" style="width:70px; border-radius:0;padding: 5px;">
-						<option <?= (($object -> params -> display_divider ?? '8') === '2' ? 'selected' : ''); ?> value="2">2</option>
-						<option <?= (($object -> params -> display_divider ?? '8') === '3' ? 'selected' : ''); ?> value="3">3</option>
-						<option <?= (($object -> params -> display_divider ?? '8') === '4' ? 'selected' : ''); ?> value="4">4</option>
-						<option <?= (($object -> params -> display_divider ?? '8') === '5' ? 'selected' : ''); ?> value="5">5</option>
-						<option <?= (($object -> params -> display_divider ?? '8') === '6' ? 'selected' : ''); ?> value="6">6</option>
-						<option <?= (($object -> params -> display_divider ?? '8') === '7' ? 'selected' : ''); ?> value="7">7</option>
-						<option <?= (($object -> params -> display_divider ?? '8') === '8' ? 'selected' : ''); ?> value="8">8</option>
-					</select>
-				</div>	
+				<input type="number" min="100" max="500"  class="trigger-view-thumb-height"  name="simple-gallery-thumb-height" value="<?= $object -> params -> thumb_height ?? '300'; ?>">
 			</div>
 		</div>
 	

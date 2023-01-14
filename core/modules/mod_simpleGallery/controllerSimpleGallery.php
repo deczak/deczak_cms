@@ -148,8 +148,8 @@ class	controllerSimpleGallery extends CController
 		$pURLVariables =	new CURLVariables();
 		$requestList		 =	[];
 		$requestList[] 	 = 	[	"input" => "simple-gallery-item", "validate" => "!empty" ]; 
-		$requestList[] 	 = 	[	"input" => "simple-gallery-display-divider", "validate" => "!empty" ];
 		$requestList[] 	 = 	[	"input" => "simple-gallery-format", "validate" => "!empty" ];
+		$requestList[] 	 = 	[	"input" => "simple-gallery-thumb-height", "validate" => "!empty" ];
 		$pURLVariables-> retrieve($requestList, false, true); // POST 
 		$urlVarList		 = $pURLVariables ->getArray();
 
@@ -160,8 +160,8 @@ class	controllerSimpleGallery extends CController
 		{
 			$simpleObject = modelSimple::where('object_id', '=', $_xhrInfo -> objectId)->one();
 
-			$simpleObject->params->display_divider 	= $urlVarList['simple-gallery-display-divider'];
 			$simpleObject->params->format 			= $urlVarList['simple-gallery-format'];
+			$simpleObject->params->thumb_height		= $urlVarList['simple-gallery-thumb-height'];
 			$simpleObject->params->itemList 		= $urlVarList['simple-gallery-item'];
 			$simpleObject->body = '';
 

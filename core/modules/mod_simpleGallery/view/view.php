@@ -1,12 +1,11 @@
 
-<div class="simple-gallery-images-list loading-indicator-space" id="simple-galleryimage-list-<?= $object -> object_id; ?>" data-tile-size="<?= ($object -> params -> display_divider ?? '8'); ?>" data-tile-format="<?= ($object -> params -> format ?? '8'); ?>" id="simple-gallery-list-<?php echo $object -> object_id; ?>">
-
+<div class="simple-gallery-images-list loading-indicator-space" id="simple-galleryimage-list-<?= $object -> object_id; ?>" data-tile-format="<?= ($object -> params -> format ?? '8'); ?>" id="simple-gallery-list-<?php echo $object -> object_id; ?>">
 
 	<div class="loading-indicator" style="clear:both;text-align: center; padding-top:20px; position:absolute; top:100%; left:0px; width:100%;">
 		<div class="lds-dual-ring"></div>
 	</div>
 
-</div>
+<div style="clear:both;"><!-- float cleaner ... do not add linebreak or js is broken --></div></div>
 
 <script>
 
@@ -14,6 +13,11 @@ class cmsSimpleGalleryController
 {
 	constructor()
 	{
+		this.drawRow 			= 1;		// Active row, just for debug
+		this.drawRowXMaxSize	= 1500;
+		this.drawImageYSize 	= <?= ($object -> params -> thumb_height ?? '300'); ?>;		// Image Y size regular
+		this.drawImageYBuffer 	= 35;		// Image Y size lowering to fit them in row
+		this.drawImageYMax 	    = 350;		// Image Y size max on row size corretion
 	}
 
 	create(nodeId, objectId, initialItemList)
@@ -68,125 +72,166 @@ class cmsSimpleGalleryController
 
 	requestItemsSuccess(outputNode, itemList)
 	{
-		this.drawList(outputNode, itemList);
+		let processedItems = { num: 0};
 
-		outputNode.simpleGallery.requestOffset = outputNode.simpleGallery.requestOffset + itemList.length;
+		let drawList = this.prepareDrawList(outputNode, itemList, processedItems);
+
+		this.drawList(outputNode, drawList);
+
+		outputNode.simpleGallery.requestOffset = outputNode.simpleGallery.requestOffset + processedItems.num;
 		outputNode.simpleGallery.lockRequest = false;
 
 		if(cmstk.detectNodeBottomInViewport(outputNode, 200))
 			this.requestItems(outputNode);
 
-
 		if(itemList.length < outputNode.simpleGallery.requestLimit || itemList.length == 0)
 		{
 			outputNode.simpleGallery.stopRequest = true;
-
 			outputNode.classList.remove('loading-indicator-space');
 		}
+	}
 
+	rowSizeCorrection(itemsList)
+	{
+		let percentUsed = 0;
 
+		for(let i = 0; i < itemsList.length; i++)
+		{
+			percentUsed += itemsList[i].sizeX;
+		}
 
+		let percentUnsed = 100 - percentUsed;
+		let percentUnusedPerItem = percentUnsed / itemsList.length;
+		let drawImageYSize = this.drawRowXMaxSize / ((this.drawRowXMaxSize / 100 * percentUsed) / this.drawImageYSize);
+
+		if(drawImageYSize > this.drawImageYMax)
+			drawImageYSize = this.drawImageYMax;
+
+		for(let i = 0; i < itemsList.length; i++)
+		{
+			let scaleFaktor     = itemsList[i].sizeX / itemsList[i].sizeY
+			itemsList[i].sizeX += percentUnusedPerItem;
+			itemsList[i].sizeY  = drawImageYSize / this.drawRowXMaxSize * 100;;
+		}
+		return itemsList;
+	}
+
+	prepareDrawList(outputNode, itemList, processedItems)
+	{
+		let drawItems = [];
+
+		let drawItemsBuffer  	= [];
+		let drawItemsBuffer_B 	= [];
+		let drawRowXUsedSize 	= 0;		
+		let drawRowXUsedSize_B 	= 0;	
+
+		let outputNodeRect = outputNode.getBoundingClientRect();
+
+		let drawImageYSize		= this.drawImageYSize;
+			drawImageYSize		= drawImageYSize / this.drawRowXMaxSize * outputNodeRect.width;
+
+		let image = Object.keys(itemList);
+
+		for(let i = 0; i < image.length; i++)
+		{
+			let scaleFaktor 	= itemList[image[i]].props[1] / drawImageYSize
+			let drawImageXSize 	= itemList[image[i]].props[0] / scaleFaktor;
+			let percentXSize	= drawImageXSize * 100 / this.drawRowXMaxSize;
+			let percentYPadding = drawImageYSize / this.drawRowXMaxSize * 100;
+
+			let scaleFaktor______B = itemList[image[i]].props[1] / (drawImageYSize - this.drawImageYBuffer)
+			let drawImageXSize___B = itemList[image[i]].props[0] / scaleFaktor______B;
+			let percentXSize_____B = drawImageXSize___B * 100 / this.drawRowXMaxSize;
+			let percentYPadding__B = (drawImageYSize - this.drawImageYBuffer) / this.drawRowXMaxSize * 100;
+
+			drawRowXUsedSize  	+= drawImageXSize;
+			drawRowXUsedSize_B 	+= drawImageXSize___B;
+
+			if((drawRowXUsedSize) > this.drawRowXMaxSize)
+			{
+				if((drawRowXUsedSize_B) > this.drawRowXMaxSize)
+				{
+					drawItemsBuffer = this.rowSizeCorrection(drawItemsBuffer);
+
+					processedItems.num += drawItemsBuffer.length;
+
+					drawItems = drawItems.concat(drawItemsBuffer);
+
+					drawRowXUsedSize = 0;
+					drawRowXUsedSize_B = 0;
+					drawItemsBuffer = [];
+					drawItemsBuffer_B = [];
+					this.drawRow++;
+					i--;
+					continue;
+				}
+				else
+				{
+					drawItemsBuffer_B.push({
+						image:itemList[image[i]],
+						sizeX: percentXSize_____B,
+						sizeY: percentYPadding__B
+					});
+
+					drawItemsBuffer_B = this.rowSizeCorrection(drawItemsBuffer_B);
+
+					processedItems.num += drawItemsBuffer_B.length;
+
+					drawItems = drawItems.concat(drawItemsBuffer_B);
+
+					drawRowXUsedSize = 0;
+					drawRowXUsedSize_B = 0;
+					drawItemsBuffer = [];
+					drawItemsBuffer_B = [];
+					
+					this.drawRow++;
+				
+					continue;
+				}
+			}
+
+			drawItemsBuffer.push({
+				image: itemList[image[i]],
+				sizeX: percentXSize,
+				sizeY: percentYPadding
+			});
+
+			drawItemsBuffer_B.push({
+				image:itemList[image[i]],
+				sizeX: percentXSize_____B,
+				sizeY: percentYPadding__B
+			});
+		}
+
+		if(image.length < outputNode.simpleGallery.requestLimit)
+		{
+			// Process rest of data
+
+			this.drawRow++;
+
+			// drawItemsBuffer = this.rowSizeCorrection(drawItemsBuffer);
+			processedItems.num += drawItemsBuffer.length;
+			drawItems = drawItems.concat(drawItemsBuffer);
+		}
+
+		return drawItems;
 	}
 
 	drawList(outputNode, itemList)
 	{
-		let ts = <?= ($object -> params -> display_divider ?? '8'); ?>;
+		let imageSize = 'thumb';
 
-		loopDo:
-		do {
+		for(let i = 0; i < itemList.length; i++)
+		{
+			let aNode = document.createElement('a');
+				aNode.href = '<?= CMS_SERVER_URL.DIR_MEDIATHEK; ?>'+ itemList[i].image.path +'/?size=xlarge'
+				aNode.innerHTML = '<img src="<?= CMS_SERVER_URL.DIR_MEDIATHEK; ?>'+ itemList[i].image.path +'/?binary&size='+ imageSize +'">'
 
-			let rp = 0;
-			let bp = [];
-			let bl = [];
-			let rp2= 0;
-
-			let imageSize = 'thumb';
-
-			switch((<?= $object -> params -> display_divider ?? '8'; ?>))
-			{
-				case '2': 
-					imageSize = 'medium'; break;
-				case '3': 
-					imageSize = 'small'; break;
-
-			}
-
-			for(let item of itemList)
-			{
-				switch(item.mime )
-				{
-					case 'image/jpeg':
-					case 'image/png':
-					case 'image/png':
-
-						break;
-
-					default:
-
-						continue loopDo;
-				}
-
-				switch(item.orient)
-				{
-					case 0:
-
-						rp2 = 2;
-						break;
-
-					case 1:
-
-						rp2 = 1;
-						break;
-				}
-
-				if((rp + rp2) > ts)
-				{
-					if(rp == (ts - 1) && bp.length > 0)
-					{
-						let itemp = bp.pop();
-
-						let aNode = document.createElement('a');
-							aNode.classList.add('orient-'+ itemp.orient);
-							aNode.href = '<?= CMS_SERVER_URL.DIR_MEDIATHEK; ?>'+ itemp.path +'/?size=xlarge'
-							aNode.innerHTML = '<img src="<?= CMS_SERVER_URL.DIR_MEDIATHEK; ?>'+ itemp.path +'/?binary&size='+ imageSize +'">'
-
-						outputNode.appendChild(aNode);
-					}
-
-					rp = 0;
-
-					switch(item.orient)
-					{
-						case 0:
-
-							bl.push(item);
-							break;
-
-						case 1:
-
-							bp.push(item);
-							break;
-					}
-
-					continue;
-				}
-
-				rp = rp + rp2;
-
-				let aNode = document.createElement('a');
-					aNode.classList.add('orient-'+ item.orient);
-					aNode.href = '<?= CMS_SERVER_URL.DIR_MEDIATHEK; ?>'+ item.path +'/?size=xlarge'
-					aNode.innerHTML = '<img src="<?= CMS_SERVER_URL.DIR_MEDIATHEK; ?>'+ item.path +'/?binary&size='+ imageSize +'">'
-
-				outputNode.appendChild(aNode);			
-			}
-
-			itemList = bp.concat(bl);
-
-			if(itemList.length == 0)
-				break;
-
-		} while (true);
+				aNode.style.width 		= itemList[i].sizeX +'%';
+				aNode.style.paddingTop  = itemList[i].sizeY +'%';
+				
+			outputNode.insertBefore(aNode, outputNode.lastChild);
+		}
 	}
 }
 
@@ -202,233 +247,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <style>
 
-
-/*
-
-	temporary solution with that media queries
-
-
-	max-width - 4% [2 + 2] padding / num tiles * 100 / (max-width - 4% padding) = height %
-
-	1400 - 4% / 6 * 100 / (1344) = 16.6%
-
-
-
-*/
-
-
-
-div.simple-gallery-images-list { display:flex; flex-wrap:wrap; position: relative; margin-bottom:40px; }
-
-div.simple-gallery-images-list.loading-indicator-space { margin-bottom:40px; }
-div.simple-gallery-images-list:not(.loading-indicator-space) .loading-indicator { display:none;  }
-
-div.simple-gallery-images-list > a { flex-shrink:0; display:block; border:1px solid white; padding-top:16.5%; position:relative; }
-
-
-
-div.simple-gallery-images-list[data-tile-size="2"] > a { padding-top:49.851%; }
-div.simple-gallery-images-list[data-tile-size="2"] > a.orient-0 { width:100%; }
-div.simple-gallery-images-list[data-tile-size="2"][data-tile-format="squares"] > a.orient-0,
-div.simple-gallery-images-list[data-tile-size="2"] > a.orient-1,
-div.simple-gallery-images-list[data-tile-size="2"] > a:last-child { width:50%; }
-
-div.simple-gallery-images-list[data-tile-size="3"] > a { padding-top:33.184%; }
-div.simple-gallery-images-list[data-tile-size="3"] > a.orient-0 { width:66.666%; }
-div.simple-gallery-images-list[data-tile-size="3"][data-tile-format="squares"] > a.orient-0,
-div.simple-gallery-images-list[data-tile-size="3"] > a.orient-1,
-div.simple-gallery-images-list[data-tile-size="3"] > a:last-child { width:33.333%; }
-
-div.simple-gallery-images-list[data-tile-size="4"] > a {  padding-top:24.851%;}
-div.simple-gallery-images-list[data-tile-size="4"] > a.orient-0 { width:50%; }
-div.simple-gallery-images-list[data-tile-size="4"][data-tile-format="squares"] > a.orient-0,
-div.simple-gallery-images-list[data-tile-size="4"] > a.orient-1,
-div.simple-gallery-images-list[data-tile-size="4"] > a:last-child { width:25%; }
-
-div.simple-gallery-images-list[data-tile-size="5"] > a { padding-top:19.85%; }
-div.simple-gallery-images-list[data-tile-size="5"] > a.orient-0 { width:40%; }
-div.simple-gallery-images-list[data-tile-size="5"][data-tile-format="squares"] > a.orient-0,
-div.simple-gallery-images-list[data-tile-size="5"] > a.orient-1,
-div.simple-gallery-images-list[data-tile-size="5"] > a:last-child { width:20%; }
-
-div.simple-gallery-images-list[data-tile-size="6"] > a { padding-top:16.51%; }
-div.simple-gallery-images-list[data-tile-size="6"] > a.orient-0 { width:33.33%; }
-div.simple-gallery-images-list[data-tile-size="6"][data-tile-format="squares"] > a.orient-0,
-div.simple-gallery-images-list[data-tile-size="6"] > a.orient-1,
-div.simple-gallery-images-list[data-tile-size="6"] > a:last-child { width:16.66%; }
-
-div.simple-gallery-images-list[data-tile-size="7"] > a { padding-top:14.136%; }
-div.simple-gallery-images-list[data-tile-size="7"] > a.orient-0 { width:28.571%; }
-div.simple-gallery-images-list[data-tile-size="7"][data-tile-format="squares"] > a.orient-0,
-div.simple-gallery-images-list[data-tile-size="7"] > a.orient-1,
-div.simple-gallery-images-list[data-tile-size="7"] > a:last-child { width:14.286%; }
-
-div.simple-gallery-images-list[data-tile-size="8"] > a { padding-top:12.351%; }
-div.simple-gallery-images-list[data-tile-size="8"] > a.orient-0 { width:25%; }
-div.simple-gallery-images-list[data-tile-size="8"][data-tile-format="squares"] > a.orient-0,
-div.simple-gallery-images-list[data-tile-size="8"] > a.orient-1,
-div.simple-gallery-images-list[data-tile-size="8"] > a:last-child { width:12.5%; }
-
-div.simple-gallery-images-list > a > img { width: 100%; height:100%; object-fit: cover; object-position: 50% 50%; position:absolute; top:0px; left:0px; }
-
-@media only screen and (max-width: 1200px) {
-
-	div.simple-gallery-images-list[data-tile-size="8"] > a { padding-top:14.136%; }
-	div.simple-gallery-images-list[data-tile-size="8"] > a.orient-0 { width:28.571%; }
-	div.simple-gallery-images-list[data-tile-size="8"][data-tile-format="squares"] > a.orient-0,
-	div.simple-gallery-images-list[data-tile-size="8"] > a.orient-1,
-	div.simple-gallery-images-list[data-tile-size="8"] > a:last-child { width:14.286%; }
-
-}
-
-@media only screen and (max-width: 1100px) {
-
-	div.simple-gallery-images-list[data-tile-size="7"] > a { padding-top:16.51%; }
-	div.simple-gallery-images-list[data-tile-size="7"] > a.orient-0 { width:33.33%; }
-	div.simple-gallery-images-list[data-tile-size="7"][data-tile-format="squares"] > a.orient-0,
-	div.simple-gallery-images-list[data-tile-size="7"] > a.orient-1,
-	div.simple-gallery-images-list[data-tile-size="7"] > a:last-child { width:16.66%; }
-
-	div.simple-gallery-images-list[data-tile-size="8"] > a { padding-top:16.51%; }
-	div.simple-gallery-images-list[data-tile-size="8"] > a.orient-0 { width:33.33%; }
-	div.simple-gallery-images-list[data-tile-size="8"][data-tile-format="squares"] > a.orient-0,
-	div.simple-gallery-images-list[data-tile-size="8"] > a.orient-1,
-	div.simple-gallery-images-list[data-tile-size="8"] > a:last-child { width:16.66%; }
-
-}
-
-@media only screen and (max-width: 1100px) {
-
-	div.simple-gallery-images-list[data-tile-size="6"] > a { padding-top:19.85%; }
-	div.simple-gallery-images-list[data-tile-size="6"] > a.orient-0 { width:40%; }
-	div.simple-gallery-images-list[data-tile-size="6"][data-tile-format="squares"] > a.orient-0,
-	div.simple-gallery-images-list[data-tile-size="6"] > a.orient-1,
-	div.simple-gallery-images-list[data-tile-size="6"] > a:last-child { width:20%; }
-
-	div.simple-gallery-images-list[data-tile-size="7"] > a { padding-top:19.85%; }
-	div.simple-gallery-images-list[data-tile-size="7"] > a.orient-0 { width:40%; }
-	div.simple-gallery-images-list[data-tile-size="7"][data-tile-format="squares"] > a.orient-0,
-	div.simple-gallery-images-list[data-tile-size="7"] > a.orient-1,
-	div.simple-gallery-images-list[data-tile-size="7"] > a:last-child { width:20%; }
-
-	div.simple-gallery-images-list[data-tile-size="8"] > a { padding-top:19.85%; }
-	div.simple-gallery-images-list[data-tile-size="8"] > a.orient-0 { width:40%; }
-	div.simple-gallery-images-list[data-tile-size="8"][data-tile-format="squares"] > a.orient-0,
-	div.simple-gallery-images-list[data-tile-size="8"] > a.orient-1,
-	div.simple-gallery-images-list[data-tile-size="8"] > a:last-child { width:20%; }
-
-}
-
-@media only screen and (max-width: 1000px) {
-
-	div.simple-gallery-images-list[data-tile-size="5"] > a {  padding-top:24.851%;}
-	div.simple-gallery-images-list[data-tile-size="5"] > a.orient-0 { width:50%; }
-	div.simple-gallery-images-list[data-tile-size="5"][data-tile-format="squares"] > a.orient-0,
-	div.simple-gallery-images-list[data-tile-size="5"] > a.orient-1,
-	div.simple-gallery-images-list[data-tile-size="5"] > a:last-child { width:25%; }
-
-	div.simple-gallery-images-list[data-tile-size="6"] > a {  padding-top:24.851%;}
-	div.simple-gallery-images-list[data-tile-size="6"] > a.orient-0 { width:50%; }
-	div.simple-gallery-images-list[data-tile-size="6"][data-tile-format="squares"] > a.orient-0,
-	div.simple-gallery-images-list[data-tile-size="6"] > a.orient-1,
-	div.simple-gallery-images-list[data-tile-size="6"] > a:last-child { width:25%; }
-
-	div.simple-gallery-images-list[data-tile-size="7"] > a {  padding-top:24.851%;}
-	div.simple-gallery-images-list[data-tile-size="7"] > a.orient-0 { width:50%; }
-	div.simple-gallery-images-list[data-tile-size="7"][data-tile-format="squares"] > a.orient-0,
-	div.simple-gallery-images-list[data-tile-size="7"] > a.orient-1,
-	div.simple-gallery-images-list[data-tile-size="7"] > a:last-child { width:25%; }
-
-	div.simple-gallery-images-list[data-tile-size="8"] > a {  padding-top:24.851%;}
-	div.simple-gallery-images-list[data-tile-size="8"] > a.orient-0 { width:50%; }
-	div.simple-gallery-images-list[data-tile-size="8"][data-tile-format="squares"] > a.orient-0,
-	div.simple-gallery-images-list[data-tile-size="8"] > a.orient-1,
-	div.simple-gallery-images-list[data-tile-size="8"] > a:last-child { width:25%; }
-}
-
-@media only screen and (max-width: 950px) {
-
-	div.simple-gallery-images-list[data-tile-size="4"] > a { padding-top:33.184%; }
-	div.simple-gallery-images-list[data-tile-size="4"] > a.orient-0 { width:66.666%; }
-	div.simple-gallery-images-list[data-tile-size="4"][data-tile-format="squares"] > a.orient-0,
-	div.simple-gallery-images-list[data-tile-size="4"] > a.orient-1,
-	div.simple-gallery-images-list[data-tile-size="4"] > a:last-child { width:33.333%; }
-
-	div.simple-gallery-images-list[data-tile-size="5"] > a { padding-top:33.184%; }
-	div.simple-gallery-images-list[data-tile-size="5"] > a.orient-0 { width:66.666%; }
-	div.simple-gallery-images-list[data-tile-size="5"][data-tile-format="squares"] > a.orient-0,
-	div.simple-gallery-images-list[data-tile-size="5"] > a.orient-1,
-	div.simple-gallery-images-list[data-tile-size="5"] > a:last-child { width:33.333%; }
-
-	div.simple-gallery-images-list[data-tile-size="6"] > a { padding-top:33.184%; }
-	div.simple-gallery-images-list[data-tile-size="6"] > a.orient-0 { width:66.666%; }
-	div.simple-gallery-images-list[data-tile-size="6"][data-tile-format="squares"] > a.orient-0,
-	div.simple-gallery-images-list[data-tile-size="6"] > a.orient-1,
-	div.simple-gallery-images-list[data-tile-size="6"] > a:last-child { width:33.333%; }
-
-	div.simple-gallery-images-list[data-tile-size="7"] > a { padding-top:33.184%; }
-	div.simple-gallery-images-list[data-tile-size="7"] > a.orient-0 { width:66.666%; }
-	div.simple-gallery-images-list[data-tile-size="7"][data-tile-format="squares"] > a.orient-0,
-	div.simple-gallery-images-list[data-tile-size="7"] > a.orient-1,
-	div.simple-gallery-images-list[data-tile-size="7"] > a:last-child { width:33.333%; }
-
-	div.simple-gallery-images-list[data-tile-size="8"] > a { padding-top:33.184%; }
-	div.simple-gallery-images-list[data-tile-size="8"] > a.orient-0 { width:66.666%; }
-	div.simple-gallery-images-list[data-tile-size="8"][data-tile-format="squares"] > a.orient-0,
-	div.simple-gallery-images-list[data-tile-size="8"] > a.orient-1,
-	div.simple-gallery-images-list[data-tile-size="8"] > a:last-child { width:33.333%; }
-
-}
-
-@media only screen and (max-width: 950px) {
-
-	div.simple-gallery-images-list[data-tile-size="3"] > a { padding-top:49.851%; }
-	div.simple-gallery-images-list[data-tile-size="3"] > a.orient-0 { width:100%; }
-	div.simple-gallery-images-list[data-tile-size="3"][data-tile-format="squares"] > a.orient-0,
-	div.simple-gallery-images-list[data-tile-size="3"] > a.orient-1,
-	div.simple-gallery-images-list[data-tile-size="3"] > a:last-child { width:50%; }
-
-	div.simple-gallery-images-list[data-tile-size="4"] > a { padding-top:49.851%; }
-	div.simple-gallery-images-list[data-tile-size="4"] > a.orient-0 { width:100%; }
-	div.simple-gallery-images-list[data-tile-size="4"][data-tile-format="squares"] > a.orient-0,
-	div.simple-gallery-images-list[data-tile-size="4"] > a.orient-1,
-	div.simple-gallery-images-list[data-tile-size="4"] > a:last-child { width:50%; }
-
-	div.simple-gallery-images-list[data-tile-size="5"] > a { padding-top:49.851%; }
-	div.simple-gallery-images-list[data-tile-size="5"] > a.orient-0 { width:100%; }
-	div.simple-gallery-images-list[data-tile-size="5"][data-tile-format="squares"] > a.orient-0,
-	div.simple-gallery-images-list[data-tile-size="5"] > a.orient-1,
-	div.simple-gallery-images-list[data-tile-size="5"] > a:last-child { width:50%; }
-
-	div.simple-gallery-images-list[data-tile-size="6"] > a { padding-top:49.851%; }
-	div.simple-gallery-images-list[data-tile-size="6"] > a.orient-0 { width:100%; }
-	div.simple-gallery-images-list[data-tile-size="6"][data-tile-format="squares"] > a.orient-0,
-	div.simple-gallery-images-list[data-tile-size="6"] > a.orient-1,
-	div.simple-gallery-images-list[data-tile-size="6"] > a:last-child { width:50%; }
-
-	div.simple-gallery-images-list[data-tile-size="7"] > a { padding-top:49.851%; }
-	div.simple-gallery-images-list[data-tile-size="7"] > a.orient-0 { width:100%; }
-	div.simple-gallery-images-list[data-tile-size="7"][data-tile-format="squares"] > a.orient-0,
-	div.simple-gallery-images-list[data-tile-size="7"] > a.orient-1,
-	div.simple-gallery-images-list[data-tile-size="7"] > a:last-child { width:50%; }
-
-	div.simple-gallery-images-list[data-tile-size="8"] > a { padding-top:49.851%; }
-	div.simple-gallery-images-list[data-tile-size="8"] > a.orient-0 { width:100%; }
-	div.simple-gallery-images-list[data-tile-size="8"][data-tile-format="squares"] > a.orient-0,
-	div.simple-gallery-images-list[data-tile-size="8"] > a.orient-1,
-	div.simple-gallery-images-list[data-tile-size="8"] > a:last-child { width:50%; }
-
-}
-
-
-
-@media only screen and (max-width: 500px) {
-
-	div.simple-gallery-images-list > a { height: 300px; width:100% !important; }
-
-}
-
-
+	div.simple-gallery-images-list.loading-indicator-space { margin-bottom:40px; }
+	div.simple-gallery-images-list:not(.loading-indicator-space) .loading-indicator { display:none;  }
+	div.simple-gallery-images-list > a { float:left; position:relative; }
+	div.simple-gallery-images-list > a > img { width: 100%; height:100%; object-fit: cover; object-position: 50% 50%; position:absolute; top:0px; left:0px; border:solid transparent 3px; }
 
 </style>
 

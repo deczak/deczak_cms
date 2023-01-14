@@ -1,3 +1,4 @@
+
 class cmsMECP_SimpleGallery
 {
 	constructor()
@@ -15,16 +16,7 @@ class cmsMECP_SimpleGallery
 
 		this.manageItemsTemplate  = '';
 		this.manageItemsTemplate += '<td style="padding-top:0px; padding-bottom:0px;"><input type="hidden" class="simple-gallery-manage-item-path" name="[INPUT_NAME_ITEM_PATH]" value="[ITEM_PATH]">[ITEM_NAME]</td>';
-/*
-		this.manageItemsTemplate += '<td style="text-align:center;padding:0px;"> ';
-		this.manageItemsTemplate += '<div class="select-wrapper">';
-		this.manageItemsTemplate += '<select name="[INPUT_NAME_LISTING_HIDDEN]" style="width:100%; border:0px; box-shadow:none;">';
-		this.manageItemsTemplate += '<option value="0" [INPUT_NAME_LISTING_HIDDEN_0]>No</option>';
-		this.manageItemsTemplate += '<option value="1" [INPUT_NAME_LISTING_HIDDEN_1]>Yes</option>';
-		this.manageItemsTemplate += '</select>';
-		this.manageItemsTemplate += '</div>';
-		this.manageItemsTemplate += '</td>';
-*/
+
 		this.manageItemsTemplate += '<td style="padding-top:0px; padding-bottom:0px;"><input type="hidden" class="simple-gallery-manage-item-listing-type" name="[INPUT_NAME_LISTING_TYPE]" value="[LISTING_TYPE]">[LISTING_TYPE_TEXT]</td>';
 		this.manageItemsTemplate += '<td style="text-align:center;padding:0px;">';
 		this.manageItemsTemplate += '<button class="ui button trigger-manage-gallery-remove-item" style="width:auto;">';
@@ -117,22 +109,25 @@ class cmsMECP_SimpleGallery
 					return true;
 				}
 				
-				if(event.target.classList.contains('trigger-view-divider'))
+				break;
+
+			case 'INPUT':
+
+				if(event.target.classList.contains('trigger-view-thumb-height'))
 				{
-					this.triggerContentUpdate(mecpContainer);
+				//	let templateId = event.target.getAttribute('data-template-id');
+				//	if(templateId !== null)
+						this.triggerContentUpdate(mecpContainer);
+
+					//	srcInstance.setViewMode(templateId, mecpDtaClass, mecpContainer);
+
 					return true;
 				}
+				
 				break;
 		}	
 	}
-	/*
-	setViewMode(viewMode, mecpDtaClass, mecpContainer)
-	{
-		mecpContainer.querySelector('input[name="simple-gallery-template"]').value = viewMode;
-		this.triggerContentUpdate(mecpContainer);
-	}
-	*/
-
+	
 	onEventAddImage(mecpDtaClass)
 	{
 		let mediathek = new cmsModalMediathek;
@@ -323,3 +318,4 @@ class cmsMECP_SimpleGallery
 }
 
 document.MECP_SimpleGallery = new cmsMECP_SimpleGallery;
+
