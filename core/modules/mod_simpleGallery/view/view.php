@@ -25,7 +25,8 @@ class cmsSimpleGalleryController
 		let containerNode = document.getElementById(nodeId);
 
 		containerNode.simpleGallery = {};
-		containerNode.simpleGallery.requestLimit	= initialItemList.length;
+		//containerNode.simpleGallery.requestLimit	= initialItemList.length;
+		containerNode.simpleGallery.requestLimit	= 20;
 		containerNode.simpleGallery.requestOffset	= 0;
 		containerNode.simpleGallery.stopRequest		= false;
 		containerNode.simpleGallery.lockRequest		= false;
@@ -37,7 +38,7 @@ class cmsSimpleGalleryController
 
 		addEventListener("scroll", (event) => {
 
-			if(cmstk.detectNodeBottomInViewport(containerNode, 200))
+			if(cmstk.detectNodeBottomInViewport(containerNode, 400))
 				srcInstance.requestItems(containerNode);
 
 		});
@@ -91,7 +92,7 @@ class cmsSimpleGalleryController
 		}
 	}
 
-	rowSizeCorrection(itemsList)
+	rowSizeCorrection(itemsList, outputNodeWidthX)
 	{
 		let percentUsed = 0;
 
@@ -102,7 +103,8 @@ class cmsSimpleGalleryController
 
 		let percentUnsed = 100 - percentUsed;
 		let percentUnusedPerItem = percentUnsed / itemsList.length;
-		let drawImageYSize = this.drawRowXMaxSize / ((this.drawRowXMaxSize / 100 * percentUsed) / this.drawImageYSize);
+
+		let drawImageYSize = outputNodeWidthX / ((outputNodeWidthX / 100 * percentUsed) / this.drawImageYSize);
 
 		if(drawImageYSize > this.drawImageYMax)
 			drawImageYSize = this.drawImageYMax;
@@ -111,7 +113,7 @@ class cmsSimpleGalleryController
 		{
 			let scaleFaktor     = itemsList[i].sizeX / itemsList[i].sizeY
 			itemsList[i].sizeX += percentUnusedPerItem;
-			itemsList[i].sizeY  = drawImageYSize / this.drawRowXMaxSize * 100;;
+			itemsList[i].sizeY  = drawImageYSize / outputNodeWidthX * 100;
 		}
 		return itemsList;
 	}
@@ -124,10 +126,10 @@ class cmsSimpleGalleryController
 		let drawItemsBuffer_B 	= [];
 		let drawRowXUsedSize 	= 0;		
 		let drawRowXUsedSize_B 	= 0;	
-
-		let outputNodeRect = outputNode.getBoundingClientRect();
-
+		let outputNodeRect 		= outputNode.getBoundingClientRect();
 		let drawImageYSize		= this.drawImageYSize;
+
+		if(outputNodeRect.width > this.drawRowXMaxSize)
 			drawImageYSize		= drawImageYSize / this.drawRowXMaxSize * outputNodeRect.width;
 
 		let image = Object.keys(itemList);
@@ -136,22 +138,30 @@ class cmsSimpleGalleryController
 		{
 			let scaleFaktor 	= itemList[image[i]].props[1] / drawImageYSize
 			let drawImageXSize 	= itemList[image[i]].props[0] / scaleFaktor;
-			let percentXSize	= drawImageXSize * 100 / this.drawRowXMaxSize;
-			let percentYPadding = drawImageYSize / this.drawRowXMaxSize * 100;
+
+			if(drawImageXSize > outputNodeRect.width)
+				drawImageXSize = outputNodeRect.width;
+
+			let percentXSize	= drawImageXSize * 100 / outputNodeRect.width;
+			let percentYPadding = drawImageYSize / outputNodeRect.width * 100;
 
 			let scaleFaktor______B = itemList[image[i]].props[1] / (drawImageYSize - this.drawImageYBuffer)
 			let drawImageXSize___B = itemList[image[i]].props[0] / scaleFaktor______B;
-			let percentXSize_____B = drawImageXSize___B * 100 / this.drawRowXMaxSize;
-			let percentYPadding__B = (drawImageYSize - this.drawImageYBuffer) / this.drawRowXMaxSize * 100;
+
+			if(drawImageXSize___B > outputNodeRect.width)
+				drawImageXSize___B = outputNodeRect.width;
+
+			let percentXSize_____B = drawImageXSize___B * 100 / outputNodeRect.width;
+			let percentYPadding__B = (drawImageYSize - this.drawImageYBuffer) / outputNodeRect.width * 100;
 
 			drawRowXUsedSize  	+= drawImageXSize;
 			drawRowXUsedSize_B 	+= drawImageXSize___B;
 
-			if((drawRowXUsedSize) > this.drawRowXMaxSize)
+			if((drawRowXUsedSize) > outputNodeRect.width)
 			{
-				if((drawRowXUsedSize_B) > this.drawRowXMaxSize)
+				if((drawRowXUsedSize_B) > outputNodeRect.width)
 				{
-					drawItemsBuffer = this.rowSizeCorrection(drawItemsBuffer);
+					drawItemsBuffer = this.rowSizeCorrection(drawItemsBuffer, outputNodeRect.width);
 
 					processedItems.num += drawItemsBuffer.length;
 
@@ -173,7 +183,7 @@ class cmsSimpleGalleryController
 						sizeY: percentYPadding__B
 					});
 
-					drawItemsBuffer_B = this.rowSizeCorrection(drawItemsBuffer_B);
+					drawItemsBuffer_B = this.rowSizeCorrection(drawItemsBuffer_B, outputNodeRect.width);
 
 					processedItems.num += drawItemsBuffer_B.length;
 
@@ -247,7 +257,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 <style>
 
-	div.simple-gallery-images-list.loading-indicator-space { margin-bottom:40px; }
+	div.simple-gallery-images-list.loading-indicator-space { margin-bottom:40px; position:relative; }
 	div.simple-gallery-images-list:not(.loading-indicator-space) .loading-indicator { display:none;  }
 	div.simple-gallery-images-list > a { float:left; position:relative; }
 	div.simple-gallery-images-list > a > img { width: 100%; height:100%; object-fit: cover; object-position: 50% 50%; position:absolute; top:0px; left:0px; border:solid transparent 3px; }
