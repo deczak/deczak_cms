@@ -10,14 +10,32 @@ class blogSquaresController
 {
 	constructor(objectId, nodeList)
 	{
-		this.rowSizeLimit 		= 5;
+ 		let blogNode = document.getElementById('blog-tiles-container');
+		let blogNodeRect = blogNode.getBoundingClientRect()
+
+		if(blogNodeRect.width < 500)
+		{
+			this.rowSizeLimit 		= 2;
+		}
+		else if(blogNodeRect.width < 800)
+		{
+			this.rowSizeLimit 		= 3;
+		}
+		else if(blogNodeRect.width < 1100)
+		{
+			this.rowSizeLimit 		= 4;
+		}
+		else
+		{
+			this.rowSizeLimit 		= 5;
+		}
+
 		this.rowIndex 	  		= 0;
 		this.subStripList 		= [];
 		this.subStripList[2]	= 100;
 		this.subStripList[3]	= 160;
 		
-		//this.requestLimit		= nodeList.length;
-		this.requestLimit		= 10;
+		this.requestLimit		= nodeList.length;
 		this.requestOffset		= 0;
 
 		this.stopRequest		= false;
@@ -69,7 +87,6 @@ class blogSquaresController
 
 	requestItemsSuccess(nodeList, srcInstance)
 	{
-
 		if(!nodeList.length)
 		{
 
@@ -82,7 +99,7 @@ class blogSquaresController
 		srcInstance.drawList(drawList);
 		srcInstance.lockRequest = false;
 
-		if(cmstk.detectNodeInViewport(document.getElementById('blog-tiles-container-loading-indicator'), 200))
+		if(cmstk.detectNodeInViewport(document.getElementById('blog-tiles-container-loading-indicator'), 400))
 			srcInstance.requestItems();
 	}
 
@@ -117,6 +134,12 @@ class blogSquaresController
 			}
 
 			let itemSize = nodeList[i].postSetting.post_size_length_min == 0 ? 1 : nodeList[i].postSetting.post_size_length_min;
+
+			if(this.rowSizeLimit < itemSize)
+				itemSize = this.rowSizeLimit;
+
+			if(this.rowSizeLimit == 2 &&  itemSize == 1)
+				itemSize = 2;
 
 			if((drawList[this.rowIndex].rowSizeUsed + itemSize) > this.rowSizeLimit)
 			{
@@ -271,6 +294,7 @@ class blogSquaresController
 				let itemNode = document.createElement('div');
 					itemNode.classList.add('blog-tiles-item');
 					itemNode.setAttribute('tile-size', itemSize)
+					itemNode.setAttribute('row-size', this.rowSizeLimit)
 
 
 
@@ -353,9 +377,9 @@ class blogSquaresController
 					if(teaserText != '')
 					{
 						teaserText = teaserText.substr(0, this.subStripList[itemSize] ?? 200); 
-						teaserText = teaserText.substr(0, teaserText.lastIndexOf(' ') + 1)
+						teaserText = teaserText.substr(0, teaserText.lastIndexOf(' '))
 
-						itemContent += '<span class="item-content-teaser">'+ teaserText + (teaserText.length && item.text.body.length > teaserText.length ? '&nbsp...' : '') +'</span>';
+						itemContent += '<span class="item-content-teaser">'+ teaserText + (teaserText.length && item.text.body.length > teaserText.length ? '&nbsp;...' : '') +'</span>';
 					}
 				}
 
@@ -394,31 +418,84 @@ document.blogSquaresController = new blogSquaresController(<?= $objectId; ?>, <?
 		margin: 0 -5px 0 -5px;
 	}
 
-	@media (max-width: 1400px) {
-		div.blog-container.blog-tiles {
-
-			font-size:1.1vw;
-		}
-	}
 
 	div.blog-container.blog-tiles > div.blog-tiles-item { 
 
 		float:left;
 	}
 
-	div.blog-container.blog-tiles > div.blog-tiles-item[tile-size="1"] { 
 
-		width:19.959%;
+	div.blog-container.blog-tiles > div.blog-tiles-item[row-size="5"] { 
+		font-size:1rem;
 	}
 
-	div.blog-container.blog-tiles > div.blog-tiles-item[tile-size="2"] { 
+	@media (max-width: 1400px) {
 
+		div.blog-container.blog-tiles > div.blog-tiles-item[row-size="5"] { 
+			font-size:1.1vw;
+		}
+
+	}
+
+	div.blog-container.blog-tiles > div.blog-tiles-item[row-size="4"] { 
+		font-size:1.6vw;
+	}
+
+	div.blog-container.blog-tiles > div.blog-tiles-item[row-size="3"] { 
+		font-size:1.8vw;
+	}
+
+	div.blog-container.blog-tiles > div.blog-tiles-item[row-size="2"] { 
+		font-size:4.0vw;
+	}
+
+
+	div.blog-container.blog-tiles > div.blog-tiles-item[tile-size="1"][row-size="5"] { 
+
+		width:20%;
+	}
+
+	div.blog-container.blog-tiles > div.blog-tiles-item[tile-size="1"][row-size="4"] { 
+
+		width:25%;
+	}
+
+	div.blog-container.blog-tiles > div.blog-tiles-item[tile-size="1"][row-size="3"] { 
+
+		width:33.33%;
+	}
+
+	div.blog-container.blog-tiles > div.blog-tiles-item[tile-size="1"][row-size="2"] { 
+
+		width:50%;
+	}
+
+	div.blog-container.blog-tiles > div.blog-tiles-item[tile-size="2"][row-size="5"] { 
 		width:40%;
 	}
 
-	div.blog-container.blog-tiles > div.blog-tiles-item[tile-size="3"] { 
+	div.blog-container.blog-tiles > div.blog-tiles-item[tile-size="2"][row-size="4"] { 
+		width:50%;
+	}
 
+	div.blog-container.blog-tiles > div.blog-tiles-item[tile-size="2"][row-size="3"] { 
+		width:66.66%;
+	}
+
+	div.blog-container.blog-tiles > div.blog-tiles-item[tile-size="2"][row-size="2"] { 
+		width:100%;
+	}
+
+	div.blog-container.blog-tiles > div.blog-tiles-item[tile-size="3"][row-size="5"] { 
 		width:60%;
+	}
+	
+	div.blog-container.blog-tiles > div.blog-tiles-item[tile-size="3"][row-size="4"] { 
+		width:75%;
+	}
+	
+	div.blog-container.blog-tiles > div.blog-tiles-item[tile-size="3"][row-size="3"] { 
+		width:100%;
 	}
 	
 	div.blog-container.blog-tiles > div.blog-tiles-item[tile-size="1"] div.blog-tiles-item-content,
@@ -535,6 +612,7 @@ document.blogSquaresController = new blogSquaresController(<?= $objectId; ?>, <?
 		text-transform:uppercase;
 		letter-spacing:1px;
 	}
+
 	div.blog-container.blog-tiles > div.blog-tiles-item div.blog-tiles-item-content span.item-content-title {
 
 		display:block;

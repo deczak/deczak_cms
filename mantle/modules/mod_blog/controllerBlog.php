@@ -363,7 +363,7 @@ class	controllerBlog extends CController
 	
 
 	protected function
-	getNodesList(CDatabaseConnection &$_pDatabase, int $_rootNodeId, int $limit = 5, int $offset = 0)
+	getNodesList(CDatabaseConnection &$_pDatabase, int $_rootNodeId, int $limit = 15, int $offset = 0)
 	{
 		$nodesSearch = new CNodesSearch;
 		if($nodesSearch -> detectSearch())
@@ -378,8 +378,8 @@ class	controllerBlog extends CController
 		else
 		{
 			$sitemapCondition 	 = new CModelCondition();
-			$sitemapCondition 	-> where('node_id', $_rootNodeId)
-								-> limit($limit, $offset);
+			$sitemapCondition 	-> where('node_id', $_rootNodeId);
+						#		-> limit($limit, $offset);
 
 
 			$modelSitemap = new modelSitemap();
@@ -433,6 +433,7 @@ class	controllerBlog extends CController
 			#	unset($nodeList[$nodeIndex]);
 		}
 
+		$nodeList = array_slice($nodeList, $offset, $limit, true);
 		/*
 		$createTime = [];
 
