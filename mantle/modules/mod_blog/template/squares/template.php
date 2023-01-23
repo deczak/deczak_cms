@@ -559,12 +559,25 @@ document.blogSquaresController = new blogSquaresController(<?= $objectId; ?>, <?
   		opacity:0.2;
 	}
 
-	div.blog-container.blog-tiles > div.blog-tiles-item div.blog-tiles-item-content span.item-content-background:hover { 
+	div.blog-container.blog-tiles > div.blog-tiles-item div.blog-tiles-item-content span.item-content-background.background-image-mode:hover { 
 
   		filter: saturate(1);
 		cursor:pointer;
 		transition:all 0.5s;
   		opacity:1;
+	}
+
+
+	@media (max-width: 1400px) {
+
+		div.blog-container.blog-tiles > div.blog-tiles-item div.blog-tiles-item-content span.item-content-background.background-image-mode { 
+
+			filter: saturate(1);
+			cursor:pointer;
+			transition:all 0.5s;
+			opacity:1;
+		}
+
 	}
 
 	div.blog-container.blog-tiles > div.blog-tiles-item div.blog-tiles-item-content span.item-content-background.background-placeholder { 
@@ -577,6 +590,15 @@ document.blogSquaresController = new blogSquaresController(<?= $objectId; ?>, <?
 	div.blog-container.blog-tiles > div.blog-tiles-item div.blog-tiles-item-content span.item-content-background.background-image-mode:hover { 
 
 		transform: scale(1.1) rotate(2deg);
+	}
+
+	@media (max-width: 1400px) {
+
+	div.blog-container.blog-tiles > div.blog-tiles-item div.blog-tiles-item-content span.item-content-background.background-image-mode { 
+
+		transform: scale(1.1) rotate(2deg);
+	}
+
 	}
 
 	div.blog-container.blog-tiles > div.blog-tiles-item div.blog-tiles-item-content div.item-content-text {
@@ -604,6 +626,19 @@ document.blogSquaresController = new blogSquaresController(<?= $objectId; ?>, <?
 		background:rgba(255,255,255,.6);
 	}
 		
+	@media (max-width: 1400px) {
+
+	div.blog-container.blog-tiles > div.blog-tiles-item div.blog-tiles-item-content div.item-content-text .text-background-color {
+
+		background:rgba(255,255,255,.8);
+		min-height: 124px;
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+	}
+
+	}
+
 	div.blog-container.blog-tiles > div.blog-tiles-item div.blog-tiles-item-content span.item-content-categories {
 
 		display:block;
