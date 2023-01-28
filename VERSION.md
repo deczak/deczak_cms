@@ -11,6 +11,12 @@ The version number is the release date. A letter as suffix indicates fixes on sa
 
 ## Version history	 
 
+### 20230128
+
+**Changes**
+- Change javscript from module simple gallery, change the behaviour of the gallery
+- Change javscript from module simple blog, change the behaviour of the blgo
+
 ### 20221223
 
 **Changes**
