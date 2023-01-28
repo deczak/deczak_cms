@@ -50,6 +50,8 @@ If the CMS is used productively, the cronjobs must be created as these on the se
 
 During the installation, it is checked whether the CMS was installed using SSL transport encryption. If this state changes, the value under $COOKIE_HTTPS must be changed in the configuration under /config/standard.php. Otherwise, a login in the backend could fail.
 
+The module Blog, as mantle module, needs to be installed in the module managment. There is currently an error that the response is wrong. After hitting the Button install, wait 2 seconds and hit reload. The module should be now listed as installed. Now you must set the user rights for Adminstrators to use this module in the page edit.
+
 ###	Third party content
 
 The content management system contains the following third-party sources:
