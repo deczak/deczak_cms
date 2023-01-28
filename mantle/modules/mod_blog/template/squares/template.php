@@ -243,7 +243,7 @@ class blogSquaresController
 					}
 				}
 
-				if(rowSizeFillState < this.rowSizeLimit)
+				if(rowSizeFillState < this.rowSizeLimit && nodeList.length !== this.requestLimit)
 				{
 					drawList[i] = null;
 					continue;
@@ -257,6 +257,7 @@ class blogSquaresController
 			this.stopRequest = true;
 			document.getElementById('blog-tiles-container-loading-indicator').innerHTML = '';
 		}
+
 
 		this.requestOffset = this.requestOffset + numItemsToDraw;
 

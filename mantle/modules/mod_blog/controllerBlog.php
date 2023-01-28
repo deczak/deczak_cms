@@ -397,7 +397,7 @@ class	controllerBlog extends CController
 
 		$timestamp = time();
 		$rootLevel = false;
-
+		
 		foreach($nodeList as $nodeIndex => $node)
 		{
 			if(property_exists($node, 'level'))
@@ -407,7 +407,6 @@ class	controllerBlog extends CController
 					#$rootLevel = $node -> level + 1;
 					$rootLevel = $node -> level;
 					//unset($nodeList[$nodeIndex]);
-					continue;
 				}
 				
 				if($rootLevel != $node -> level)
@@ -415,7 +414,6 @@ class	controllerBlog extends CController
 					unset($nodeList[$nodeIndex]);
 					continue;
 				}
-		
 			}
 
 			if(
