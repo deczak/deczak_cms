@@ -1358,11 +1358,11 @@ class CModulesResources
 	public function
 	generateResources(array $_modulesList)
 	{
-		if(!file_exists(CMS_SERVER_ROOT.DIR_PUBLIC .'css'))		{mkdir(CMS_SERVER_ROOT.DIR_PUBLIC .'css'); chmod(CMS_SERVER_ROOT.DIR_PUBLIC .'css', 0777); }
-		if(!file_exists(CMS_SERVER_ROOT.DIR_PUBLIC .'js'))		{mkdir(CMS_SERVER_ROOT.DIR_PUBLIC .'js'); chmod(CMS_SERVER_ROOT.DIR_PUBLIC .'js', 0777); }
+		if(!file_exists(CMS_SERVER_ROOT.DIR_PUBLIC .'css'))		{ mkdir(CMS_SERVER_ROOT.DIR_PUBLIC .'css'); chmod(CMS_SERVER_ROOT.DIR_PUBLIC .'css', 0777); }
+		if(!file_exists(CMS_SERVER_ROOT.DIR_PUBLIC .'js'))		{ mkdir(CMS_SERVER_ROOT.DIR_PUBLIC .'js');  chmod(CMS_SERVER_ROOT.DIR_PUBLIC .'js', 0777); }
 
-		if(!file_exists(CMS_SERVER_ROOT.DIR_BACKEND .'css'))	{mkdir(CMS_SERVER_ROOT.DIR_BACKEND .'css'); chmod(CMS_SERVER_ROOT.DIR_BACKEND .'css', 0777); }
-		if(!file_exists(CMS_SERVER_ROOT.DIR_BACKEND .'js'))		{mkdir(CMS_SERVER_ROOT.DIR_BACKEND .'js'); chmod(CMS_SERVER_ROOT.DIR_BACKEND .'js', 0777); }
+		if(!file_exists(CMS_SERVER_ROOT.DIR_BACKEND .'css'))	{ mkdir(CMS_SERVER_ROOT.DIR_BACKEND .'css'); chmod(CMS_SERVER_ROOT.DIR_BACKEND .'css', 0777); }
+		if(!file_exists(CMS_SERVER_ROOT.DIR_BACKEND .'js'))		{ mkdir(CMS_SERVER_ROOT.DIR_BACKEND .'js');  chmod(CMS_SERVER_ROOT.DIR_BACKEND .'js', 0777); }
 
 		$hFileCSSFrontend 	 = fopen(CMS_SERVER_ROOT.DIR_PUBLIC .'css/cms.css', "a");
 		$hFileCSSBackend 	 = fopen(CMS_SERVER_ROOT.DIR_BACKEND .'css/cms.css', "a");
@@ -1383,7 +1383,9 @@ class CModulesResources
 				{
 					case 'core':	
 
-						$moduleConfig 	= file_get_contents( CMS_SERVER_ROOT.DIR_CORE.DIR_MODULES. $module -> module_location .'/module.json');
+						$moduleLocation = CMS_SERVER_ROOT.DIR_CORE.DIR_MODULES. $module -> module_location .'/';
+
+						$moduleConfig 	= file_get_contents($moduleLocation .'module.json');
 						$moduleConfig 	= ($moduleConfig !== false ? json_decode($moduleConfig) : [] );	
 
 						$pModulesInstall = new CModulesInstall;
@@ -1393,11 +1395,14 @@ class CModulesResources
 							continue 2;
 						
 						$moduleData = json_decode(json_encode($moduleData));
+
 						break;
 									
 					case 'mantle':
 
-						$moduleConfig 	= file_get_contents( CMS_SERVER_ROOT.DIR_MANTLE.DIR_MODULES. $module -> module_location .'/module.json');
+						$moduleLocation = CMS_SERVER_ROOT.DIR_MANTLE.DIR_MODULES. $module -> module_location .'/';
+
+						$moduleConfig 	= file_get_contents($moduleLocation .'module.json');
 						$moduleConfig 	= ($moduleConfig !== false ? json_decode($moduleConfig) : [] );	
 
 						$pModulesInstall = new CModulesInstall;
@@ -1408,7 +1413,78 @@ class CModulesResources
 						
 						$moduleData = json_decode(json_encode($moduleData));
 						break;
+
+					default: 
+						continue 2;
 				}
+
+				## collect all files in the css directory
+
+				if(is_dir($moduleLocation.'css/'))
+				{
+					$resIterator 	= new DirectoryIterator($moduleLocation.'css/');
+					foreach($resIterator as $iterItem)
+					{
+						if($iterItem -> isDot() || $iterItem -> getType() !== 'file')
+							continue;
+
+						if($iterItem -> getBasename()[0] === '.') // skip files with leading dot
+							continue;
+
+						$filepath 		= $iterItem -> getPathname();
+						$resFileData	= file_get_contents($filepath);
+
+						if($resFileData === false)
+							continue 2;
+
+						switch($module -> module_group) 
+						{
+							case 'backend':	
+
+								fwrite($hFileCSSBackend, "\r\n" . $resFileData);		
+								break;
+
+							default:
+
+								fwrite($hFileCSSFrontend, "\r\n" . $resFileData);
+						}
+					}
+				}
+
+				## collect all files in the js directory
+
+				if(is_dir($moduleLocation.'js/'))
+				{
+					$resIterator 	= new DirectoryIterator($moduleLocation.'js/');
+					foreach($resIterator as $iterItem)
+					{
+						if($iterItem -> isDot() || $iterItem -> getType() !== 'file')
+							continue;
+
+						if($iterItem -> getBasename()[0] === '.') // skip files with leading dot
+							continue;
+
+						$filepath 		= $iterItem -> getPathname();
+						$resFileData	= file_get_contents($filepath);
+						
+						if($resFileData === false)
+							continue 2;
+
+						switch($module -> module_group) 
+						{
+							case 'backend':	
+
+								fwrite($hFileJSBackend, "\r\n" . $resFileData);		
+								break;
+
+							default:
+
+								fwrite($hFileJSFrontend, "\r\n" . $resFileData);
+						}
+					}
+				}
+
+				## collect files those are names in the module.json
 
 				if(empty($moduleData -> includes))
 					continue;
@@ -1417,21 +1493,6 @@ class CModulesResources
 				{
 					if(!$include -> collect)
 						continue;
-
-					switch($moduleData -> module -> module_type) 
-					{
-						case 'core':
-
-							$moduleLocation = CMS_SERVER_ROOT.DIR_CORE.DIR_MODULES. $module -> module_location .'/';
-							break;
-
-						case 'mantle':	
-
-							$moduleLocation = CMS_SERVER_ROOT.DIR_MANTLE.DIR_MODULES. $module -> module_location .'/';
-							break;
-
-						default: continue 2;
-					}
 
 					$resFileData = file_get_contents($moduleLocation . $include -> file);
 

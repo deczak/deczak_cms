@@ -11,6 +11,11 @@ The version number is the release date. A letter as suffix indicates fixes on sa
 
 ## Version history	 
 
+### 2023----
+
+**Changes**
+- Resource files like css and js files are now additionaly collect from module css and js sub-directory, as usual from the reading the module.json linked resource files.
+
 ### 20230128
 
 **Changes**

@@ -1,0 +1,46 @@
+
+#page-header-overview,
+#page-list-overview	li > div.item { display:flex; width:100%;  }
+
+#page-list-overview	ul,
+#page-list-overview	li { list-style:none; margin:0px; padding:0px; }
+#page-list-overview	li { display:none;}
+#page-list-overview > ul > li,
+#page-list-overview	li.open > ul > li { display:block; }
+
+#page-list-overview	div.item .collapse { position:relative; margin-top:2px; height: 17px;  margin-right:6px; margin-left:3px; width:17px; cursor:pointer; }
+#page-list-overview	div.item .collapse:before { content: '+'; border:1px solid gray; padding:3px; background-color:white; width: 9px; height:9px; line-height: 9px;  position: absolute; text-align:center; }
+#page-list-overview	li.open > div.item .collapse:before { content: '-'; line-height: 8px; }
+#page-list-overview div.item .collapse[data-num-childs="0"],
+#page-list-overview > ul > li > div.item .collapse { opacity:0; pointer-events:none; }
+/*#page-list-overview ul > li { background-color:rgba(64, 128, 191, 10%); }*/
+
+#page-list-overview	div.item { padding: 4px 0px; font-size:0.86em; }
+
+#page-header-overview div.collapse { width:26px; }
+#page-header-overview div { font-size: 0.65em; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; padding: 4px 0px; }
+#page-header-overview { border-bottom: 1px solid rgb(80,80,80); }
+
+#page-list-overview	div.page-name,
+#page-header-overview div.page-name {  width: 25%; }
+
+#page-list-overview	div.page-template,
+#page-header-overview div.page-template {  width: 130px; }
+
+#page-list-overview	div.page-update,
+#page-header-overview div.page-update {  width: 150px; margin-left:10px; }
+
+#page-list-overview	div.page-option-a,
+#page-header-overview div.page-option-a { width:28px; text-align:center; }
+#page-list-overview	 a,
+#page-list-overview	 button { padding:2px 4px; border:0px; background:none; color: rgba(0, 0, 0, 15%); text-shadow:none; }
+#page-list-overview	 a:hover,
+#page-list-overview	 button:hover { color: rgba(0, 0, 0, 100%); }
+#page-list-overview	 a i,
+#page-list-overview	 button i { pointer-events:none; }
+
+#page-list-overview	div.item:hover { background-color:rgba(214,187,35,25%); }
+
+.language-select-container { display:flex; padding:10px 20px; margin-bottom:25px; }
+.language-select-container .trigger-language-select { border:1px solid grey; padding:3px 6px; padding-left:34px; position:relative; margin-right:10px; font-size:0.8em; }
+.language-select-container .trigger-language-select span { background:grey; color:white; position:absolute; display:block; left:0px; top:0px; height:100%; padding:3px 6px; font-weight:500; }
