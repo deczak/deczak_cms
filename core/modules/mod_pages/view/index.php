@@ -22,9 +22,16 @@
 
 	<div id="page-header-overview">
 
-		<div class="collapse">&nbsp;</div>
 
+		<div>
+
+		<div class="collapse">&nbsp;</div>
 		<div class="page-name"><?= CLanguage::string('MOD_SITES_OV_TABLE_PAGETITLE'); ?></div>
+
+
+		</div>
+		
+		<div>
 
 		<div class="page-template"><?= CLanguage::string('MOD_SITES_OV_TABLE_TEMPLATE'); ?></div>
 		<div class="page-option-a"></div>
@@ -34,6 +41,8 @@
 
 		<div class="page-update"><?= CLanguage::string('TIME_UPDATE_AT'); ?></div>
 
+		</div>
+		
 	</div>
 
 	<div id="page-list-overview">
@@ -47,14 +56,25 @@
 	
 
 	<div class="item" data-node-id="%NODE_ID%">
+
+		<div>
+
 		<div class="collapse trigger-collapse" data-num-childs="%NUM_CHILDNODES%"></div>
-		<div class="page-name">%PAGE_NAME% <a href="%PAGE_PATH%"><i class="fas fa-external-link-alt" style="font-size:0.9em"></i></a></div>
+		<div class="page-name">%PAGE_NAME% <a href="%PAGE_PATH%"><i class="fas fa-external-link-alt" style="font-size:0.9em" title="Public link"></i></a></div>
+
+		</div>
+		
+		<div>
+
 		<div class="page-template">%PAGE_TEMPLATE%</div>
 		<div class="page-option-a"><a href="<?php echo CMS_SERVER_URL_BACKEND . $pageRequest -> urlPath; ?>view/%PAGE_LANGUAGE%/%NODE_ID%?language=<?= CLanguage::getActive(); ?>" target="_blank" class="button icon"><i class="fas fa-pen"></i></a></div>
 		<div class="page-option-a"><button class="button icon trigger-add-subpage"><i class="fas fa-plus-square"></i></button></div>
 		<div class="page-option-a">%BUTTON_MOVE%</div>
 		<div class="page-option-a">%BUTTON_DELETE%</div>
 		<div class="page-update">%UPDATE_TIME%</div>
+
+		</div>
+
 	</div>
 
 	

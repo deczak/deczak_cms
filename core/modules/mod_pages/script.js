@@ -43,6 +43,8 @@ class	cmsIndexList
 				
 			let	template = document.getElementById('template-page-item').innerHTML;
 
+			/*
+
 			let levelFolderNode = document.createElement('span');
 				levelFolderNode.classList.add('level-folder');
 
@@ -50,12 +52,13 @@ class	cmsIndexList
 			{
 				levelFolderNode.innerHTML += ' <b>&mdash;</b> ';
 			}
+			*/
 			
 			if(pageList[i].create_time == '0') pageList[i].create_time = ''; else pageList[i].create_time = cmstk.formatDate(pageList[i].create_time, 'Y-m-d @ H:i:s');
 			if(pageList[i].update_time == '0') pageList[i].update_time = ''; else pageList[i].update_time = cmstk.formatDate(pageList[i].update_time, 'Y-m-d @ H:i:s');
 
 			template = template.replaceAll('%NUM_CHILDNODES%', (typeof pageList[i].childnodes !== 'undefined' ? Object.keys(pageList[i].childnodes).length : 0));
-			template = template.replaceAll('%PAGE_NAME%', levelFolderNode.outerHTML + pageList[i].page_name);
+			template = template.replaceAll('%PAGE_NAME%', pageList[i].page_name);
 			template = template.replaceAll('%PAGE_TEMPLATE%', pageList[i].page_template);
 			template = template.replaceAll('%PAGE_PATH%', CMS.SERVER_URL +''+ ((CMS.LANGUAGE_DEFAULT_IN_URL || pageList[i].page_language !== CMS.LANGUAGE_DEFAULT) ? pageList[i].page_language +'/' : '') + pageList[i].page_path.substr(1));
 			template = template.replaceAll('%NODE_ID%', pageList[i].node_id);
