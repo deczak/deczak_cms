@@ -1,6 +1,9 @@
+#page-list-overview	{ border-bottom: 1px solid rgba(0,0,0,.1); border-right: 1px solid rgba(0,0,0,.1);}
 
 #page-header-overview,
-#page-list-overview	li > div.item { display:flex; width:100%; justify-content:space-between; border-bottom: 1px solid rgba(0,0,0,.1); }
+#page-list-overview	li > div.item { display:flex; width:100%; justify-content:space-between;  }
+
+#page-list-overview	li > div.item { border-top: 1px solid rgba(0,0,0,.1); }
 
 #page-header-overview > div,
 #page-list-overview	li > div.item > div { display:flex; flex-wrap:nowrap;  }

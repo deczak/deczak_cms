@@ -60,7 +60,7 @@
 		<div>
 
 		<div class="collapse trigger-collapse" data-num-childs="%NUM_CHILDNODES%"></div>
-		<div class="page-name">%PAGE_NAME% <a href="%PAGE_PATH%"><i class="fas fa-external-link-alt" style="font-size:0.9em" title="Public link"></i></a></div>
+		<div class="page-name">%PAGE_NAME% <a href="%PAGE_PATH%" title="Public link"><i class="fas fa-external-link-alt" style="font-size:0.9em"></i></a></div>
 
 		</div>
 		
