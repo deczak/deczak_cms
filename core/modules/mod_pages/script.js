@@ -68,7 +68,7 @@ class	cmsIndexList
 
 			if(pageList[i].page_path !== '/')
 			{
-				template = template.replaceAll('%BUTTON_DELETE%', '<button class="button icon trigger-delete-page"><i class="fas fa-trash-alt"></i></button>');
+				template = template.replaceAll('%BUTTON_DELETE%', '<button class="button icon trigger-delete-page"><i class="fa-solid fa-trash-can"></i></button>');
 				template = template.replaceAll('%BUTTON_MOVE%', '<button class="button icon trigger-move-subpage"><i class="fas fa-share" style="font-size:1.2em;"></i></button>');
 			}
 			else

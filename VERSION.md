@@ -16,6 +16,7 @@ The version number is the release date. A letter as suffix indicates fixes on sa
 **Changes**
 - Resource files like css and js files are now additionaly collect from module css and js sub-directory, as usual from the reading the module.json linked resource files.
 - Changed optic of pages management, requires manual resource file update in environment section
+- upgrade backend fontawesome from 5.15.3 to 6.21
 
 ### 20230128
 
