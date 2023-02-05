@@ -22,7 +22,8 @@
 	MOD_SITES_ERR_NOTCREATED			= Could not create a new site
 	MOD_SITES_PAGECREATED				= Created new site
 	MOD_SITES_PAGECREATE				= Create new sub page
-	MOD_SITES_PAGEMOVE					= Move page to new parent page
+	MOD_SITES_PAGEMOVE					= Move page to sub page as ...
+	MOD_SITES_PAGECOPY					= Copy page to sub page as ...
 	
 	MOD_SITES_NEWPAGE_NAME				= Unnamed page
 	

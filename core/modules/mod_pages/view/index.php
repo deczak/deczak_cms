@@ -38,6 +38,7 @@
 		<div class="page-option-a"></div>
 		<div class="page-option-a"></div>
 		<div class="page-option-a"></div>
+		<div class="page-option-a"></div>
 
 		<div class="page-update"><?= CLanguage::string('TIME_UPDATE_AT'); ?></div>
 
@@ -67,9 +68,10 @@
 		<div>
 
 		<div class="page-template">%PAGE_TEMPLATE%</div>
-		<div class="page-option-a"><a href="<?php echo CMS_SERVER_URL_BACKEND . $pageRequest -> urlPath; ?>view/%PAGE_LANGUAGE%/%NODE_ID%?language=<?= CLanguage::getActive(); ?>" target="_blank" class="button icon"><i class="fas fa-pen"></i></a></div>
-		<div class="page-option-a"><button class="button icon trigger-add-subpage"><i class="fas fa-plus-square"></i></button></div>
+		<div class="page-option-a"><a href="<?php echo CMS_SERVER_URL_BACKEND . $pageRequest -> urlPath; ?>view/%PAGE_LANGUAGE%/%NODE_ID%?language=<?= CLanguage::getActive(); ?>" title="Edit page" target="_blank" class="button icon"><i class="fas fa-pen"></i></a></div>
+		<div class="page-option-a"><button class="button icon trigger-add-subpage" title="Create sub page"><i class="fas fa-plus-square"></i></button></div>
 		<div class="page-option-a">%BUTTON_MOVE%</div>
+		<div class="page-option-a">%BUTTON_COPY%</div>
 		<div class="page-option-a">%BUTTON_DELETE%</div>
 		<div class="page-update">%UPDATE_TIME%</div>
 
@@ -112,6 +114,8 @@
 		if(	element !== null && element.classList.contains('trigger-add-subpage')) onPageAdd(element, event);
 
 		if(	element !== null && element.classList.contains('trigger-move-subpage')) onPageSubMove(element, event);
+
+		if(	element !== null && element.classList.contains('trigger-copy-subpage')) onPageSubCopy(element, event);
 			
 	}, false);
 
@@ -119,10 +123,6 @@
 	function
 	onPageSubMoveOKSuccess(xhrResponse, srcInfo)
 	{
-
-		console.log('onPageSubMoveOKSuccess');
-		console.log(xhrResponse);
-
 		if(xhrResponse.state !== 0)
 			return;
 
@@ -155,10 +155,82 @@
 			modalNode.open(
 				'<?= CLanguage::string('MOD_SITES_PAGEMOVE'); ?>', 
 				{nodeId:nodeId, buttonNode:buttonNode}, 
-				'fas fa-file',
-				CMS.LANGUAGES
+				'',
+				CMS.LANGUAGES,
+				activeLanguage
 			);
 	}
+
+
+
+
+
+
+
+
+	function
+	onPageSubCopyOKSuccess(xhrResponse, srcInfo)
+	{
+		if(xhrResponse.state !== 0)
+			return;
+
+		openedNodeIdList[ srcInfo.select.node_id ] = true;
+		indexList.requestData(activeLanguage, openedNodeIdList);
+	}
+
+	function
+	onPageSubCopyOK(event)
+	{
+		$xhrAction = 'copysub';
+
+		let requestURL = CMS.SERVER_URL_BACKEND + CMS.PAGE_PATH + CMS.MODULE_TARGET + $xhrAction + '/' + event.detail.sourceNode.nodeId;
+
+		let	formData  = new FormData;
+			formData.append('new-parent-node-id', event.detail.select.node_id);
+
+			cmsXhr.request(requestURL, formData, onPageSubCopyOKSuccess, event.detail, $xhrAction);
+	}
+
+	window.addEventListener('event-modal-select-new-parent-page-by-copy', function(event) { onPageSubCopyOK(event); });
+
+	function
+	onPageSubCopy(buttonNode, buttonEvent)
+	{
+		let nodeId = buttonNode.closest('div.item').getAttribute('data-node-id');
+		
+		let	modalNode = new cmsModalNode;
+			modalNode.setEventNameOnSelected('event-modal-select-new-parent-page-by-copy');
+			modalNode.open(
+				'<?= CLanguage::string('MOD_SITES_PAGECOPY'); ?>', 
+				{nodeId:nodeId, buttonNode:buttonNode}, 
+				'',
+				CMS.LANGUAGES,
+				activeLanguage
+			);
+	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 	function
 	onPageAddOKSuccess(xhrResponse, srcInfo)

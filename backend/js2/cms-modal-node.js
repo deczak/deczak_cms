@@ -7,7 +7,7 @@ class	cmsModalNode extends cmsModal
 		this.eventNameOnSelected = null;
 	}
 
-	open(modalTitle, sourceNode = null, defaultIcon = null, langList = [])
+	open(modalTitle, sourceNode = null, defaultIcon = null, langList = [], initialLang = null)
 	{
 		let srcInstance = this;
 
@@ -30,7 +30,11 @@ class	cmsModalNode extends cmsModal
 		srcInstance.pathString = null;
 		srcInstance.langList   = langList;
 	
-		srcInstance.queryNodeList(srcInstance.getDefaultLanguage());
+
+		if(initialLang == null)
+			initialLang = srcInstance.getDefaultLanguage();
+
+		srcInstance.queryNodeList(initialLang);
 
 		srcInstance.content.addEventListener('click', function(event) { srcInstance._onClick(event, srcInstance); });
 		srcInstance.content.addEventListener('dblclick', function(event) { srcInstance._onClick(event, srcInstance); });
@@ -46,9 +50,14 @@ class	cmsModalNode extends cmsModal
 		let selectedNode = srcInstance.content.querySelector('.cms-modal-path-select-list tr.path-selected');
 
 		if(selectedNode === null)
-			return;
+		{
+			event.target.dispatchEvent(new CustomEvent(srcInstance.eventNameOnSelected, { detail: { select: srcInstance.pathInfo, sourceNode: srcInstance.eventSourceNode }, bubbles: true  }));
+		}
+		else
+		{
+			event.target.dispatchEvent(new CustomEvent(srcInstance.eventNameOnSelected, { detail: { select: selectedNode.pathInfo, sourceNode: srcInstance.eventSourceNode }, bubbles: true  }));
+		}
 
-		event.target.dispatchEvent(new CustomEvent(srcInstance.eventNameOnSelected, { detail: { select: selectedNode.pathInfo, sourceNode: srcInstance.eventSourceNode }, bubbles: true  }));
 		event.target.dispatchEvent(new CustomEvent('cms-modal-close', { detail: null, bubbles: true }));
 	}
 
@@ -56,7 +65,6 @@ class	cmsModalNode extends cmsModal
 	{
 		let srcInstance = this;
 			srcInstance.content.innerHTML = '';
-
 
 		// Language panel
 
@@ -146,7 +154,7 @@ class	cmsModalNode extends cmsModal
 			
 
 			let itemRowHTML = '';
-				itemRowHTML += '<td class="fileicon"><i class="'+ icon +'"></i></td>';
+				itemRowHTML += '<td class="fileicon" data-event-click="item-ctr-dir-down"><i class="'+ icon +'"></i></td>';
 				itemRowHTML += '<td class="pathname">'+ srcInstance.pathList[i].name +'</td>';
 		
 				itemRowNode.innerHTML = itemRowHTML;
@@ -169,20 +177,41 @@ class	cmsModalNode extends cmsModal
 		if(event.target.tagName == 'TD')
 		{
 			// check for click on TD to change the targetNode, the info is in the TR
-			targetNode = event.target.parentNode;
+			// except, the TD has his own event-click target
+
+			if(!targetNode.hasAttribute('data-event-click'))
+				targetNode = event.target.parentNode;
 		}
 
 		if(targetNode.hasAttribute('data-event-click'))
 		{
 			switch(targetNode.getAttribute('data-event-click'))
 			{
+				case 'item-ctr-dir-down': // this is on a TD
+
+						targetNode = event.target.parentNode;
+
+						if(Object.keys(targetNode.pathInfo.childs).length !== 0)
+						{
+							event.stopPropagation();
+							srcInstance.parentPath  = JSON.parse(JSON.stringify(srcInstance.pathList));
+							srcInstance.pathList    = targetNode.pathInfo.childs;
+							srcInstance.pathString  = targetNode.pathInfo.path;
+							srcInstance.pathInfo 	= targetNode.pathInfo;
+
+							srcInstance._generateNodeTable();
+						}
+				
+					break;
+
 				case 'path-select':
 
 					switch(event.type)
 					{
 						case 'click': // Mark as selected
-						
 
+								let targetHasClickedBefore = targetNode.classList.contains('path-selected');
+						
 								let parentNode = targetNode.parentNode;
 
 								let allItems = parentNode.querySelectorAll('tr');
@@ -192,7 +221,10 @@ class	cmsModalNode extends cmsModal
 									allItems[i].classList.remove('path-selected');
 								}
 
-								targetNode.classList.add('path-selected');
+								if(!targetHasClickedBefore)
+								{
+									targetNode.classList.add('path-selected');
+								}
 
 
 							break;
@@ -201,9 +233,10 @@ class	cmsModalNode extends cmsModal
 				
 							if(Object.keys(targetNode.pathInfo.childs).length !== 0)
 							{
-								srcInstance.parentPath =  JSON.parse(JSON.stringify(srcInstance.pathList));
-								srcInstance.pathList   = targetNode.pathInfo.childs;
-								srcInstance.pathString = targetNode.pathInfo.path;
+								srcInstance.parentPath  = JSON.parse(JSON.stringify(srcInstance.pathList));
+								srcInstance.pathList    = targetNode.pathInfo.childs;
+								srcInstance.pathString  = targetNode.pathInfo.path;
+								srcInstance.pathInfo 	= targetNode.pathInfo;
 
 								srcInstance._generateNodeTable();
 							}
@@ -218,7 +251,7 @@ class	cmsModalNode extends cmsModal
 						if(typeof srcInstance.pathList[i] === 'function')
 							continue;
 
-						srcInstance.pathList   = srcInstance.pathList[i].parent;
+						srcInstance.pathList = srcInstance.pathList[i].parent;
 
 						break;
 					}
@@ -232,10 +265,17 @@ class	cmsModalNode extends cmsModal
 						{
 							srcInstance.parentPath = srcInstance.pathList[i].parent;
 
-							let cp = srcInstance.pathString;
+							let cp = srcInstance.pathString.replace(/^\/|\/$/g, '');
 								cp = cp.split('/');
 								cp.pop();
-							srcInstance.pathString = cp.join('/');
+
+							if(cp.length)
+								srcInstance.pathString = '/'+ cp.join('/') +'/';
+							else
+							{
+								srcInstance.pathString = null;
+								srcInstance.pathInfo = srcInstance.pathRoot
+							}
 						}
 						else
 						{
@@ -249,6 +289,7 @@ class	cmsModalNode extends cmsModal
 
 					return true;
 					break;
+
 			}
 		}
 
@@ -295,8 +336,24 @@ class	cmsModalNode extends cmsModal
 			return false;
 		}
 		let pathList = [];
+
 		cmsNode.createNestedNodeStructure(response.data, pathList, 1, 2);
 		srcInstance.pathList = pathList;
+		srcInstance.pathString = null;
+
+		let pathRoot = {
+			level:   response.data[0].level,
+			name:    response.data[0].page_name,
+			path:    response.data[0].page_path,
+			icon:    (response.data[0].offspring > 0 ? 'fas fa-folder' : null),
+			node_id: response.data[0].node_id,
+			page_id: response.data[0].page_id,
+			lang:    response.data[0].page_language,
+			childs:[]
+		};
+
+		srcInstance.pathInfo = pathRoot;
+		srcInstance.pathRoot = { ...pathRoot };
 		srcInstance._generateNodeTable();
 	}
 
@@ -311,4 +368,3 @@ class	cmsModalNode extends cmsModal
 	}
 
 }
-

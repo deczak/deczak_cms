@@ -435,8 +435,6 @@ addEventListener("beforeunload", function(){ cmsTabInstance.unregister() }, fals
 
 class cmsNode
 {
-
-
 	static getNodeList(language, onSuccessCallback, srcInstance)
 	{
 		let formData 		= new FormData();
@@ -482,7 +480,7 @@ class cmsNode
 						level:   _srcList[i].level,
 						name:    _srcList[i].page_name,
 						path:    _srcList[i].page_path,
-						icon:    (_srcList[i].offspring > 0 ? 'fas fa-copy' : null),
+						icon:    (_srcList[i].offspring > 0 ? 'fas fa-folder' : null),
 						node_id: _srcList[i].node_id,
 						page_id: _srcList[i].page_id,
 						lang:    _srcList[i].page_language,

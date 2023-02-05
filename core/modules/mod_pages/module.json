@@ -103,6 +103,18 @@
 												"url_name"	:false,
 												"query_var" :"cms-edit-page-node"
 											 }
+							},
+							{
+								"url_name"	:"copysub",
+								"ctl_target":"copysub",
+								"menu_name"	:"",
+								"menu_order":"0",
+								"use_right" :"edit",
+								"query_var" :"cms-ctrl-action",
+								"subSection":{
+												"url_name"	:false,
+												"query_var" :"cms-edit-page-node"
+											 }
 							}
 						],
 	"include"			:[

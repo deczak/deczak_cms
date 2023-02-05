@@ -9,11 +9,6 @@ class CPageRequest extends CSingleton
 {
 
 
-
-
-
-
-
 	/**
 	 * 	Detects if request comes by XHR, it requires a xhr-action to return a valid info
 	 * 
@@ -44,10 +39,7 @@ class CPageRequest extends CSingleton
 
 
 
-
-
 	##	code below this point is for refactoring/revision
-
 
 
 
@@ -149,8 +141,15 @@ class CPageRequest extends CSingleton
 		}
 		elseif(!empty($redirectList) && CMS_BACKEND)
 		{
+			$condRedirectInfo = new CModelCondition();
+			$condRedirectInfo -> where('tb_page_path.node_id', $redirectList[0] -> redirect_target);		
+			$modelRedirectInfo = new modelPage();
+			$modelRedirectInfo -> load($_pDatabase, $condRedirectInfo);
+			$RedirectInfo = $modelRedirectInfo -> getResult()[0];
+
 			$redirectTarget = $redirectList[0] -> redirect_target;
 			$this -> page_redirect = $redirectTarget;
+			$this -> page_redirect_name = $RedirectInfo -> page_name;
 		}
 
 		##	

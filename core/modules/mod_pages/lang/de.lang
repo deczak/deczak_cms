@@ -22,7 +22,8 @@
 	MOD_SITES_ERR_NOTCREATED			= Neue Seite konnte nicht erstellt werden
 	MOD_SITES_PAGECREATED				= Neue Seite erstellen
 	MOD_SITES_PAGECREATE				= Neue Unterseite erstellen
-	MOD_SITES_PAGEMOVE					= Seite verschieben zu neuer Elternseite
+	MOD_SITES_PAGEMOVE					= Seite verschieben als Unterseite zu ...
+	MOD_SITES_PAGECOPY					= Seite kopieren als Unterseite zu ...
 	
 	MOD_SITES_NEWPAGE_NAME				= Unbenannte Seite
 

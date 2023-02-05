@@ -57,7 +57,7 @@ class	controllerPages extends CController
 
 
 
-		if($_xhrInfo !== null && $_xhrInfo -> isXHR && $_xhrInfo -> action !== 'update-site' && $_xhrInfo -> action !== 'delete' && $_xhrInfo -> action !== 'movesub' && $_xhrInfo -> action !== 'deletetree' && $_xhrInfo -> action !== 'create' && !empty($_GET['cms-edit-page-node']))
+		if($_xhrInfo !== null && $_xhrInfo -> isXHR && $_xhrInfo -> action !== 'update-site' && $_xhrInfo -> action !== 'delete' && $_xhrInfo -> action !== 'movesub' && $_xhrInfo -> action !== 'copysub' && $_xhrInfo -> action !== 'deletetree' && $_xhrInfo -> action !== 'create' && !empty($_GET['cms-edit-page-node']))
 			$_xhrInfo -> action = 'view';
 		
 
@@ -107,6 +107,7 @@ class	controllerPages extends CController
 				
 			case 'xhr_create': $logicDone = $this -> logicXHRCreate($_pDatabase); break;
 			case 'xhr_movesub': $logicDone = $this -> logicXHRMovesub($_pDatabase); break;
+			case 'xhr_copysub': $logicDone = $this -> logicXHRCopysub($_pDatabase); break;
 
 
 			case 'xhr_delete': $logicDone = $this -> logicXHRDelete($_pDatabase, $_xhrInfo); break;	
@@ -296,7 +297,7 @@ class	controllerPages extends CController
 										$requestList[] 	 = 	[	"input" => "crawler_index", 	"validate" => "strip_tags|!empty" ]; 	
 										$requestList[] 	 = 	[	"input" => "crawler_follow", 	"validate" => "strip_tags|!empty" ]; 	
 										$requestList[] 	 = 	[	"input" => "menu_follow", 		"validate" => "strip_tags|!empty" ]; 	
-										$requestList[] 	 = 	[	"input" => "page_id", 			"validate" => "strip_tags|!empty" , 		"use_default" => true, "default_value" => false ]; 	
+										$requestList[] 	 = 	[	"input" => "page_id", 			"validate" => "strip_tags|!empty" , "use_default" => true, "default_value" => false ]; 	
 										$requestList[] 	 = 	[	"input" => "page_image",		"validate" => "strip_tags|trim|!empty" , 	"use_default" => true, "default_value" => 0 ]; 	
 										$requestList[] 	 = 	[	"input" => "publish_from",		"validate" => "strip_tags|trim|!empty" , 	"use_default" => true, "default_value" => 0 ]; 	
 										$requestList[] 	 = 	[	"input" => "publish_until", 	"validate" => "strip_tags|trim|!empty" , 	"use_default" => true, "default_value" => 0 ]; 	
@@ -370,12 +371,7 @@ class	controllerPages extends CController
 											$urlVarList['update_by']		= CSession::instance() -> getValue('user_id');
 											$urlVarList['update_reason']	= '';
 
-
-											##	unset page-id if it contains false
-
-											if($urlVarList['page_id'] === false)
-												unset($urlVarList['page_id']);
-
+										
 											##	apply auth settings to target node and child nodes
 											
 											if(intval($urlVarList['apply_childs_auth']) === 1)
@@ -549,48 +545,8 @@ class	controllerPages extends CController
 		$modelCondition = new CModelCondition();
 		$modelCondition -> where('node_id', $urlVarList['cms-edit-page-node']);		
 		
-
-
 		$this -> m_modelPage  = new modelPage();
-
 		$this -> m_modelPage -> move($_pDatabase, $urlVarList['cms-edit-page-node'], $urlVarList['new-parent-node-id']);
-
-
-
-
-
-		/*
-		
-				Bewege 		$urlVarList['cms-edit-page-node']			zu 			$urlVarList['new-parent-node-id']
-		
-		
-
-				->	von der Zielparent Seite das letzte child finden
-
-				->	right vom letzten child +1 ist das neue left der zu verschiebenen seite
-
-				->	die menge der childs der zu verschiebenden seite +1 ergibt das neue right der zu verschiebenen seite
-
-				-> 	alle seiten ab right Zielparent müssen um die menge verschoben werden die bei der zuverschiebenden seite vorhanden sind 
-
-				->	dem ehemaligem parent muss dann die lücke wieder geschlossen werden durch die 
-
-
-				-----
-
-				->	Daten der zu verschiebenen Seite abrufen mit left und right
-
-				-> 	Daten der neuen parent Seite abrufen mit left und right
-
-				->	Menge der Punkte ermitteln für die Korrekturen
-
-
-
-
-		
-		
-		*/
-
 
 		$_pHTAccess  = new CHTAccess();
 		$_pHTAccess -> generatePart4Frontend($_pDatabase);
@@ -599,7 +555,38 @@ class	controllerPages extends CController
 		$sitemap  	 = new CXMLSitemap();
 		$sitemap 	-> generate($_pDatabase);	
 
+		tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
+		return false;
+	}	
+	
+	private function
+	logicXHRCopysub(CDatabaseConnection &$_pDatabase) : bool
+	{
+		$validationErr =	false;
+		$validationMsg =	'';
+		$responseData = 	[];
 
+		$pURLVariables	 =	new CURLVariables();
+		$requestList		 =	[];
+		$requestList[] 	 = 	[	"input" => "cms-edit-page-node",   "validate" => "strip_tags|!empty", 	"use_default" => true, "default_value" => false  ];
+		$pURLVariables -> retrieve($requestList, true, false); 
+
+		$requestList[] 	 = 	[	"input" => "new-parent-node-id",   "validate" => "strip_tags|!empty", 	"use_default" => true, "default_value" => false  ];
+		$pURLVariables -> retrieve($requestList, false, true); 
+		$urlVarList		 = $pURLVariables ->getArray();
+
+		$modelCondition = new CModelCondition();
+		$modelCondition -> where('node_id', $urlVarList['cms-edit-page-node']);		
+		
+		$this -> m_modelPage  = new modelPage();
+		$this -> m_modelPage -> copy($_pDatabase, $urlVarList['cms-edit-page-node'], $urlVarList['new-parent-node-id']);
+
+		$_pHTAccess  = new CHTAccess();
+		$_pHTAccess -> generatePart4Frontend($_pDatabase);
+		$_pHTAccess -> writeHTAccess($_pDatabase);
+
+		$sitemap  	 = new CXMLSitemap();
+		$sitemap 	-> generate($_pDatabase);	
 
 		tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
 		return false;

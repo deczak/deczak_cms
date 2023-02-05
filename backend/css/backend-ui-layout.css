@@ -213,17 +213,19 @@ div.cms-modal div.controls button span { pointer-events:none; }
 
 div.cms-modal table.cms-modal-path-select-list { width:100%; border-spacing: 0px; font-size:0.9em; }
 div.cms-modal table.cms-modal-path-select-list tr { cursor:pointer; }
-div.cms-modal table.cms-modal-path-select-list tr .fileicon { text-align:center; width:25px; padding:0px 3px 0px 10px; pointer-events:none; }
+div.cms-modal table.cms-modal-path-select-list tr .fileicon { text-align:center; width:28px; padding:0px 10px 0px 10px; }
+div.cms-modal table.cms-modal-path-select-list tr .fileicon i { pointer-events:none; }
+div.cms-modal table.cms-modal-path-select-list tr .fileicon:hover{ background-color: rgba(255, 214, 51, 0.7); }
 div.cms-modal table.cms-modal-path-select-list tr .filename { text-align:left; }
 div.cms-modal table.cms-modal-path-select-list tr .filetype { text-align:left; }
 div.cms-modal table.cms-modal-path-select-list tr .filesize { text-align:right; }
 div.cms-modal table.cms-modal-path-select-list thead th { font-size:0.9em; font-weight:normal; }
 div.cms-modal table.cms-modal-path-select-list th,
-div.cms-modal table.cms-modal-path-select-list td { padding:5px 13px; }
+div.cms-modal table.cms-modal-path-select-list td { padding:5px 5px; }
 div.cms-modal table.cms-modal-path-select-list i { pointer-events:none; }
 div.cms-modal table.cms-modal-path-select-list th:nth-of-type(1):not(:empty):hover { background-color:rgba(0,0,0,0.07); cursor:pointer; font-weight:bold; }
 
-div.cms-modal table.cms-modal-path-select-list tr.path-selected { background:rgba(194, 214, 214, 0.2); }
+div.cms-modal table.cms-modal-path-select-list tr.path-selected { background:rgba(255, 214, 51, 0.5); }
 div.cms-modal fieldset { border:0px; }
 
 

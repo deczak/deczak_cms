@@ -545,25 +545,28 @@
 				<?php if($pageRequest -> page_id != 1) { ?>
 
 					<div style="padding-top:10px;" id="panel-alternate-language">
-
-						<div class="input width-100">
+	
+						<div class="input width-100 append-button-panel">
 							<label><?= CLanguage::string('BEPE_PANEL_ALTLANGNODEID'); ?></label>
-							<input type="text" name="page_id" id="alt_page_id" value="">
+
+							<div class="input-inner">
+
+								<input type="hidden" name="page_id" id="page_id" value="">
+								
+								<input type="text" id="page_id_alternate_node_name" readonly value="">
+
+								<div class="button-panel">
+									<button class="ui button icon button-select button-select-alternate-node"><span><i class="fas fa-ellipsis-h"></i></span></button> 
+									<button class="ui button icon button-remove button-remove-alternate-node"><i class="far fa-trash-alt"></i></button> 
+								</div>
+
+							</div>
+
 						</div>
 
 						<div class="result-box" data-field="page_id" data-error=""></div>
 
-
-
-
-
-
 					</div>
-
-
-	
-
-
 
 					<hr>
 
@@ -576,6 +579,15 @@
 					function
 					updateAlternateList(pageId)
 					{
+						if(!(/^\d+$/.test(pageId)))
+						{
+							let altList = document.getElementById('alterante-container');
+								altList.innerHTML = '<span style="font-size:0.75em;"><?= CLanguage::string('BEPE_PANEL_NOALTLANGEXIST'); ?></span>';
+							document.getElementById('page_id').value   = ''
+							document.getElementById('page_id_alternate_node_name').value = '';
+							return;
+						}
+
 						var formData 		= new FormData();
 							formData.append('cms-xhrequest', 'raw-alternate');
 							formData.append('page_id', pageId);
@@ -645,7 +657,7 @@
 
 								<input type="hidden" name="page_redirect" id="page_redirect_node_id" value="<?= (ctype_digit($pageRequest -> page_redirect) ? $pageRequest -> page_redirect : ''); ?>">
 								
-								<input type="text" id="page_redirect_node_name" readonly value="<?= (!empty($pageRequest -> page_redirect) && ctype_digit($pageRequest -> page_redirect) ? '['. $pageRequest -> page_redirect .']' : '') ?>">
+								<input type="text" id="page_redirect_node_name" readonly value="<?= (!empty($pageRequest -> page_redirect) && ctype_digit($pageRequest -> page_redirect) ? '['. $pageRequest -> page_redirect .'] '. ($pageRequest -> page_redirect_name ?? '') : '') ?>">
 
 								<div class="button-panel">
 									<button class="ui button icon button-select button-select-redirect-node"><span><i class="fas fa-ellipsis-h"></i></span></button> 
@@ -730,6 +742,7 @@
 	{
 		document.getElementById('page_redirect_node_id').value   = event.detail.select.node_id
 		document.getElementById('page_redirect_node_name').value = '['+ event.detail.select.node_id +'] '+ event.detail.select.name;
+		document.getElementById('page_redirect_node_name').title = event.detail.select.path;
 	}
 
 	function openModalSelectRedirectNode()
@@ -740,7 +753,7 @@
 			modalNode.open(
 				'Select page as redirect target', 
 				this, 
-				'fas fa-file',
+				'',
 				<?= json_encode(CLanguage::getLanguages()) ?>
 			);
 	}
@@ -749,6 +762,33 @@
 	{
 		document.getElementById('page_redirect_node_id').value   = '';
 		document.getElementById('page_redirect_node_name').value = '';		
+	}
+	
+	// Alternate Node
+
+	function openModalSelectAlternateNodeSuccess(event)
+	{
+		document.getElementById('page_id').value   = event.detail.select.page_id
+		document.getElementById('page_id_alternate_node_name').value = '['+ event.detail.select.page_id +'] '+ event.detail.select.name;
+	}
+
+	function openModalSelectAlternateNode()
+	{
+
+		let	modalNode = new cmsModalNode;
+			modalNode.setEventNameOnSelected('event-page-panel-alternate-node-select-selected');
+			modalNode.open(
+				'Select page as redirect target', 
+				this, 
+				'',
+				<?= json_encode(CLanguage::getLanguages()) ?>
+			);
+	}
+
+	function openModalRemoveAlternateNode()
+	{
+		document.getElementById('page_id').value   = 'remove'
+		document.getElementById('page_id_alternate_node_name').value = 'create page-id (requires Save)';
 	}
 
 	// Listener
@@ -776,6 +816,18 @@
 					return true;
 				}
 
+				if(event.target.classList.contains('button-select-alternate-node'))
+				{
+					openModalSelectAlternateNode();
+					return true;
+				}
+
+				if(event.target.classList.contains('button-remove-alternate-node'))
+				{
+					openModalRemoveAlternateNode();
+					return true;
+				}
+
 				if(event.target.classList.contains('button-remove-redirect-external'))
 				{
 					document.getElementById('page_redirect_external').value = '';	
@@ -786,5 +838,6 @@
 	});
 
 	window.addEventListener('event-page-panel-redirect-node-select-selected', openModalSelectRedirectNodeSuccess);
+	window.addEventListener('event-page-panel-alternate-node-select-selected', openModalSelectAlternateNodeSuccess);
 
 </script>

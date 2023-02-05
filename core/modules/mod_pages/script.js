@@ -16,9 +16,6 @@ class	cmsIndexList
 
 	onXHRSuccess(response, callInstance)
 	{
-
-		console.log(response);
-
 		if(response.state != 0)
 		{
 			return;
@@ -42,17 +39,6 @@ class	cmsIndexList
 				continue;
 				
 			let	template = document.getElementById('template-page-item').innerHTML;
-
-			/*
-
-			let levelFolderNode = document.createElement('span');
-				levelFolderNode.classList.add('level-folder');
-
-			for(let e = 1; e < pageList[i].level; e++)
-			{
-				levelFolderNode.innerHTML += ' <b>&mdash;</b> ';
-			}
-			*/
 			
 			if(pageList[i].create_time == '0') pageList[i].create_time = ''; else pageList[i].create_time = cmstk.formatDate(pageList[i].create_time, 'Y-m-d @ H:i:s');
 			if(pageList[i].update_time == '0') pageList[i].update_time = ''; else pageList[i].update_time = cmstk.formatDate(pageList[i].update_time, 'Y-m-d @ H:i:s');
@@ -68,13 +54,19 @@ class	cmsIndexList
 
 			if(pageList[i].page_path !== '/')
 			{
-				template = template.replaceAll('%BUTTON_DELETE%', '<button class="button icon trigger-delete-page"><i class="fa-solid fa-trash-can"></i></button>');
-				template = template.replaceAll('%BUTTON_MOVE%', '<button class="button icon trigger-move-subpage"><i class="fas fa-share" style="font-size:1.2em;"></i></button>');
+				template = template.replaceAll('%BUTTON_DELETE%', '<button class="button icon trigger-delete-page" title="Delete page"><i class="fa-solid fa-trash-can"></i></button>');
+				template = template.replaceAll('%BUTTON_MOVE%', '<button class="button icon trigger-move-subpage" title="Move page"><i class="fas fa-share" style="font-size:1.2em;"></i></button>');
+
+				// copy not completed, has more stuff todo
+				//template = template.replaceAll('%BUTTON_COPY%', '<button class="button icon trigger-copy-subpage" title="Copy page"><i class="fa-regular fa-copy" style="font-size:1.2em;"></i></button>');
+
+				template = template.replaceAll('%BUTTON_COPY%', '&nbsp;');
 			}
 			else
 			{
 				template = template.replaceAll('%BUTTON_DELETE%', '&nbsp;');
 				template = template.replaceAll('%BUTTON_MOVE%', '&nbsp;');
+				template = template.replaceAll('%BUTTON_COPY%', '&nbsp;');
 			}
 
 			let listItemNode = document.createElement('li');

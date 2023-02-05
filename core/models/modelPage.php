@@ -252,6 +252,22 @@ class 	modelPage extends CModel
 			$_insertData['page_path']		=	$this -> getValidPath($_pDatabase, $_insertData['node_id'], $_insertData['page_name']) .'/';
 			#parent node id funktion erstellen
 
+
+
+	##	unset page-id if it contains false
+
+
+					if($_insertData['page_id'] !== false && !ctype_digit($_insertData['page_id'])) {
+
+						$_insertData['page_id'] = $this -> getFreePageID($_pDatabase);
+					}
+					elseif($_insertData['page_id'] === false) 
+					{
+						unset($_insertData['page_id']);
+
+					}
+
+
 		##	tb_page
 
 
@@ -509,7 +525,8 @@ class 	modelPage extends CModel
 	public function
 	move(CDatabaseConnection &$_pDatabase, int $nodeId2Move, int $nodeIdNewParent)
 	{
-		$_tablePagePath	=	$this -> m_schemePagePath 	-> getTableName();
+		$_tablePagePath		=	$this -> m_schemePagePath -> getTableName();
+		$_tablePageHeader	=	$this -> m_schemePageHeader -> getTableName();
 
 		$srcNodeList = [];
 		$this -> getNodeTree($_pDatabase, $nodeId2Move, $srcNodeList );
@@ -518,6 +535,8 @@ class 	modelPage extends CModel
 
 		$newParentNodeInfo = [];
 		$this -> getNodeData($_pDatabase, $nodeIdNewParent, $newParentNodeInfo);
+
+		error_log(print_r($newParentNodeInfo, true));
 
 		// Make space on destination
 
@@ -552,6 +571,13 @@ class 	modelPage extends CModel
 		$dtaObject 		-> prepareMode 		= false;
 		$_pDatabase		-> query(DB_UPDATE) -> table($_tablePagePath) -> dtaObject($dtaObject) -> condition($pagePathCond) -> exec();
 
+		$pagePathCond	 = new CModelCondition();
+		$pagePathCond	-> where('node_id', $movingNodeInfo -> node_id);
+		$dtaObject 		 = new stdClass();
+		$dtaObject 		-> page_language 	= "'". $newParentNodeInfo -> page_language ."'";
+		$dtaObject 		-> prepareMode 		= false;
+		$_pDatabase		-> query(DB_UPDATE) -> table($_tablePageHeader) -> dtaObject($dtaObject) -> condition($pagePathCond) -> exec();
+
 		// remove space from previous location
 
 		$pagePathCond	 = new CModelCondition();
@@ -567,6 +593,79 @@ class 	modelPage extends CModel
 		$dtaObject 		-> node_lft 		= 'node_lft-'. $srcNodeEdges;
 		$dtaObject 		-> prepareMode 		= false;
 		$_pDatabase		-> query(DB_UPDATE) -> table($_tablePagePath) -> dtaObject($dtaObject) -> condition($pagePathCond) -> exec();
+	}
+		
+	public function
+	copy(CDatabaseConnection &$_pDatabase, int $nodeId2Move, int $nodeIdNewParent)
+	{
+		$_tablePagePath	=	$this -> m_schemePagePath 	-> getTableName();
+
+		$srcNodeList = [];
+		$this -> getNodeTree($_pDatabase, $nodeId2Move, $srcNodeList );
+
+		$srcNodeEdges = count($srcNodeList) * 2;
+
+		$newParentNodeInfo = [];
+		$this -> getNodeData($_pDatabase, $nodeIdNewParent, $newParentNodeInfo);
+
+		/*
+
+				-> 	make space on target
+
+				->	there is not yet an option to set the copy as language sister, so it is get a new page id
+
+				->	correct the language on target root scope if differs from src
+
+				-> 	copy all page data with corrected node/page-id 
+
+				->	module data in their own tables needs something like  a copy callback
+
+
+
+
+
+		// Make space on destination
+
+		$pagePathCond	 = new CModelCondition();
+		$pagePathCond	-> whereGreaterEven('node_rgt', $newParentNodeInfo -> node_rgt);
+		$dtaObject 		 = new stdClass();
+		$dtaObject 		-> node_rgt 		= 'node_rgt+'. $srcNodeEdges;
+		$dtaObject 		-> prepareMode 		= false;
+		$_pDatabase		-> query(DB_UPDATE) -> table($_tablePagePath) -> dtaObject($dtaObject) -> condition($pagePathCond) -> exec();
+
+		$pagePathCond	 = new CModelCondition();
+		$pagePathCond	-> whereGreater('node_lft', $newParentNodeInfo -> node_rgt);
+		$dtaObject 		 = new stdClass();
+		$dtaObject 		-> node_lft 		= 'node_lft+'. $srcNodeEdges;
+		$dtaObject 		-> prepareMode 		= false;
+		$_pDatabase		-> query(DB_UPDATE) -> table($_tablePagePath) -> dtaObject($dtaObject) -> condition($pagePathCond) -> exec();
+
+		// Move nodes to destination
+
+		$movingNodeInfo = [];
+		$this -> getNodeData($_pDatabase, $nodeId2Move, $movingNodeInfo);
+
+		$edgeCorrection = $newParentNodeInfo -> node_rgt - $movingNodeInfo -> node_lft;
+
+		$pagePathCond	 = new CModelCondition();
+		$pagePathCond	-> whereBetween('node_lft', $movingNodeInfo -> node_lft, $movingNodeInfo -> node_rgt);
+		$dtaObject 		 = new stdClass();
+		$dtaObject 		-> node_lft 		= 'node_lft+('. $edgeCorrection .')';
+		$dtaObject 		-> node_rgt 		= 'node_rgt+('. $edgeCorrection .')';
+		$dtaObject 		-> node_level 		= $newParentNodeInfo -> node_level + 1;
+		$dtaObject 		-> page_language 	= "'". $newParentNodeInfo -> page_language ."'";
+		$dtaObject 		-> prepareMode 		= false;
+		$_pDatabase		-> query(DB_UPDATE) -> table($_tablePagePath) -> dtaObject($dtaObject) -> condition($pagePathCond) -> exec();
+
+		$pagePathCond	 = new CModelCondition();
+		$pagePathCond	-> where('node_id', $movingNodeInfo -> node_id);
+		$dtaObject 		 = new stdClass();
+		$dtaObject 		-> page_language 	= "'". $newParentNodeInfo -> page_language ."'";
+		$dtaObject 		-> prepareMode 		= false;
+		$_pDatabase		-> query(DB_UPDATE) -> table($_tablePageHeader) -> dtaObject($dtaObject) -> condition($pagePathCond) -> exec();
+
+
+		*/
 	}
 			
 	private function

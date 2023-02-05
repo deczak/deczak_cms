@@ -15,8 +15,11 @@ The version number is the release date. A letter as suffix indicates fixes on sa
 
 **Changes**
 - Resource files like css and js files are now additionaly collect from module css and js sub-directory, as usual from the reading the module.json linked resource files.
-- Changed optic of pages management, requires manual resource file update in environment section
-- upgrade backend fontawesome from 5.15.3 to 6.21
+- Changed optic of pages management, requires manual resource file update in environment section.
+- Upgrade backend fontawesome from 5.15.3 to 6.21.
+- Fixed issue with move page into another language scope where language was not set correct to his parent language.
+- Changed optic and usability of node-select modal for move and copy page.
+- Changed page edit alternate language input to node-select modal instead of typing page-id
 
 ### 20230128
 

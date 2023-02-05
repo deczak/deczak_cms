@@ -84,7 +84,8 @@ class cmsPageEdit
 										pageIdError = true;
 								}
 
-								let altPageInput =  document.getElementById('alt_page_id');
+								let altPageInput =  document.getElementById('page_id');
+
 								if(altPageInput != null)
 								{
 								if(!pageIdError)
@@ -97,7 +98,7 @@ class cmsPageEdit
 								
 								}
 					
-								document.getElementById('alt_page_id').value = "";
+								document.getElementById('page_id').value = "";
 							}
 								break;
 						
