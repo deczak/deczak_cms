@@ -21,11 +21,10 @@
 
 		<!-- TEMPLATE --------------------------->
 
-		<label></label>
-
+		<label><?= CLanguage::string('M_BESIMPLEIMGG_VIEWMODE'); ?></label>
+		
 		<?php 
 		
-		/* not in use atm
 
 		foreach($avaiableTemplates as $template) { ?>
 
@@ -35,23 +34,9 @@
 		
 		<?php } 
 
-		*/
-		
 		?>
 
 		<input type="hidden" name="simple-gallery-template" value="<?= $object -> params -> template; ?>">
-
-		<div style="display:flex; align-items:center;">
-			<label>Format</label>	
-			<div class="input">
-				<div class="select-wrapper">
-					<select name="simple-gallery-format" class="trigger-view-mode" style="width:120px; border-radius:0; padding: 5px;">
-						<option <?= (($object -> params -> format ?? 'ratio') === 'ratio' ? 'selected' : ''); ?> value="ratio">Ratio based</option>
-						<option hidden <?= (($object -> params -> format ?? 'ratio') === 'squares' ? 'selected' : ''); ?> value="squares">Squares</option>
-					</select>
-				</div>	
-			</div>
-		</div>
 
 		<div style="display:flex; align-items:center;">
 			<label>Thumbnail Height (px)</label>	
