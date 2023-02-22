@@ -286,17 +286,15 @@ class	controllerSimpleNavigation extends CController
 			{
 				$validationMsg = 'Object updated';
 
+				$object = modelPageObject::
+					  db($_pDatabase)
+					->where('object_id', '=', $_xhrInfo -> objectId)
+					->one();
 
-				$modelCondition = new CModelCondition();
-				$modelCondition -> where('object_id', $_xhrInfo -> objectId);
-
-				$this -> m_modelPageObject = new modelPageObject();
-
-				$_objectUpdate['update_time']		=	time();
-				$_objectUpdate['update_by']			=	0;
-				$_objectUpdate['update_reason']		=	'';
-
-				$this -> m_modelPageObject -> update($_pDatabase, $_objectUpdate, $modelCondition);
+				$object->update_time 	= time();
+				$object->update_by 		= 0;
+				$object->update_reason	= '';
+				$object->save();
 
 				$this->logicXHRView($_pDatabase, $_xhrInfo, $_enableEdit, $_enableDelete);
 			}
@@ -335,7 +333,7 @@ class	controllerSimpleNavigation extends CController
 				'object_id' => (int)$this -> objectInfo -> object_id,
 				'body' 		=> '',
 				'params' 	=> $sOParams,
-			]);
+			], $_pDatabase);
 			
 
 
@@ -406,24 +404,13 @@ class	controllerSimpleNavigation extends CController
 		{
 
 
-			$simpleObject = modelSimple::where('object_id', '=', $_xhrInfo -> objectId)->one();
-
-			if($simpleObject->delete())
-			{
-				
-			$modelCondition = new CModelCondition();
-			$modelCondition -> where('object_id', $_xhrInfo -> objectId);
-
-				$modelPageObject  = new modelPageObject();
-				$modelPageObject -> delete($_pDatabase, $modelCondition);
+			modelPageObject::
+				  db($_pDatabase)
+				->where('object_id', '=', $_xhrInfo -> objectId)
+				->delete();
 
 				$validationMsg = 'Object deleted';
-			}
-			else
-			{
-				$validationMsg = 'Unknown error on sql query';
-				$validationErr = true;
-			}											
+										
 		}
 		else	// Validation Failed
 		{

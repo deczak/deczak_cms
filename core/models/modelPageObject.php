@@ -1,7 +1,7 @@
 <?php
 
 include_once CMS_SERVER_ROOT.DIR_CORE.DIR_SCHEME.'schemePageObject.php';	
-
+/*
 class 	modelPageObject extends CModel
 {
 	public function
@@ -30,4 +30,17 @@ class 	modelBackendPageObject extends CModel
 	{
 		return $this -> createPrototype();
 	}
+}
+
+
+*/
+
+class	modelPageObject extends cmsModel
+{
+	public static string $schemeName = 'schemePageObject';
+}
+
+class	modelBackendPageObject extends cmsModel
+{
+	public static string $schemeName = 'schemeBackendPageObject';
 }

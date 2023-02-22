@@ -347,7 +347,7 @@ class	controllerEnvironment extends CController
 
 			MEDIATHEK::deleteAll();
 
-			modelMediathek::remove();
+			modelMediathek::delete();
 
 			tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
 		}

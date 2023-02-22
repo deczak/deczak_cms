@@ -21,6 +21,7 @@
 	include_once '../core/classes/cmsModel.php';
 	include_once '../core/classes/CView.php';
 	include_once '../core/classes/CController.php';
+	include_once '../core/classes/cmsController.php';
 	include_once '../core/classes/CPageRequest.php';
 	include_once '../core/classes/CSession.php';
 	include_once '../core/classes/CUserRights.php';

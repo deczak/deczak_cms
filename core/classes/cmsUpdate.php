@@ -388,6 +388,13 @@ class cmsUpdate
 			{
 				# Get Node-ID by Module-ID
 
+
+				$beObjektInfo = modelBackendPageObject::
+					  where('module_id', '=', $module->module_id)
+					->one();
+					
+				/*
+
 				$condition		 = new CModelCondition();
 				$condition		-> where('module_id', $module -> module_id);
 
@@ -396,6 +403,8 @@ class cmsUpdate
 
 				$beObjektInfo 	 = $modelBackendPageObject -> getResult();
 				$beObjektInfo	 = (!empty($beObjektInfo) ? reset($beObjektInfo) : null);
+
+				*/
 
 				if(empty($beObjektInfo))
 					continue;

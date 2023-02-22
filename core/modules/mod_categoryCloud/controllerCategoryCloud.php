@@ -244,18 +244,19 @@ class	controllerCategoryCloud extends CController
 
 			if($simpleObject->save())
 			{
-				$modelCondition = new CModelCondition();
-				$modelCondition -> where('object_id', $_xhrInfo -> objectId);
+				
 
 				$validationMsg = 'Object updated';
 
-				$this -> m_modelPageObject = new modelPageObject();
+				$object = modelPageObject::
+					  db($_pDatabase)
+					->where('object_id', '=', $_xhrInfo -> objectId)
+					->one();
 
-				$_objectUpdate['update_time']		=	time();
-				$_objectUpdate['update_by']			=	0;
-				$_objectUpdate['update_reason']		=	'';
-
-				$this -> m_modelPageObject -> update($_pDatabase, $_objectUpdate, $modelCondition);
+				$object->update_time 	= time();
+				$object->update_by 		= 0;
+				$object->update_reason	= '';
+				$object->save();
 			}
 			else
 			{
@@ -290,7 +291,7 @@ class	controllerCategoryCloud extends CController
 			'object_id' => (int)$this -> objectInfo -> object_id,
 			'body' 		=> '',
 			'params' 	=> $sOParams,
-		]);
+		], $_pDatabase);
 		
 		if(!$simpleObject->save())
 		{
@@ -388,23 +389,15 @@ class	controllerCategoryCloud extends CController
 
 		if(!$validationErr)
 		{
-			$simpleObject = modelSimple::where('object_id', '=', $_xhrInfo -> objectId)->one();
 
-			if($simpleObject->delete())
-			{
-				$modelCondition = new CModelCondition();
-				$modelCondition -> where('object_id', $_xhrInfo -> objectId);
+			modelPageObject::
+				  db($_pDatabase)
+				->where('object_id', '=', $_xhrInfo -> objectId)
+				->delete();
 
-				$_objectModel  	 = new modelPageObject();
-				$_objectModel	-> delete($_pDatabase, $modelCondition);
 
-				$validationMsg = 'Object deleted';
-			}
-			else
-			{
-				$validationMsg .= 'Unknown error on sql query';
-				$validationErr = true;
-			}									
+			$validationMsg = 'Object deleted';
+							
 		}
 		else	// Validation Failed
 		{

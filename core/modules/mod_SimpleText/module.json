@@ -9,7 +9,6 @@
 	"module_menu_group"	: "0",
 	"module_rights"		:[
 							{"name":"view",		"desc":"VIEW"},
-							{"name":"create",	"desc":"CREATE"},
 							{"name":"edit",		"desc":"EDIT"}
 						],
 	"module_subs"		:[	

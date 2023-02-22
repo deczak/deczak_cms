@@ -10,6 +10,12 @@ include_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelRedirect.php';
 include_once CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CModulesTemplates.php';	
 include_once 'modelBlog.php';
 
+/*
+
+	todo .. die db verbindungung zum model durchschleifen, einschl. den select usw.
+
+*/
+
 class	controllerBlog extends CController
 {
 	public function
@@ -20,21 +26,10 @@ class	controllerBlog extends CController
 		$this->publicActionList = [
 			'getBlogItems'
 		];
-
-		switch($this -> moduleInfo -> module_type) 
-		{
-			case 'core':	
-				$this -> moduleRootDir = CMS_SERVER_ROOT.DIR_CORE.DIR_MODULES;
-				break;
-							
-			case 'mantle':
-				$this -> moduleRootDir = CMS_SERVER_ROOT.DIR_MANTLE.DIR_MODULES;
-				break;
-		}
 	}
 	
 	public function
-	logic(CDatabaseConnection &$_pDatabase, array $_rcaTarget, ?object $_xhrInfo, &$_logicResult, bool $_bEditMode) : bool
+	logic(CDatabaseConnection &$_pDatabase, array $_rcaTarget, ?object $_xhrInfo, &$_logicResult, bool $_bEditMode, object $requestInfo) : bool
 	{
 		##	Set default target if not exists
 
@@ -95,7 +90,7 @@ class	controllerBlog extends CController
 		$simpleObject = modelSimple::where('object_id', '=', $this -> objectInfo -> object_id)->one();
 
 		$moduleTemplate  = new CModulesTemplates();
-		$moduleTemplate ->	load($this -> moduleRootDir, $this->moduleInfo->module_location, $simpleObject -> params -> template ?? 'list');
+		$moduleTemplate ->	load($this->moduleInfo->modules_path, $this->moduleInfo->module_location, $simpleObject -> params -> template ?? 'list');
 	
 		$nodeList = $this -> getNodesList($_pDatabase, $this -> objectInfo -> node_id);
 
@@ -119,10 +114,10 @@ class	controllerBlog extends CController
 		$simpleObject = modelSimple::where('object_id', '=', $this -> objectInfo -> object_id)->one();
 
 		$moduleTemplate = new CModulesTemplates();
-		$moduleTemplate ->	load($this -> moduleRootDir, $this->moduleInfo->module_location, $simpleObject -> params -> template ?? 'list');
+		$moduleTemplate ->	load($this->moduleInfo->modules_path, $this->moduleInfo->module_location, $simpleObject -> params -> template ?? 'list');
 
 		$moduleTemplates = new CModulesTemplates();
-		$moduleTemplates ->	load($this -> moduleRootDir, $this->moduleInfo->module_location);
+		$moduleTemplates ->	load($this->moduleInfo->modules_path, $this->moduleInfo->module_location);
 
 		$nodeList = $this -> getNodesList($_pDatabase, $this -> objectInfo -> node_id);
 
@@ -178,16 +173,15 @@ class	controllerBlog extends CController
 			{
 				$validationMsg = 'Object updated';
 
-				$this -> m_modelPageObject = new modelPageObject();
+				$object = modelPageObject::
+					  db($_pDatabase)
+					->where('object_id', '=', $_xhrInfo -> objectId)
+					->one();
 
-				$_objectUpdate['update_time']		=	time();
-				$_objectUpdate['update_by']			=	0;
-				$_objectUpdate['update_reason']		=	'';
-
-				$modelCondition = new CModelCondition();
-				$modelCondition -> where('object_id', $_xhrInfo -> objectId);
-
-				$this -> m_modelPageObject -> update($_pDatabase, $_objectUpdate, $modelCondition);
+				$object->update_time 	= time();
+				$object->update_by 		= 0;
+				$object->update_reason	= '';
+				$object->save();
 
 				$this->logicXHRView($_pDatabase, $_xhrInfo);
 			
@@ -240,7 +234,7 @@ class	controllerBlog extends CController
 		$validationMsg =	'';
 		$responseData = 	[];
 
-		$simpleObject = modelSimple::new();
+		$simpleObject = modelSimple::new(null, $_pDatabase);
 		$simpleObject->body			= '';
 		$simpleObject->object_id	= $this -> objectInfo -> object_id;
 		$simpleObject->params->template		= 'list';
@@ -260,10 +254,10 @@ class	controllerBlog extends CController
 
 
 		$moduleTemplate = new CModulesTemplates();
-		$moduleTemplate ->	load($this -> moduleRootDir, $this->moduleInfo->module_location, $simpleObject -> params -> template );
+		$moduleTemplate ->	load($this->moduleInfo->modules_path, $this->moduleInfo->module_location, $simpleObject -> params -> template );
 
 		$moduleTemplates = new CModulesTemplates();
-		$moduleTemplates ->	load($this -> moduleRootDir, $this->moduleInfo->module_location);
+		$moduleTemplates ->	load($this->moduleInfo->modules_path, $this->moduleInfo->module_location);
 
 
 
@@ -308,21 +302,13 @@ class	controllerBlog extends CController
 		if(!$validationErr)
 		{
 			
-			$modelCondition = new CModelCondition();
-			$modelCondition -> where('object_id', $_xhrInfo -> objectId);
-			
-			$_objectModel  	 = new modelPageObject();
+			modelPageObject::
+				  db($_pDatabase)
+				->where('object_id', '=', $_xhrInfo -> objectId)
+				->delete();
 
-			if($_objectModel->delete($_pDatabase, $modelCondition))
-			{
+			$validationMsg = 'Object deleted';
 
-				$validationMsg = 'Object deleted';
-			}
-			else
-			{
-				$validationMsg .= 'Unknown error on sql query';
-				$validationErr = true;
-			}	
 		}
 		else	// Validation Failed
 		{
@@ -536,49 +522,49 @@ class	controllerBlog extends CController
 	protected function
 	getNodeHeatline(CDatabaseConnection &$_pDatabase, int $_nodeId)
 	{
-		$nodeCondition    = new CModelCondition();
-		$nodeCondition   -> where('node_id', $_nodeId);
-		$nodeCondition   -> where('module_controller', 'controllerSimpleHeadline');
-		$nodeCondition   -> orderBy('object_order_by');
-		$nodeCondition   -> limit(1);
+		$object = modelPageObject::
+				  db($_pDatabase)
+				->select(
+					'tb_page_object.*',
+					'tb_page_object_simple.body',
+					'tb_page_object_simple.params',
+				)
+				->join('tb_page_object_simple', function ($join) {
+					$join->where('tb_page_object_simple.object_id', 'tb_page_object.object_id');
+				})
+				->join('tb_modules', function ($join) {
+					$join->where('tb_modules.module_id', 'tb_page_object.module_id');
+				})
+				->where('node_id', '=', $_nodeId)
+				->where('module_controller', '=', 'controllerSimpleHeadline')
+				->orderBy('object_order_by')
+				->one();
 
-		$conditionPages	  = new CModelCondition();
-		$conditionPages  -> where('tb_page_object_simple.object_id', 'tb_page_object.object_id');
-		$modelPageObject  = new modelPageObject();
-		$modelPageObject -> addSelectColumns('tb_page_object.*','tb_page_object_simple.body','tb_page_object_simple.params');
-		$modelPageObject -> addRelation('join', 'tb_page_object_simple', $conditionPages);
-
-		$conditionPages   = new CModelCondition();
-		$conditionPages  -> where('tb_modules.module_id', 'tb_page_object.module_id');
-		$modelPageObject -> addRelation('join', 'tb_modules', $conditionPages);
-
-		$modelPageObject -> load($_pDatabase, $nodeCondition);
-
-		return (count($modelPageObject -> getResult()) != 0 ? $modelPageObject -> getResult()[0] : NULL);
+		return $object;
 	}
 
 	protected function
 	getNodeText(CDatabaseConnection &$_pDatabase, int $_nodeId)
 	{
-		$nodeCondition    = new CModelCondition();
-		$nodeCondition   -> where('node_id', $_nodeId);
-		$nodeCondition   -> where('module_controller', 'controllerSimpleText');
-		$nodeCondition   -> orderBy('object_order_by');
-		$nodeCondition   -> limit(1);
+		$object = modelPageObject::
+				  db($_pDatabase)
+				->select(
+					'tb_page_object.*',
+					'tb_page_object_simple.body',
+					'tb_page_object_simple.params',
+				)
+				->join('tb_page_object_simple', function ($join) {
+					$join->where('tb_page_object_simple.object_id', 'tb_page_object.object_id');
+				})
+				->join('tb_modules', function ($join) {
+					$join->where('tb_modules.module_id', 'tb_page_object.module_id');
+				})
+				->where('node_id', '=', $_nodeId)
+				->where('module_controller', '=', 'controllerSimpleText')
+				->orderBy('object_order_by')
+				->one();
 
-		$conditionPages   = new CModelCondition();
-		$conditionPages  -> where('tb_page_object_simple.object_id', 'tb_page_object.object_id');
-		$modelPageObject  = new modelPageObject();
-		$modelPageObject -> addSelectColumns('tb_page_object.*','tb_page_object_simple.body','tb_page_object_simple.params');
-		$modelPageObject -> addRelation('join', 'tb_page_object_simple', $conditionPages);
-
-		$conditionPages   = new CModelCondition();
-		$conditionPages  -> where('tb_modules.module_id', 'tb_page_object.module_id');
-		$modelPageObject -> addRelation('join', 'tb_modules', $conditionPages);
-
-		$modelPageObject -> load($_pDatabase, $nodeCondition);
-
-		return (count($modelPageObject -> getResult()) != 0 ? $modelPageObject -> getResult()[0] : NULL);
+		return $object;
 	}
 
 	public function

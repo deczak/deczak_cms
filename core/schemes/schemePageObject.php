@@ -22,7 +22,7 @@ class schemePageObject extends CScheme
 		$this -> addColumn('update_time', DB_COLUMN_TYPE_BIGINT) -> setAttribute(DB_COLUMN_ATTR_UNSIGNED) -> setDefault('0');
 		$this -> addColumn('update_by', DB_COLUMN_TYPE_STRING) -> setLength(25) -> setDefault('NULL');
 
-		$this -> addColumn('instance', DB_COLUMN_TYPE_INT) -> setVirtual();
+		$this -> addColumn('instance', DB_COLUMN_TYPE_JSON) -> setVirtual() -> setDefault('NULL');
 		$this -> addColumn('body', DB_COLUMN_TYPE_STRING) -> setVirtual();
 		$this -> addColumn('params'	, 0) -> setVirtual();
 

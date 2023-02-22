@@ -15,6 +15,17 @@ class	controllerSimpleGallery extends CController
 		$this->publicActionList = [
 			'getItems'
 		];
+
+		switch($this -> moduleInfo -> module_type) 
+		{
+			case 'core':	
+				$this -> moduleRootDir = CMS_SERVER_ROOT.DIR_CORE.DIR_MODULES;
+				break;
+							
+			case 'mantle':
+				$this -> moduleRootDir = CMS_SERVER_ROOT.DIR_MANTLE.DIR_MODULES;
+				break;
+		}
 	}
 	
 	public function
@@ -80,6 +91,10 @@ class	controllerSimpleGallery extends CController
 		if(empty($simpleObject -> params -> itemList))
 			$simpleObject -> params -> itemList = [];
 
+
+		$moduleTemplate	 = new CModulesTemplates();
+		$moduleTemplate	-> load($this -> moduleRootDir, $this->moduleInfo->module_location, $simpleObject -> params -> template ?? 'thumbnails-ratio');
+
 		$simpleObject -> params -> itemList = (array)$simpleObject -> params -> itemList;
 
 		$this -> setView(	
@@ -87,6 +102,7 @@ class	controllerSimpleGallery extends CController
 						'',
 						[
 							'object'	=> $simpleObject,
+							'currentTemplate' => $moduleTemplate -> templatesList,
 							'itemList'	=> $this -> processGalleryItems($_pDatabase, $simpleObject -> params -> itemList),
 						]
 						);
@@ -125,11 +141,23 @@ class	controllerSimpleGallery extends CController
 
 		$simpleObject -> params -> itemList = (array)$simpleObject -> params -> itemList;
 
+
+		$moduleTemplate = new CModulesTemplates();
+		$moduleTemplate ->	load($this -> moduleRootDir, $this->moduleInfo->module_location, $simpleObject -> params -> template ?? 'thumbnails-ratio');
+
+		$moduleTemplates = new CModulesTemplates();
+		$moduleTemplates ->	load($this -> moduleRootDir, $this->moduleInfo->module_location);
+
+
+
+
 		$this -> setView(	
 						'edit',	
 						'',
 						[
 							'object'	=> $simpleObject,
+							'currentTemplate'	=> $moduleTemplate -> templatesList,
+							'avaiableTemplates'	=> $moduleTemplates -> templatesList,
 							'itemList'	=> $this -> processGalleryItems($_pDatabase, $simpleObject -> params -> itemList),
 						]
 						);
@@ -148,7 +176,7 @@ class	controllerSimpleGallery extends CController
 		$pURLVariables =	new CURLVariables();
 		$requestList		 =	[];
 		$requestList[] 	 = 	[	"input" => "simple-gallery-item", "validate" => "!empty" ]; 
-		$requestList[] 	 = 	[	"input" => "simple-gallery-format", "validate" => "!empty" ];
+		$requestList[] 	 = 	[	"input" => "simple-gallery-template", "validate" => "!empty" ];
 		$requestList[] 	 = 	[	"input" => "simple-gallery-thumb-height", "validate" => "!empty" ];
 		$pURLVariables-> retrieve($requestList, false, true); // POST 
 		$urlVarList		 = $pURLVariables ->getArray();
@@ -160,7 +188,8 @@ class	controllerSimpleGallery extends CController
 		{
 			$simpleObject = modelSimple::where('object_id', '=', $_xhrInfo -> objectId)->one();
 
-			$simpleObject->params->format 			= $urlVarList['simple-gallery-format'];
+			#$simpleObject->params->format 			= $urlVarList['simple-gallery-template'];
+			$simpleObject->params->template			= $urlVarList['simple-gallery-template'];
 			$simpleObject->params->thumb_height		= $urlVarList['simple-gallery-thumb-height'];
 			$simpleObject->params->itemList 		= $urlVarList['simple-gallery-item'];
 			$simpleObject->body = '';
@@ -169,16 +198,15 @@ class	controllerSimpleGallery extends CController
 			{
 				$validationMsg = 'Object updated';
 
-				$modelCondition = new CModelCondition();
-				$modelCondition -> where('object_id', $_xhrInfo -> objectId);
+				$object = modelPageObject::
+					  db($_pDatabase)
+					->where('object_id', '=', $_xhrInfo -> objectId)
+					->one();
 
-				$this -> m_modelPageObject = new modelPageObject();
-
-				$_objectUpdate['update_time']		=	time();
-				$_objectUpdate['update_by']			=	0;
-				$_objectUpdate['update_reason']		=	'';
-
-				$this -> m_modelPageObject -> update($_pDatabase, $_objectUpdate, $modelCondition);
+				$object->update_time 	= time();
+				$object->update_by 		= 0;
+				$object->update_reason	= '';
+				$object->save();
 
 
 				$this->logicXHRView($_pDatabase, $_xhrInfo, $_enableEdit, $_enableDelete);
@@ -211,12 +239,13 @@ class	controllerSimpleGallery extends CController
 		$responseData = 	[];
 
 		$sOParams = new stdClass;
+		$sOParams -> template = 'thumbnails-ratio';
 
 		$simpleObject = modelSimple::new([
 			'object_id' => (int)$this -> objectInfo -> object_id,
 			'body' 		=> '',
 			'params' 	=> $sOParams,
-		]);
+		], $_pDatabase);
 		
 		if(!$simpleObject->save())
 		{
@@ -225,11 +254,23 @@ class	controllerSimpleGallery extends CController
 		}
 		else
 		{
+
+
+
+			$moduleTemplate = new CModulesTemplates();
+			$moduleTemplate ->	load($this -> moduleRootDir, $this->moduleInfo->module_location, $simpleObject -> params -> template);
+
+			$moduleTemplates = new CModulesTemplates();
+			$moduleTemplates ->	load($this -> moduleRootDir, $this->moduleInfo->module_location);
+
+
 			$this -> setView(	
 							'edit',	
 							'',
 							[
 								'object'	=> $simpleObject,
+						'currentTemplate'	=> $moduleTemplate -> templatesList,
+						'avaiableTemplates'	=> $moduleTemplates -> templatesList,
 								'itemList'	=> [],
 							]
 							);
@@ -257,24 +298,13 @@ class	controllerSimpleGallery extends CController
 
 		if(!$validationErr)
 		{
-			$simpleObject = modelSimple::where('object_id', '=', $_xhrInfo -> objectId)->one();
-
-			if($simpleObject->delete())
-			{
-				$modelCondition = new CModelCondition();
-				$modelCondition -> where('object_id', $_xhrInfo -> objectId);
-
-				$_objectModel  	 = new modelPageObject();
-				$_objectModel	-> delete($_pDatabase, $modelCondition);
+			modelPageObject::
+				  db($_pDatabase)
+				->where('object_id', '=', $_xhrInfo -> objectId)
+				->delete();
 
 				$validationMsg = 'Object deleted';
-			
-			}
-			else
-			{
-				$validationMsg .= 'Unknown error on sql query';
-				$validationErr = true;
-			}											
+											
 		}
 		else	// Validation Failed
 		{

@@ -31,12 +31,24 @@ class CPageRequest extends CSingleton
 		return null;
 	}
 
-
 	public function getPageLanguage() : string
 	{
 		return $this->page_language;		
 	}
 
+	public function getShortRequestInfo() : object
+	{
+		$response = new stdClass;
+		$response->node_id = $this->node_id;
+		$response->page_language = $this->page_language;
+		$response->page_version = $this->page_version;
+		$response->page_title = $this->page_title;
+		$response->page_name = $this->page_name;
+		$response->page_id = $this->page_id;
+		$response->page_url = $this->url;
+		$response->alternate_path_list = $this->alternate_path;
+		return $response;
+	}
 
 
 	##	code below this point is for refactoring/revision
@@ -48,6 +60,10 @@ class CPageRequest extends CSingleton
 	public	$page_version;
 	public	$urlPath;
 	public	$sitemap;
+	public	$page_name;
+	public	$page_id;
+	public	$url;
+	public	$alternate_path;
 
 	public	$isEditMode;
 
@@ -55,6 +71,13 @@ class CPageRequest extends CSingleton
 	public	$crumbsList;
 
 	public	$responseCode = 200;
+
+	public 	$canonical;
+	public 	$page_redirect;
+	public 	$page_redirect_name;
+	public 	$page_title;
+	public 	$page_description;
+	public 	$languageInfo;
 
 	public function
 	init(?CDatabaseConnection &$_pDatabase, $_nodeId, $_language, $_version)
@@ -234,14 +257,32 @@ class CPageRequest extends CSingleton
 			}
 
 
+			/*
 			$modelCondition = new CModelCondition();
 			$modelCondition -> where('node_id', $this -> node_id);
 			$modelCondition -> where('page_version', $this -> page_version);
 			$modelCondition -> orderBy('object_order_by');
 
-			$modelPageObject = new modelPageObject();
-			$modelPageObject -> load($_pDatabase, $modelCondition);
-			$this -> objectsList = &$modelPageObject -> getResult();
+			$model_PageObject = new model_PageObject();
+			$model_PageObject -> load($_pDatabase, $modelCondition);
+			$this -> objectsList = &$model_PageObject -> getResult();
+			*/
+
+
+			$objectList = modelPageObject::
+				  db($_pDatabase)
+				->where('node_id', '=', $this -> node_id)
+				->where('page_version', '=', $this -> page_version)
+				->orderBy('object_order_by')
+				->get();
+
+			
+			foreach($objectList as $object)
+			{
+				$this -> objectsList[] = $object;	
+			}
+
+
 		
 			foreach($this -> sitemap as $_mapIndex =>  $_mapItem)
 			{
@@ -340,6 +381,15 @@ class CPageRequest extends CSingleton
 				$this -> $property = $value;
 			}
 
+
+			$page->objects = modelBackendPageObject::
+				  where('node_id', '=', $this->node_id)
+				->where('page_version', '=', $this->page_version)
+				->orderBy('object_order_by')
+				->get();
+
+			/*
+
 			$modelCondition = new CModelCondition();
 			$modelCondition -> where('node_id', $this -> node_id);
 			$modelCondition -> where('page_version', $this -> page_version);
@@ -348,22 +398,27 @@ class CPageRequest extends CSingleton
 			$modelBackendPageObject  = new modelBackendPageObject;
 			$modelBackendPageObject -> load($_pDatabase, $modelCondition);
 			$page -> objects = $modelBackendPageObject -> getResult();
+			*/
 			
 			$this -> addCrumb((empty($page -> crumb_name) ? $page -> page_name : $page -> crumb_name), $page -> page_path .'');
 
 			$schemeBackendPageObject		= new schemeBackendPageObject();
 
-			$modelPageObject = new modelPageObject();
 
-			$_className = $modelPageObject -> createClass();
+			/*
+			$model_PageObject = new model_PageObject();
+
+			$_className = $model_PageObject -> createClass();
+			*/
+
+
+
 
 			foreach($page -> objects as $_objectKey =>  $_objectData)
 			{
-				$pageObject = new $_className($_objectData, $schemeBackendPageObject -> getColumns());
+				#$pageObject = new $_className($_objectData, $schemeBackendPageObject -> getColumns());
 
-				#$modelCondition = new CModelCondition();
-				#$modelCondition -> where('object_id', $pageObject -> object_id);
-
+				$pageObject = modelPageObject::new($_objectData, $_pDatabase);
 
 				$simpleBEObject = modelBackendSimple::where('object_id', '=', $pageObject -> object_id)->one();
 
@@ -375,14 +430,6 @@ class CPageRequest extends CSingleton
 
 				}
 
-				/*
-				$modelBackendSimple  = new modelBackendSimple;
-				if($modelBackendSimple -> load($_pDatabase, $modelCondition))
-				{
-					$simpleObject = reset($modelBackendSimple -> getResult());
-
-				}
-				*/
 				$this -> objectsList[] = $pageObject;		
 			}
 

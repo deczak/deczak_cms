@@ -1,5 +1,5 @@
 <?php
-
+ 
 class cmsModelConstruct
 {
 	public static function
@@ -52,7 +52,7 @@ class cmsModelConstruct
 
 					$_objectString .= "\tpublic ". ($type !== null && $column -> m_isNull ? "?" : "")."$type \$". $column -> m_columnName .";\r\n";
 				}
-			
+				
 				## constructor
 
 				$_objectString .= "\r\n ";
@@ -129,10 +129,39 @@ class cmsModelConstruct
 
 class cmsModelQuery
 {
+
+	private string	$modelName;
+	private string	$schemeName;
+	private string	$orderBy;
+	private string	$orderDirection;
+	private ?array	$where;
+	private ?array	$whereIn;
+	private ?int	$offset;
+	private ?int	$limit;
+	private ?array	$relations;
+	private array	$selects;
+
+	private ?CDatabaseConnection $pDatabase;
+
 	public function
 	__construct(string $modelName)
 	{
 		$this->model($modelName);
+
+		$this->pDatabase 	= null;
+		$this->limit 		= null;
+		$this->offset 		= null;
+		$this->whereIn 		= null;
+		$this->where 		= null;
+		$this->relations 	= null;
+		$this->selects 		= [];
+	}
+
+	public function
+	db(?CDatabaseConnection &$_pDatabase): cmsModelQuery
+	{
+		$this->pDatabase = $_pDatabase;
+		return $this;
 	}
 
 	public function
@@ -140,6 +169,13 @@ class cmsModelQuery
 	{
 		$this->modelName  = $modelName;
 		$this->schemeName = $modelName::$schemeName;
+		return $this;
+	}
+
+	public function
+	select()
+	{
+		$this->selects = array_merge($this->selects, func_get_args());
 		return $this;
 	}
 
@@ -153,6 +189,14 @@ class cmsModelQuery
 	}
 
 	public function
+	orderBy(string $_orderBy, string $_orderDirection = 'ASC')
+	{
+		$this->orderBy			= $_orderBy;
+		$this->orderDirection	= $_orderDirection;
+		return $this;
+	}
+
+	public function
 	offset(int $offset): cmsModelQuery
 	{
 		$this->offset = $offset;
@@ -162,7 +206,7 @@ class cmsModelQuery
 	public function
 	where(string $column, string $condition, $value) : cmsModelQuery
 	{
-		if(!isset($this->where))
+		if($this->where === null)
 			$this->where = [[]];
 		$this->where[ count($this->where) - 1 ][] = [
 			'column' => $column,
@@ -175,7 +219,7 @@ class cmsModelQuery
 	public function
 	whereIn(string $column, array $values) : cmsModelQuery
 	{
-		if(!isset($this->where))
+		if($this->whereIn === null)
 			$this->whereIn = [[]];
 		$this->whereIn[ count($this->whereIn) - 1 ][] = [
 			'column' => $column,
@@ -185,11 +229,55 @@ class cmsModelQuery
 	}
 
 	public function
+	join(string $tableName, Callable $joinHandler) : cmsModelQuery
+	{
+		$condition	  = new CModelCondition();
+
+		$joinHandler($condition);
+
+		if($this->relations === null)
+			$this->relations = [];
+
+		$this->relations[] = new CModelRelations('join', $tableName, $condition);
+
+		return $this;
+	}
+
+	public function
+	joinLeft(string $tableName, Callable $joinHandler) : cmsModelQuery
+	{
+		$condition	  = new CModelCondition();
+
+		$joinHandler($condition);
+
+		if($this->relations === null)
+			$this->relations = [];
+
+		$this->relations[] = new CModelRelations('join left', $tableName, $condition);
+
+		return $this;
+	}
+
+	public function
+	joinRight(string $tableName, Callable $joinHandler) : cmsModelQuery
+	{
+		$condition	  = new CModelCondition();
+
+		$joinHandler($condition);
+
+		if($this->relations === null)
+			$this->relations = [];
+
+		$this->relations[] = new CModelRelations('join right', $tableName, $condition);
+
+		return $this;
+	}
+
+	public function
 	get()
 	{
-		$pDBInstance  = CDatabase::instance();
-		$dbConnection = $pDBInstance -> getConnection(CFG::GET() -> MYSQL -> PRIMARY_DATABASE);
-
+		$dbConnection = $this->getDBConnection();
+		
 		$schemeInstance = new $this->schemeName;
 
 		$tableName = $schemeInstance -> getTableName();
@@ -199,7 +287,7 @@ class cmsModelQuery
 		$pModelCondition = new CModelCondition;
 		$pModelCondition->limit($this->limit ?? 0, $this->offset ?? 0);
 
-		if(isset($this->where))
+		if($this->where !== null)
 		{
 			foreach($this->where as $conditions)
 			foreach($conditions as $condition)
@@ -214,7 +302,7 @@ class cmsModelQuery
 			}
 		}
 
-		if(isset($this->whereIn))
+		if($this->whereIn !== null)
 		{
 			foreach($this->whereIn as $conditions)
 			foreach($conditions as $condition)
@@ -226,12 +314,18 @@ class cmsModelQuery
 			}
 		}
 
+		if(!empty($this->orderBy))
+			$pModelCondition -> orderBy($this->orderBy, $this->orderDirection);
+
 		$dbQuery = $dbConnection 
 			-> query(DB_SELECT) 
 			-> table($tableName)
+			-> selectColumns($this->selects)
 			-> dtaObjectName($className)
 			-> condition($pModelCondition);
 
+		if($this->relations !== null)
+			$dbQuery->relations($this->relations);
 
 		return new cmsModelCollection(
 			$dbQuery -> exec()
@@ -241,8 +335,7 @@ class cmsModelQuery
 	public function
 	delete() : bool
 	{
-		$pDBInstance  = CDatabase::instance();
-		$dbConnection = $pDBInstance -> getConnection(CFG::GET() -> MYSQL -> PRIMARY_DATABASE);
+		$dbConnection = $this->getDBConnection();
 
 		$schemeInstance = new $this->schemeName;
 
@@ -253,7 +346,7 @@ class cmsModelQuery
 		$pModelCondition = new CModelCondition;
 		$pModelCondition->limit($this->limit ?? 0, $this->offset ?? 0);
 
-		if(isset($this->where))
+		if($this->where !== null)
 		{
 			foreach($this->where as $conditions)
 			foreach($conditions as $condition)
@@ -268,7 +361,7 @@ class cmsModelQuery
 			}
 		}
 
-		if(isset($this->whereIn))
+		if($this->whereIn !== null)
 		{
 			foreach($this->whereIn as $conditions)
 			foreach($conditions as $condition)
@@ -300,8 +393,7 @@ class cmsModelQuery
 	public function
 	find(int $primaryKeyId) : ?object
 	{
-		$pDBInstance  = CDatabase::instance();
-		$dbConnection = $pDBInstance -> getConnection(CFG::GET() -> MYSQL -> PRIMARY_DATABASE);
+		$dbConnection = $this->getDBConnection();
 
 		$schemeInstance = new $this->schemeName;
 
@@ -316,6 +408,9 @@ class cmsModelQuery
 
 		$pModelCondition = new CModelCondition;
 		$pModelCondition->where($primaryKeyColumnName, $primaryKeyId);
+		
+		if(!empty($this->orderBy))
+			$pModelCondition -> orderBy($this->orderBy);
 
 		$dbQuery = $dbConnection 
 			-> query(DB_SELECT) 
@@ -323,6 +418,8 @@ class cmsModelQuery
 			-> dtaObjectName($className)
 			-> condition($pModelCondition);
 
+		if($this->relations !== null)
+			$dbQuery->relations($this->relations);
 
 		$queryResponse = $dbQuery -> exec();
 
@@ -335,9 +432,7 @@ class cmsModelQuery
 		if(empty($this->schemeName))
 			return false;
 
-		$pDBInstance  = CDatabase::instance();
-
-		$dbConnection = $pDBInstance -> getConnection(CFG::GET() -> MYSQL -> PRIMARY_DATABASE);
+		$dbConnection = $this->getDBConnection();
 
 		$schemeInstance = new $this->schemeName;
 
@@ -383,9 +478,7 @@ class cmsModelQuery
 		if(empty($this->schemeName))
 			return false;
 
-		$pDBInstance  = CDatabase::instance();
-
-		$dbConnection = $pDBInstance -> getConnection(CFG::GET() -> MYSQL -> PRIMARY_DATABASE);
+		$dbConnection = $this->getDBConnection();
 
 		$schemeInstance = new $this->schemeName;
 
@@ -410,6 +503,18 @@ class cmsModelQuery
 		$srcObject->$primaryKeyColumnName = null;
 		
 		return true;
+	}
+
+	private function
+	getDBConnection() : CDatabaseConnection
+	{
+		if(!$this->pDatabase)
+		{
+			$pDBInstance  = CDatabase::instance();
+			return $pDBInstance -> getConnection(CFG::GET() -> MYSQL -> PRIMARY_DATABASE);
+		}
+	
+		return $this->pDatabase;
 	}
 }
 
@@ -499,6 +604,39 @@ class cmsModelCollection implements IteratorAggregate, Countable, JsonSerializab
 
 	# Entry cmsModelQuery
 
+	/**
+	 * 	Start cmsModelQuery Instance, works only for executing functions.
+	 * 	__callStatic is loosing his arguments if this is using in a method chain.
+	 */
+	public static function 
+	__callStatic($name, $arguments)
+    {
+		switch($name)
+		{
+			case 'get':
+			case 'one':
+			case 'find':
+			case 'delete':
+
+				break;
+
+			default:
+
+				error_log("ERROR: cmsModelQuery::$name does not exists");
+				exit;
+		}
+				
+		$cmsModelQuery = new cmsModelQuery(static::class);
+		return $cmsModelQuery->$name(...$arguments);
+    }
+
+	public static function
+	db(CDatabaseConnection &$_pDatabase) : cmsModelQuery
+	{
+		$cmsModelQuery = new cmsModelQuery(static::class);
+		return $cmsModelQuery->db($_pDatabase);
+	}
+
 	public static function
 	where(string $column, string $condition, $value) : cmsModelQuery
 	{
@@ -521,6 +659,43 @@ class cmsModelCollection implements IteratorAggregate, Countable, JsonSerializab
 	}
 
 	public static function
+	join(string $tableName, Callable $joinHandler) : cmsModelQuery
+	{
+		$cmsModelQuery = new cmsModelQuery(static::class);
+		return $cmsModelQuery->join($tableName, $joinHandler);
+	}
+
+	public static function
+	joinLeft(string $tableName, Callable $joinHandler) : cmsModelQuery
+	{
+		$cmsModelQuery = new cmsModelQuery(static::class);
+		return $cmsModelQuery->joinLeft($tableName, $joinHandler);
+	}
+
+	public static function
+	joinRight(string $tableName, Callable $joinHandler) : cmsModelQuery
+	{
+		$cmsModelQuery = new cmsModelQuery(static::class);
+		return $cmsModelQuery->joinRight($tableName, $joinHandler);
+	}
+
+	public static function
+	orderBy(string $_orderBy, string $_orderDirection)
+	{
+		$cmsModelQuery = new cmsModelQuery(static::class);
+		return $cmsModelQuery->orderBy($_orderBy, $_orderDirection);
+	}
+
+	public static function
+	select()
+	{
+		$cmsModelQuery = new cmsModelQuery(static::class);
+		return $cmsModelQuery->select(...func_get_args());
+		
+	}
+
+/*
+	public static function
 	get() : cmsModelCollection
 	{
 		$cmsModelQuery = new cmsModelQuery(static::class);
@@ -533,7 +708,6 @@ class cmsModelCollection implements IteratorAggregate, Countable, JsonSerializab
 		$cmsModelQuery = new cmsModelQuery(static::class);
 		return $cmsModelQuery->one();
 	}
-
 	public static function
 	find(int $primaryKeyId): ?object
 	{
@@ -547,6 +721,7 @@ class cmsModelCollection implements IteratorAggregate, Countable, JsonSerializab
 		$cmsModelQuery = new cmsModelQuery(static::class);
 		return $cmsModelQuery->delete();
 	}
+	*/
 
 	# Interface IteratorAggregate
 
@@ -559,7 +734,7 @@ class cmsModelCollection implements IteratorAggregate, Countable, JsonSerializab
 	# Interface Countable
 
 	public function 
-	count()
+	count() : int
     {
         return count($this -> modelItems);
     }
@@ -575,6 +750,8 @@ class cmsModelCollection implements IteratorAggregate, Countable, JsonSerializab
 
 class cmsModel extends cmsModelCollection
 {
+	private ?CDatabaseConnection $pDatabase;
+
 	public function
 	__construct()
 	{
@@ -592,17 +769,19 @@ class cmsModel extends cmsModelCollection
 	save() : bool
 	{
 		$cmsModelQuery = new cmsModelQuery($this::class);
-		return $cmsModelQuery->save($this);
+		return $cmsModelQuery->db($this->pDatabase)->save($this);
 	}
 
 	public static function
-	new(array|object $presetValues = null) : object
+	new(array|object $presetValues = null, CDatabaseConnection &$_pDatabase = null) : object
 	{
 		$modelName = static::class;
 		$schemeInstance = new $modelName::$schemeName();
 		$className = cmsModelConstruct::createPrototype($modelName);
 
-		return new $className($presetValues,$schemeInstance -> getColumns());
+		$pDatabase = $_pDatabase;
+
+		return new $className($presetValues, $schemeInstance -> getColumns());
 	}
 	/**
 	 *	Pulls $values into the model but does not check for types, wrong types ends in php error.
@@ -625,7 +804,7 @@ class cmsModel extends cmsModelCollection
 	delete() : ?bool
 	{
 		$cmsModelQuery = new cmsModelQuery($this::class);
-		return $cmsModelQuery->deleteItem($this);
+		return $cmsModelQuery->db($this->pDatabase)->deleteItem($this);
 	}
 
 	# Interface IteratorAggregate from cmsModelCollection
@@ -647,34 +826,12 @@ class cmsModel extends cmsModelCollection
 		$columnList = array_column((array)$columnList,'m_columnName');
 	 	$modelValues = new stdClass; 
 		foreach($columnList as $column)
+		{
+			$rP = new ReflectionProperty($this, $column);
+			if(!$rP->isInitialized($this))
+				continue;
 	 		$modelValues -> {$column} =  $this->{$column};
+		}
         return $modelValues;
     }
 }
-
-
-
-
-/*
-
-	todo
-
-	collection
-
-		remove		removes defined item from collection
-
-	static collection bzw. überlegen wie das gemacht werden kann... eventuell andere bezeichnung da delete ja schon existiert
-
-		delete		deletes items with condition
-
-		update		update items with condition and values 
-
-	query static collection
-
-		select mit spalten angaben		$argList = func_get_args();
-
-		relation
-
-	comments
-
-*/

@@ -6,6 +6,7 @@
 </div>
 
 <script>
+	
 class blogSquaresController
 {
 	constructor(objectId, nodeList)
@@ -406,7 +407,7 @@ class blogSquaresController
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-document.blogSquaresController = new blogSquaresController(<?= $objectId; ?>, <?= json_encode($nodeList); ?>);
+	document.blogSquaresController = new blogSquaresController(<?= $objectId; ?>, <?= json_encode($nodeList); ?>);
 });
 
 </script>

@@ -55,11 +55,15 @@ class 	modelBackendSitemap extends modelSitemap
 
 			##	Object info
 
-			$modelBackendPageObject = new modelBackendPageObject;
-			$modelBackendPageObject -> load($_pDatabase, $condPg);
+			$modelBackendPageObject = modelBackendPageObject::
+				  where('node_id', '=', $page->node_id)
+				->get();
+
+			#$modelBackendPageObject = new modelBackendPageObject;
+			#$modelBackendPageObject -> load($_pDatabase, $condPg);
 
 			$page -> objects = [];
-			foreach($modelBackendPageObject -> getResult() as $_sqlNode)
+			foreach($modelBackendPageObject as $_sqlNode)
 			{		
 				$page -> objects[] = $_sqlNode;
 			}

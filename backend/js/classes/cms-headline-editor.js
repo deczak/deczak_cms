@@ -82,6 +82,12 @@ class	cmsHeadlineEditor
 			oParent.classList.add('editor-simple');
 			oParent.id 			= srcElement.id || "rich-text-" + nEditorId;
 
+			if(srcElement.getAttribute('data-flag-hidden') == '1')
+			{
+				oParent.style.opacity = '0.5';
+				oParent.style.background = 'rgba(194, 214, 214,0.4)';
+			}
+			
 		var oToolsBar 			= document.createElement("div"); 
 			oToolsBar.className = "rte-headline-tools";
 			oToolsBar.style.display = "none";
@@ -93,6 +99,13 @@ class	cmsHeadlineEditor
 			oTextarea.innerHTML = srcElement.innerHTML;
 			oTextarea.setAttribute('name', this.nameAttribute);
 			oTextarea.style.display = "none";
+		
+
+		var	oHiddenVisbile			= document.createElement("input");
+			oHiddenVisbile.type		= 	"hidden";
+			oHiddenVisbile.setAttribute('name', this.nameAttribute +'-flag-hidden');
+			oHiddenVisbile.value = srcElement.getAttribute('data-flag-hidden');
+
 
 		var	bodyData 		= this.getHTagFromBody(srcElement.innerHTML);
 		var oEditBoxWrapper = document.createElement(bodyData[0]);
@@ -163,9 +176,62 @@ class	cmsHeadlineEditor
 			oToolsBar.appendChild(oButton);
 		}
 
+
+
+			let	rfIcongTag	  = document.createElement("i");
+
+			if(srcElement.getAttribute('data-flag-hidden') == '1')
+				rfIcongTag.classList.add('far', 'fa-eye-slash');
+			else
+				rfIcongTag.classList.add('far', 'fa-eye');
+
+			let rfButtonNode 		  = document.createElement("button");
+				rfButtonNode.className = "rte-button";
+				rfButtonNode.id 		  = oBtnDefinition.command + nEditorId;
+				rfButtonNode.title 	  = oBtnDefinition.text;
+				rfButtonNode.style.float = "right";
+				rfButtonNode.onclick   = function(event) {
+					
+				
+					let pn = event.target.closest('.editor-simple');
+
+
+					let hn = pn.querySelector('input[name="simple-text-flag-hidden"]');
+
+					if(hn.value == '1')
+					{
+						hn.value = '0';
+						this.querySelector('i').classList.remove('fa-eye-slash');
+						this.querySelector('i').classList.add('fa-eye');
+						pn.style.opacity = '1';
+						pn.style.background = '';
+					}
+					else
+					{
+						hn.value = '1';
+						this.querySelector('i').classList.remove('fa-eye');
+						this.querySelector('i').classList.add('fa-eye-slash');
+						pn.style.opacity = '0.5';
+						pn.style.background = 'rgba(194, 214, 214,0.4)';
+
+					}
+
+				
+				
+												};
+			rfButtonNode.setAttribute('type','button');
+			rfButtonNode.style.color = fontColor;
+			rfButtonNode.appendChild(rfIcongTag);
+			oToolsBar.appendChild(rfButtonNode);
+
+
+
+
+
 		oParent.appendChild(oEditBoxWrapper);
 		oParent.appendChild(oToolsBar);
 		oParent.appendChild(oTextarea);
+		oParent.appendChild(oHiddenVisbile);
 
 		srcElement.parentNode.replaceChild(oParent, srcElement);
 	}

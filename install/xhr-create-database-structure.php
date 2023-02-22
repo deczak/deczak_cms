@@ -11,6 +11,7 @@
 	include '../core/classes/toolkit.php';
 	include '../core/classes/CScheme.php';
 	include '../core/classes/CModel.php';
+	include '../core/classes/cmsModel.php';
 	include '../core/classes/CDatabase.php';
 	include '../core/classes/CPackages.php';
 	include '../core/classes/CMessages.php';

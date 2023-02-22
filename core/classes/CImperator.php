@@ -62,17 +62,18 @@ class	CImperator
 			return;
 		}
 
-		$xhrInfo = $_pPageRequest -> detectXHRequest();
+		$xhrInfo     = $_pPageRequest->detectXHRequest();
+		$requestInfo = $_pPageRequest->getShortRequestInfo();
 
 		##	Gathering active modules data
-
 		if(!empty($_pPageRequest -> objectsList))
 		foreach($_pPageRequest -> objectsList as $_objectIndex =>  $_object)
 		{	
 			$_modules = CModules::instance();
 			$module = $_modules -> loadModule((int)$_object -> module_id, $_pPageRequest -> page_language);
 
-			if( $module === null) continue;
+			if($module === null)
+				continue;
 
 			$_logicResult =	false;
 
@@ -82,7 +83,8 @@ class	CImperator
 																				$_rcaTarget,
 																				$xhrInfo, 
 																				$_logicResult, 
-																				$_pPageRequest -> isEditMode
+																				$_pPageRequest -> isEditMode,
+																				$requestInfo
 																				);
 		}
 
@@ -102,7 +104,8 @@ class	CImperator
 			return false;
 		}
 
-		$xhrInfo = $_pPageRequest -> detectXHRequest();
+		$xhrInfo     = $_pPageRequest->detectXHRequest();
+		$requestInfo = $_pPageRequest->getShortRequestInfo();
 
 		##	XHR call
 
@@ -155,8 +158,15 @@ class	CImperator
 									];
 			
 
-					$_objectModel  = new modelPageObject();
+
+					$pageObject = modelPageObject::new($_initObj, $this->pDatabase);
+					$pageObject->save();
+
+					/*
+					$_objectModel  = new model_PageObject();
 					$_initObj['object_id'] = $_objectModel -> insert($this -> pDatabase, $_initObj);
+					*/
+					$_initObj['object_id'] = $pageObject->object_id;
 
 
 						$objectData = new stdClass();
@@ -176,7 +186,8 @@ class	CImperator
 												[ $objectData -> object_id => 'create' ],
 												$xhrInfo, 
 												$_logicResult, 
-												true
+												true,
+												$requestInfo
 												);
 					
 				}
@@ -198,17 +209,32 @@ class	CImperator
 				$_bValidationDta = 	[];
 
 				$_pageNodeID	= $_pURLVariables -> getValue("cms-order-by-node-id");
-				$_objectModel  	= new modelPageObject();
+				#$_objectModel  	= new model_PageObject();
 
 				foreach($_pURLVariables -> getValue("cms-order-by-modules") as $_objectIndex =>  $_objectID)
 				{
+					/*
 					$_updateSet['object_order_by']	= ($_objectIndex + 1);
 
 					$modelCondition = new CModelCondition();
 					$modelCondition -> where('node_id', $_pageNodeID);
 					$modelCondition -> where('object_id', $_objectID);
 					
-					$_objectModel -> update($this -> pDatabase, $_updateSet, $modelCondition);					
+					$_objectModel -> update($this -> pDatabase, $_updateSet, $modelCondition);		
+					*/
+
+
+
+					$_objectModel = modelPageObject::
+						  db($_pDatabase)
+						->where('node_id', '=', $_pageNodeID)
+						->where('object_id', '=', $_objectID)
+						->one();
+
+					$_objectModel->object_order_by = ($_objectIndex + 1);
+					$_objectModel->save();
+
+
 				}
 
 				tk::xhrResult(intval($_bValidationErr), $_bValidationMsg, $_bValidationDta);	// contains exit call

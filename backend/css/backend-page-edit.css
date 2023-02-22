@@ -181,7 +181,7 @@
 
 	div.rte-code-tools, 
 	div.rte-headline-tools, 
-	div.rte-tools { position:absolute; top:0px; left:0px; display:flex; align-items:center; } 
+	div.rte-tools { position:absolute; top:0px; left:0px; display:flex; align-items:center; width:100%; } 
 
 	div.rte-code-tools button.rte-button, 
 	div.rte-headline-tools button.rte-button, 

@@ -116,6 +116,8 @@ class CModules extends CSingleton
 
 							$this -> modulesList[$moduleIndex] = (object)array_merge((array)$moduleInstance, (array)$moduleData);
 							$this -> modulesList[$moduleIndex] -> user_rights = $this -> m_pUserRights -> getModuleRights($_moduleId);
+							$this -> modulesList[$moduleIndex] -> modules_path = CMS_SERVER_ROOT.DIR_CORE.DIR_MODULES;
+							$this -> modulesList[$moduleIndex] -> module_path = CMS_SERVER_ROOT.DIR_CORE.DIR_MODULES. $moduleInstance -> module_location .'/';
 
 							$_modLocation	= CMS_SERVER_ROOT . DIR_CORE . DIR_MODULES . $moduleInstance -> module_location .'/';	
 							CLanguage::loadLanguageFile($_modLocation.'lang/', $_pageLanguage);
@@ -131,7 +133,6 @@ class CModules extends CSingleton
 							$pModulesInstall = new CModulesInstall;
 							$moduleData = $pModulesInstall -> getModuleData($moduleConfig, $moduleInstance -> module_location, $moduleInstance -> module_type);
 
-
 							if($moduleData === false)
 							{
 								cmsLog::add('CModules::loadModule -- Unable to retrieve modul info for module-ID '. $_moduleId, true);
@@ -142,6 +143,8 @@ class CModules extends CSingleton
 
 							$this -> modulesList[$moduleIndex] = (object)array_merge((array)$moduleInstance, (array)$moduleData);
 							$this -> modulesList[$moduleIndex] -> user_rights = $this -> m_pUserRights -> getModuleRights($_moduleId);
+							$this -> modulesList[$moduleIndex] -> modules_path = CMS_SERVER_ROOT.DIR_MANTLE.DIR_MODULES;
+							$this -> modulesList[$moduleIndex] -> module_path = CMS_SERVER_ROOT.DIR_MANTLE.DIR_MODULES. $moduleInstance->module_location .'/';
 
 							$_modLocation	= CMS_SERVER_ROOT . DIR_MANTLE . DIR_MODULES . $moduleInstance -> module_location .'/';
 							CLanguage::loadLanguageFile($_modLocation.'lang/', $_pageLanguage);
@@ -795,13 +798,23 @@ class CModulesInstall
 
 				if(isset($moduleData['module']['is_frontend']) && $moduleData['module']['is_frontend'] === '0')
 				{
-					$modelBackendPageObject = new modelBackendPageObject;
-					$contentId = $modelBackendPageObject -> insert($_dbConnection, $object);
+					//$modelBackendPageObject = new modelBackendPageObject;
+					//$contentId = $modelBackendPageObject -> insert($_dbConnection, $object);
+
+					$modelBackendPageObject = modelBackendPageObject::new($object, $_dbConnection);
+					$modelBackendPageObject->save();
+
+					$contentId = $modelBackendPageObject->content_id;
 				}
 				else
 				{
-					$modelPageObject = new modelPageObject;
-					$contentId = $modelPageObject -> insert($_dbConnection, $object);
+					//$modelPageObject = new modelPageObject;
+					//$contentId = $modelPageObject -> insert($_dbConnection, $object);
+
+					$modelPageObject = modelPageObject::new($object, $_dbConnection);
+					$modelPageObject->save();
+
+					$contentId = $modelPageObject->content_id;
 				}
 
 				if($moduleInfo -> module_group === 'backend')
@@ -968,14 +981,21 @@ class CModulesInstall
 		}
 		else
 		{
+
+			$modelBackendPageObject = modelBackendPageObject::
+				  where('module_id', '=', $_moduleId)
+				->get();
+			/*
 			$objectCondition  = new CModelCondition;
 			$objectCondition -> where('module_id', $_moduleId);
 
 			$modelBackendPageObject  = new modelBackendPageObject;
 			$modelBackendPageObject -> load($_dbConnection, $objectCondition);
+			*/
 
 			$nodeList = [];
-			foreach($modelBackendPageObject -> getResult() as $object)
+			#foreach($modelBackendPageObject -> getResult() as $object)
+			foreach($modelBackendPageObject as $object)
 				$nodeList[] = $object -> node_id;
 			$nodeList = array_unique($nodeList);
 

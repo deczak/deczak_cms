@@ -125,16 +125,15 @@ class	controllerSimpleSource extends CController
 			{
 				$validationMsg = 'Object updated';
 
-				$modelCondition = new CModelCondition();
-				$modelCondition -> where('object_id', $_xhrInfo -> objectId);
+				$object = modelPageObject::
+					  db($_pDatabase)
+					->where('object_id', '=', $_xhrInfo -> objectId)
+					->one();
 
-				$this -> m_modelPageObject = new modelPageObject();
-
-				$_objectUpdate['update_time']		=	time();
-				$_objectUpdate['update_by']			=	0;
-				$_objectUpdate['update_reason']		=	'';
-
-				$this -> m_modelPageObject -> update($_pDatabase, $_objectUpdate, $modelCondition);
+				$object->update_time 	= time();
+				$object->update_by 		= 0;
+				$object->update_reason	= '';
+				$object->save();
 			}
 			else
 			{
@@ -166,7 +165,7 @@ class	controllerSimpleSource extends CController
 			'object_id' => (int)$this -> objectInfo -> object_id,
 			'body' 		=> '',
 			'params' 	=> $sOParams,
-		]);
+		], $_pDatabase);
 		
 		if(!$simpleObject->save())
 		{
@@ -207,24 +206,13 @@ class	controllerSimpleSource extends CController
 		if(!$validationErr)
 		{
 
-			$simpleObject = modelSimple::where('object_id', '=', $_xhrInfo -> objectId)->one();
+			modelPageObject::
+				  db($_pDatabase)
+				->where('object_id', '=', $_xhrInfo -> objectId)
+				->delete();
 
-			if($simpleObject->delete())
-			{
-				$modelCondition = new CModelCondition();
-				$modelCondition -> where('object_id', $_xhrInfo -> objectId);
-
-				$_objectModel  	 = new modelPageObject();
-				$_objectModel	-> delete($_pDatabase, $modelCondition);
-
-				$validationMsg = 'Object deleted';
-			
-			}
-			else
-			{
-				$validationMsg .= 'Unknown error on sql query';
-				$validationErr = true;
-			}											
+			$validationMsg = 'Object deleted';
+										
 		}
 		else	// Validation Failed
 		{
