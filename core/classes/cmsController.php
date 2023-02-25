@@ -8,7 +8,6 @@ include_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelSimple.php';
 class cmsController
 {
 	protected array  $rightOfPublicAccessList;
-	#protected array  $rightAliasList;
 	protected object $moduleInfo;
 	protected object $objectInfo;
 
@@ -18,7 +17,6 @@ class cmsController
 	__construct(object $_moduleInfo, object &$_objectInfo)
 	{
 		$this->rightOfPublicAccessList = [];
-		#$this->rightAliasList = [];
 
 		$this->moduleInfo = $_moduleInfo;
 		$this->objectInfo = $_objectInfo;
@@ -35,17 +33,6 @@ class cmsController
 			$this->rightOfPublicAccessList[] = $_right;
 
 	}
-
-	/*
-	protected function
-	setRightAlias(string $_right, string $_alias)
-	{
-		if(!array_key_exists($_right, $this->rightAliasList))
-			$this->actionAliasList[$_right] = [];
-
-		$this->rightAliasList[$_right][] = $_alias;
-	}
-	*/
 
 	/**
 	 * 	liefert die action, beim erstellen die create, bei xhr die xhr, wenn nicht vorhaden die default, sonst die übermittelte action
