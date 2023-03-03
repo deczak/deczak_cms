@@ -6,86 +6,76 @@ include_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelTagsAllocation.php';
 
 include_once CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CModulesTemplates.php';	
 
-class	controllerTagCloud extends CController
+
+class controllerTagCloud extends cmsControllerSimple
 {
+	private string $defaultTemplateName;
 
 	public function
-	__construct($_module, &$_object)
-	{		
-		$this -> m_modelTags	= new modelTags();
-		parent::__construct($_module, $_object);
-		$this -> moduleInfo -> user_rights[] = 'view';	// add view right as default for everyone
-
-		switch($this -> moduleInfo -> module_type) 
-		{
-			case 'core':	
-				$this -> moduleRootDir = CMS_SERVER_ROOT.DIR_CORE.DIR_MODULES;
-				break;
-							
-			case 'mantle':
-				$this -> moduleRootDir = CMS_SERVER_ROOT.DIR_MANTLE.DIR_MODULES;
-				break;
-		}
-	}
-	
-	public function
-	logic(CDatabaseConnection &$_pDatabase, array $_rcaTarget, ?object $_xhrInfo, &$_logicResult, bool $_bEditMode) : bool
+	__construct(object $_moduleInfo, object &$_objectInfo)
 	{
-		##	Set default target if not exists
+		parent::__construct($_moduleInfo, $_objectInfo);
 
-		$controllerAction = $this -> getControllerAction_v2($_rcaTarget, $_xhrInfo, 'view');
+		##	Set user default right in this module
 
-		##	Check user rights for this target
-		
-		if(!$this -> detectRights($controllerAction))
-		{
-			if($_xhrInfo !== null)
-			{
-				$validationErr =	true;
-				$validationMsg =	CLanguage::string('ERR_PERMISSON');
-				$responseData  = 	[];
+		$this->setRightOfPublicAccess('view');	
 
+		##	Default template
 
-				tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
-			}
+		$this->defaultTemplateName = 'list';	
+	}
 
-			CMessages::add(CLanguage::string('ERR_PERMISSON') , MSG_WARNING);
+	public function
+	logic(CDatabaseConnection &$_pDatabase, array $_rcaTarget, ?object $_xhrInfo, &$_logicResult, bool $_pageEditMode, object $requestInfo) : bool
+	{
+		##	Get action by request term, can return actions that not listed in module.json
+
+		$action = $this -> getAction($_rcaTarget, $_xhrInfo, $_pageEditMode);
+
+		##	Validate action with user right, xhr request will end in this function
+
+		if(!$this -> validateRight($action, $_xhrInfo))
 			return false;
-		}
+		
+		##	If the user does not have the right, he will not reach this point of process
+		##	Public user needs the RightOfPublicAccess call to get here
 
-		if($_bEditMode && $_xhrInfo === null) 
-			$controllerAction = 'edit';
-			
-		if($_xhrInfo !== null && $_xhrInfo -> isXHR && $_xhrInfo -> objectId === $this -> objectInfo -> object_id)
-			$controllerAction = 'xhr_'. $_xhrInfo -> action;
-
-		##	Call sub-logic function by target, if there results are false, we make a fall back to default view
-
-		$enableEdit 	= $this -> existsUserRight('edit');
-		$enableDelete	= $enableEdit;
+		## 	Call Logic function, if there goes something wrong, the default view get called (except on xhr calls)
 
 		$logicDone = false;
-		switch($controllerAction)
-		{
-			case 'edit'		  : $logicDone = $this -> logicEdit($_pDatabase); break;
 
-			case 'xhr_edit'   : $logicDone = $this -> logicXHREdit($_pDatabase, $_xhrInfo); break;
-			case 'xhr_create' : $logicDone = $this -> logicXHRCreate($_pDatabase, $_xhrInfo); break;	
-			case 'xhr_delete' : $logicDone = $this -> logicXHRDelete($_pDatabase, $_xhrInfo); break;	
+		if($_xhrInfo === null) // NON XHR
+		switch($action)
+		{
+			case 'edit'		: $logicDone = $this -> logicEdit($_pDatabase); 				break; // cmsControllerSimple::logicEdit
+		}
+
+		if($_xhrInfo !== null && $_xhrInfo -> objectId === $this -> objectInfo -> object_id) // XHR
+		switch($action)
+		{
+			case 'create' 	: $logicDone = $this -> logicInsert($_pDatabase, $_xhrInfo, $requestInfo); 	break; // page object should exists at this point
+			case 'edit'	    :
+			case 'update' 	: $logicDone = $this -> logicUpdate($_pDatabase, $_xhrInfo); 	break;
+			case 'delete' 	: $logicDone = $this -> logicDelete($_pDatabase, $_xhrInfo); 	break;	
 		}
 
 		if(!$logicDone) // Default
-			$logicDone = $this -> logicView($_pDatabase);	
+			$logicDone = $this -> logicView($_pDatabase); // cmsControllerSimple::logicView
 	
-		return $logicDone;
+		return false;
 	}
 
-	private function
-	logicView(CDatabaseConnection &$_pDatabase) : bool
+	/**
+	 * 	Overloaded parent ::logicView
+	 */
+	public function logicView(CDatabaseConnection &$_pDatabase) : bool
 	{
-		##	get object
-		$simpleObject = modelSimple::where('object_id', '=', $this -> objectInfo -> object_id)->one();
+		$simpleObject = modelSimple::db($_pDatabase)->where('object_id', '=', $this -> objectInfo -> object_id)->one();
 		
+		$moduleTemplate	 = new CModulesTemplates();
+		$moduleTemplate	-> load($this->moduleInfo->modules_path, $this->moduleInfo->module_location, $simpleObject -> params -> template ?? $this->defaultTemplateName);
+
+
 		##	get node list
 		$parentNode = $simpleObject -> params -> parent_node_id;
 		$parentNode = (empty($parentNode) ? $this -> objectInfo -> node_id : $simpleObject ->  params -> parent_node_id);
@@ -119,13 +109,10 @@ class	controllerTagCloud extends CController
 			$condTags -> whereIn('tag_id', implode(',', $collectedTagIds));	
 			$condTags -> groupBy('tag_id');
 
-			$this -> m_modelTags -> load($_pDatabase, $condTags);
-			$tagList = $this -> m_modelTags -> getResult();
+			$m_modelTags	= new modelTags();
+			$m_modelTags -> load($_pDatabase, $condTags);
+			$tagList = $m_modelTags -> getResult();
 		}
-
-		##	get module templates
-		$moduleTemplate		 = new CModulesTemplates();
-		$moduleTemplate		->	load($this -> moduleRootDir, $this->moduleInfo->module_location, $simpleObject -> params -> template);
 
 		##	get parent node
 		$parentNode= tk::getNodeFromSitemap($modelSitemap -> getResult(), $parentNode);
@@ -134,24 +121,31 @@ class	controllerTagCloud extends CController
 						'view',	
 						'',
 						[
-							'object' 			=> $simpleObject,
+							'object' 	=> $simpleObject,
 							'termList' 			=> $tagList ?? [],
 							'parentNode' 		=> $parentNode,
-							'currentTemplate'	=> $moduleTemplate -> templatesList
+							'currentTemplate' => $moduleTemplate -> templatesList,
 						]
 						);
 
 		return true;
 	}
 
-	private function
-	logicEdit(CDatabaseConnection &$_pDatabase) : bool
+	/**
+	 * 	Overloaded parent ::logicEdit
+	 */
+	public function logicEdit(CDatabaseConnection &$_pDatabase) : bool
 	{
-		##	get object
-		$simpleObject = modelSimple::where('object_id', '=', $this -> objectInfo -> object_id)->one();
-		
+		$simpleObject = modelSimple::db($_pDatabase)->where('object_id', '=', $this -> objectInfo -> object_id)->one();
+			
+		$moduleTemplate = new CModulesTemplates();
+		$moduleTemplate ->	load($this->moduleInfo->modules_path, $this->moduleInfo->module_location, $simpleObject -> params -> template ?? 'thumbnails-ratio');
+
+		$moduleTemplates = new CModulesTemplates();
+		$moduleTemplates ->	load($this->moduleInfo->modules_path, $this->moduleInfo->module_location);
+
 		##	get node list
-		$parentNode = $simpleObject -> params -> parent_node_id;
+		$parentNode = $simpleObject -> params -> parent_node_id ?? 0;
 		$parentNode = (empty($parentNode) ? $this -> objectInfo -> node_id : $simpleObject ->  params -> parent_node_id);
 
 		$modelCondition = new CModelCondition();
@@ -162,6 +156,7 @@ class	controllerTagCloud extends CController
 		$collectedNodeIds = [];
 		foreach($modelSitemap -> getResult() as $node)
 			$collectedNodeIds[] = $node -> node_id;
+
 		##	get tag allocations
 		$condTagsAllocation = new CModelCondition();
 		$condTagsAllocation -> whereIn('node_id', implode(',', $collectedNodeIds));	
@@ -171,6 +166,7 @@ class	controllerTagCloud extends CController
 		$modelTagsAllocation -> load($_pDatabase, $condTagsAllocation);
 
 		$collectedTagIds = [];
+		if(is_array($modelTagsAllocation -> getResult()))
 		foreach($modelTagsAllocation -> getResult() as $tagAlloc)
 			$collectedTagIds[] = $tagAlloc -> tag_id;
 	
@@ -182,119 +178,104 @@ class	controllerTagCloud extends CController
 			$condTags -> whereIn('tag_id', implode(',', $collectedTagIds));	
 			$condTags -> groupBy('tag_id');
 
-			$this -> m_modelTags -> load($_pDatabase, $condTags);
-			$tagList = $this -> m_modelTags -> getResult();
+			$m_modelTags	= new modelTags();
+			$m_modelTags -> load($_pDatabase, $condTags);
+			$tagList = $m_modelTags -> getResult();
 		}
-
-		##	get module templates
-		$moduleTemplate		 = new CModulesTemplates();
-		$moduleTemplate		-> load($this -> moduleRootDir, $this->moduleInfo->module_location, $simpleObject -> params -> template);
-
-		$moduleTemplates	 = new CModulesTemplates();
-		$moduleTemplates	-> load($this -> moduleRootDir, $this->moduleInfo->module_location);
 
 		##	get parent node
 		$parentNode = tk::getNodeFromSitemap($modelSitemap -> getResult(), $parentNode);
+
+
 
 
 		$this -> setView(	
 						'edit',	
 						'',
 						[
-							'object' 			=> $simpleObject,
+							'object' 	=> $simpleObject,
 							'termList' 			=> $tagList ?? [],
 							'parentNode' 		=> $parentNode,
 							'currentTemplate'	=> $moduleTemplate -> templatesList,
-							'avaiableTemplates'	=> $moduleTemplates -> templatesList
+							'avaiableTemplates'	=> $moduleTemplates -> templatesList,
 						]
 						);
 
 		return true;
 	}
 
-	private function
-	logicXHREdit(CDatabaseConnection &$_pDatabase, object $_xhrInfo) : bool
+	/**
+	 * 	XHR process function to update object data
+	 */
+	public function logicUpdate(CDatabaseConnection &$_pDatabase, object $_xhrInfo)
 	{
-		$validationErr =	false;
-		$validationMsg =	'';
-		$responseData = 	[];
+		$queryValidationString = QueryValidation::IS_NOTEMPTY;
 
-		$_pFormVariables =	new CURLVariables();
-		$_request		 =	[];
-		$_request[] 	 = 	[	"input" => "tagcloud-template",  		"validate" => "strip_tags|!empty" ]; 
-		$_request[] 	 = 	[	"input" => "tagcloud-parent-node-id", 	"validate" => "strip_tags|!empty" ]; 
-		$_pFormVariables-> retrieve($_request, false, true); // POST 
-		$_aFormData		 = $_pFormVariables ->getArray();
+		##	Body
 
-		if(empty($_xhrInfo -> objectId)) 		{ 	$validationErr = true; 	$responseData[] = 'cms-object-id'; 			}
+		$sOBody = '';
+	
+		##	Parameters
 
-		if(!$validationErr)
-		{
-			$simpleObject = modelSimple::where('object_id', '=', $_xhrInfo -> objectId)->one();
+		$requestQuery = new cmsRequestQuery(true);
+		$requestQuery->post('tagcloud-template')->validate($queryValidationString)->default($this->defaultTemplateName)->out('template')->exec();
+		$requestQuery->post('tagcloud-parent-node-id')->validate($queryValidationString)->default(0)->out('parent_node_id')->exec();
+		$sOParams = $requestQuery->toObject();
 
-			$sOParams = new stdClass;
-			$sOParams->template 		= $_aFormData['tagcloud-template'];
-			$sOParams->parent_node_id 	= $_aFormData['tagcloud-parent-node-id'];
-
-			$simpleObject->params	= $sOParams;
-			$simpleObject->body 	= '';
-
-			if($simpleObject->save())
-			{
-				$validationMsg = 'Object updated';
-
-				$object = modelPageObject::
-					  db($_pDatabase)
-					->where('object_id', '=', $_xhrInfo -> objectId)
-					->one();
-
-				$object->update_time 	= time();
-				$object->update_by 		= 0;
-				$object->update_reason	= '';
-				$object->save();
-			}
-			else
-			{
-				$validationMsg .= 'Unknown error on sql query';
-				$validationErr = true;
-			}											
-		}
-		else	// Validation Failed
-		{
-			$validationMsg .= 'Data validation failed - object was not updated';
-			$validationErr = true;
-		}
-		
-		tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
-
-		return false;
+		return $this->logicUpdateExec(
+			$_pDatabase, 
+			$_xhrInfo, 
+			$sOBody, 
+			$sOParams
+			);
 	}
 
-	private function
-	logicXHRCreate(CDatabaseConnection &$_pDatabase, object $_xhrInfo) : bool
+	/**
+	 * 	XHR process function to delete the object
+	 */
+	public function logicDelete(CDatabaseConnection &$_pDatabase, object $_xhrInfo)
 	{
-		$validationErr =	false;
-		$validationMsg =	'';
-		$responseData = 	[];
+		return $this->logicDeleteExec(
+			$_pDatabase, 
+			$_xhrInfo
+			);
+	}
 
-		$sOParams = new stdClass;
-		$sOParams->template = '';
-		$sOParams->display_hidden = '';
-		$sOParams->parent_node_id = '';
+	/**
+	 * 	XHR process function to insert the object
+	 */
+	public function logicInsert(CDatabaseConnection &$_pDatabase, object $_xhrInfo, object $requestInfo)
+	{
+		$sOBody    = '';
+		$sOParams  = new stdClass;
+		$sOParams -> template = $this->defaultTemplateName;
+		$sOParams -> parent_node_id = $requestInfo->node_id;
 
+		$responseData = [];
+		
 		$simpleObject = modelSimple::new([
 			'object_id' => (int)$this -> objectInfo -> object_id,
-			'body' 		=> '',
+			'body' 		=> $sOBody,
 			'params' 	=> $sOParams,
 		], $_pDatabase);
-		
+
 		if(!$simpleObject->save())
 		{
-			$validationErr =	true;
-			$validationMsg =	'sql insert failed';
+			tk::xhrResult(
+				1, 
+				'sql insert failed', 
+				[]
+				);	
 		}
 		else
-		{				
+		{
+			$moduleTemplate = new CModulesTemplates();
+			$moduleTemplate ->	load($this->moduleInfo->modules_path, $this->moduleInfo->module_location, $simpleObject -> params -> template);
+
+			$moduleTemplates = new CModulesTemplates();
+			$moduleTemplates ->	load($this->moduleInfo->modules_path, $this->moduleInfo->module_location);
+
+
 			##	get node list
 			$parentNode = $simpleObject -> params -> parent_node_id;
 			$parentNode = (empty($parentNode) ? $this -> objectInfo -> node_id : $simpleObject ->  params -> parent_node_id);
@@ -317,6 +298,7 @@ class	controllerTagCloud extends CController
 			$modelTagsAllocation -> load($_pDatabase, $condTagsAllocation);
 
 			$collectedTagIds = [];
+			if(is_array($modelTagsAllocation -> getResult()))
 			foreach($modelTagsAllocation -> getResult() as $tagAlloc)
 				$collectedTagIds[] = $tagAlloc -> tag_id;
 
@@ -327,79 +309,38 @@ class	controllerTagCloud extends CController
 				$condTags -> whereIn('tag_id', implode(',', $collectedTagIds));	
 				$condTags -> groupBy('tag_id');
 			
-				$this -> m_modelTags -> load($_pDatabase, $condTags);
-				$tagList = $this -> m_modelTags -> getResult();
+			$m_modelTags	= new modelTags();
+				$m_modelTags -> load($_pDatabase, $condTags);
+				$tagList = $m_modelTags -> getResult();
 			}
+
+
+
 
 			##	create fake pageRequest
 			$parentNode = tk::getNodeFromSitemap($modelSitemap -> getResult(), $parentNode);
-
-			$pageRequest = new stdClass;
-			$pageRequest -> page_language 	= $parentNode -> page_language;
-			$pageRequest -> node_id 		= $this -> objectInfo -> node_id;
-			$pageRequest -> sitemap 		= $this -> m_modelTags -> getResult();
-
-			##	get module templates
-			$moduleTemplate		 = new CModulesTemplates();
-			$moduleTemplate		-> load($this -> moduleRootDir, $this->moduleInfo->module_location, $simpleObject -> params -> template);
-
-			$moduleTemplates	 = new CModulesTemplates();
-			$moduleTemplates	-> load($this -> moduleRootDir, $this->moduleInfo->module_location);
 
 			$this -> setView(	
 							'edit',	
 							'',
 							[
-							'object' 			=> $simpleObject,
+								'object' 	=> $simpleObject,
 							'parentNode' 		=> $parentNode,
 							'termList' 			=> $tagList ?? [],
-							'currentTemplate'	=> $moduleTemplate -> templatesList,
-							'avaiableTemplates'	=> $moduleTemplates -> templatesList
+								'currentTemplate'	=> $moduleTemplate -> templatesList,
+								'avaiableTemplates'	=> $moduleTemplates -> templatesList,
 							]
 							);
 
-			$responseData['html'] = $this -> m_pView -> getHTML($pageRequest);
-
-			$pRouter  = CRouter::instance();
-			$pRouter -> createRoutes($_pDatabase);
+			$responseData['html'] = $this -> m_pView -> getHTML();
 		}
 
-		tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
-	}
-	
-	private function
-	logicXHRDelete(CDatabaseConnection &$_pDatabase, object $_xhrInfo) : bool
-	{
-		$validationErr =	false;
-		$validationMsg =	'';
-		$responseData = 	[];
-	
-		if(empty($_xhrInfo -> objectId))
-		{ 	
-			$validationErr	= true; 	
-			$responseData[] = 'cms-object-id'; 			
-		}
-
-		if(!$validationErr)
-		{
-			modelPageObject::
-				  db($_pDatabase)
-				->where('object_id', '=', $_xhrInfo -> objectId)
-				->delete();
-
-			$validationMsg = 'Object deleted';
-		}
-		else	// Validation Failed
-		{
-			$validationMsg .= 'Data validation failed - object was not updated';
-			$validationErr = true;
-		}
-
-		$pRouter  = CRouter::instance();
-		$pRouter -> createRoutes($_pDatabase);
-
-		tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
-	
+		tk::xhrResult(
+			0, 
+			'OK', 
+			$responseData
+			);	
+		
 		return false;
 	}
 }

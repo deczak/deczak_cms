@@ -169,15 +169,18 @@ class	CImperator
 					$_initObj['object_id'] = $pageObject->object_id;
 
 
-						$objectData = new stdClass();
-						foreach ($_initObj as $key => $value)
-						{
-							$objectData -> $key = $value;
-						}
+					$objectData = new stdClass();
+					foreach ($_initObj as $key => $value)
+					{
+						$objectData -> $key = $value;
+					}
 
 
-						$xhrInfo -> objectId = $_initObj['object_id'];
+					$xhrInfo -> objectId = $_initObj['object_id'];
 
+
+					// insert module gets initObj as requestInfo to deliver the frontent page node_id, but it contains not alle data
+					// like requestInfo .. its todo
 
 					$_logicResult 	  = [];
 					$_objectInstance  = new $module -> module_controller($module, $objectData);
@@ -187,7 +190,7 @@ class	CImperator
 												$xhrInfo, 
 												$_logicResult, 
 												true,
-												$requestInfo
+												(object)$_initObj
 												);
 					
 				}
