@@ -147,11 +147,12 @@
 			xhr.setRequestHeader("X-Requested-XHR-Object", objectId);
 			xhr.onload = function()
 			{
+				console.log(xhr.response);
 				switch(xhr.status)
 				{
 					case 200:	// OK					
 								var jsonObject = xhr.response; 
-								if(jsonObject.state == 0)
+								if(jsonObject.state == 0 || jsonObject.error == 0)
 								{
 									if(onSuccess != null)
 										onSuccess(buttonElement, that, jsonObject);

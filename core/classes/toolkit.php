@@ -25,7 +25,7 @@ class	TK
 		header("Permissions-Policy: interest-cohort=()");	
 		header('Content-type:application/json');
 						
-		echo json_encode($_array, JSON_HEX_APOS | JSON_UNESCAPED_SLASHES | JSON_FORCE_OBJECT | JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK);
+		echo json_encode($_array, JSON_HEX_APOS | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK);
 		exit;
 	}
 
@@ -39,7 +39,7 @@ class	TK
 			'error' => $error,
 			'msg'   => $msg,
 			'data' 	=> $data,
-		], JSON_HEX_APOS | JSON_UNESCAPED_SLASHES | JSON_FORCE_OBJECT | JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK);
+		], JSON_HEX_APOS | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK);
 
 		if($jsonResponse === false)
 			http_response_code(500);

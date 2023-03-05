@@ -157,7 +157,7 @@ class	cmsModuleManager
 								resultBox.setAttribute('data-error',jsonObject.state);
 							}	
 
-							if(jsonObject.state == 0)
+							if(jsonObject.state == 0 || jsonObject.error == 0)
 							{
 
 								// some rights are multiple times in activeModules
@@ -203,7 +203,6 @@ class	cmsModuleManager
 								parentInstances.pEditorCode.createOnDestNode(newObject);
 								parentInstances.pObjectTools.create();
 								parentInstances.pObjectTools.submitObjectsOrder(contentContainer);
-
 							}						
 					 		break;
 					

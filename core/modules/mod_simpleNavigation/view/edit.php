@@ -3,11 +3,7 @@
 <input type="hidden" name="cms-object-id" value="<?php echo $object -> object_id; ?>">
 
 
-
 <?php
-
-if(empty($object -> params -> template))
-	$object -> params -> template = 'list';
 
 
 $timestamp = time();
@@ -93,15 +89,15 @@ $timestamp = time();
 
 	</div>
 
-
-
 <script>
 
-	document.addEventListener('DOMContentLoaded', function () {
+	document.addEventListener('DOMContentLoaded', () => {
 
 		let snilNode = document.querySelector('.simple-navigation-items-list.simple-navigation-list-<?php echo $object -> object_id; ?>');
 		let mecpNode = document.querySelector('.simple-navigation-manage-list.simple-navigation-list-<?php echo $object -> object_id; ?>');
+
 		let rawNavigationItems_<?php echo $object -> object_id; ?> = <?= json_encode($object -> params -> nodeList); ?>;
+		console.log(rawNavigationItems_<?php echo $object -> object_id; ?>);
 		for(let node of rawNavigationItems_<?php echo $object -> object_id; ?>)
 		{
 			document.MECP_SimpleNavigation.addNavigationItem(
@@ -116,6 +112,34 @@ $timestamp = time();
 		}
 
 	}, false);
+
+
+	function jsXHRSimpleNavigation() {
+
+console.log('jsXHRSimpleNavigation');
+
+		let snilNode = document.querySelector('body .simple-navigation-items-list.simple-navigation-list-<?php echo $object -> object_id; ?>');
+		let mecpNode = document.querySelector('body .simple-navigation-manage-list.simple-navigation-list-<?php echo $object -> object_id; ?>');
+
+		let rawNavigationItems_<?php echo $object -> object_id; ?> = <?= json_encode($object -> params -> nodeList); ?>;
+		console.log(rawNavigationItems_<?php echo $object -> object_id; ?>);
+
+		console.log('snilNode', snilNode);
+		for(let node of rawNavigationItems_<?php echo $object -> object_id; ?>)
+		{
+			document.MECP_SimpleNavigation.addNavigationItem(
+				snilNode,
+				mecpNode,
+				node['node-id'],
+				node['page_name'],
+				node['listing-hidden'],
+				node['listing-type'],
+				true
+			);
+		}
+
+	};
+
 
 </script>
 

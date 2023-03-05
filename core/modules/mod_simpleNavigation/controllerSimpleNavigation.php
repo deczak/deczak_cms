@@ -4,203 +4,261 @@ include_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelSimple.php';
 include_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelSitemap.php';	
 include_once CMS_SERVER_ROOT.DIR_CORE.DIR_PHP_CLASS.'CModulesTemplates.php';	
 
-class	controllerSimpleNavigation extends CController
-{		
-	public function
-	__construct(object $_module, object &$_object)
-	{
-		parent::__construct($_module, $_object);
-		$this -> moduleInfo -> user_rights[] = 'view';	// add view right as default for everyone
+class controllerSimpleNavigation extends cmsControllerSimple
+{
+	private string $defaultTemplateName;
 
-		switch($this -> moduleInfo -> module_type) 
-		{
-			case 'core':	
-				$this -> moduleRootDir = CMS_SERVER_ROOT.DIR_CORE.DIR_MODULES;
-				break;
-							
-			case 'mantle':
-				$this -> moduleRootDir = CMS_SERVER_ROOT.DIR_MANTLE.DIR_MODULES;
-				break;
-		}
+	public function
+	__construct(object $_moduleInfo, object &$_objectInfo)
+	{
+		parent::__construct($_moduleInfo, $_objectInfo);
+
+		##	Set user default right in this module
+
+		$this->setRightOfPublicAccess('view');	
+
+		##	Default template
+
+		$this->defaultTemplateName = 'list';	
 	}
-	
+
 	public function
-	logic(CDatabaseConnection &$_pDatabase, array $_rcaTarget, ?object $_xhrInfo, &$_logicResult, bool $_bEditMode) : bool
+	logic(CDatabaseConnection &$_pDatabase, array $_rcaTarget, ?object $_xhrInfo, &$_logicResult, bool $_pageEditMode, object $requestInfo) : bool
 	{
-		##	Set default target if not exists
+		##	Get action by request term, can return actions that not listed in module.json
 
-		$controllerAction = $this -> getControllerAction_v2($_rcaTarget, $_xhrInfo, 'view');
+		$action = $this -> getAction($_rcaTarget, $_xhrInfo, $_pageEditMode);
 
-		##	Check user rights for this target
-		
-		if(!$this -> detectRights($controllerAction))
-		{
-			if($_xhrInfo !== null && $_xhrInfo -> isXHR)
-			{
-				$validationErr =	true;
-				$validationMsg =	CLanguage::string('ERR_PERMISSON');
-				$responseData = 	[];
+		##	Validate action with user right, xhr request will end in this function
 
-				tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
-			}
-
-			CMessages::add(CLanguage::string('ERR_PERMISSON') , MSG_WARNING);
+		if(!$this -> validateRight($action, $_xhrInfo))
 			return false;
-		}
+		
+		##	If the user does not have the right, he will not reach this point of process
+		##	Public user needs the RightOfPublicAccess call to get here
 
-		if($_bEditMode && $_xhrInfo === null) 
-			$controllerAction = 'edit';
-
-		if($_xhrInfo !== null && $_xhrInfo -> isXHR && $_xhrInfo -> objectId === $this -> objectInfo -> object_id)
-			$controllerAction = 'xhr_'. $_xhrInfo -> action;
-
-		##	Call sub-logic function by target, if there results are false, we make a fall back to default view
-
-		$enableEdit 	= $this -> existsUserRight('edit');
-		$enableDelete	= $enableEdit;
+		## 	Call Logic function, if there goes something wrong, the default view get called (except on xhr calls)
 
 		$logicDone = false;
-		switch($controllerAction)
+
+		if($_xhrInfo === null) // NON XHR
+		switch($action)
 		{
-			case 'edit' 	  : $logicDone = $this -> logicEdit($_pDatabase, $enableEdit, $enableDelete); break;	
-			case 'xhr_create' : $logicDone = $this -> logicXHRCreate($_pDatabase, $_xhrInfo, $enableEdit, $enableDelete); break;	
-			case 'xhr_edit'   : $logicDone = $this -> logicXHREdit($_pDatabase, $_xhrInfo, $enableEdit, $enableDelete); break;	
-			case 'xhr_delete' : $logicDone = $this -> logicXHRDelete($_pDatabase, $_xhrInfo, $enableEdit, $enableDelete); break;	
-			case 'xhr_view'   : $logicDone = $this -> logicXHRView($_pDatabase, $_xhrInfo, $enableEdit, $enableDelete); break;	
+			case 'edit'		: $logicDone = $this -> logicEdit($_pDatabase); 				break; // cmsControllerSimple::logicEdit
 		}
 
-		if(!$logicDone)
-			$logicDone = $this -> logicView($_pDatabase, $enableEdit, $enableDelete);	
+		if($_xhrInfo !== null && $_xhrInfo -> objectId === $this -> objectInfo -> object_id) // XHR
+		switch($action)
+		{
+			case 'create' 	: $logicDone = $this -> logicInsert($_pDatabase, $_xhrInfo, $requestInfo); 	break;
+			case 'edit'	    :
+			case 'update' 	: $logicDone = $this -> logicUpdate($_pDatabase, $_xhrInfo); 	break;
+			case 'delete' 	: $logicDone = $this -> logicDelete($_pDatabase, $_xhrInfo); 	break;	
+		}
 
-		return $logicDone;
-	}
-
-	private function
-	logicView(CDatabaseConnection &$_pDatabase, bool $_enableEdit = false, bool $_enableDelete = false) : bool
-	{
-
-		$simpleObject = modelSimple::where('object_id', '=', $this -> objectInfo -> object_id)->one();
-
-
-
-
-		##	gathering child nodes
-
-		$parentNode = (empty($simpleObject -> params -> parent_node_id) ? $this -> objectInfo -> node_id : $simpleObject -> params -> parent_node_id);
-
-		$moduleTemplate	 = new CModulesTemplates();
-		$moduleTemplate	-> load($this -> moduleRootDir, $this->moduleInfo->module_location, $simpleObject -> params -> template);
-
-		if(empty($simpleObject -> params -> nodeList))
-			$simpleObject -> params -> nodeList = [];
-
-		$simpleObject -> params -> nodeList = (array)$simpleObject -> params -> nodeList;
-
-		$this -> setView(	
-						'view',	
-						'',
-						[
-							'object' 		  => $simpleObject,
-							'sitemap'		  => null,
-							'currentTemplate' => $moduleTemplate -> templatesList,
-							'nodeList'		  => $this -> processNavigationItems($_pDatabase, $simpleObject -> params -> nodeList),
-						]
-						);
-
-		return true;
-	}
-
-	private function
-	logicXHRView(CDatabaseConnection &$_pDatabase, object $_xhrInfo, bool $_enableEdit = false, bool $_enableDelete = false) : bool
-	{
-		$validationErr   = false;
-		$validationMsg   = 'OK';
-		$responseData    = [];
-
-		$this->logicView($_pDatabase, $_enableEdit, $_enableDelete);
-
-		ob_start();
-		$this->view();
-		$responseData['html'] = ob_get_contents();
-		ob_end_clean();
-
-		$responseData['objectId'] = $_xhrInfo -> objectId;
-
-		tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
+		if(!$logicDone) // Default
+			$logicDone = $this -> logicView($_pDatabase); // cmsControllerSimple::logicView
 	
-		return true;
+		return false;
 	}
 
-	private function
-	logicEdit(CDatabaseConnection &$_pDatabase, bool $enableEdit, bool $enableDelete) : bool
+	/**
+	 * 	Overloaded parent ::logicView
+	 */
+	public function logicView(CDatabaseConnection &$_pDatabase) : bool
 	{
-
-
-		$simpleObject = modelSimple::where('object_id', '=', $this -> objectInfo -> object_id)->one();
-
-
-
-
+		$simpleObject = modelSimple::db($_pDatabase)->where('object_id', '=', $this -> objectInfo -> object_id)->one();
 
 		##	gathering child nodes
-
-		$parentNode = (empty($simpleObject -> params -> parent_node_id) ? $this -> objectInfo -> node_id : $simpleObject -> params -> parent_node_id);
-
-		$moduleTemplate = new CModulesTemplates();
-		$moduleTemplate ->	load($this -> moduleRootDir, $this->moduleInfo->module_location, $simpleObject -> params -> template);
-
-		$moduleTemplates = new CModulesTemplates();
-		$moduleTemplates ->	load($this -> moduleRootDir, $this->moduleInfo->module_location);
-
-
-
-
-
 
 		if(empty($simpleObject -> params -> nodeList))
 			$simpleObject -> params -> nodeList = [];
 
 		$simpleObject -> params -> nodeList = (array)$simpleObject -> params -> nodeList;
-
-
-
-
-
-		$this -> setView(	
-						'edit',	
-						'',
-						[
-							'object' 			=> $simpleObject,
-							'sitemap'			=> null,
-							'currentTemplate'	=> $moduleTemplate -> templatesList,
-							'avaiableTemplates'	=> $moduleTemplates -> templatesList,
-							'nodeList'			=> $this -> processNavigationItems($_pDatabase, $simpleObject -> params -> nodeList),
-						]
-						);
+		
+		$this->setViewSimple($_pDatabase, 'view', $simpleObject);
 
 		return true;
+	}
+
+	/**
+	 * 	Overloaded parent ::logicEdit
+	 */
+	public function logicEdit(CDatabaseConnection &$_pDatabase) : bool
+	{
+		$simpleObject = modelSimple::db($_pDatabase)->where('object_id', '=', $this -> objectInfo -> object_id)->one();
+			
+		if(empty($simpleObject -> params -> nodeList))
+			$simpleObject -> params -> nodeList = [];
+
+		$simpleObject -> params -> nodeList = (array)$simpleObject -> params -> nodeList;
+
+		$this->setViewSimple($_pDatabase, 'edit', $simpleObject);
+
+		return true;
+	}
+
+	/**
+	 * 	XHR process function to update object data
+	 */
+	public function logicUpdate(CDatabaseConnection &$_pDatabase, object $_xhrInfo)
+	{
+		#$queryValidationString = QueryValidation::STRIP_TAGS | QueryValidation::IS_NOTEMPTY;
+		$queryValidationString = QueryValidation::IS_NOTEMPTY;
+
+		##	Body
+
+		$sOBody = '';
+	
+		##	Parameters
+
+		$requestQuery = new cmsRequestQuery(true);
+		$requestQuery->post('simple-navigation-template')->validate($queryValidationString)->default($this->defaultTemplateName)->out('template')->exec();
+		$requestQuery->post('simple-navigation-item')->validate($queryValidationString)->default([])->out('nodeList')->exec();
+		$sOParams = $requestQuery->toObject();
+
+		if($simpleObject = $this->logicUpdateExec(
+			$_pDatabase, 
+			$_xhrInfo, 
+			$sOBody, 
+			$sOParams,
+			cmsControllerSimple::PREVENT_XHRRESPONSE
+			)
+		) {
+			$this->setViewSimple($_pDatabase, 'view', $simpleObject);
+
+			tk::xhrResponse(
+				200,
+				[
+					'objectId' 	=> $this -> objectInfo -> object_id,
+					'html' 		=> $this -> m_pView -> getHTML(),
+				]);	
+		}
+
+		tk::xhrResponse(
+			200,
+			[],
+			1, 
+			'Unknown error on sql query'
+			);	
+	}
+
+	/**
+	 * 	XHR process function to delete the object
+	 */
+	public function logicDelete(CDatabaseConnection &$_pDatabase, object $_xhrInfo)
+	{
+		return $this->logicDeleteExec(
+			$_pDatabase, 
+			$_xhrInfo
+			);
+	}
+
+	/**
+	 * 	XHR process function to insert the object
+	 */
+	public function logicInsert(CDatabaseConnection &$_pDatabase, object $_xhrInfo, object $requestInfo)
+	{
+		$sOBody    = '';
+		$sOParams  = new stdClass;
+		$sOParams -> template = $this->defaultTemplateName;
+		$sOParams -> nodeList = [];
+		/* until the problem is fixed
+		$sOParams -> nodeList = [ (object)[
+			'listing-type' => 'subpages',
+			'listing-hidden' => 0,
+			'node-id' => $requestInfo->node_id,
+		]];
+		*/
+
+		$responseData = [];
+		
+		$simpleObject = modelSimple::new([
+			'object_id' => (int)$this -> objectInfo -> object_id,
+			'body' 		=> $sOBody,
+			'params' 	=> $sOParams,
+		], $_pDatabase);
+
+		if(!$simpleObject->save())
+		{
+			tk::xhrResponse(
+				200,
+				[],
+				1, 
+				'sql insert failed'
+				);	
+		}
+		else
+		{
+			$this->setViewSimple($_pDatabase, 'edit', $simpleObject);
+
+			$responseData['html'] = $this -> m_pView -> getHTML();
+		}
+
+		tk::xhrResponse(
+			200,
+			$responseData,
+			0, 
+			'OK'
+			);	
+		
+		return false;
+	}
+
+	protected function setViewSimple(CDatabaseConnection &$_pDatabase, string $view, object $simpleObject)
+	{
+		$dataInstances = [];
+		
+		switch($view)
+		{
+			case 'edit':
+
+				$moduleTemplates = new CModulesTemplates();
+				$moduleTemplates ->	load($this->moduleInfo->modules_path, $this->moduleInfo->module_location);
+
+				$dataInstances['avaiableTemplates']	= $moduleTemplates -> templatesList;
+
+			case 'view':
+			default:
+
+				$moduleTemplate = new CModulesTemplates();
+				$moduleTemplate ->	load($this->moduleInfo->modules_path, $this->moduleInfo->module_location, $simpleObject -> params -> template);
+
+				$dataInstances['object'] 			= $simpleObject;
+				$dataInstances['currentTemplate'] 	= $moduleTemplate -> templatesList;
+				$dataInstances['nodeList'] 			= $this -> processNavigationItems($_pDatabase, $simpleObject -> params -> nodeList);
+
+				break;			
+		}
+
+		$this -> setView(	
+						$view,	
+						'',
+						$dataInstances
+						);
 	}
 
 	private function
 	processNavigationItems(CDatabaseConnection &$_pDatabase, &$itemsList) : array
 	{
-		
 		$nodeList = [];
 		foreach($itemsList as $nodeIndex => $node)
 		{
+			if(is_array($node)) 
+			{
+				$node = (object)$node;
+				$itemsList[$nodeIndex] = (object)$itemsList[$nodeIndex];
+			}
 
-					$modelCondition = new CModelCondition();
-					$modelCondition -> where('node_id', $node -> {'node-id'});		
+			$modelCondition = new CModelCondition();
+			$modelCondition -> where('node_id', $node -> {'node-id'});		
 
-					$modelSitemap  = new modelSitemap();
-					$modelSitemap -> load($_pDatabase, $modelCondition, NULL, SITEMAP_OWN_CHILDS_ONLY);	
-
+			$modelSitemap  = new modelSitemap();
+			$modelSitemap -> load($_pDatabase, $modelCondition, NULL, SITEMAP_OWN_CHILDS_ONLY);	
 
 			switch($node -> {'listing-type'})
 			{
 				case 'page':
-
-
 
 					if(!empty($modelSitemap -> getResult()))
 					{
@@ -211,30 +269,23 @@ class	controllerSimpleNavigation extends CController
 						$sitemapNode -> listing_hidden = $node -> {'listing-hidden'};
 						$sitemapNode -> listing_type = $node -> {'listing-type'};
 
-
 						$nodeList[] = [$sitemapNode];
-
 					}
 
 					break;
 
 				case 'subpages':
 
-
 					foreach($modelSitemap -> getResult() as &$sitemapNode)
 					{
-
 						if((int)$sitemapNode -> node_id === (int)$node -> {'node-id'})
 						{
 							$itemsList[$nodeIndex] -> page_name = $sitemapNode -> page_name;
-						
 						}
 
 						$sitemapNode -> listing_hidden = $node -> {'listing-hidden'};
 						$sitemapNode -> listing_type = $node -> {'listing-type'};
 					}
-
-
 
 					$nodeList[] = $modelSitemap -> getResult();
 					if(isset($sitemapNode))
@@ -245,181 +296,5 @@ class	controllerSimpleNavigation extends CController
 
 		}
 		return $nodeList;
-	}
-
-	private function
-	logicXHREdit(CDatabaseConnection &$_pDatabase, object $_xhrInfo, bool $_enableEdit = false, bool $_enableDelete = false) : bool
-	{
-		$validationErr   = false;
-		$validationMsg   = 'OK';
-		$responseData    = [];
-
-		$pURLVariables	 =	new CURLVariables();
-		$requestList	 =	[];
-		$requestList[] 	 = 	[	"input" => "simple-navigation-template",  		"validate" => "strip_tags|!empty" ]; 
-		$requestList[] 	 = 	[	"input" => "simple-navigation-item",  			"validate" => "!empty",	"use_default" => true, "default_value" => [] ]; 
-		//	$requestList[] 	 = 	[	"input" => "navigation-display-hidden", 	"validate" => "strip_tags|!empty" ]; 
-		//	$requestList[] 	 = 	[	"input" => "navigation-parent-node-id", 	"validate" => "strip_tags|!empty" ]; 
-
-		$pURLVariables-> retrieve($requestList, false, true); // POST 
-		$urlVarList		 = $pURLVariables -> getArray();
-
-		if(empty($_xhrInfo -> objectId)) 		{ 	$validationErr = true; 	$responseData[] = 'cms-object-id'; 			}
-
-		if(!$validationErr)
-		{
-
-			$urlVarList['params']	= 	[
-											"template"			=> $urlVarList['simple-navigation-template'],
-											"nodeList"			=> $urlVarList['simple-navigation-item'],
-		//										"display_hidden"	=> $urlVarList['navigation-display-hidden'],
-		//										"parent_node_id"	=> $urlVarList['navigation-parent-node-id']
-										];
-			$urlVarList['params']	 = 	json_encode($urlVarList['params'], JSON_FORCE_OBJECT);
-
-			$simpleObject = modelSimple::where('object_id', '=', $_xhrInfo -> objectId)->one();
-			$simpleObject->params->template = $urlVarList['simple-navigation-template'];
-			$simpleObject->params->nodeList = $urlVarList['simple-navigation-item'];
-
-		
-			if($simpleObject->save())
-			{
-				$validationMsg = 'Object updated';
-
-				$object = modelPageObject::
-					  db($_pDatabase)
-					->where('object_id', '=', $_xhrInfo -> objectId)
-					->one();
-
-				$object->update_time 	= time();
-				$object->update_by 		= 0;
-				$object->update_reason	= '';
-				$object->save();
-
-				$this->logicXHRView($_pDatabase, $_xhrInfo, $_enableEdit, $_enableDelete);
-			}
-			else
-			{
-				$validationMsg .= 'Unknown error on sql query';
-				$validationErr = true;
-			}											
-		}
-		else	// Validation Failed
-		{
-			$validationMsg .= 'Data validation failed - object was not updated';
-			$validationErr = true;
-		}
-
-		tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
-	
-		return true;
-	}
-	
-	private function
-	logicXHRCreate(CDatabaseConnection &$_pDatabase, object $_xhrInfo, bool $_enableEdit = false, bool $_enableDelete = false) : bool
-	{
-		$validationErr =	false;
-		$validationMsg =	'';
-		$responseData = 	[];
-
-			$sOParams = new stdClass;
-			$sOParams->template 		= '';
-			$sOParams->display_hidden 	= ''; 
-			$sOParams->parent_node_id 	= '';
-
-
-
-			$simpleObject = modelSimple::new([
-				'object_id' => (int)$this -> objectInfo -> object_id,
-				'body' 		=> '',
-				'params' 	=> $sOParams,
-			], $_pDatabase);
-			
-
-
-
-		if(!$simpleObject->save())
-		{
-			$validationErr =	true;
-			$validationMsg =	'sql insert failed';
-		}
-		else
-		{
-
-			##	gathering child nodes
-
-
-			$modelCondition = new CModelCondition();
-			$modelCondition -> where('node_id', $this -> objectInfo -> node_id);		
-
-			$modelSitemap = new modelSitemap();
-			$modelSitemap -> load($_pDatabase, $modelCondition, NULL, SITEMAP_OWN_CHILDS_ONLY);	
-
-
-
-			$moduleTemplate = new CModulesTemplates();
-			$moduleTemplate ->	load($this -> moduleRootDir, $this->moduleInfo->module_location, $simpleObject -> params -> template);
-
-			$moduleTemplates = new CModulesTemplates();
-			$moduleTemplates ->	load($this -> moduleRootDir, $this->moduleInfo->module_location);
-
-			$this -> setView(	
-							'edit',	
-							'',
-							[
-								'object' 	=> $simpleObject,
-								'sitemap'	=> null,
-						'currentTemplate'	=> $moduleTemplate -> templatesList,
-						'avaiableTemplates'	=> $moduleTemplates -> templatesList,
-						'nodeList'			=> [],
-							]
-							);
-
-
-			$pageRequest = new stdClass;
-			$pageRequest -> crumbsList = $modelSitemap -> getResult();
-
-			$responseData['html'] = $this -> m_pView -> getHTML($pageRequest);
-		}
-
-		tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
-
-		return false;
-	}
-	
-	private function
-	logicXHRDelete(CDatabaseConnection &$_pDatabase, object $_xhrInfo, bool $_enableEdit = false, bool $_enableDelete = false) : bool
-	{
-		$validationErr	= false;
-		$validationMsg	= 'OK';
-		$responseData	= [];
-	
-		if(empty($_xhrInfo -> objectId))
-		{ 	
-			$validationErr	= true; 	
-			$responseData[] = 'cms-object-id'; 			
-		}
-
-		if(!$validationErr)
-		{
-
-
-			modelPageObject::
-				  db($_pDatabase)
-				->where('object_id', '=', $_xhrInfo -> objectId)
-				->delete();
-
-				$validationMsg = 'Object deleted';
-										
-		}
-		else	// Validation Failed
-		{
-			$validationMsg = 'Data validation failed - object was not updated';
-			$validationErr = true;
-		}
-
-		tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
-
-		return false;
 	}
 }

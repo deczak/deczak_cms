@@ -5,10 +5,10 @@
 	
 	foreach($nodeList as $nodeLevel1)
 	{
-
 		$mapLevel = null;
 		foreach($nodeLevel1 as $node)
 		{
+			$markNotDisplayed = false;
 
 			if($mapLevel === null)
 				$mapLevel = $node -> level + 1 ;
@@ -34,8 +34,6 @@
 
 			); else 
 			{
-				$markNotDisplayed = false;
-
 				if(!CMS_BACKEND)
 				{
 					continue;
@@ -43,7 +41,6 @@
 				else
 				{
 					$markNotDisplayed = true;
-
 				}
 			}
 		

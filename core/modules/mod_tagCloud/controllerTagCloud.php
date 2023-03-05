@@ -139,7 +139,7 @@ class controllerTagCloud extends cmsControllerSimple
 		$simpleObject = modelSimple::db($_pDatabase)->where('object_id', '=', $this -> objectInfo -> object_id)->one();
 			
 		$moduleTemplate = new CModulesTemplates();
-		$moduleTemplate ->	load($this->moduleInfo->modules_path, $this->moduleInfo->module_location, $simpleObject -> params -> template ?? 'thumbnails-ratio');
+		$moduleTemplate ->	load($this->moduleInfo->modules_path, $this->moduleInfo->module_location, $simpleObject -> params -> template ?? $this->defaultTemplateName);
 
 		$moduleTemplates = new CModulesTemplates();
 		$moduleTemplates ->	load($this->moduleInfo->modules_path, $this->moduleInfo->module_location);

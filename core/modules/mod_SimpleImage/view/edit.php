@@ -76,7 +76,7 @@ $image_url = ($image_url !== null ? $image_url .'?binary&size=large' : $image_ur
 
 </div>
 
-<div style="position:relative; padding-top:<?= ($object -> params -> height ?? '45') . ($object -> params -> height_unit ?? '%'); ?>;" class="simple-image-container simple-image-container-<?php echo $object -> object_id; ?>"">
+<div style="position:relative; padding-top:<?= ($object -> params -> height ?? '45') . ($object -> params -> height_unit ?? '%'); ?>;" class="simple-image-container simple-image-container-<?php echo $object -> object_id; ?>">
 
 	<input type="hidden"  name="simple-image-id" value="<?= $object -> params -> id ?? 0; ?>">
 	<img style="width:100%; height:100%; top:0px; left:0px; position:absolute; object-fit:<?= $object -> params -> fit ?? 'cover'; ?>; object-position: <?= ($object -> params -> position_x ?? '50') . ($object -> params -> position_x_unit ?? '%'); ?> <?= ($object -> params -> position_y ?? '50') . ($object -> params -> position_y_unit ?? '%'); ?>;" src="<?= $image_url; ?>">

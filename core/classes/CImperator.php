@@ -229,7 +229,7 @@ class	CImperator
 
 
 					$_objectModel = modelPageObject::
-						  db($_pDatabase)
+						  db($this->pDatabase)
 						->where('node_id', '=', $_pageNodeID)
 						->where('object_id', '=', $_objectID)
 						->one();

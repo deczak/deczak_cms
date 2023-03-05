@@ -95,11 +95,12 @@ class cmsController
 		{
 			if($_xhrInfo !== null && $_xhrInfo -> isXHR)
 			{
-				$validationErr =	true;
-				$validationMsg =	CLanguage::string('ERR_PERMISSON');
-				$responseData = 	[];
-
-				tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
+				tk::xhrResponse(
+					200,
+					[],
+					1, 
+					CLanguage::string('ERR_PERMISSON')
+					);
 			}
 
 			CMessages::add(CLanguage::string('ERR_PERMISSON') , MSG_WARNING);
@@ -185,6 +186,9 @@ class cmsController
  */
 class cmsControllerSimple extends cmsController
 {
+
+    const PREVENT_XHRRESPONSE 	= 0x01;
+
 	protected ?object $modelSimple; 
 
 	public function __construct(object $_moduleInfo, object &$_objectInfo)
@@ -233,52 +237,43 @@ class cmsControllerSimple extends cmsController
 	/**
 	 * 	XHR process function to update object data
 	 */
-	public function logicUpdateExec(CDatabaseConnection &$_pDatabase, object $_xhrInfo, string $sOBody, object $sOParams)
+	public function logicUpdateExec(CDatabaseConnection &$_pDatabase, object $_xhrInfo, string $sOBody, object $sOParams, ?int $flags = null)
 	{
-		$responseErr   = false;
-		$responseMsg   = 'OK';
-		$responseData    = [];
+		$simpleObject = modelSimple::db($_pDatabase)->where('object_id', '=', $_xhrInfo -> objectId)->one();
 
-		if(!$responseErr)
+		$simpleObject->body   = $sOBody;
+		$simpleObject->params = $sOParams;
+
+		if($simpleObject->save())
 		{
-			$simpleObject = modelSimple::db($_pDatabase)->where('object_id', '=', $_xhrInfo -> objectId)->one();
+			$object = modelPageObject::
+					db($_pDatabase)
+				->where('object_id', '=', $_xhrInfo -> objectId)
+				->one();
 
-			$simpleObject->body   = $sOBody;
-			$simpleObject->params = $sOParams;
+			$object->update_time 	= time();
+			$object->update_by 		= 0;
+			$object->update_reason	= '';
+			$object->save();
 
-			if($simpleObject->save())
-			{
-				$responseMsg = 'Object updated';
-
-				$object = modelPageObject::
-					  db($_pDatabase)
-					->where('object_id', '=', $_xhrInfo -> objectId)
-					->one();
-
-				$object->update_time 	= time();
-				$object->update_by 		= 0;
-				$object->update_reason	= '';
-				$object->save();
-			}
-			else
-			{
-				$responseMsg .= 'Unknown error on sql query';
-				$responseErr = true;
-			}											
-		}
-		else	// Validation Failed
-		{
-			$responseMsg .= 'Data validation failed - object was not updated';
-			$responseErr = true;
+			if($flags & cmsControllerSimple::PREVENT_XHRRESPONSE)
+				return $simpleObject;
+		
+			tk::xhrResponse(
+				200,
+				[],
+				);	
 		}
 
-		tk::xhrResult(
-			intval($responseErr), 
-			$responseMsg, 
-			$responseData
+		if($flags & cmsControllerSimple::PREVENT_XHRRESPONSE)
+			return false;
+
+		tk::xhrResponse(
+			200,
+			[],
+			1,
+			'Unknown error on sql query'
 			);	
-
-		return false;
 	}
 
 	/**
@@ -308,10 +303,11 @@ class cmsControllerSimple extends cmsController
 			$responseErr = true;
 		}
 
-		tk::xhrResult(
+		tk::xhrResponse(
+			200,
+			$responseData,
 			intval($responseErr), 
-			$responseMsg, 
-			$responseData
+			$responseMsg
 			);	
 	
 		return false;
@@ -320,25 +316,19 @@ class cmsControllerSimple extends cmsController
 	/**
 	 * 	XHR process function to insert the object
 	 */
-	public function logicInsertExec(CDatabaseConnection &$_pDatabase, object $_xhrInfo, string $sOBody, object $sOParams)
+	public function logicInsertExec(CDatabaseConnection &$_pDatabase, object $_xhrInfo, string $sOBody, object $sOParams, ?int $flags = null)
 	{
-		$responseErr =	false;
-		$responseMsg =	'';
-		$responseData = 	[];
-		
 		$simpleObject = modelSimple::new([
 			'object_id' => (int)$this -> objectInfo -> object_id,
 			'body' 		=> $sOBody,
 			'params' 	=> $sOParams,
 		], $_pDatabase);
 
-		if(!$simpleObject->save())
+		if($simpleObject->save())
 		{
-			$responseErr =	true;
-			$responseMsg =	'sql insert failed';
-		}
-		else
-		{
+			if($flags & cmsControllerSimple::PREVENT_XHRRESPONSE)
+				return $simpleObject;
+
 			$this -> setView(	
 							'edit',	
 							'',
@@ -347,16 +337,21 @@ class cmsControllerSimple extends cmsController
 							]
 							);
 
-			$responseData['html'] = $this -> m_pView -> getHTML();
+			tk::xhrResponse(
+				200,
+				[ 'html' => $this -> m_pView -> getHTML() ],
+				);	
 		}
 
-		tk::xhrResult(
-			intval($responseErr), 
-			$responseMsg, 
-			$responseData
+		if($flags & cmsControllerSimple::PREVENT_XHRRESPONSE)
+			return false;
+
+		tk::xhrResponse(
+			200,
+			[],
+			1,
+			'sql insert failed'
 			);	
-		
-		return false;
 	}
 }
 

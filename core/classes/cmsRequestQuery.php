@@ -80,7 +80,6 @@ class cmsRequestQueryProcessor
 	{
 		if(is_object($validateFlags))
 		$this->qryValidate = $validateFlags;
-		$this->qryValidate = $validateFlags;
 		return $this;
 	}
 
