@@ -11,16 +11,22 @@ class cmsController
 	protected object $moduleInfo;
 	protected object $objectInfo;
 
+	protected bool 	 $isBackendMode;
+	protected bool 	 $isInstallMode;
+
 	protected ?CView $m_pView;
 
 	public function
-	__construct(object $_moduleInfo, object &$_objectInfo)
+	__construct(object $_moduleInfo, object &$_objectInfo, bool $_isBackendMode = false)
 	{
 		$this->rightOfPublicAccessList = [];
 
 		$this->moduleInfo = $_moduleInfo;
 		$this->objectInfo = $_objectInfo;
 		$this->m_pView = null;
+
+		$this->isBackendMode = $_isBackendMode;
+		$this->isInstallMode = false;
 	}
 
 	/**
@@ -176,6 +182,31 @@ class cmsController
 	{
 		if($this -> m_pView == null) return;
 		$this -> m_pView -> view();
+	}
+
+
+	/**
+	 * 	Returns the state of backend mode
+	 */
+	public function isBackendMode() : bool
+	{
+		return $this->isBackendMode;
+	}
+
+	/**
+	 *	Set the install mode to tell the process thats called on install procedure 
+	 */
+	public function setInstallMode(bool $_isInstallMode = true)
+	{
+		$this->isInstallMode = $_isInstallMode;
+	}
+
+	/**
+	 *	Returns the state of install mode 
+	 */
+	public function getInstallMode() : bool
+	{
+		return $this->isInstallMode;
 	}
 
 }

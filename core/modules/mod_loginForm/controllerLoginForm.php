@@ -3,7 +3,291 @@
 require_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelSimple.php';	
 require_once CMS_SERVER_ROOT.DIR_CORE.DIR_MODELS.'modelLoginObjects.php';
 
-class	controllerLoginForm extends CController
+class controllerLoginForm extends cmsControllerSimple
+{
+	protected $m_modelSimpleName;
+
+	public function
+	__construct(object $_moduleInfo, object &$_objectInfo)
+	{
+		parent::__construct($_moduleInfo, $_objectInfo);
+
+		##	Set user default right in this module
+
+		$this->setRightOfPublicAccess('view');	
+		
+		if($this -> isBackendMode())
+			$this->m_modelSimpleName = 'modelBackendSimple';
+		else
+			$this->m_modelSimpleName = 'modelSimple';	
+	}
+
+	public function
+	logic(CDatabaseConnection &$_pDatabase, array $_rcaTarget, ?object $_xhrInfo, &$_logicResult, bool $_pageEditMode, object $requestInfo) : bool
+	{
+		##	Get action by request term, can return actions that not listed in module.json
+
+		$action = $this -> getAction($_rcaTarget, $_xhrInfo, $_pageEditMode);
+
+		##	Validate action with user right, xhr request will end in this function
+
+		if(!$this -> validateRight($action, $_xhrInfo, ['loginSuccess']))
+			return false;
+		
+		##	If the user does not have the right, he will not reach this point of process
+		##	Public user needs the RightOfPublicAccess call to get here
+
+		## 	Call Logic function, if there goes something wrong, the default view get called (except on xhr calls)
+
+		$logicDone = false;
+
+		if($_xhrInfo === null) // NON XHR
+		switch($action)
+		{
+			case 'edit'		    : $logicDone = $this -> logicEdit($_pDatabase);		break; // cmsControllerSimple::logicEdit
+			case 'loginSuccess'	: $logicDone = $this -> logicSuccess($_pDatabase);	break;
+		}
+
+		if($_xhrInfo !== null && $_xhrInfo -> objectId === $this -> objectInfo -> object_id) // XHR
+		switch($action)
+		{
+			case 'create' 	: $logicDone = $this -> logicInsert($_pDatabase, $_xhrInfo,); 	break; // page object should exists at this point
+			case 'edit'	    :
+			case 'update' 	: $logicDone = $this -> logicUpdate($_pDatabase, $_xhrInfo); 	break;
+			case 'delete' 	: $logicDone = $this -> logicDelete($_pDatabase, $_xhrInfo); 	break;	
+		}
+
+		if(!$logicDone) // Default
+			$logicDone = $this -> logicView($_pDatabase); // cmsControllerSimple::logicView
+	
+		return false;
+	}
+
+	/**
+	 * 	Overloaded parent ::logicView
+	 */
+	public function logicView(CDatabaseConnection &$_pDatabase) : bool
+	{
+		if(isset($_GET['logout']))
+		{
+			CLogin::logout($_pDatabase);
+		}
+
+
+
+		if(empty($this -> objectInfo -> params))
+		{
+			
+
+			$simpleObject = $this -> m_modelSimpleName::where('object_id', '=', $this -> objectInfo -> object_id)->one();
+
+
+
+
+
+
+
+			$this -> objectInfo -> params = $simpleObject  -> params;
+			$this -> objectInfo -> body = $simpleObject  -> body;
+
+			if(CSession::instance() -> isAuthed($simpleObject  -> params -> object_id) !== false)
+			{
+				$this -> logicSuccess($_pDatabase);
+			}
+
+
+
+			$modelCondition = new CModelCondition();
+			$modelCondition -> where('object_id', $simpleObject  -> params -> object_id);
+			
+			$_pModelLoginObjects	 =	new modelLoginObjects();
+			$_pModelLoginObjects	->	load($_pDatabase, $modelCondition);	
+
+			$this -> setView(	
+							'view',	
+							'',
+							[
+								'object' 	=> $simpleObject ,
+								'login_object' => $_pModelLoginObjects -> getResult()[0]
+							]
+							);
+
+		}
+		else
+		{
+			// set data as property
+
+			$object = new stdClass;
+			$object -> params		= $this -> objectInfo -> params;
+			$object -> object_id	= $this -> objectInfo -> object_id;
+
+			// authed check
+			if(CSession::instance() -> isAuthed($object -> params -> object_id) !== false)
+			{
+				$this -> logicSuccess($_pDatabase);
+			}
+
+			$modelCondition = new CModelCondition();
+			$modelCondition -> where('object_id', $object -> params -> object_id);
+			
+			// default view
+
+			$_pModelLoginObjects	 =	new modelLoginObjects();
+			$_pModelLoginObjects	->	load($_pDatabase, $modelCondition);	
+
+			$this -> setView(
+							'view',
+							'', 
+							[ 
+								'object' => $object,
+								'login_object' => $_pModelLoginObjects -> getResult()[0]
+							]
+							);
+		}
+
+		return true;
+	}
+
+	/**
+	 * 	Output function for page edit mode
+	 */
+	public function logicEdit(CDatabaseConnection &$_pDatabase) : bool
+	{
+		$simpleObject = $this -> m_modelSimpleName::where('object_id', '=', $this -> objectInfo -> object_id)->one();
+
+		$_pModelLoginObjects	 =	new modelLoginObjects();
+		$_pModelLoginObjects	->	load($_pDatabase);	
+
+		$this -> setView(	
+						'edit',	
+						'',
+						[
+							'object' 		=> $simpleObject,
+							'login_objects' => $_pModelLoginObjects -> getResult()
+						]
+						);
+
+		return true;
+	}
+
+	/**
+	 * 	XHR process function to update object data
+	 */
+	public function logicUpdate(CDatabaseConnection &$_pDatabase, object $_xhrInfo)
+	{
+		$queryValidationString = QueryValidation::STRIP_TAGS | QueryValidation::IS_NOTEMPTY;
+		$queryValidationString2 = QueryValidation::STRIP_TAGS | QueryValidation::TRIM;
+
+		##	Body
+
+		$requestQuery = new cmsRequestQuery(true);
+		$requestQuery->post('login-object-redirect')->validate($queryValidationString)->default(20)->out('body')->exec();
+		$sOBody = $requestQuery->toObject();
+	
+		##	Parameters
+
+		$requestQuery = new cmsRequestQuery(true);
+		$requestQuery->post('login-object-id')->validate($queryValidationString)->out('object_id')->exec();
+		$requestQuery->post('field_label')->validate($queryValidationString2)->out('labels')->exec();
+		$sOParams = $requestQuery->toObject();
+
+		if($this->logicUpdateExec(
+			$_pDatabase, 
+			$_xhrInfo, 
+			$sOBody->body, 
+			$sOParams,
+			cmsControllerSimple::PREVENT_XHRRESPONSE
+			)
+		) {
+			if($this -> getInstallMode())
+				return true;
+				
+			tk::xhrResponse(
+				200,
+				[],
+				);	
+		}
+
+		return false;
+	}
+
+	/**
+	 * 	XHR process function to delete the object
+	 */
+	public function logicDelete(CDatabaseConnection &$_pDatabase, object $_xhrInfo)
+	{
+		return $this->logicDeleteExec(
+			$_pDatabase, 
+			$_xhrInfo
+			);
+	}
+
+	/**
+	 * 	XHR process function to insert the object
+	 */
+	public function logicInsert(CDatabaseConnection &$_pDatabase, object $_xhrInfo)
+	{
+		$responseData = 	[];
+
+		$sOParams = new stdClass;
+		$sOParams->object_id 		= '';
+		$sOParams->labels 			= []; 
+
+		$simpleObject = $this -> m_modelSimpleName::new([
+			'object_id' => (int)$this -> objectInfo -> object_id,
+			'body' 		=> '',
+			'params' 	=> $sOParams,
+		], $_pDatabase);
+		
+		if(!$simpleObject->save())
+		{
+			tk::xhrResponse(
+				200,
+				[],
+				1, 
+				'sql insert failed'
+				);	
+		}
+		else
+		{
+			if($this -> getInstallMode())
+				return true;
+
+			$_pModelLoginObjects	 =	new modelLoginObjects();
+			$_pModelLoginObjects	->	load($_pDatabase);	
+
+			$this -> setView(	
+							'edit',	
+							'',
+							[
+								'object' 	=> $simpleObject,
+								'login_objects' => $_pModelLoginObjects -> getResult()
+							]
+							);
+
+			$responseData['html'] = $this -> m_pView -> getHTML();
+		}
+
+		tk::xhrResponse(
+			200,
+			$responseData
+			);	
+
+		return false;
+	}
+
+	public function
+	logicSuccess(CDatabaseConnection &$_pDatabase)
+	{
+		$_redirectTarget = (empty($this -> objectInfo -> body) ? $_SERVER['REQUEST_URI'] : CMS_SERVER_URL . $this -> objectInfo -> body );
+		header("Location: ". $_redirectTarget ); 
+		exit;
+	}
+}
+
+
+/*
+class	controllerLogiddnForm extends CController
 {
 	public function
 	__construct($_module, &$_object, bool $_backendCall = false)
@@ -18,56 +302,7 @@ class	controllerLoginForm extends CController
 
 		$this -> moduleInfo -> user_rights[] = 'view';			// add view right as default for everyone
 	}
-	/*
-	public function
-	logic(CDatabaseConnection &$_pDatabase, array $_rcaTarget, $_isXHRequest, &$_logicResult, bool $_bEditMode)
-	{
-		$_controllerAction = $this -> getControllerAction($_rcaTarget, 'view');
 
-		if(!$this -> detectRights($_controllerAction) && $_controllerAction != 'loginSuccess')
-		{
-			if($_isXHRequest !== false)
-			{
-				$validationErr =	true;
-				$validationMsg =	CLanguage::string('ERR_PERMISSON');
-				$responseData = 	[];
-
-				tk::xhrResult(intval($validationErr), $validationMsg, $responseData);	// contains exit call
-			}
-
-			CMessages::add(CLanguage::string('ERR_PERMISSON') , MSG_WARNING);
-			return;
-		}
-
-		##	
-
-		if($_bEditMode && $_isXHRequest === false) 
-			$_controllerAction = 'edit';
-
-		##	Call sub-logic function by target, if there results are false, we make a fall back to default view
-		
-		$enableEdit 	= $this -> existsUserRight('edit');
-		$enableDelete	= $enableEdit;
-
-		$logicResults = false;
-		switch($_controllerAction)
-		{
-			case 'loginSuccess'	: $logicResults = $this -> logicSuccess($_pDatabase);	break;
-			case 'view'			: $logicResults = $this -> logicView(	$_pDatabase, $_isXHRequest, $_logicResult);	break;
-			case 'edit'			: $logicResults = $this -> logicEdit(	$_pDatabase, $_isXHRequest, $_logicResult);	break;	
-			case 'create'		: $logicResults = $this -> logicCreate($_pDatabase, $_isXHRequest, $_logicResult);	break;
-			case 'delete'		: $logicResults = $this -> logicDelete($_pDatabase, $_isXHRequest, $_logicResult);	break;	
-		}
-
-
-		if(!$logicResults)
-		{
-			##	Default View
-			$logicResults = $this -> logicView($_pDatabase, $_isXHRequest, $_logicResult);	
-		}
-
-	}
-	*/
 	public function
 	logic(CDatabaseConnection &$_pDatabase, array $_rcaTarget, ?object $_xhrInfo, &$_logicResult, bool $_bEditMode) : bool
 	{
@@ -131,10 +366,10 @@ class	controllerLoginForm extends CController
 
 
 
-if(isset($_GET['logout']))
-{
-	CLogin::logout($_pDatabase);
-}
+		if(isset($_GET['logout']))
+		{
+			CLogin::logout($_pDatabase);
+		}
 
 
 
@@ -145,7 +380,7 @@ if(isset($_GET['logout']))
 		{
 			
 
-		$simpleObject = $this -> m_modelSimpleName::where('object_id', '=', $this -> objectInfo -> object_id)->one();
+			$simpleObject = $this -> m_modelSimpleName::where('object_id', '=', $this -> objectInfo -> object_id)->one();
 
 
 
@@ -222,17 +457,6 @@ if(isset($_GET['logout']))
 			$validationErr =	false;
 			$validationMsg =	'';
 			$responseData = 	[];
-
-
-			/*
-			$_dataset['object_id'] 	= $this -> objectInfo -> object_id;
-			$_dataset['body'] 		= '';
-
-			$_dataset['params']['object_id'] 	= '';
-			$_dataset['params']['labels'] 		= [];
-
-			$_dataset['params'] = json_encode($_dataset['params'], JSON_HEX_QUOT | JSON_HEX_APOS | JSON_UNESCAPED_UNICODE);
-			*/
 
 
 			$sOParams = new stdClass;
@@ -335,21 +559,7 @@ if(isset($_GET['logout']))
 								
 								if(!$validationErr)
 								{
-									/*
-									$_aFormData['params']['object_id'] 	= $_aFormData['login-object-id'];
-									$_aFormData['params']['labels'] 	= $_aFormData['field_label'];
-
-									$_aFormData['params'] = json_encode($_aFormData['params'], JSON_HEX_QUOT | JSON_HEX_APOS | JSON_UNESCAPED_UNICODE);
-
-									unset($_aFormData['login-object-id']);
-									unset($_aFormData['field_label']);
-
-									*/
-
-
-									#$modelCondition -> where('object_id', $_aFormData['object_id']);
-
-
+									
 
 
 									$simpleObject = $this -> m_modelSimpleName::where('object_id', '=', $_xhrInfo -> objectId)->one();
@@ -446,3 +656,4 @@ if(isset($_GET['logout']))
 		exit;
 	}
 }
+*/

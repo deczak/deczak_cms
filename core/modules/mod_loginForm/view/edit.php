@@ -1,6 +1,5 @@
 <?php
 
-$object -> params = json_decode($object -> params);
 
 $fieldsList = [];
 foreach($login_objects as $objecKey => $objectSet )

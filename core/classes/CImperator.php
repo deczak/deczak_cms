@@ -272,7 +272,8 @@ class	CImperator
 				$_rcaTarget, 
 				$xhrInfo,
 				$_logicResult, 
-				false
+				false,
+				$_pPageRequest
 				);
 
 			if($_logicResult !== false && $_logicResult['state'] === 1)
