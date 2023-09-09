@@ -1,3 +1,5 @@
+I stopped the development of this project and started a new one that is  not public at this time.
+It would cost me to much time change the code to this where i want to be.
 
 ## The project
 
@@ -7,10 +9,6 @@ There are two branches:
 
 + master-branch, the version that was tested so far and should tend to work (errors are of course not excluded)
 + dev-branch, the version that contains the newest features but it could contains bugs
-
-Further information at: 
-+ EN: [https://www.dennczak.de/en/projects/content-management-system/](https://www.dennczak.de/en/projects/content-management-system/) 
-+ DE: [https://www.dennczak.de/projekte/content-managment-system/](https://www.dennczak.de/projekte/content-managment-system/) 
 
 ### Current status
 
